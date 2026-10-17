@@ -1,6 +1,6 @@
 # Bricks
 
-A portable React + TypeScript + Vite falling-block puzzle game, developed in controlled milestones. Current scope: **Milestone 1.2 — standalone gameplay engine**. The engine is implemented and tested; the website still shows the foundation/menu until rendering and controls are integrated in Milestone 1.3.
+A portable React + TypeScript + Vite falling-block puzzle game, developed in controlled milestones. Current scope: **Milestone 1.3 — playable single-player integration**. The site includes keyboard gameplay, a next-piece preview, score/level/line HUD, pause and game-over screens, and configurable keyboard bindings.
 
 ## Development
 
