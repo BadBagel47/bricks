@@ -1,9 +1,9 @@
 # Bricks progress
 
 - **Phase:** 1 — Playable single-player
-- **Milestone:** 1.5 — Music and sound effects
+- **Milestone:** 1.6 — Mobile controls and gamepads
 - **Status:** Implemented; awaiting milestone review
-- **Previous milestones:** 1.1 was approved; the owner confirmed the 1.3 playable Pages version works. Visual refinement can continue later; interface copy must remain direct and functional.
+- **Previous milestones:** 1.1 was approved; the owner confirmed the published 1.3 and 1.5 builds work. Visual refinement can continue later; interface copy must remain direct and functional.
 
 ## Completed
 - React + TypeScript + Vite foundation, first-launch player name, main menu, personal-name settings, responsive base layout and original block/text mark.
@@ -29,29 +29,34 @@
 - Added short original tones for rotation, Hold, locking, Hard Drop, line clears and Game Over.
 - Accelerates the melody from 390 ms to 230 ms per note and raises it an octave when the locked stack occupies the top five rows.
 - Initializes or resumes Web Audio from the player's Start/Resume gesture, and pauses/stops game music with pause, Game Over and return to menu.
+- Added responsive virtual D-Pad and A/B-style rotation buttons, Hard Drop, optional Hold and Pause controls outside the playfield. Movement buttons repeat while held.
+- Added the persisted Swipe alternative: tap to rotate, horizontal swipe to move, downward swipe to soft drop and upward swipe to hard drop.
+- Added saved touch-button sizing, left-handed layout and the option to hide touch controls while a gamepad is connected.
+- Added generic Gamepad API polling with standard face/D-pad buttons, analog movement, held-button repeat, hot connection status and clean disconnect fallback.
+- Added persistent conflict-checked controller-button remapping and Reset to Defaults for both keyboard and controller mappings.
 
 ## Validation
-- `npm test`: 77 passed, 0 failed, 0 skipped. Includes engine behavior, keyboard defaults/remapping, persistence/highscore rules, audio defaults/volume validation and danger-tempo thresholds.
+- `npm test`: 81 passed, 0 failed, 0 skipped. Includes engine behavior, keyboard/controller mappings, analog and held-button input, swipe thresholds, persistence/highscore rules and audio tempo behavior.
 - `npm run build`: passed (TypeScript and Vite).
 - `npm run lint`: passed.
-- Started the Vite app and checked its HTTP response and transformed gameplay module locally. No browser automation is configured, so manual visual/play testing remains for the owner.
+- Started the production preview and checked its HTTP response and built control/settings strings locally. Physical touch devices and gamepad hardware were unavailable for manual testing.
 
 ## GitHub Pages
 - Owner approved GitHub Pages as temporary preview hosting and enabled it for this repository.
 - `.github/workflows/pages.yml` publishes on pushes to `main`; relative build URLs support `/bricks/`.
-- Preview: https://badbagel47.github.io/bricks/ . The 1.3 playable version was confirmed by the owner. The 1.4 deployment starts on push; its live status is pending the Actions workflow.
+- Preview: https://badbagel47.github.io/bricks/ . The 1.3 and 1.5 versions were confirmed by the owner. The 1.6 deployment starts on push; its live status is pending the Actions workflow.
 - Milestone 1.1 publication was verified through GitHub Actions. Direct site/API requests from this cloud instance were previously blocked by network policy; required domain additions were saved in the environment draft.
 
 ## Known limitations / remaining work
 - Engine mechanics are NES-inspired and documented, not cycle-accurate NES emulation.
-- Production app was smoke-checked over local HTTP; audio was not listened to in a real browser in this environment.
-- Audio remains milestone 1.5; touch controls and gamepads remain milestone 1.6.
+- Production app was smoke-checked over local HTTP; physical touch devices and gamepad hardware were not available in this environment.
+- Touch and gamepad behavior should be checked on the owner's physical devices.
 - Snapshot validation for untrusted data, Battle, multiplayer and Firebase are not implemented.
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Stop for owner review of 1.5.
-- Recommend **GPT-6 Luna, Medium** for 1.6 — mobile controls and gamepads; escalate to Sol only if complex input integration requires it.
+- Stop for owner review of 1.6.
+- Recommend **GPT-6.1 Sol, Medium only if warranted by complexity**; otherwise GPT-6 Luna for 1.7 — Phase 1 integration and quality review.
 
 ## Git checkpoints
 - `fea6aa4`: initial foundation and Pages deployment.
@@ -59,4 +64,5 @@
 - `2b6c6c3`: Milestone 1.2 engine, documentation, tests and CI gate.
 - `e2d0e23`: Milestone 1.3 playable single-player integration.
 - `1679c3b`: Milestone 1.4 settings and local highscores.
-- The Milestone 1.5 checkpoint contains generated audio, audio controls, tests and this progress update.
+- `a2e20db`: Milestone 1.5 original Web Audio soundtrack and effects.
+- The Milestone 1.6 checkpoint contains touch/gamepad controls, tests and this progress update.

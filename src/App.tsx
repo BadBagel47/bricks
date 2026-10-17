@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import type { CSSProperties, FormEvent } from 'react'
+import type { CSSProperties, FormEvent, PointerEvent as ReactPointerEvent } from 'react'
 import { advanceGame, createGame, dispatch, pieceCells, spawnPiece } from './engine/index.ts'
 import type { GameAction, GameEvent, GameState, PieceType } from './engine/index.ts'
-import { ACTION_LABELS, actionForCode, INPUT_ACTIONS, isRepeatable, keyLabel, parseBindings, remapKey } from './input/keyboard.ts'
+import { ACTION_LABELS, actionForCode, DEFAULT_BINDINGS, INPUT_ACTIONS, isRepeatable, keyLabel, parseBindings, remapKey } from './input/keyboard.ts'
 import type { InputAction, KeyboardBindings } from './input/keyboard.ts'
+import { DEFAULT_GAMEPAD_BINDINGS, gamepadActions, gamepadButtonLabel, parseGamepadBindings, remapGamepadButton } from './input/gamepad.ts'
+import type { GamepadBindings } from './input/gamepad.ts'
+import { actionsForSwipe } from './input/swipe.ts'
 import { colorForPiece } from './ui/level-palettes.ts'
 import { addHighscore, DEFAULT_PERSONAL_SETTINGS, DEFAULT_SINGLE_PLAYER_SETTINGS, parseHighscores, parsePersonalSettings, parseSinglePlayerSettings, serializeHighscores } from './persistence.ts'
 import type { HighscoreRecord, PersonalSettings, SinglePlayerSettings } from './persistence.ts'
@@ -12,6 +15,7 @@ import './App.css'
 
 const USERNAME_KEY = 'bricks.username'
 const CONTROLS_KEY = 'bricks.controls.v1'
+const GAMEPAD_CONTROLS_KEY = 'bricks.gamepad-controls.v1'
 const PERSONAL_KEY = 'bricks.personal.v1'
 const SINGLE_PLAYER_KEY = 'bricks.single-player.v1'
 const HIGHSCORES_KEY = 'bricks.highscores.v1'
@@ -19,6 +23,10 @@ type View = 'welcome' | 'menu' | 'settings' | 'highScores' | 'game'
 
 function readControls() {
   try { return parseBindings(localStorage.getItem(CONTROLS_KEY)) } catch { return parseBindings(null) }
+}
+
+function readGamepadControls() {
+  try { return parseGamepadBindings(localStorage.getItem(GAMEPAD_CONTROLS_KEY)) } catch { return parseGamepadBindings(null) }
 }
 
 function readStored<T>(key: string, parse: (raw: string | null) => T, fallback: T): T {
@@ -41,6 +49,10 @@ function App() {
   const [bindings, setBindings] = useState<KeyboardBindings>(readControls)
   const [capture, setCapture] = useState<InputAction | null>(null)
   const [captureError, setCaptureError] = useState('')
+  const [gamepadBindings, setGamepadBindings] = useState<GamepadBindings>(readGamepadControls)
+  const [gamepadCapture, setGamepadCapture] = useState<InputAction | null>(null)
+  const [gamepadCaptureError, setGamepadCaptureError] = useState('')
+  const [controllerStatus, setControllerStatus] = useState('No controller detected')
   const [personal, setPersonal] = useState<PersonalSettings>(() => readStored(PERSONAL_KEY, parsePersonalSettings, DEFAULT_PERSONAL_SETTINGS))
   const [singlePlayer, setSinglePlayer] = useState<SinglePlayerSettings>(() => readStored(SINGLE_PLAYER_KEY, parseSinglePlayerSettings, DEFAULT_SINGLE_PLAYER_SETTINGS))
   const [highscores, setHighscores] = useState<HighscoreRecord[]>(() => readStored(HIGHSCORES_KEY, parseHighscores, []))
@@ -49,6 +61,8 @@ function App() {
   const [game, setGame] = useState<GameState>(() => createGame())
   const gameRef = useRef(game)
   const bindingsRef = useRef(bindings)
+  const gamepadBindingsRef = useRef(gamepadBindings)
+  const controllerStatusRef = useRef(controllerStatus)
   const highscoresRef = useRef(highscores)
   const usernameRef = useRef(username)
   const runIdRef = useRef('')
@@ -124,11 +138,88 @@ function App() {
     catch { setNotice('Your browser could not save this setting.') }
   }
 
+  function resetKeyboardBindings() {
+    const defaults = { ...DEFAULT_BINDINGS }
+    setBindings(defaults)
+    bindingsRef.current = defaults
+    try { localStorage.setItem(CONTROLS_KEY, JSON.stringify(defaults)) }
+    catch { setNotice('Your browser could not save this setting.') }
+  }
+
+  function resetGamepadBindings() {
+    const defaults = { ...DEFAULT_GAMEPAD_BINDINGS }
+    setGamepadBindings(defaults)
+    gamepadBindingsRef.current = defaults
+    try { localStorage.setItem(GAMEPAD_CONTROLS_KEY, JSON.stringify(defaults)) }
+    catch { setNotice('Your browser could not save this setting.') }
+  }
+
+  function updateControllerStatus(status: string) {
+    if (controllerStatusRef.current === status) return
+    controllerStatusRef.current = status
+    setControllerStatus(status)
+  }
+
+  useEffect(() => {
+    const check = () => {
+      const pad = Array.from(navigator.getGamepads?.() ?? []).find((candidate) => candidate?.connected)
+      updateControllerStatus(pad ? `Gamepad connected${pad.mapping ? ` · ${pad.mapping}` : ''}` : 'No controller detected')
+    }
+    const timer = window.setInterval(check, 600)
+    window.addEventListener('gamepadconnected', check)
+    window.addEventListener('gamepaddisconnected', check)
+    check()
+    return () => {
+      window.clearInterval(timer)
+      window.removeEventListener('gamepadconnected', check)
+      window.removeEventListener('gamepaddisconnected', check)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!gamepadCapture) return
+    let frame = 0
+    const pressedBefore = new Set<string>()
+    const poll = () => {
+      const pads = Array.from(navigator.getGamepads?.() ?? []).filter((pad): pad is Gamepad => Boolean(pad?.connected))
+      let captured: number | null = null
+      const pressedNow = new Set<string>()
+      for (const pad of pads) {
+        for (let index = 0; index < pad.buttons.length; index++) {
+          const button = pad.buttons[index]
+          if (!button.pressed && button.value < 0.55) continue
+          const key = `${pad.index}:${index}`
+          pressedNow.add(key)
+          if (captured === null && !pressedBefore.has(key)) captured = index
+        }
+      }
+      pressedBefore.clear()
+      for (const key of pressedNow) pressedBefore.add(key)
+      if (captured !== null) {
+        try {
+          const next = remapGamepadButton(gamepadBindingsRef.current, gamepadCapture, captured)
+          setGamepadBindings(next)
+          gamepadBindingsRef.current = next
+          localStorage.setItem(GAMEPAD_CONTROLS_KEY, JSON.stringify(next))
+          setGamepadCapture(null)
+          setGamepadCaptureError('')
+        } catch (error) {
+          setGamepadCaptureError(error instanceof Error ? error.message : 'This controller button cannot be assigned.')
+        }
+      }
+      frame = requestAnimationFrame(poll)
+    }
+    frame = requestAnimationFrame(poll)
+    return () => cancelAnimationFrame(frame)
+  }, [gamepadCapture])
+
   useEffect(() => {
     if (view !== 'game') return
     let frame = 0
     let previous = 0
     const held = new Map<string, { action: InputAction; since: number; last: number }>()
+    let previousPadActions = new Set<InputAction>()
+    let previousPadIndex: number | null = null
     const stopRepeats = () => held.clear()
     const onKeyDown = (event: KeyboardEvent) => {
       const action = event.code === 'Escape' ? 'pause' : actionForCode(bindingsRef.current, event.code)
@@ -151,7 +242,35 @@ function App() {
       if (document.hidden && gameRef.current.status === 'playing') apply('pause')
       stopRepeats()
     }
+    const pollGamepad = (now: number) => {
+      const pad = Array.from(navigator.getGamepads?.() ?? []).find((candidate) => candidate?.connected)
+      updateControllerStatus(pad ? `Gamepad connected${pad.mapping ? ` · ${pad.mapping}` : ''}` : 'No controller detected')
+      const actions = pad ? gamepadActions(pad, gamepadBindingsRef.current) : new Set<InputAction>()
+      if (pad?.index !== previousPadIndex) {
+        for (const key of held.keys()) if (key.startsWith('pad:')) held.delete(key)
+        previousPadActions = new Set()
+        previousPadIndex = pad?.index ?? null
+      }
+      for (const action of previousPadActions) if (!actions.has(action)) held.delete(`pad:${action}`)
+      for (const action of actions) {
+        const wasDown = previousPadActions.has(action)
+        if (action === 'pause') {
+          if (!wasDown) {
+            if (gameRef.current.status === 'paused') apply('resume')
+            else if (gameRef.current.status === 'playing') apply('pause')
+            stopRepeats()
+          }
+        } else if (gameRef.current.status === 'playing') {
+          if (!wasDown) {
+            apply(action)
+            if (isRepeatable(action)) held.set(`pad:${action}`, { action, since: now, last: 0 })
+          }
+        }
+      }
+      previousPadActions = actions
+    }
     const tick = (now: number) => {
+      pollGamepad(now)
       if (previous && gameRef.current.status === 'playing') {
         const transition = advanceGame(gameRef.current, Math.min(now - previous, 100))
         if (transition.events.length) commitGame(transition.state, transition.events)
@@ -233,8 +352,23 @@ function App() {
         <span>{ACTION_LABELS[action]}</span>
         <button className="key-button" onClick={() => { setCapture(action); setCaptureError('') }}>{capture === action ? 'Press a key…' : keyLabel(bindings[action])}</button>
       </div>)}</div>
+      <button className="reset-button" onClick={resetKeyboardBindings}>Reset keyboard controls</button>
       {captureError && <p className="notice" role="status">{captureError}</p>}
       {capture && <button className="back-button cancel-capture" onClick={() => { setCapture(null); setCaptureError('') }}>Cancel</button>}
+      <h2 className="settings-heading">Controller</h2>
+      <p className="controller-status">{controllerStatus}</p>
+      <div className="binding-list">{INPUT_ACTIONS.map((action) => <div className="binding-row" key={action}>
+        <span>{ACTION_LABELS[action]}</span>
+        <button className="key-button" onClick={() => { setGamepadCapture(action); setGamepadCaptureError('') }}>{gamepadCapture === action ? 'Press a button…' : gamepadButtonLabel(gamepadBindings[action])}</button>
+      </div>)}</div>
+      {gamepadCaptureError && <p className="notice" role="status">{gamepadCaptureError}</p>}
+      {gamepadCapture && <button className="back-button cancel-capture" onClick={() => { setGamepadCapture(null); setGamepadCaptureError('') }}>Cancel</button>}
+      <button className="reset-button" onClick={resetGamepadBindings}>Reset controller controls</button>
+      <h2 className="settings-heading">Mobile controls</h2>
+      <label className="setting-select-row" htmlFor="mobile-controls"><span>Control method</span><select id="mobile-controls" onChange={(event) => savePersonal({ ...personal, mobileControlMethod: event.target.value as PersonalSettings['mobileControlMethod'] })} value={personal.mobileControlMethod}><option value="dpad">D-Pad</option><option value="swipe">Swipe</option></select></label>
+      <label className="audio-volume"><span>Button size</span><input aria-label="Touch button size" max="72" min="44" onChange={(event) => savePersonal({ ...personal, touchButtonSize: Number(event.target.value) })} step="4" type="range" value={personal.touchButtonSize} /><output>{personal.touchButtonSize}px</output></label>
+      <label className="toggle-row"><span>Left-handed layout</span><input checked={personal.leftHandedControls} onChange={(event) => savePersonal({ ...personal, leftHandedControls: event.target.checked })} type="checkbox" /></label>
+      <label className="toggle-row"><span>Hide touch controls when a controller is connected</span><input checked={personal.hideTouchControlsWhenController} onChange={(event) => savePersonal({ ...personal, hideTouchControlsWhenController: event.target.checked })} type="checkbox" /></label>
       <h2 className="settings-heading">1 Player Settings</h2>
       <label className="setting-select-row" htmlFor="start-level"><span>Starting Level</span><select id="start-level" onChange={(event) => saveSinglePlayer({ ...singlePlayer, startLevel: Number(event.target.value) })} value={singlePlayer.startLevel}>{Array.from({ length: 20 }, (_, level) => <option key={level} value={level}>Level {String(level).padStart(2, '0')}</option>)}</select></label>
       <label className="toggle-row"><span>Hold Piece</span><input checked={singlePlayer.holdEnabled} onChange={(event) => saveSinglePlayer({ ...singlePlayer, holdEnabled: event.target.checked })} type="checkbox" /></label>
@@ -258,9 +392,11 @@ function App() {
         <div><span>Level</span><strong>{game.level}</strong></div>
         <div><span>Lines</span><strong>{game.lines}</strong></div>
       </aside>
-      <Playfield game={game} />
+      <Playfield game={game} swipeMode={personal.mobileControlMethod === 'swipe'} onSwipe={(start, end) => actionsForSwipe(start, end).forEach(apply)} />
       <aside className="game-side next-panel"><span>Next</span><PiecePreview type={game.next} level={game.level} />{game.holdEnabled && <><span>Hold</span>{game.held ? <PiecePreview type={game.held} level={game.level} /> : <span className="empty-hold">—</span>}</>}</aside>
     </section>
+    {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={personal.touchButtonSize} leftHanded={personal.leftHandedControls} holdEnabled={game.holdEnabled} apply={apply} />}
+    <p className="controller-status" aria-live="polite">{controllerStatus}</p>
     <p className="control-hint" aria-label="Keyboard controls">{keyLabel(bindings.moveLeft)} {keyLabel(bindings.moveRight)} Move · {keyLabel(bindings.softDrop)} Soft drop · {keyLabel(bindings.rotateCounterclockwise)} {keyLabel(bindings.rotateClockwise)} Rotate · {personal.hardDropEnabled ? `${keyLabel(bindings.hardDrop)} Hard drop` : 'Hard Drop off'}{game.holdEnabled ? ` · ${keyLabel(bindings.hold)} Hold` : ''} · {keyLabel(bindings.pause)} / Esc Pause</p>
     {game.status === 'paused' && <div className="game-overlay"><section className="overlay-card" aria-labelledby="overlay-title"><h1 id="overlay-title">Paused</h1><button className="button button-primary" onClick={() => apply('resume')}>Resume</button><button className="overlay-link" onClick={() => { audioRef.current?.leaveGame(); setView('menu') }}>Main menu</button></section></div>}
     {game.status === 'gameOver' && <div className="game-overlay"><section className="overlay-card result-card" aria-labelledby="overlay-title"><h1 id="overlay-title">Game over</h1>{isNewRecord && <p className="record-badge">New record</p>}{notice && <p className="notice" role="status">{notice}</p>}<div className="result-stats"><div><span>Final score</span><strong>{game.score.toLocaleString()}</strong></div><div><span>Level</span><strong>{game.level}</strong></div><div><span>Lines</span><strong>{game.lines}</strong></div><div><span>Highscore</span><strong>{resultRank ? `#${resultRank}` : '—'}</strong></div></div><HighscoreTable records={highscores} compact /><button className="button button-primary" onClick={beginGame}>Play Again</button><button className="overlay-link" onClick={() => setView('menu')}>Main Menu</button></section></div>}
@@ -280,12 +416,60 @@ function App() {
   </main>
 }
 
-function Playfield({ game }: { game: GameState }) {
+interface SwipePoint { readonly x: number; readonly y: number }
+
+function Playfield({ game, swipeMode, onSwipe }: { game: GameState; swipeMode: boolean; onSwipe: (start: SwipePoint, end: SwipePoint) => void }) {
   const cells: (PieceType | null)[] = game.board.flatMap((row) => [...row])
+  const swipeStart = useRef<SwipePoint | null>(null)
   if (game.active) for (const [x, y] of pieceCells(game.active)) cells[y * 10 + x] = game.active.type
-  return <div className="playfield" role="grid" aria-label="Game board">
+  return <div className={`playfield${swipeMode ? ' swipe-active' : ''}`} role="grid" aria-label="Game board"
+    onPointerDown={(event) => { if (swipeMode && event.pointerType !== 'mouse') { swipeStart.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId) } }}
+    onPointerUp={(event) => { if (!swipeMode || !swipeStart.current) return; onSwipe(swipeStart.current, { x: event.clientX, y: event.clientY }); swipeStart.current = null }}
+    onPointerCancel={() => { swipeStart.current = null }}>
     {cells.map((type, index) => <div className={`board-cell${type ? ' filled' : ''}`} key={index} role="gridcell" style={type ? { '--cell-color': colorForPiece(type, game.level) } as CSSProperties : undefined} />)}
   </div>
+}
+
+function TouchControls({ method, buttonSize, leftHanded, holdEnabled, apply }: {
+  method: 'dpad' | 'swipe'; buttonSize: number; leftHanded: boolean; holdEnabled: boolean; apply: (action: GameAction) => void
+}) {
+  return <section className={`touch-controls${leftHanded ? ' left-handed' : ''}`} style={{ '--touch-size': `${buttonSize}px` } as CSSProperties} aria-label="Touch controls">
+    {method === 'dpad' ? <div className="touch-pad" aria-label="Directional pad">
+      <span />
+      <TouchButton label="Move left" mark="←" action="moveLeft" apply={apply} repeat />
+      <span />
+      <TouchButton label="Move right" mark="→" action="moveRight" apply={apply} repeat />
+      <TouchButton label="Soft drop" mark="↓" action="softDrop" apply={apply} repeat />
+    </div> : <p className="swipe-instructions">Tap to rotate · Swipe left/right to move · Swipe down to soft drop · Swipe up to hard drop</p>}
+    <div className="touch-actions">
+      <TouchButton label="Rotate counterclockwise" mark="B" action="rotateCounterclockwise" apply={apply} />
+      <TouchButton label="Rotate clockwise" mark="A" action="rotateClockwise" apply={apply} />
+      <TouchButton label="Hard drop" mark="DROP" action="hardDrop" apply={apply} primary />
+      {holdEnabled && <TouchButton label="Hold piece" mark="HOLD" action="hold" apply={apply} />}
+      <TouchButton label="Pause game" mark="Ⅱ" action="pause" apply={apply} />
+    </div>
+  </section>
+}
+
+function TouchButton({ label, mark, action, apply, repeat = false, primary = false }: {
+  label: string; mark: string; action: GameAction; apply: (action: GameAction) => void; repeat?: boolean; primary?: boolean
+}) {
+  const delay = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const interval = useRef<ReturnType<typeof setInterval> | null>(null)
+  function stop() {
+    if (delay.current) clearTimeout(delay.current)
+    if (interval.current) clearInterval(interval.current)
+    delay.current = null
+    interval.current = null
+  }
+  function press(event: ReactPointerEvent<HTMLButtonElement>) {
+    event.preventDefault()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    apply(action)
+    if (repeat) delay.current = setTimeout(() => { interval.current = setInterval(() => apply(action), action === 'softDrop' ? 65 : 48) }, 160)
+  }
+  useEffect(() => stop, [])
+  return <button aria-label={label} className={`touch-button${primary ? ' touch-primary' : ''}`} onClick={(event) => { if (event.detail === 0) apply(action) }} onLostPointerCapture={stop} onPointerCancel={stop} onPointerDown={press} onPointerUp={stop} type="button">{mark}</button>
 }
 
 function PiecePreview({ type, level }: { type: PieceType; level: number }) {
