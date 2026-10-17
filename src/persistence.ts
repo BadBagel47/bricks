@@ -1,6 +1,10 @@
 export interface PersonalSettings {
   readonly version: 1
   readonly hardDropEnabled: boolean
+  readonly musicEnabled: boolean
+  readonly musicVolume: number
+  readonly effectsEnabled: boolean
+  readonly effectsVolume: number
 }
 
 export interface SinglePlayerSettings {
@@ -24,7 +28,9 @@ export interface HighscoreResult {
   readonly isNewRecord: boolean
 }
 
-export const DEFAULT_PERSONAL_SETTINGS: PersonalSettings = { version: 1, hardDropEnabled: true }
+export const DEFAULT_PERSONAL_SETTINGS: PersonalSettings = {
+  version: 1, hardDropEnabled: true, musicEnabled: true, musicVolume: 70, effectsEnabled: true, effectsVolume: 70,
+}
 export const DEFAULT_SINGLE_PLAYER_SETTINGS: SinglePlayerSettings = { version: 1, startLevel: 0, holdEnabled: false }
 
 function parseObject(raw: string | null): Record<string, unknown> | null {
@@ -39,7 +45,15 @@ function parseObject(raw: string | null): Record<string, unknown> | null {
 
 export function parsePersonalSettings(raw: string | null): PersonalSettings {
   const value = parseObject(raw)
-  return { version: 1, hardDropEnabled: typeof value?.hardDropEnabled === 'boolean' ? value.hardDropEnabled : true }
+  const volume = (key: string, fallback: number) => typeof value?.[key] === 'number' && Number.isInteger(value[key]) && (value[key] as number) >= 0 && (value[key] as number) <= 100 ? value[key] as number : fallback
+  return {
+    version: 1,
+    hardDropEnabled: typeof value?.hardDropEnabled === 'boolean' ? value.hardDropEnabled : true,
+    musicEnabled: typeof value?.musicEnabled === 'boolean' ? value.musicEnabled : true,
+    musicVolume: volume('musicVolume', 70),
+    effectsEnabled: typeof value?.effectsEnabled === 'boolean' ? value.effectsEnabled : true,
+    effectsVolume: volume('effectsVolume', 70),
+  }
 }
 
 export function parseSinglePlayerSettings(raw: string | null): SinglePlayerSettings {

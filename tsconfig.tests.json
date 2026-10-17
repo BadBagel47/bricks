@@ -15,5 +15,5 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["src/engine", "src/dev", "src/persistence.ts", "tests"]
+  "include": ["src/engine", "src/dev", "src/audio/tempo.ts", "src/persistence.ts", "tests"]
 }

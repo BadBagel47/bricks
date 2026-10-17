@@ -1,7 +1,7 @@
 # Bricks progress
 
 - **Phase:** 1 — Playable single-player
-- **Milestone:** 1.4 — Settings and highscores
+- **Milestone:** 1.5 — Music and sound effects
 - **Status:** Implemented; awaiting milestone review
 - **Previous milestones:** 1.1 was approved; the owner confirmed the 1.3 playable Pages version works. Visual refinement can continue later; interface copy must remain direct and functional.
 
@@ -24,9 +24,14 @@
 - Added 1 Player Settings for the saved starting level (00–19) and Hold preference. New games use the saved values, and the HUD shows Hold only when enabled.
 - Added a versioned local top-10 highscore store, sorted by score, with run-ID duplicate protection and immutable historical usernames.
 - Added the High Scores page and a Game Over result screen with final score/level/lines, rank, new-record message, score table, Play Again and Main Menu.
+- Added an original looping 8-bit-style melody synthesized with Web Audio; no external tracks or assets are used.
+- Added Personal Settings for Music ON/OFF and volume, plus Sound Effects ON/OFF and volume. Both default ON with volume at 70%, and are saved locally.
+- Added short original tones for rotation, Hold, locking, Hard Drop, line clears and Game Over.
+- Accelerates the melody from 390 ms to 230 ms per note and raises it an octave when the locked stack occupies the top five rows.
+- Initializes or resumes Web Audio from the player's Start/Resume gesture, and pauses/stops game music with pause, Game Over and return to menu.
 
 ## Validation
-- `npm test`: 75 passed, 0 failed, 0 skipped. Includes engine behavior, keyboard defaults/remapping and settings/highscore validation, sorting, top-10 limits and duplicate protection.
+- `npm test`: 77 passed, 0 failed, 0 skipped. Includes engine behavior, keyboard defaults/remapping, persistence/highscore rules, audio defaults/volume validation and danger-tempo thresholds.
 - `npm run build`: passed (TypeScript and Vite).
 - `npm run lint`: passed.
 - Started the Vite app and checked its HTTP response and transformed gameplay module locally. No browser automation is configured, so manual visual/play testing remains for the owner.
@@ -39,18 +44,19 @@
 
 ## Known limitations / remaining work
 - Engine mechanics are NES-inspired and documented, not cycle-accurate NES emulation.
-- Browser integration was smoke-checked over HTTP but not exercised in a real browser here.
+- Production app was smoke-checked over local HTTP; audio was not listened to in a real browser in this environment.
 - Audio remains milestone 1.5; touch controls and gamepads remain milestone 1.6.
 - Snapshot validation for untrusted data, Battle, multiplayer and Firebase are not implemented.
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Stop for owner review of 1.4.
-- Recommend **GPT-6 Luna, Medium** for 1.5 — music and sound effects.
+- Stop for owner review of 1.5.
+- Recommend **GPT-6 Luna, Medium** for 1.6 — mobile controls and gamepads; escalate to Sol only if complex input integration requires it.
 
 ## Git checkpoints
 - `fea6aa4`: initial foundation and Pages deployment.
 - `41766b9`: simplified interface copy; owner subsequently approved 1.1.
 - `2b6c6c3`: Milestone 1.2 engine, documentation, tests and CI gate.
 - `e2d0e23`: Milestone 1.3 playable single-player integration.
-- The Milestone 1.4 checkpoint contains settings, local highscores, tests and this progress update.
+- `1679c3b`: Milestone 1.4 settings and local highscores.
+- The Milestone 1.5 checkpoint contains generated audio, audio controls, tests and this progress update.

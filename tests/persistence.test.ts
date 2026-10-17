@@ -9,7 +9,8 @@ function score(id: string, points: number, username = 'Player'): HighscoreRecord
 
 test('personal and single-player settings load safe defaults and validate saved values', () => {
   assert.deepEqual(parsePersonalSettings(null), DEFAULT_PERSONAL_SETTINGS)
-  assert.deepEqual(parsePersonalSettings('{"hardDropEnabled":false}'), { version: 1, hardDropEnabled: false })
+  assert.deepEqual(parsePersonalSettings('{"hardDropEnabled":false}'), { version: 1, hardDropEnabled: false, musicEnabled: true, musicVolume: 70, effectsEnabled: true, effectsVolume: 70 })
+  assert.deepEqual(parsePersonalSettings('{"musicEnabled":false,"musicVolume":120,"effectsEnabled":false,"effectsVolume":25}'), { version: 1, hardDropEnabled: true, musicEnabled: false, musicVolume: 70, effectsEnabled: false, effectsVolume: 25 })
   assert.deepEqual(parseSinglePlayerSettings('{"startLevel":19,"holdEnabled":true}'), { version: 1, startLevel: 19, holdEnabled: true })
   assert.deepEqual(parseSinglePlayerSettings('{"startLevel":20,"holdEnabled":"yes"}'), DEFAULT_SINGLE_PLAYER_SETTINGS)
 })

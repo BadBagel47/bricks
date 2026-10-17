@@ -1,6 +1,6 @@
 # Bricks
 
-A portable React + TypeScript + Vite falling-block puzzle game, developed in controlled milestones. Current scope: **Milestone 1.4 — settings and local highscores**. It includes playable keyboard controls, persistent personal and single-player settings, and a local top-10 scoreboard with final results.
+A portable React + TypeScript + Vite falling-block puzzle game, developed in controlled milestones. Current scope: **Milestone 1.5 — original music and sound effects**. It includes keyboard gameplay, saved settings/highscores, and a generated retro soundtrack with adjustable audio preferences.
 
 ## Development
 
@@ -34,3 +34,4 @@ The expected address after successful deployment is `https://badbagel47.github.i
 - `AGENTS.md`: concise working instructions.
 - `PROGRESS.md`: implemented scope, checks, and next review checkpoint.
 - `docs/ENGINE.md`: engine API, deterministic piece algorithm, rotation, gravity, scores, level thresholds and developer scenarios.
+- `docs/AUDIO.md`: generated soundtrack, danger tempo, sound effects and browser audio behavior.

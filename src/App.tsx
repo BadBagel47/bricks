@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, FormEvent } from 'react'
 import { advanceGame, createGame, dispatch, pieceCells, spawnPiece } from './engine/index.ts'
-import type { GameAction, GameState, PieceType } from './engine/index.ts'
+import type { GameAction, GameEvent, GameState, PieceType } from './engine/index.ts'
 import { ACTION_LABELS, actionForCode, INPUT_ACTIONS, isRepeatable, keyLabel, parseBindings, remapKey } from './input/keyboard.ts'
 import type { InputAction, KeyboardBindings } from './input/keyboard.ts'
 import { colorForPiece } from './ui/level-palettes.ts'
 import { addHighscore, DEFAULT_PERSONAL_SETTINGS, DEFAULT_SINGLE_PLAYER_SETTINGS, parseHighscores, parsePersonalSettings, parseSinglePlayerSettings, serializeHighscores } from './persistence.ts'
 import type { HighscoreRecord, PersonalSettings, SinglePlayerSettings } from './persistence.ts'
+import { BricksAudio } from './audio/synth.ts'
 import './App.css'
 
 const USERNAME_KEY = 'bricks.username'
@@ -51,6 +52,7 @@ function App() {
   const highscoresRef = useRef(highscores)
   const usernameRef = useRef(username)
   const runIdRef = useRef('')
+  const audioRef = useRef<BricksAudio | null>(null)
 
   function saveUsername(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -66,6 +68,10 @@ function App() {
 
   function beginGame() {
     const fresh = createGame({ startLevel: singlePlayer.startLevel, hardDropEnabled: personal.hardDropEnabled, holdEnabled: singlePlayer.holdEnabled })
+    const audio = audioRef.current ?? new BricksAudio(personal)
+    audioRef.current = audio
+    audio.beginGame(personal)
+    audio.setDanger(fresh.board)
     runIdRef.current = makeRunId()
     setResultRank(null)
     setIsNewRecord(false)
@@ -75,11 +81,13 @@ function App() {
     setNotice('')
   }
 
-  function commitGame(next: GameState) {
+  function commitGame(next: GameState, events: readonly GameEvent[] = []) {
     const previous = gameRef.current
     if (next === previous) return
     gameRef.current = next
     setGame(next)
+    audioRef.current?.handleEvents(events)
+    if (events.some((event) => event.type === 'locked' || event.type === 'linesCleared')) audioRef.current?.setDanger(next.board)
     if (previous.status !== 'gameOver' && next.status === 'gameOver') {
       const result = addHighscore(highscoresRef.current, {
         id: runIdRef.current,
@@ -99,11 +107,13 @@ function App() {
   }
 
   function apply(action: GameAction) {
-    commitGame(dispatch(gameRef.current, action).state)
+    const transition = dispatch(gameRef.current, action)
+    commitGame(transition.state, transition.events)
   }
 
   function savePersonal(next: PersonalSettings) {
     setPersonal(next)
+    audioRef.current?.updateSettings(next)
     try { localStorage.setItem(PERSONAL_KEY, JSON.stringify(next)) }
     catch { setNotice('Your browser could not save this setting.') }
   }
@@ -144,7 +154,7 @@ function App() {
     const tick = (now: number) => {
       if (previous && gameRef.current.status === 'playing') {
         const transition = advanceGame(gameRef.current, Math.min(now - previous, 100))
-        if (transition.events.length) commitGame(transition.state)
+        if (transition.events.length) commitGame(transition.state, transition.events)
         else gameRef.current = transition.state
         for (const repeat of held.values()) {
           const elapsed = now - repeat.since
@@ -214,6 +224,10 @@ function App() {
         <button className="button button-primary" type="submit">Save name</button>
       </form>
       <label className="toggle-row"><span>Hard Drop</span><input checked={personal.hardDropEnabled} onChange={(event) => savePersonal({ ...personal, hardDropEnabled: event.target.checked })} type="checkbox" /></label>
+      <label className="toggle-row"><span>Music</span><input checked={personal.musicEnabled} onChange={(event) => savePersonal({ ...personal, musicEnabled: event.target.checked })} type="checkbox" /></label>
+      <label className="audio-volume"><span>Music volume</span><input aria-label="Music volume" max="100" min="0" onChange={(event) => savePersonal({ ...personal, musicVolume: Number(event.target.value) })} type="range" value={personal.musicVolume} /><output>{personal.musicVolume}%</output></label>
+      <label className="toggle-row"><span>Sound effects</span><input checked={personal.effectsEnabled} onChange={(event) => savePersonal({ ...personal, effectsEnabled: event.target.checked })} type="checkbox" /></label>
+      <label className="audio-volume"><span>Effects volume</span><input aria-label="Effects volume" max="100" min="0" onChange={(event) => savePersonal({ ...personal, effectsVolume: Number(event.target.value) })} type="range" value={personal.effectsVolume} /><output>{personal.effectsVolume}%</output></label>
       <h2 className="settings-heading">Keyboard</h2>
       <div className="binding-list">{INPUT_ACTIONS.map((action) => <div className="binding-row" key={action}>
         <span>{ACTION_LABELS[action]}</span>
@@ -237,7 +251,7 @@ function App() {
   </main>
 
   if (view === 'game') return <main className="shell game-shell">
-    <header className="topbar game-topbar"><Brand compact /><button className="back-button" onClick={() => { setView('menu'); setNotice('') }}>← Main menu</button></header>
+    <header className="topbar game-topbar"><Brand compact /><button className="back-button" onClick={() => { audioRef.current?.leaveGame(); setView('menu'); setNotice('') }}>← Main menu</button></header>
     <section className="game-layout" aria-label="Single-player game">
       <aside className="game-side game-stats">
         <div><span>Score</span><strong>{game.score.toLocaleString()}</strong></div>
@@ -248,7 +262,7 @@ function App() {
       <aside className="game-side next-panel"><span>Next</span><PiecePreview type={game.next} level={game.level} />{game.holdEnabled && <><span>Hold</span>{game.held ? <PiecePreview type={game.held} level={game.level} /> : <span className="empty-hold">—</span>}</>}</aside>
     </section>
     <p className="control-hint" aria-label="Keyboard controls">{keyLabel(bindings.moveLeft)} {keyLabel(bindings.moveRight)} Move · {keyLabel(bindings.softDrop)} Soft drop · {keyLabel(bindings.rotateCounterclockwise)} {keyLabel(bindings.rotateClockwise)} Rotate · {personal.hardDropEnabled ? `${keyLabel(bindings.hardDrop)} Hard drop` : 'Hard Drop off'}{game.holdEnabled ? ` · ${keyLabel(bindings.hold)} Hold` : ''} · {keyLabel(bindings.pause)} / Esc Pause</p>
-    {game.status === 'paused' && <div className="game-overlay"><section className="overlay-card" aria-labelledby="overlay-title"><h1 id="overlay-title">Paused</h1><button className="button button-primary" onClick={() => apply('resume')}>Resume</button><button className="overlay-link" onClick={() => setView('menu')}>Main menu</button></section></div>}
+    {game.status === 'paused' && <div className="game-overlay"><section className="overlay-card" aria-labelledby="overlay-title"><h1 id="overlay-title">Paused</h1><button className="button button-primary" onClick={() => apply('resume')}>Resume</button><button className="overlay-link" onClick={() => { audioRef.current?.leaveGame(); setView('menu') }}>Main menu</button></section></div>}
     {game.status === 'gameOver' && <div className="game-overlay"><section className="overlay-card result-card" aria-labelledby="overlay-title"><h1 id="overlay-title">Game over</h1>{isNewRecord && <p className="record-badge">New record</p>}{notice && <p className="notice" role="status">{notice}</p>}<div className="result-stats"><div><span>Final score</span><strong>{game.score.toLocaleString()}</strong></div><div><span>Level</span><strong>{game.level}</strong></div><div><span>Lines</span><strong>{game.lines}</strong></div><div><span>Highscore</span><strong>{resultRank ? `#${resultRank}` : '—'}</strong></div></div><HighscoreTable records={highscores} compact /><button className="button button-primary" onClick={beginGame}>Play Again</button><button className="overlay-link" onClick={() => setView('menu')}>Main Menu</button></section></div>}
   </main>
 
