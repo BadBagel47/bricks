@@ -15,5 +15,5 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["src/engine", "src/dev", "tests"]
+  "include": ["src/engine", "src/dev", "src/persistence.ts", "tests"]
 }
