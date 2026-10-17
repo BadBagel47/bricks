@@ -64,7 +64,7 @@ async function open({ viewport = { width: 1280, height: 800 }, personal = {}, si
 }
 const start = async (page) => {
   await page.getByRole('button', { name: '1 Player', exact: true }).click()
-  await page.getByRole('grid', { name: 'Game board' }).waitFor()
+  await page.getByRole('img', { name: 'Game board, 10 columns by 20 rows' }).waitFor()
 }
 const cells = (page) => page.locator('.playfield').evaluate((board) => [...board.children].flatMap((cell, index) => cell.classList.contains('filled') ? [index] : []))
 const minX = async (page) => Math.min(...(await cells(page)).map((cell) => cell % 10))
@@ -91,14 +91,17 @@ test('desktop flow: all preview cells, movement, hold, pause/blur, results, rena
   await page.keyboard.press('KeyC')
   assert.equal(await page.locator('.piece-preview').nth(1).locator('.filled').count(), 4)
   await page.keyboard.press('KeyP')
+  await page.getByRole('status').filter({ hasText: 'Game paused.' }).waitFor()
   const paused = await cells(page)
   await page.waitForTimeout(850)
   assert.deepEqual(await cells(page), paused)
   await page.getByRole('button', { name: 'Resume', exact: true }).press('Space')
+  await page.getByRole('status').filter({ hasText: 'Game resumed.' }).waitFor()
   await page.evaluate(() => window.dispatchEvent(new Event('blur')))
   await page.getByRole('heading', { name: 'Paused', exact: true }).waitFor()
   await page.getByRole('button', { name: 'Resume', exact: true }).click()
   await finish(page)
+  await page.getByRole('status').filter({ hasText: 'Game over. Final score' }).waitFor()
   assert.equal(await page.locator('.result-card tbody tr').count(), 1)
   await page.getByRole('button', { name: 'Play Again', exact: true }).click()
   assert.equal((await cells(page)).length, 4)
@@ -182,7 +185,7 @@ test('real touch events: held D-pad, pause releases repeats, and swipe movement'
   await page.getByLabel('Control method', { exact: true }).selectOption('swipe')
   await page.getByRole('button', { name: '← Back to menu', exact: true }).click()
   await start(page)
-  const board = await page.getByRole('grid', { name: 'Game board' }).boundingBox()
+  const board = await page.getByRole('img', { name: 'Game board, 10 columns by 20 rows' }).boundingBox()
   const initial = await minX(page)
   const point = { x: board.x + board.width / 2, y: board.y + board.height / 2 }
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] })
@@ -247,7 +250,7 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 320, height: 667 
     const dimensions = await page.evaluate(() => ({ width: innerWidth, height: innerHeight, scrollHeight: document.documentElement.scrollHeight, scrollWidth: document.documentElement.scrollWidth }))
     assert.ok(dimensions.scrollHeight <= dimensions.height + 1, JSON.stringify(dimensions))
     assert.ok(dimensions.scrollWidth <= dimensions.width + 1, JSON.stringify(dimensions))
-    const board = await page.getByRole('grid', { name: 'Game board' }).boundingBox()
+    const board = await page.getByRole('img', { name: 'Game board, 10 columns by 20 rows' }).boundingBox()
     assert.ok(board.y >= 0 && board.y + board.height <= viewport.height)
     const controls = page.getByRole('region', { name: 'Touch controls' })
     if (await controls.isVisible()) {

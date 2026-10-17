@@ -60,6 +60,7 @@ function App() {
   const [draft, setDraft] = useState(username)
   const [view, setView] = useState<View>(username ? 'menu' : 'welcome')
   const [notice, setNotice] = useState('')
+  const [gameAnnouncement, setGameAnnouncement] = useState('')
   const [bindings, setBindings] = useState<KeyboardBindings>(readControls)
   const [capture, setCapture] = useState<InputAction | null>(null)
   const [captureError, setCaptureError] = useState('')
@@ -98,6 +99,7 @@ function App() {
   }
 
   function beginGame() {
+    setGameAnnouncement('')
     const fresh = createGame({ startLevel: singlePlayer.startLevel, hardDropEnabled: personal.hardDropEnabled, holdEnabled: singlePlayer.holdEnabled })
     const audio = audioRef.current ?? new BricksAudio(personal)
     audioRef.current = audio
@@ -119,6 +121,15 @@ function App() {
     gameRef.current = next
     setGame(next)
     audioRef.current?.handleEvents(events)
+    const announcements = events.flatMap((event) => {
+      if (event.type === 'linesCleared') return [`${event.count} ${event.count === 1 ? 'line' : 'lines'} cleared.`]
+      if (event.type === 'levelChanged') return [`Level ${event.to}.`]
+      if (event.type === 'paused') return ['Game paused.']
+      if (event.type === 'resumed') return ['Game resumed.']
+      if (event.type === 'gameOver') return [`Game over. Final score ${next.score.toLocaleString()}.`]
+      return []
+    })
+    if (announcements.length) setGameAnnouncement(announcements.join(' '))
     if (events.some((event) => event.type === 'locked' || event.type === 'linesCleared')) audioRef.current?.setDanger(next.board)
     if (previous.status !== 'gameOver' && next.status === 'gameOver') {
       const result = addHighscore(highscoresRef.current, {
@@ -420,6 +431,7 @@ function App() {
     </section>
     {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={personal.touchButtonSize} leftHanded={personal.leftHandedControls} holdEnabled={game.holdEnabled} hardDropEnabled={game.hardDropEnabled} enabled={game.status === 'playing'} apply={apply} />}
     <p className="controller-status" aria-live="polite">{controllerStatus}</p>
+    <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">{gameAnnouncement}</p>
     <p className="control-hint" aria-label="Keyboard controls">{keyLabel(bindings.moveLeft)} {keyLabel(bindings.moveRight)} Move · {keyLabel(bindings.softDrop)} Soft drop · {keyLabel(bindings.rotateCounterclockwise)} {keyLabel(bindings.rotateClockwise)} Rotate · {personal.hardDropEnabled ? `${keyLabel(bindings.hardDrop)} Hard drop` : 'Hard Drop off'}{game.holdEnabled ? ` · ${keyLabel(bindings.hold)} Hold` : ''} · {keyLabel(bindings.pause)} / Esc Pause</p>
     {game.status === 'paused' && <div className="game-overlay"><section className="overlay-card" aria-labelledby="overlay-title"><h1 id="overlay-title">Paused</h1><button className="button button-primary" autoFocus onClick={() => apply('resume')}>Resume</button><button className="overlay-link" onClick={() => { audioRef.current?.leaveGame(); setView('menu') }}>Main menu</button></section></div>}
     {game.status === 'gameOver' && <div className="game-overlay"><section className="overlay-card result-card" aria-labelledby="overlay-title"><h1 id="overlay-title">Game over</h1>{isNewRecord && <p className="record-badge">New record</p>}{notice && <p className="notice" role="status">{notice}</p>}<div className="result-stats"><div><span>Final score</span><strong>{game.score.toLocaleString()}</strong></div><div><span>Level</span><strong>{game.level}</strong></div><div><span>Lines</span><strong>{game.lines}</strong></div><div><span>Highscore</span><strong>{resultRank ? `#${resultRank}` : '—'}</strong></div></div><HighscoreTable records={highscores} compact /><button className="button button-primary" autoFocus onClick={beginGame}>Play Again</button><button className="overlay-link" onClick={() => { setCapture(null); setGamepadCapture(null); setView('menu') }}>Main Menu</button></section></div>}
@@ -445,11 +457,11 @@ function Playfield({ game, swipeMode, onSwipe }: { game: GameState; swipeMode: b
   const cells: (PieceType | null)[] = game.board.flatMap((row) => [...row])
   const swipeStart = useRef<SwipePoint | null>(null)
   if (game.active) for (const [x, y] of pieceCells(game.active)) cells[y * 10 + x] = game.active.type
-  return <div className={`playfield${swipeMode ? ' swipe-active' : ''}`} role="grid" aria-label="Game board"
+  return <div className={`playfield${swipeMode ? ' swipe-active' : ''}`} role="img" aria-label="Game board, 10 columns by 20 rows"
     onPointerDown={(event) => { if (swipeMode && event.pointerType !== 'mouse') { swipeStart.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId) } }}
     onPointerUp={(event) => { if (!swipeMode || !swipeStart.current) return; onSwipe(swipeStart.current, { x: event.clientX, y: event.clientY }); swipeStart.current = null }}
     onPointerCancel={() => { swipeStart.current = null }}>
-    {cells.map((type, index) => <div className={`board-cell${type ? ' filled' : ''}`} key={index} role="gridcell" style={type ? { '--cell-color': colorForPiece(type, game.level) } as CSSProperties : undefined} />)}
+    {cells.map((type, index) => <div className={`board-cell${type ? ' filled' : ''}`} key={index} style={type ? { '--cell-color': colorForPiece(type, game.level) } as CSSProperties : undefined} />)}
   </div>
 }
 

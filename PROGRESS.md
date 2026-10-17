@@ -1,8 +1,8 @@
 # Bricks progress
 
-- **Phase:** 1 — Playable single-player
-- **Milestone:** 1.7 — Phase 1 integration and quality review
-- **Status:** Review and fixes delivered; awaiting owner acceptance of Phase 1
+- **Phase:** 2 — Polish
+- **Milestone:** 2.1 — Accessible game feedback
+- **Status:** Implemented; awaiting owner review
 - **Previous milestones:** 1.1 was approved; the owner confirmed the published builds through 1.6 work. Visual refinement can continue later; interface copy must remain direct and functional.
 
 ## Completed
@@ -37,6 +37,9 @@
 
 - Completed the Phase 1 integration review in `docs/PHASE1_REVIEW.md`, including preview/palette fixes, input lifecycle and timing regressions, accessible select labels and mobile viewport corrections.
 - Added reproducible production-browser integration tests using system Chromium/Chrome and `playwright-core`; Pages CI now runs them before deploying.
+- The owner accepted Phase 1 by confirming the published build works.
+- Added screen-reader announcements for line clears, level changes, pause/resume and Game Over; the visual board is now announced as a 10 × 20 game board instead of exposing 200 decorative cells.
+- Browser coverage verifies the board's accessible name and pause/resume/Game Over announcements.
 
 ## Validation
 - `npm test`: 85 passed, 0 failed, 0 skipped. Covers engine behavior, rendering, corrupt mappings, elapsed-time repeats, persistence and audio tempo.
@@ -58,8 +61,8 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Stop for owner acceptance of Phase 1, as required by the specification.
-- Do not begin Phase 2 or Firebase/multiplayer without explicit approval. Select its model when that scope is approved.
+- The first Phase 2 polish checkpoint is ready for owner review. Continue routine polish with Luna; use Sol only for difficult gameplay engineering.
+- Stop for approval before multiplayer/Firebase.
 
 ## Git checkpoints
 - `fea6aa4`: initial foundation and Pages deployment.
