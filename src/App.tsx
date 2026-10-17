@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { CSSProperties, FormEvent, PointerEvent as ReactPointerEvent } from 'react'
+import type { CSSProperties, FormEvent, PointerEvent as ReactPointerEvent, Ref } from 'react'
 import { advanceGame, createGame, dispatch, pieceCells } from './engine/index.ts'
 import type { GameAction, GameEvent, GameState, PieceType } from './engine/index.ts'
 import { ACTION_LABELS, actionForCode, DEFAULT_BINDINGS, INPUT_ACTIONS, isRepeatable, keyLabel, parseBindings, remapKey } from './input/keyboard.ts'
@@ -75,6 +75,10 @@ function App() {
   const [isNewRecord, setIsNewRecord] = useState(false)
   const [game, setGame] = useState<GameState>(() => createGame())
   const [gameSession, setGameSession] = useState(0)
+  const gameBoardRef = useRef<HTMLDivElement>(null)
+  const previousViewRef = useRef(view)
+  const previousGameStatusRef = useRef(game.status)
+  const previousGameSessionRef = useRef(gameSession)
   const gameRef = useRef(game)
   const bindingsRef = useRef(bindings)
   const gamepadBindingsRef = useRef(gamepadBindings)
@@ -83,6 +87,21 @@ function App() {
   const usernameRef = useRef(username)
   const runIdRef = useRef('')
   const audioRef = useRef<BricksAudio | null>(null)
+
+  useEffect(() => {
+    const viewChanged = previousViewRef.current !== view
+    const resumed = previousGameStatusRef.current === 'paused' && game.status === 'playing'
+    const replayed = previousGameSessionRef.current !== gameSession
+    previousViewRef.current = view
+    previousGameStatusRef.current = game.status
+    previousGameSessionRef.current = gameSession
+
+    if (view === 'game') {
+      if (viewChanged || resumed || replayed) gameBoardRef.current?.focus()
+    } else if (viewChanged) {
+      document.querySelector<HTMLElement>('.shell h1')?.focus()
+    }
+  }, [game.status, gameSession, view])
 
   function saveUsername(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -355,7 +374,7 @@ function App() {
   if (view === 'welcome') return <main className="shell welcome-shell">
     <Brand />
     <section className="welcome-card" aria-labelledby="welcome-title">
-      <h1 id="welcome-title">Enter your name</h1>
+      <h1 id="welcome-title" tabIndex={-1}>Enter your name</h1>
       <form className="name-form" onSubmit={saveUsername}>
         <label htmlFor="username">Player name</label>
         <input autoComplete="nickname" autoFocus id="username" maxLength={16} minLength={2} onChange={(event) => setDraft(event.target.value)} required value={draft} />
@@ -369,7 +388,7 @@ function App() {
   if (view === 'settings') return <main className="shell">
     <header className="topbar"><Brand compact /><button className="back-button" onClick={() => { setCapture(null); setGamepadCapture(null); setView('menu') }}>← Back to menu</button></header>
     <section className="settings-card">
-      <h1>Personal settings</h1>
+      <h1 tabIndex={-1}>Personal settings</h1>
       <form className="name-form" onSubmit={saveUsername}>
         <label htmlFor="username">Player name</label>
         <input id="username" maxLength={16} minLength={2} onChange={(event) => setDraft(event.target.value)} required value={draft} />
@@ -413,7 +432,7 @@ function App() {
   if (view === 'highScores') return <main className="shell">
     <header className="topbar"><Brand compact /><button className="back-button" onClick={() => { setCapture(null); setGamepadCapture(null); setView('menu') }}>← Back to menu</button></header>
     <section className="settings-card score-list-page">
-      <h1>High Scores</h1>
+      <h1 tabIndex={-1}>High Scores</h1>
       {highscores.length === 0 ? <p className="empty-scores">No scores yet.</p> : <HighscoreTable records={highscores} />}
     </section>
   </main>
@@ -426,7 +445,7 @@ function App() {
         <div><span>Level</span><strong>{game.level}</strong></div>
         <div><span>Lines</span><strong>{game.lines}</strong></div>
       </aside>
-      <Playfield game={game} swipeMode={personal.mobileControlMethod === 'swipe'} onSwipe={(start, end) => actionsForSwipe(start, end).forEach(apply)} />
+      <Playfield ref={gameBoardRef} game={game} swipeMode={personal.mobileControlMethod === 'swipe'} onSwipe={(start, end) => actionsForSwipe(start, end).forEach(apply)} />
       <aside className="game-side next-panel"><span>Next</span><PiecePreview type={game.next} level={game.level} />{game.holdEnabled && <><span>Hold</span>{game.held ? <PiecePreview type={game.held} level={game.level} /> : <span className="empty-hold">—</span>}</>}</aside>
     </section>
     {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={personal.touchButtonSize} leftHanded={personal.leftHandedControls} holdEnabled={game.holdEnabled} hardDropEnabled={game.hardDropEnabled} enabled={game.status === 'playing'} apply={apply} />}
@@ -440,7 +459,7 @@ function App() {
   return <main className="shell menu-shell">
     <header className="topbar"><Brand compact /><button aria-label="Open personal settings" className="settings-button" onClick={() => { setDraft(username); setView('settings') }}>⚙<span>Settings</span></button></header>
     <section className="menu-content">
-      <div className="hero-copy"><h1>Make room<br />for <span>one more.</span></h1></div>
+      <div className="hero-copy"><h1 tabIndex={-1}>Make room<br />for <span>one more.</span></h1></div>
       <div className="menu-actions" aria-label="Main menu">
         <button className="mode-card single-player" onClick={beginGame}><span className="mode-copy"><strong>1 Player</strong></span></button>
         <div className="mode-card disabled-card" aria-disabled="true"><span className="mode-copy"><strong>2 Players</strong></span><span className="coming-soon">Coming soon</span></div>
@@ -453,11 +472,11 @@ function App() {
 
 interface SwipePoint { readonly x: number; readonly y: number }
 
-function Playfield({ game, swipeMode, onSwipe }: { game: GameState; swipeMode: boolean; onSwipe: (start: SwipePoint, end: SwipePoint) => void }) {
+function Playfield({ game, swipeMode, onSwipe, ref }: { game: GameState; swipeMode: boolean; onSwipe: (start: SwipePoint, end: SwipePoint) => void; ref: Ref<HTMLDivElement> }) {
   const cells: (PieceType | null)[] = game.board.flatMap((row) => [...row])
   const swipeStart = useRef<SwipePoint | null>(null)
   if (game.active) for (const [x, y] of pieceCells(game.active)) cells[y * 10 + x] = game.active.type
-  return <div className={`playfield${swipeMode ? ' swipe-active' : ''}`} role="img" aria-label="Game board, 10 columns by 20 rows"
+  return <div ref={ref} tabIndex={0} className={`playfield${swipeMode ? ' swipe-active' : ''}`} role="img" aria-label="Game board, 10 columns by 20 rows"
     onPointerDown={(event) => { if (swipeMode && event.pointerType !== 'mouse') { swipeStart.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId) } }}
     onPointerUp={(event) => { if (!swipeMode || !swipeStart.current) return; onSwipe(swipeStart.current, { x: event.clientX, y: event.clientY }); swipeStart.current = null }}
     onPointerCancel={() => { swipeStart.current = null }}>

@@ -1,7 +1,7 @@
 # Bricks progress
 
 - **Phase:** 2 — Polish
-- **Milestone:** 2.1 — Accessible game feedback
+- **Milestone:** 2.2 — Keyboard focus navigation
 - **Status:** Implemented; awaiting owner review
 - **Previous milestones:** 1.1 was approved; the owner confirmed the published builds through 1.6 work. Visual refinement can continue later; interface copy must remain direct and functional.
 
@@ -40,12 +40,14 @@
 - The owner accepted Phase 1 by confirming the published build works.
 - Added screen-reader announcements for line clears, level changes, pause/resume and Game Over; the visual board is now announced as a 10 × 20 game board instead of exposing 200 decorative cells.
 - Browser coverage verifies the board's accessible name and pause/resume/Game Over announcements.
+- Added predictable keyboard focus when navigating between screens, starting/replaying a game, and resuming from pause. The game board is keyboard-focusable.
+- Browser coverage verifies focus moves to the board and back to the page heading through a keyboard-only start, pause, resume, and navigation flow.
 
 ## Validation
 - `npm test`: 85 passed, 0 failed, 0 skipped. Covers engine behavior, rendering, corrupt mappings, elapsed-time repeats, persistence and audio tempo.
 - `npm run build`: passed (TypeScript and Vite).
 - `npm run lint`: passed.
-- `npm run test:browser`: 13 passed, 0 failed, 0 skipped in Chromium against the production build. Covers full run/results/rename/replay, saved settings, touch events, simulated gamepad lifecycle, real Web Audio initialization/muting, frame stalls and five viewports with largest touch controls.
+- `npm run test:browser`: 14 passed, 0 failed, 0 skipped in Chromium against the production build. Covers full run/results/rename/replay, keyboard focus navigation, saved settings, touch events, simulated gamepad lifecycle, real Web Audio initialization/muting, frame stalls and five viewports with largest touch controls.
 
 ## GitHub Pages
 - Owner approved GitHub Pages as temporary preview hosting and enabled it for this repository.
@@ -61,7 +63,7 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- The first Phase 2 polish checkpoint is ready for owner review. Continue routine polish with Luna; use Sol only for difficult gameplay engineering.
+- Phase 2.2 is ready for owner review. Continue routine polish with Luna; use Sol only for difficult gameplay engineering.
 - Stop for approval before multiplayer/Firebase.
 
 ## Git checkpoints

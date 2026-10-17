@@ -114,6 +114,21 @@ test('desktop flow: all preview cells, movement, hold, pause/blur, results, rena
   assert.equal(await page.locator('tbody tr').first().locator('td').nth(1).textContent(), 'Original Name')
 })
 
+test('keyboard focus follows navigation, enters the board, and returns after resume', async () => {
+  const page = await open()
+  await start(page)
+  await page.waitForFunction(() => document.activeElement === document.querySelector('.playfield'))
+  assert.equal(await page.locator('.playfield').evaluate((board) => getComputedStyle(board).outlineStyle), 'solid')
+  await page.keyboard.press('KeyP')
+  await page.getByRole('button', { name: 'Resume', exact: true }).waitFor()
+  await page.keyboard.press('Space')
+  await page.waitForFunction(() => document.activeElement === document.querySelector('.playfield'))
+  await mainMenu(page)
+  await page.waitForFunction(() => document.activeElement?.textContent?.includes('Make room'))
+  await settings(page)
+  await page.waitForFunction(() => document.activeElement?.textContent === 'Personal settings')
+})
+
 test('settings and mappings survive reload; leaving capture does not intercept gameplay', async () => {
   const page = await open()
   await settings(page)
