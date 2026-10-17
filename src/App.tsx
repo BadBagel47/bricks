@@ -29,46 +29,41 @@ function App() {
   if (view === 'welcome') return <main className="shell welcome-shell">
     <Brand />
     <section className="welcome-card" aria-labelledby="welcome-title">
-      <span className="eyebrow">YOUR NEXT FAVORITE DISTRACTION</span>
-      <h1 id="welcome-title">Let’s get you on the board.</h1>
-      <p className="intro">Choose a name to play under. You can change it later.</p>
+      <h1 id="welcome-title">Enter your name</h1>
       <form className="name-form" onSubmit={saveUsername}>
         <label htmlFor="username">Player name</label>
-        <input autoComplete="nickname" autoFocus id="username" maxLength={16} minLength={2} onChange={(event) => setDraft(event.target.value)} placeholder="e.g. blockparty" required value={draft} />
+        <input autoComplete="nickname" autoFocus id="username" maxLength={16} minLength={2} onChange={(event) => setDraft(event.target.value)} required value={draft} />
         <span className="field-hint">2–16 characters</span>
         {notice && <p className="notice" role="status">{notice}</p>}
-        <button className="button button-primary" type="submit">Let’s play <span aria-hidden="true">↗</span></button>
+        <button className="button button-primary" type="submit">Continue</button>
       </form>
     </section>
-    <footer>NO PRESSURE. JUST BLOCKS.</footer>
   </main>
 
   if (view === 'settings') return <main className="shell">
     <header className="topbar"><Brand compact /><button className="back-button" onClick={() => setView('menu')}>← Back to menu</button></header>
     <section className="settings-card">
-      <span className="eyebrow">MAKE IT YOURS</span><h1>Personal settings</h1>
+      <h1>Personal settings</h1>
       <form className="name-form" onSubmit={saveUsername}>
         <label htmlFor="username">Player name</label>
         <input id="username" maxLength={16} minLength={2} onChange={(event) => setDraft(event.target.value)} required value={draft} />
         <span className="field-hint">2–16 characters</span>
         <button className="button button-primary" type="submit">Save name</button>
       </form>
-      <p className="settings-note">More controls and preferences are coming in a later milestone.</p>
     </section>
   </main>
 
   return <main className="shell menu-shell">
     <header className="topbar"><Brand compact /><button aria-label="Open personal settings" className="settings-button" onClick={() => { setDraft(username); setView('settings') }}>⚙<span>Settings</span></button></header>
     <section className="menu-content">
-      <div className="hero-copy"><span className="eyebrow">HEY, {username.toUpperCase()}</span><h1>Make room<br />for <span>one more.</span></h1><p className="intro">A fresh stack. A clean slate. How far can you get?</p></div>
+      <div className="hero-copy"><h1>Make room<br />for <span>one more.</span></h1></div>
       <div className="menu-actions" aria-label="Main menu">
-        <button className="mode-card single-player" onClick={() => setNotice('Single-player is being built. Check back soon!')}><span className="mode-icon" aria-hidden="true">▦</span><span className="mode-copy"><strong>1 Player</strong><small>Just you and the stack</small></span><span className="arrow" aria-hidden="true">↗</span></button>
-        <div className="mode-card disabled-card" aria-disabled="true"><span className="mode-icon" aria-hidden="true">⌁</span><span className="mode-copy"><strong>2 Players</strong><small>Good things take two</small></span><span className="coming-soon">SOON</span></div>
-        <button className="secondary-card" onClick={() => setNotice('High scores will appear here once a game is playable.')}>High Scores <span aria-hidden="true">↗</span></button>
+        <button className="mode-card single-player" onClick={() => setNotice('Single-player is not available yet.')}><span className="mode-copy"><strong>1 Player</strong></span></button>
+        <div className="mode-card disabled-card" aria-disabled="true"><span className="mode-copy"><strong>2 Players</strong></span><span className="coming-soon">Coming soon</span></div>
+        <button className="secondary-card" onClick={() => setNotice('High scores are not available yet.')}>High Scores</button>
         {notice && <p className="notice menu-notice" role="status">{notice}</p>}
       </div>
     </section>
-    <footer><span>BUILT TO FIT. MADE TO PLAY.</span><span>© BRICKS</span></footer>
   </main>
 }
 

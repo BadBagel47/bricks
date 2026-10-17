@@ -9,6 +9,7 @@
 - First-launch username onboarding with local persistence.
 - Responsive dark-first main menu, original text/block mark, personal-name settings, and multiplayer Coming Soon state.
 - Full master specification saved in `BRICKS_SPEC.md`.
+- Milestone 1.1 review: retained “Make room for one more.” and removed decorative subheadings, greetings, slogans, menu descriptions, and footers. Onboarding and unavailable-feature messages now use direct wording.
 
 ## Tests
 - `npm ci --no-audit --no-fund` — dependencies installed (npm cache redirected to `/tmp`).
@@ -16,6 +17,7 @@
 - `npm run lint` — passed (Oxlint).
 - `npm run dev -- --host 0.0.0.0` — started; local HTTP request returned the app HTML.
 - GitHub Pages preparation: `npm run lint` and `npm run build` passed; production HTML, favicon, JavaScript, and CSS returned HTTP 200 when hosted under `/bricks/` locally.
+- Direct-copy review: `npm run lint` and `npm run build` passed after simplifying the interface; visual browser review remains pending.
 
 ## GitHub Pages preview
 - Owner approved GitHub Pages as temporary hosting for Milestone 1.1.
