@@ -1,9 +1,9 @@
 # Bricks progress
 
 - **Phase:** 1 — Playable single-player
-- **Milestone:** 1.6 — Mobile controls and gamepads
-- **Status:** Implemented; awaiting milestone review
-- **Previous milestones:** 1.1 was approved; the owner confirmed the published 1.3 and 1.5 builds work. Visual refinement can continue later; interface copy must remain direct and functional.
+- **Milestone:** 1.7 — Phase 1 integration and quality review
+- **Status:** Review and fixes delivered; awaiting owner acceptance of Phase 1
+- **Previous milestones:** 1.1 was approved; the owner confirmed the published builds through 1.6 work. Visual refinement can continue later; interface copy must remain direct and functional.
 
 ## Completed
 - React + TypeScript + Vite foundation, first-launch player name, main menu, personal-name settings, responsive base layout and original block/text mark.
@@ -35,28 +35,31 @@
 - Added generic Gamepad API polling with standard face/D-pad buttons, analog movement, held-button repeat, hot connection status and clean disconnect fallback.
 - Added persistent conflict-checked controller-button remapping and Reset to Defaults for both keyboard and controller mappings.
 
+- Completed the Phase 1 integration review in `docs/PHASE1_REVIEW.md`, including preview/palette fixes, input lifecycle and timing regressions, accessible select labels and mobile viewport corrections.
+- Added reproducible production-browser integration tests using system Chromium/Chrome and `playwright-core`; Pages CI now runs them before deploying.
+
 ## Validation
-- `npm test`: 81 passed, 0 failed, 0 skipped. Includes engine behavior, keyboard/controller mappings, analog and held-button input, swipe thresholds, persistence/highscore rules and audio tempo behavior.
+- `npm test`: 85 passed, 0 failed, 0 skipped. Covers engine behavior, rendering, corrupt mappings, elapsed-time repeats, persistence and audio tempo.
 - `npm run build`: passed (TypeScript and Vite).
 - `npm run lint`: passed.
-- Started the production preview and checked its HTTP response and built control/settings strings locally. Physical touch devices and gamepad hardware were unavailable for manual testing.
+- `npm run test:browser`: 13 passed, 0 failed, 0 skipped in Chromium against the production build. Covers full run/results/rename/replay, saved settings, touch events, simulated gamepad lifecycle, real Web Audio initialization/muting, frame stalls and five viewports with largest touch controls.
 
 ## GitHub Pages
 - Owner approved GitHub Pages as temporary preview hosting and enabled it for this repository.
 - `.github/workflows/pages.yml` publishes on pushes to `main`; relative build URLs support `/bricks/`.
-- Preview: https://badbagel47.github.io/bricks/ . The 1.3 and 1.5 versions were confirmed by the owner. The 1.6 deployment starts on push; its live status is pending the Actions workflow.
+- Preview: https://badbagel47.github.io/bricks/ . The owner confirmed the builds through 1.6. The 1.7 deployment starts on push and includes the new browser-test gate.
 - Milestone 1.1 publication was verified through GitHub Actions. Direct site/API requests from this cloud instance were previously blocked by network policy; required domain additions were saved in the environment draft.
 
 ## Known limitations / remaining work
 - Engine mechanics are NES-inspired and documented, not cycle-accurate NES emulation.
-- Production app was smoke-checked over local HTTP; physical touch devices and gamepad hardware were not available in this environment.
+- Chromium desktop/mobile viewport, touch-event and simulated gamepad tests passed. Physical devices and subjective audio quality remain unverified here.
 - Touch and gamepad behavior should be checked on the owner's physical devices.
 - Snapshot validation for untrusted data, Battle, multiplayer and Firebase are not implemented.
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Stop for owner review of 1.6.
-- Recommend **GPT-6.1 Sol, Medium only if warranted by complexity**; otherwise GPT-6 Luna for 1.7 — Phase 1 integration and quality review.
+- Stop for owner acceptance of Phase 1, as required by the specification.
+- Do not begin Phase 2 or Firebase/multiplayer without explicit approval. Select its model when that scope is approved.
 
 ## Git checkpoints
 - `fea6aa4`: initial foundation and Pages deployment.
@@ -65,4 +68,5 @@
 - `e2d0e23`: Milestone 1.3 playable single-player integration.
 - `1679c3b`: Milestone 1.4 settings and local highscores.
 - `a2e20db`: Milestone 1.5 original Web Audio soundtrack and effects.
-- The Milestone 1.6 checkpoint contains touch/gamepad controls, tests and this progress update.
+- `0a67fac`: Milestone 1.6 touch and gamepad controls.
+- The Milestone 1.7 checkpoint contains integration fixes, Chromium tests, CI gate and the Phase 1 review report.

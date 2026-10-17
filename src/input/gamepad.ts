@@ -24,16 +24,11 @@ export function parseGamepadBindings(serialized: string | null): GamepadBindings
     if (!saved || typeof saved !== 'object') return { ...DEFAULT_GAMEPAD_BINDINGS }
     const candidate = saved as Record<string, unknown>
     const result = { ...DEFAULT_GAMEPAD_BINDINGS }
-    const used = new Set<number>()
     for (const action of INPUT_ACTIONS) {
       const button = candidate[action]
-      if (typeof button === 'number' && Number.isInteger(button) && button >= 0 && button <= 31 && !used.has(button)) {
-        result[action] = button
-        used.add(button)
-      } else {
-        used.add(result[action])
-      }
+      if (typeof button === 'number' && Number.isInteger(button) && button >= 0 && button <= 31) result[action] = button
     }
+    if (new Set(Object.values(result)).size !== INPUT_ACTIONS.length) return { ...DEFAULT_GAMEPAD_BINDINGS }
     return result
   } catch {
     return { ...DEFAULT_GAMEPAD_BINDINGS }

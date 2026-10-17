@@ -21,8 +21,10 @@ test('control storage parsing tolerates missing, malformed and conflicting data'
   assert.deepEqual(parseBindings(null), DEFAULT_BINDINGS)
   assert.deepEqual(parseBindings('{'), DEFAULT_BINDINGS)
   const parsed = parseBindings('{"moveLeft":"KeyA","moveRight":"KeyA"}')
-  assert.equal(parsed.moveLeft, 'KeyA')
-  assert.equal(parsed.moveRight, DEFAULT_BINDINGS.moveRight)
+  assert.deepEqual(parsed, DEFAULT_BINDINGS)
+  assert.deepEqual(parseBindings('{"moveLeft":"ArrowRight"}'), DEFAULT_BINDINGS)
+  const swapped = { ...DEFAULT_BINDINGS, moveLeft: 'ArrowRight', moveRight: 'ArrowLeft' }
+  assert.deepEqual(parseBindings(JSON.stringify(swapped)), swapped)
 })
 
 test('only movement and soft drop repeat while held', () => {

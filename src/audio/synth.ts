@@ -141,6 +141,7 @@ export class BricksAudio {
       envelope.gain.exponentialRampToValueAtTime(0.0001, start + duration)
       oscillator.connect(envelope)
       envelope.connect(destination)
+      oscillator.onended = () => { oscillator.disconnect(); envelope.disconnect() }
       oscillator.start(start)
       oscillator.stop(start + duration + 0.01)
     } catch {

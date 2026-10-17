@@ -45,16 +45,12 @@ export function parseBindings(serialized: string | null): KeyboardBindings {
     if (!saved || typeof saved !== 'object') return { ...DEFAULT_BINDINGS }
     const candidate = saved as Record<string, unknown>
     const result = { ...DEFAULT_BINDINGS }
-    const used = new Set<string>()
     for (const action of INPUT_ACTIONS) {
       const code = candidate[action]
-      if (typeof code === 'string' && code && code !== 'Escape' && code !== 'Tab' && !used.has(code)) {
-        result[action] = code
-        used.add(code)
-      } else {
-        used.add(result[action])
-      }
+      if (typeof code === 'string' && code && code !== 'Escape' && code !== 'Tab') result[action] = code
     }
+    // Restore a complete usable map if corrupt/partial data assigns a key twice.
+    if (new Set(Object.values(result)).size !== INPUT_ACTIONS.length) return { ...DEFAULT_BINDINGS }
     return result
   } catch {
     return { ...DEFAULT_BINDINGS }

@@ -6,4 +6,4 @@ The looping square-wave melody is a sixteen-note sequence written for this game.
 
 Short synthesized effects respond to rotations, Hold, piece locking, Hard Drop, line clears and Game Over. Pause and returning to the menu stop the music; resuming play starts it again.
 
-Automated coverage checks the audio defaults and volume validation, original melody shape, danger threshold, tempo change and octave shift. Browser output still needs a listening check on the published site.
+Automated coverage checks the audio defaults and volume validation, original melody shape, danger threshold, tempo change and octave shift. Chromium integration tests also exercise real Web Audio initialization, pause/resume and saved mute settings. Audible output still needs a listening check on the published site.

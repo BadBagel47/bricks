@@ -1,6 +1,6 @@
 # Bricks
 
-A portable React + TypeScript + Vite falling-block puzzle game, developed in controlled milestones. Current scope: **Milestone 1.6 — mobile and controller input**. It includes keyboard, touch and generic Gamepad API controls, with saved mappings and responsive play layouts.
+A portable React + TypeScript + Vite falling-block puzzle game, developed in controlled milestones. Current scope: **Milestone 1.7 — Phase 1 integration and quality review**. The playable single-player build includes keyboard/touch/gamepad input, audio, saved settings and local highscores. See `docs/PHASE1_REVIEW.md` for verification and remaining device checks.
 
 ## Development
 
@@ -17,14 +17,17 @@ If the environment's home directory is not writable, prefix the install command 
 npm run lint
 npm test
 npm run build
+npm run test:browser
 npm run preview -- --host 0.0.0.0
 ```
 
 The first visit requires a player name. It is stored locally in the browser and can be changed in Settings.
 
+The browser suite uses `playwright-core` with an installed Chromium or Google Chrome, starts its own production preview and stops it after testing. Build first. It finds `/usr/bin/chromium` or `/usr/bin/google-chrome`; set `BRICKS_CHROMIUM_EXECUTABLE` for another path. Optional `BRICKS_SCREENSHOT_DIR` saves viewport screenshots. Physical controller, mobile browser and audible output checks complement the automated suite.
+
 ## GitHub Pages
 
-`.github/workflows/pages.yml` lints, tests, builds, and deploys the site on pushes to `main`. It can also be run manually from the Actions tab. In the repository's **Settings → Pages**, set **Build and deployment → Source** to **GitHub Actions** before deployment. No paid services or application secrets are required by the workflow.
+`.github/workflows/pages.yml` lints, runs unit tests, builds, runs Chromium integration tests, and deploys the site on pushes to `main`. The GitHub Ubuntu runner supplies Chrome. The workflow can also be run manually from the Actions tab. In the repository's **Settings → Pages**, set **Build and deployment → Source** to **GitHub Actions** before deployment. No paid services or application secrets are required by the workflow.
 
 The expected address after successful deployment is `https://badbagel47.github.io/bricks/`. The build uses relative asset URLs so it can also be hosted elsewhere.
 

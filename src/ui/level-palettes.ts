@@ -9,5 +9,5 @@ const palettes: readonly Record<PieceType, string>[] = [
 ]
 
 export function colorForPiece(type: PieceType, level: number): string {
-  return palettes[Math.floor(level / 5) % palettes.length][type]
+  return palettes[level % palettes.length][type]
 }

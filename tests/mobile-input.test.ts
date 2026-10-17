@@ -17,6 +17,7 @@ test('gamepad button remapping is immutable, range-checked and conflict-checked'
   assert.throws(() => remapGamepadButton(changed, 'moveRight', 6), /already assigned/)
   assert.throws(() => remapGamepadButton(changed, 'moveRight', 32), /controller button/)
   assert.deepEqual(parseGamepadBindings(JSON.stringify({ moveLeft: 6 } )).moveLeft, 6)
+  assert.deepEqual(parseGamepadBindings('{"moveLeft":15}'), DEFAULT_GAMEPAD_BINDINGS)
 })
 
 test('gamepad polling supports held digital buttons and analog movement', () => {
