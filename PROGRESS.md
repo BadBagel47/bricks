@@ -1,7 +1,7 @@
 # Bricks progress
 
 - **Phase:** 2 — Polish
-- **Milestone:** 2.2 — Keyboard focus navigation
+- **Milestone:** 2.3 — Modal dialog keyboard access
 - **Status:** Implemented; awaiting owner review
 - **Previous milestones:** 1.1 was approved; the owner confirmed the published builds through 1.6 work. Visual refinement can continue later; interface copy must remain direct and functional.
 
@@ -42,6 +42,8 @@
 - Browser coverage verifies the board's accessible name and pause/resume/Game Over announcements.
 - Added predictable keyboard focus when navigating between screens, starting/replaying a game, and resuming from pause. The game board is keyboard-focusable.
 - Browser coverage verifies focus moves to the board and back to the page heading through a keyboard-only start, pause, resume, and navigation flow.
+- Marked pause and Game Over overlays as modal dialogs for assistive technology and kept Tab/Shift+Tab inside each dialog.
+- Browser coverage verifies dialog names and focus wrapping in both directions for pause and Game Over.
 
 ## Validation
 - `npm test`: 85 passed, 0 failed, 0 skipped. Covers engine behavior, rendering, corrupt mappings, elapsed-time repeats, persistence and audio tempo.
@@ -63,7 +65,7 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Phase 2.2 is ready for owner review. Continue routine polish with Luna; use Sol only for difficult gameplay engineering.
+- Phase 2.3 is ready for owner review. Continue routine polish with Luna; use Sol only for difficult gameplay engineering.
 - Stop for approval before multiplayer/Firebase.
 
 ## Git checkpoints

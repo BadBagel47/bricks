@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { CSSProperties, FormEvent, PointerEvent as ReactPointerEvent, Ref } from 'react'
+import type { CSSProperties, FormEvent, KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent, Ref } from 'react'
 import { advanceGame, createGame, dispatch, pieceCells } from './engine/index.ts'
 import type { GameAction, GameEvent, GameState, PieceType } from './engine/index.ts'
 import { ACTION_LABELS, actionForCode, DEFAULT_BINDINGS, INPUT_ACTIONS, isRepeatable, keyLabel, parseBindings, remapKey } from './input/keyboard.ts'
@@ -452,8 +452,8 @@ function App() {
     <p className="controller-status" aria-live="polite">{controllerStatus}</p>
     <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">{gameAnnouncement}</p>
     <p className="control-hint" aria-label="Keyboard controls">{keyLabel(bindings.moveLeft)} {keyLabel(bindings.moveRight)} Move · {keyLabel(bindings.softDrop)} Soft drop · {keyLabel(bindings.rotateCounterclockwise)} {keyLabel(bindings.rotateClockwise)} Rotate · {personal.hardDropEnabled ? `${keyLabel(bindings.hardDrop)} Hard drop` : 'Hard Drop off'}{game.holdEnabled ? ` · ${keyLabel(bindings.hold)} Hold` : ''} · {keyLabel(bindings.pause)} / Esc Pause</p>
-    {game.status === 'paused' && <div className="game-overlay"><section className="overlay-card" aria-labelledby="overlay-title"><h1 id="overlay-title">Paused</h1><button className="button button-primary" autoFocus onClick={() => apply('resume')}>Resume</button><button className="overlay-link" onClick={() => { audioRef.current?.leaveGame(); setView('menu') }}>Main menu</button></section></div>}
-    {game.status === 'gameOver' && <div className="game-overlay"><section className="overlay-card result-card" aria-labelledby="overlay-title"><h1 id="overlay-title">Game over</h1>{isNewRecord && <p className="record-badge">New record</p>}{notice && <p className="notice" role="status">{notice}</p>}<div className="result-stats"><div><span>Final score</span><strong>{game.score.toLocaleString()}</strong></div><div><span>Level</span><strong>{game.level}</strong></div><div><span>Lines</span><strong>{game.lines}</strong></div><div><span>Highscore</span><strong>{resultRank ? `#${resultRank}` : '—'}</strong></div></div><HighscoreTable records={highscores} compact /><button className="button button-primary" autoFocus onClick={beginGame}>Play Again</button><button className="overlay-link" onClick={() => { setCapture(null); setGamepadCapture(null); setView('menu') }}>Main Menu</button></section></div>}
+    {game.status === 'paused' && <div className="game-overlay"><section className="overlay-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title" onKeyDown={keepDialogFocus}><h1 id="overlay-title">Paused</h1><button className="button button-primary" autoFocus onClick={() => apply('resume')}>Resume</button><button className="overlay-link" onClick={() => { audioRef.current?.leaveGame(); setView('menu') }}>Main menu</button></section></div>}
+    {game.status === 'gameOver' && <div className="game-overlay"><section className="overlay-card result-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title" onKeyDown={keepDialogFocus}><h1 id="overlay-title">Game over</h1>{isNewRecord && <p className="record-badge">New record</p>}{notice && <p className="notice" role="status">{notice}</p>}<div className="result-stats"><div><span>Final score</span><strong>{game.score.toLocaleString()}</strong></div><div><span>Level</span><strong>{game.level}</strong></div><div><span>Lines</span><strong>{game.lines}</strong></div><div><span>Highscore</span><strong>{resultRank ? `#${resultRank}` : '—'}</strong></div></div><HighscoreTable records={highscores} compact /><button className="button button-primary" autoFocus onClick={beginGame}>Play Again</button><button className="overlay-link" onClick={() => { setCapture(null); setGamepadCapture(null); setView('menu') }}>Main Menu</button></section></div>}
   </main>
 
   return <main className="shell menu-shell">
@@ -471,6 +471,21 @@ function App() {
 }
 
 interface SwipePoint { readonly x: number; readonly y: number }
+
+function keepDialogFocus(event: ReactKeyboardEvent<HTMLElement>) {
+  if (event.key !== 'Tab') return
+  const controls = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(
+    'button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
+  )).filter((control) => control.offsetWidth > 0 || control.offsetHeight > 0)
+  const first = controls[0]
+  const last = controls.at(-1)
+  if (!first || !last) return
+  const focusIsOutside = !event.currentTarget.contains(document.activeElement)
+  if ((event.shiftKey && (document.activeElement === first || focusIsOutside)) || (!event.shiftKey && (document.activeElement === last || focusIsOutside))) {
+    event.preventDefault()
+    ;(event.shiftKey ? last : first).focus()
+  }
+}
 
 function Playfield({ game, swipeMode, onSwipe, ref }: { game: GameState; swipeMode: boolean; onSwipe: (start: SwipePoint, end: SwipePoint) => void; ref: Ref<HTMLDivElement> }) {
   const cells: (PieceType | null)[] = game.board.flatMap((row) => [...row])
