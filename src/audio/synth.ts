@@ -86,6 +86,8 @@ export class BricksAudio {
       this.context = new AudioContext()
       this.musicGain = this.context.createGain()
       this.effectsGain = this.context.createGain()
+      this.musicGain.gain.setValueAtTime(0, this.context.currentTime)
+      this.effectsGain.gain.setValueAtTime(0, this.context.currentTime)
       this.musicGain.connect(this.context.destination)
       this.effectsGain.connect(this.context.destination)
       void this.context.resume().catch(() => undefined)

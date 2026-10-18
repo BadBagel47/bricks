@@ -41,11 +41,17 @@ async function open({ viewport = { width: 1280, height: 800 }, personal = {}, si
     crypto.getRandomValues = (array) => array instanceof Uint32Array && array.length === 1 ? (array[0] = 47, array) : nativeRandom(array)
     window.__pads = []
     Object.defineProperty(navigator, 'getGamepads', { value: () => { if (window.__gamepadDenied) throw new DOMException('Disabled', 'SecurityError'); return window.__pads } })
-    window.__audio = { contexts: 0, tones: 0 }
+    window.__audio = { contexts: 0, tones: 0, gainSetValues: [] }
     const NativeAudioContext = window.AudioContext
     window.AudioContext = class extends NativeAudioContext {
       constructor(...args) { super(...args); window.__audio.contexts++; window.__audio.state = () => this.state }
       createOscillator() { window.__audio.tones++; return super.createOscillator() }
+      createGain() {
+        const gain = super.createGain()
+        const setValueAtTime = gain.gain.setValueAtTime.bind(gain.gain)
+        gain.gain.setValueAtTime = (value, start) => { window.__audio.gainSetValues.push(value); return setValueAtTime(value, start) }
+        return gain
+      }
     }
     if (!sessionStorage.getItem('review-seeded')) {
       localStorage.setItem('bricks.personal.v1', JSON.stringify({ ...personal, version: 1 }))
@@ -136,6 +142,8 @@ test('keyboard focus follows navigation, enters the board, and returns after res
   await start(page)
   await page.waitForFunction(() => document.activeElement === document.querySelector('.playfield'))
   assert.equal(await page.locator('.playfield').evaluate((board) => getComputedStyle(board).outlineStyle), 'solid')
+  await page.keyboard.press('Tab')
+  assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Pause')
   await page.keyboard.press('KeyP')
   await page.getByRole('button', { name: 'Resume', exact: true }).waitFor()
   await page.keyboard.press('Shift+Tab')
@@ -265,6 +273,7 @@ test('real Web Audio initializes after start, pauses and obeys saved mute settin
   assert.equal(await page.evaluate(() => window.__audio.contexts), 0)
   await start(page)
   await page.waitForFunction(() => window.__audio.tones > 0 && window.__audio.state() === 'running')
+  assert.deepEqual(await page.evaluate(() => window.__audio.gainSetValues.slice(0, 2)), [0, 0])
   await page.keyboard.press('KeyP'); await page.waitForTimeout(400)
   const stopped = await page.evaluate(() => window.__audio.tones)
   await page.waitForTimeout(450)

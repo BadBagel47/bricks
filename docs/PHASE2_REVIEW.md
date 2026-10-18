@@ -18,7 +18,7 @@ Physical screen-reader behavior has not been checked.
 
 ## 2.2 — Keyboard focus navigation
 
-Screen changes now move keyboard focus to the new page heading. Starting or replaying a game and resuming from pause return focus to the game board. The board can receive keyboard focus and keeps the existing global game controls active.
+Screen changes now move keyboard focus to the new page heading. Starting or replaying a game and resuming from pause return focus synchronously to the game board. The board is excluded from sequential Tab stops, so the first Tab on desktop reaches the visible Pause control instead of leaving the page.
 
 Verification:
 
@@ -31,9 +31,11 @@ Verification:
 
 Pause and Game Over overlays now expose modal dialog roles and their visible headings as accessible names. They render outside the game page, while the page is inert until the dialog closes. Tab and Shift+Tab wrap between the available actions; a document-level keyboard guard returns focus to the dialog if it reaches a background control.
 
+Music and effects gain nodes start at zero, then ramp to the selected output volume. This prevents the initial gain ramp from beginning at Web Audio's default full level.
+
 Verification:
 
-- Browser tests verify pause and Game Over dialog names, the inert background, focus wrapping in both directions, recovery after attempting to focus a background control, and eight consecutive Tab presses staying inside the pause dialog.
+- Browser tests verify first-Tab navigation to Pause, pause and Game Over dialog names, the inert background, focus wrapping in both directions, recovery after attempting to focus a background control, eight consecutive Tab presses staying inside the pause dialog, and both audio buses ramping from zero.
 - `npm test`: 85 passed.
 - `npm run lint`: passed.
 - `npm run build`: passed.
