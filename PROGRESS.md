@@ -53,13 +53,14 @@
 - Deterministic audio lifecycle tests cover pause, resume, rapid replay, menu exit, the complete Game Over sound, and volume changes.
 - Raised touch-button minimums to 48 × 48 px and kept the responsive control sizing within narrow screens.
 - Improved the readability of mobile gameplay instructions, swipe guidance, controller status and game-stat labels.
+- Added a mobile/tablet Pause button that opens the pause dialog while staying out of the normal Tab order.
 
 ## Validation
 - `npm test`: 90 passed, 0 failed, 0 skipped. Covers engine behavior, rendering, corrupt mappings, elapsed-time repeats, persistence, audio tempo and playback lifecycle.
 - `npm run build`: passed (TypeScript and Vite).
 - `npm run lint`: passed.
 - `npm run test:browser`: 15 passed, 0 failed, 0 skipped in Chromium against the production build. Covers full run/results/rename/replay, keyboard focus navigation, saved settings, touch events, simulated gamepad lifecycle, real Web Audio initialization/muting, oscillator shutdown and Game Over menu exit, frame stalls and five viewports with largest touch controls.
-- Phase 2.5 checks: `npm run build` and `npm run lint` passed. `npm run test:browser`: 15 passed, 0 failed, 0 skipped, including complete playfield and largest touch-control fit at 320 × 667, 390 × 844, 844 × 390, and 800 × 600.
+- Phase 2.5 checks: `npm run build` and `npm run lint` passed. `npm run test:browser`: 15 passed, 0 failed, 0 skipped, including mobile pause/resume and complete playfield/largest touch-control fit at 320 × 667, 390 × 844, 844 × 390, and 800 × 600.
 
 ## GitHub Pages
 - Owner approved GitHub Pages as temporary preview hosting and enabled it for this repository.
