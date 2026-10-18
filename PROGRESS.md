@@ -1,7 +1,7 @@
 # Bricks progress
 
 - **Phase:** 2 — Polish
-- **Milestone:** 2.4 — Audio playback lifecycle
+- **Milestone:** 2.5 — Mobile layout and readability
 - **Status:** Implemented; awaiting owner review
 - **Previous milestones:** 1.1 was approved; the owner confirmed the published builds through 1.6 work. Visual refinement can continue later; interface copy must remain direct and functional.
 
@@ -51,12 +51,15 @@
 - New games reset the melody and danger tempo, and cancel leftover Game Over sounds. Resume continues the melody without reviving interrupted effects.
 - Volume changes preserve the melody position; muting effects cancels their queued notes.
 - Deterministic audio lifecycle tests cover pause, resume, rapid replay, menu exit, the complete Game Over sound, and volume changes.
+- Raised touch-button minimums to 48 × 48 px and kept the responsive control sizing within narrow screens.
+- Improved the readability of mobile gameplay instructions, swipe guidance, controller status and game-stat labels.
 
 ## Validation
 - `npm test`: 90 passed, 0 failed, 0 skipped. Covers engine behavior, rendering, corrupt mappings, elapsed-time repeats, persistence, audio tempo and playback lifecycle.
 - `npm run build`: passed (TypeScript and Vite).
 - `npm run lint`: passed.
 - `npm run test:browser`: 15 passed, 0 failed, 0 skipped in Chromium against the production build. Covers full run/results/rename/replay, keyboard focus navigation, saved settings, touch events, simulated gamepad lifecycle, real Web Audio initialization/muting, oscillator shutdown and Game Over menu exit, frame stalls and five viewports with largest touch controls.
+- Phase 2.5 checks: `npm run build` passed; `npm run lint` passed. Browser tests were not run for this milestone.
 
 ## GitHub Pages
 - Owner approved GitHub Pages as temporary preview hosting and enabled it for this repository.
@@ -72,7 +75,7 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Review the Phase 2.4 audio changes, then continue with Phase 2.5 mobile layout and readability. Recommend GPT-6 Luna Medium for that routine interface work. Preserve the approved keyboard/pause flow.
+- Review the Phase 2.5 mobile layout and readability changes. Recommend GPT-6 Luna Medium for routine interface refinement. Preserve the approved keyboard/pause flow.
 - Stop for approval before multiplayer/Firebase.
 
 ## Git checkpoints

@@ -34,3 +34,19 @@
 }
 
 .touch-button.touch-word { font-size: 11px; letter-spacing: 0; }
+
+/* Mobile readability and touch targets follow the interface size guidance. */
+.touch-button { min-width: 48px; min-height: 48px; }
+.touch-controls { --touch-size: min(var(--preferred-touch-size), calc((100vw - 72px) / 5)); }
+.game-side > span, .game-stats span { font-size: 12px; }
+.controller-status { font-size: 12px; line-height: 1.5; }
+.control-hint { font-size: 14px; line-height: 1.5; }
+.swipe-instructions { font-size: 14px; line-height: 1.5; }
+.score-table th { font-size: 11px; }
+@media (max-width: 760px) {
+  .game-shell > .control-hint { font-size: 12px; line-height: 1.5; }
+  .game-stats strong { font-size: 17px; }
+}
+@media (max-width: 900px) and (max-height: 720px) and (orientation: landscape) {
+  .touch-controls { --touch-size: 48px; }
+}
