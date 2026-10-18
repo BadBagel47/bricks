@@ -74,9 +74,13 @@ const start = async (page) => {
 }
 const cells = (page) => page.locator('.playfield').evaluate((board) => [...board.children].flatMap((cell, index) => cell.classList.contains('filled') ? [index] : []))
 const minX = async (page) => Math.min(...(await cells(page)).map((cell) => cell % 10))
-const mainMenu = (page) => page.getByRole('button', { name: '← Main menu', exact: true }).click()
+const mainMenu = async (page) => {
+  await page.keyboard.press('Escape')
+  await page.getByRole('dialog', { name: 'Paused' }).getByRole('button', { name: 'Main menu', exact: true }).click()
+}
 const settings = (page) => page.getByRole('button', { name: 'Open personal settings' }).click()
 async function checkGameTabCycle(page) {
+  assert.equal(await page.getByRole('button', { name: /main menu/i }).count(), 0, 'Exit is only available after pausing')
   await page.evaluate(() => {
     window.__gameTabBlurs = 0
     window.addEventListener('blur', () => { window.__gameTabBlurs++ }, { once: true })
@@ -122,7 +126,7 @@ test('desktop flow: all preview cells, movement, hold, pause/blur, results, rena
   assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Main menu')
   await page.keyboard.press('Tab')
   assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Resume')
-  await page.locator('.game-topbar .back-button').evaluate((button) => button.focus())
+  await page.locator('.playfield').evaluate((board) => board.focus())
   assert.equal(await page.getByRole('dialog', { name: 'Paused' }).evaluate((dialog) => dialog.contains(document.activeElement)), true)
   await page.keyboard.press('Tab')
   assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Main menu')
@@ -174,14 +178,10 @@ test('keyboard focus follows navigation, enters the board, and returns after res
   assert.equal(await page.getByRole('button', { name: 'Pause game', exact: true }).count(), 0)
   assert.equal(await page.getByRole('link', { name: 'Bricks home', exact: true }).count(), 0)
   assert.equal(await page.locator('.playfield').evaluate((board) => getComputedStyle(board).outlineStyle), 'solid')
-  await page.keyboard.press('Tab')
-  assert.equal(await page.evaluate(() => document.activeElement?.textContent), '← Main menu')
-  await page.keyboard.press('Tab')
-  assert.equal(await page.evaluate(() => document.activeElement === document.querySelector('.playfield')), true)
-  await page.keyboard.press('Shift+Tab')
-  assert.equal(await page.evaluate(() => document.activeElement?.textContent), '← Main menu')
-  await page.keyboard.press('Shift+Tab')
-  assert.equal(await page.evaluate(() => document.activeElement === document.querySelector('.playfield')), true)
+  for (const key of ['Tab', 'Tab', 'Shift+Tab', 'Shift+Tab']) {
+    await page.keyboard.press(key)
+    assert.equal(await page.evaluate(() => document.activeElement === document.querySelector('.playfield')), true)
+  }
   const initial = await minX(page)
   await page.keyboard.press('ArrowLeft')
   assert.equal(await minX(page), initial - 1)
@@ -195,9 +195,13 @@ test('keyboard focus follows navigation, enters the board, and returns after res
   await page.keyboard.press('Space')
   await page.waitForFunction(() => document.activeElement === document.querySelector('.playfield'))
   await page.keyboard.press('Shift+Tab')
-  assert.equal(await page.evaluate(() => document.activeElement?.textContent), '← Main menu')
+  assert.equal(await page.evaluate(() => document.activeElement === document.querySelector('.playfield')), true)
   await checkGameTabCycle(page)
-  await mainMenu(page)
+  await page.keyboard.press('Escape')
+  await page.getByRole('dialog', { name: 'Paused' }).waitFor()
+  await page.keyboard.press('Tab')
+  assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Main menu')
+  await page.keyboard.press('Enter')
   await page.waitForFunction(() => document.activeElement?.textContent?.includes('Make room'))
   await settings(page)
   await page.waitForFunction(() => document.activeElement?.textContent === 'Personal settings')

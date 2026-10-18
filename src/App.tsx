@@ -465,7 +465,7 @@ function App() {
 
   if (view === 'game') return <>
     <main className="shell game-shell" inert={game.status === 'paused' || game.status === 'gameOver'}>
-    <header className="topbar game-topbar"><Brand compact /><button className="back-button" onClick={() => { audioRef.current?.leaveGame(); setView('menu'); setNotice('') }}>← Main menu</button></header>
+    <header className="topbar game-topbar"><Brand compact /></header>
     <section className="game-layout" aria-label="Single-player game">
       <aside className="game-side game-stats">
         <div><span>Score</span><strong>{game.score.toLocaleString()}</strong></div>

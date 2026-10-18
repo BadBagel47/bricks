@@ -18,11 +18,11 @@ Physical screen-reader behavior has not been checked.
 
 ## 2.2 — Keyboard focus navigation
 
-Screen changes now move keyboard focus to the new page heading. Starting or replaying a game and resuming from pause return focus synchronously to the game board. Tab and Shift+Tab cycle through the board and visible game controls. The logo is plain branding with no link or tab stop; keyboard instructions are plain text. Navigation is handled before the browser can leave the page, preventing window blur and automatic pause. Pause remains available through the configured keyboard shortcut or Escape.
+Screen changes now move keyboard focus to the new page heading. Starting or replaying a game and resuming from pause return focus synchronously to the game board. Tab and Shift+Tab cycle through the board and visible game controls. The logo is plain branding with no link or tab stop; keyboard instructions are plain text. Navigation is handled before the browser can leave the page, preventing window blur and automatic pause. Pause remains available through the configured keyboard shortcut or Escape. The playing screen has no Main Menu action; quitting an active game requires the pause dialog. On desktop, Tab and Shift+Tab keep focus on the board.
 
 Verification:
 
-- Browser test covers keyboard-only start, pause, resume, menu navigation, and entering Settings.
+- Browser test covers keyboard-only start, pause, resume, exiting through the pause dialog, and entering Settings.
 - `npm run build`: passed.
 - `npm run lint`: passed.
 - `npm run test:browser`: 14 passed in Chromium.
