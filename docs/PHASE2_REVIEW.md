@@ -18,7 +18,7 @@ Physical screen-reader behavior has not been checked.
 
 ## 2.2 — Keyboard focus navigation
 
-Screen changes now move keyboard focus to the new page heading. Starting or replaying a game and resuming from pause return focus synchronously to the game board. The board is excluded from sequential Tab stops. Tab and Shift+Tab cycle through visible game controls; keyboard instructions are plain text. Navigation is handled before the browser can leave the page, preventing window blur and automatic pause. Pause remains available through the configured keyboard shortcut or Escape.
+Screen changes now move keyboard focus to the new page heading. Starting or replaying a game and resuming from pause return focus synchronously to the game board. Tab and Shift+Tab cycle through the board and visible game controls. The logo is plain branding with no link or tab stop; keyboard instructions are plain text. Navigation is handled before the browser can leave the page, preventing window blur and automatic pause. Pause remains available through the configured keyboard shortcut or Escape.
 
 Verification:
 
@@ -35,7 +35,7 @@ Music and effects gain nodes start at zero, then ramp to the selected output vol
 
 Verification:
 
-- Browser tests verify repeated Tab/Shift+Tab cycles during gameplay before and after resume, no window blur or unexpected pause across five viewports, pause and Game Over dialog names, the inert background, focus wrapping in both directions, recovery after attempting to focus a background control, repeated forward/reverse Tab cycles staying inside both dialogs, and both audio buses ramping from zero.
+- Browser tests verify repeated Tab/Shift+Tab cycles during gameplay before and after resume, returning to the board in both directions, no focus on the logo, gameplay input after returning, no window blur or unexpected pause across five viewports, pause and Game Over dialog names, the inert background, focus wrapping in both directions, recovery after attempting to focus a background control, repeated forward/reverse Tab cycles staying inside both dialogs, and both audio buses ramping from zero.
 - `npm test`: 85 passed.
 - `npm run lint`: passed.
 - `npm run build`: passed.

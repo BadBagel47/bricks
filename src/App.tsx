@@ -510,7 +510,7 @@ function Playfield({ game, swipeMode, onSwipe, ref }: { game: GameState; swipeMo
   const cells: (PieceType | null)[] = game.board.flatMap((row) => [...row])
   const swipeStart = useRef<SwipePoint | null>(null)
   if (game.active) for (const [x, y] of pieceCells(game.active)) cells[y * 10 + x] = game.active.type
-  return <div ref={ref} tabIndex={-1} className={`playfield${swipeMode ? ' swipe-active' : ''}`} role="img" aria-label="Game board, 10 columns by 20 rows"
+  return <div ref={ref} tabIndex={0} className={`playfield${swipeMode ? ' swipe-active' : ''}`} role="img" aria-label="Game board, 10 columns by 20 rows"
     onPointerDown={(event) => { if (swipeMode && event.pointerType !== 'mouse') { swipeStart.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId) } }}
     onPointerUp={(event) => { if (!swipeMode || !swipeStart.current) return; onSwipe(swipeStart.current, { x: event.clientX, y: event.clientY }); swipeStart.current = null }}
     onPointerCancel={() => { swipeStart.current = null }}>
@@ -586,9 +586,9 @@ function HighscoreTable({ records, compact = false }: { records: readonly Highsc
 }
 
 function Brand({ compact = false }: { compact?: boolean }) {
-  return <a aria-label="Bricks home" className={`brand${compact ? ' brand-compact' : ''}`} href="#home" onClick={(event) => event.preventDefault()}>
+  return <span className={`brand${compact ? ' brand-compact' : ''}`}>
     <span className="brand-mark" aria-hidden="true"><i /><i /><i /><i /></span><span>BRICKS<span className="brand-period">.</span></span>
-  </a>
+  </span>
 }
 
 export default App
