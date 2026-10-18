@@ -42,8 +42,8 @@
 - Browser coverage verifies the board's accessible name and pause/resume/Game Over announcements.
 - Added predictable keyboard focus when navigating between screens, starting/replaying a game, and resuming from pause. The game board is keyboard-focusable.
 - Browser coverage verifies focus moves to the board and back to the page heading through a keyboard-only start, pause, resume, and navigation flow.
-- Marked pause and Game Over overlays as modal dialogs for assistive technology and kept Tab/Shift+Tab inside each dialog.
-- Browser coverage verifies dialog names and focus wrapping in both directions for pause and Game Over.
+- Marked pause and Game Over overlays as modal dialogs for assistive technology and kept Tab/Shift+Tab inside each dialog, including recovery if focus reaches a background control.
+- Browser coverage verifies dialog names, focus wrapping in both directions, and recovery from a background control.
 
 ## Validation
 - `npm test`: 85 passed, 0 failed, 0 skipped. Covers engine behavior, rendering, corrupt mappings, elapsed-time repeats, persistence and audio tempo.

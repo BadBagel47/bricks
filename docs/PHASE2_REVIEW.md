@@ -29,11 +29,11 @@ Verification:
 
 ## 2.3 — Modal dialog keyboard access
 
-Pause and Game Over overlays now expose modal dialog roles and their visible headings as accessible names. Tab and Shift+Tab wrap between the available actions, keeping keyboard focus inside the open dialog.
+Pause and Game Over overlays now expose modal dialog roles and their visible headings as accessible names. Tab and Shift+Tab wrap between the available actions. A document-level keyboard guard also returns focus to the dialog if it reaches a background control.
 
 Verification:
 
-- Browser tests verify pause and Game Over dialog names and focus wrapping in both directions.
+- Browser tests verify pause and Game Over dialog names, focus wrapping in both directions, and recovery after focusing a background control.
 - `npm test`: 85 passed.
 - `npm run lint`: passed.
 - `npm run build`: passed.

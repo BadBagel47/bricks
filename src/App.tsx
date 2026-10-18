@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import type { CSSProperties, FormEvent, KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent, Ref } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import type { CSSProperties, FormEvent, PointerEvent as ReactPointerEvent, Ref } from 'react'
 import { advanceGame, createGame, dispatch, pieceCells } from './engine/index.ts'
 import type { GameAction, GameEvent, GameState, PieceType } from './engine/index.ts'
 import { ACTION_LABELS, actionForCode, DEFAULT_BINDINGS, INPUT_ACTIONS, isRepeatable, keyLabel, parseBindings, remapKey } from './input/keyboard.ts'
@@ -102,6 +102,33 @@ function App() {
       document.querySelector<HTMLElement>('.shell h1')?.focus()
     }
   }, [game.status, gameSession, view])
+
+  useLayoutEffect(() => {
+    if (view !== 'game' || (game.status !== 'paused' && game.status !== 'gameOver')) return
+    const dialog = document.querySelector<HTMLElement>('.game-overlay [role="dialog"]')
+    if (!dialog) return
+    const controls = dialogControls(dialog)
+    const first = controls[0]
+    if (first && !dialog.contains(document.activeElement)) first.focus()
+
+    function containTab(event: globalThis.KeyboardEvent) {
+      if (event.key !== 'Tab') return
+      const activeDialog = document.querySelector<HTMLElement>('.game-overlay [role="dialog"]')
+      if (!activeDialog) return
+      const focusable = dialogControls(activeDialog)
+      const firstControl = focusable[0]
+      const lastControl = focusable.at(-1)
+      if (!firstControl || !lastControl) return
+      const activeIndex = focusable.indexOf(document.activeElement as HTMLElement)
+      if (activeIndex === -1 || (event.shiftKey ? activeIndex === 0 : activeIndex === focusable.length - 1)) {
+        event.preventDefault()
+        ;(event.shiftKey ? lastControl : firstControl).focus()
+      }
+    }
+
+    document.addEventListener('keydown', containTab, true)
+    return () => document.removeEventListener('keydown', containTab, true)
+  }, [game.status, view])
 
   function saveUsername(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -452,8 +479,8 @@ function App() {
     <p className="controller-status" aria-live="polite">{controllerStatus}</p>
     <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">{gameAnnouncement}</p>
     <p className="control-hint" aria-label="Keyboard controls">{keyLabel(bindings.moveLeft)} {keyLabel(bindings.moveRight)} Move · {keyLabel(bindings.softDrop)} Soft drop · {keyLabel(bindings.rotateCounterclockwise)} {keyLabel(bindings.rotateClockwise)} Rotate · {personal.hardDropEnabled ? `${keyLabel(bindings.hardDrop)} Hard drop` : 'Hard Drop off'}{game.holdEnabled ? ` · ${keyLabel(bindings.hold)} Hold` : ''} · {keyLabel(bindings.pause)} / Esc Pause</p>
-    {game.status === 'paused' && <div className="game-overlay"><section className="overlay-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title" onKeyDown={keepDialogFocus}><h1 id="overlay-title">Paused</h1><button className="button button-primary" autoFocus onClick={() => apply('resume')}>Resume</button><button className="overlay-link" onClick={() => { audioRef.current?.leaveGame(); setView('menu') }}>Main menu</button></section></div>}
-    {game.status === 'gameOver' && <div className="game-overlay"><section className="overlay-card result-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title" onKeyDown={keepDialogFocus}><h1 id="overlay-title">Game over</h1>{isNewRecord && <p className="record-badge">New record</p>}{notice && <p className="notice" role="status">{notice}</p>}<div className="result-stats"><div><span>Final score</span><strong>{game.score.toLocaleString()}</strong></div><div><span>Level</span><strong>{game.level}</strong></div><div><span>Lines</span><strong>{game.lines}</strong></div><div><span>Highscore</span><strong>{resultRank ? `#${resultRank}` : '—'}</strong></div></div><HighscoreTable records={highscores} compact /><button className="button button-primary" autoFocus onClick={beginGame}>Play Again</button><button className="overlay-link" onClick={() => { setCapture(null); setGamepadCapture(null); setView('menu') }}>Main Menu</button></section></div>}
+    {game.status === 'paused' && <div className="game-overlay"><section className="overlay-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title"><h1 id="overlay-title">Paused</h1><button className="button button-primary" autoFocus onClick={() => apply('resume')}>Resume</button><button className="overlay-link" onClick={() => { audioRef.current?.leaveGame(); setView('menu') }}>Main menu</button></section></div>}
+    {game.status === 'gameOver' && <div className="game-overlay"><section className="overlay-card result-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title"><h1 id="overlay-title">Game over</h1>{isNewRecord && <p className="record-badge">New record</p>}{notice && <p className="notice" role="status">{notice}</p>}<div className="result-stats"><div><span>Final score</span><strong>{game.score.toLocaleString()}</strong></div><div><span>Level</span><strong>{game.level}</strong></div><div><span>Lines</span><strong>{game.lines}</strong></div><div><span>Highscore</span><strong>{resultRank ? `#${resultRank}` : '—'}</strong></div></div><HighscoreTable records={highscores} compact /><button className="button button-primary" autoFocus onClick={beginGame}>Play Again</button><button className="overlay-link" onClick={() => { setCapture(null); setGamepadCapture(null); setView('menu') }}>Main Menu</button></section></div>}
   </main>
 
   return <main className="shell menu-shell">
@@ -472,19 +499,10 @@ function App() {
 
 interface SwipePoint { readonly x: number; readonly y: number }
 
-function keepDialogFocus(event: ReactKeyboardEvent<HTMLElement>) {
-  if (event.key !== 'Tab') return
-  const controls = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(
+function dialogControls(dialog: HTMLElement): HTMLElement[] {
+  return Array.from(dialog.querySelectorAll<HTMLElement>(
     'button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
   )).filter((control) => control.offsetWidth > 0 || control.offsetHeight > 0)
-  const first = controls[0]
-  const last = controls.at(-1)
-  if (!first || !last) return
-  const focusIsOutside = !event.currentTarget.contains(document.activeElement)
-  if ((event.shiftKey && (document.activeElement === first || focusIsOutside)) || (!event.shiftKey && (document.activeElement === last || focusIsOutside))) {
-    event.preventDefault()
-    ;(event.shiftKey ? last : first).focus()
-  }
 }
 
 function Playfield({ game, swipeMode, onSwipe, ref }: { game: GameState; swipeMode: boolean; onSwipe: (start: SwipePoint, end: SwipePoint) => void; ref: Ref<HTMLDivElement> }) {
