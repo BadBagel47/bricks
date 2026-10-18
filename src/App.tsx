@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { CSSProperties, FormEvent, PointerEvent as ReactPointerEvent, Ref } from 'react'
+import { createPortal } from 'react-dom'
 import { advanceGame, createGame, dispatch, pieceCells } from './engine/index.ts'
 import type { GameAction, GameEvent, GameState, PieceType } from './engine/index.ts'
 import { ACTION_LABELS, actionForCode, DEFAULT_BINDINGS, INPUT_ACTIONS, isRepeatable, keyLabel, parseBindings, remapKey } from './input/keyboard.ts'
@@ -464,7 +465,8 @@ function App() {
     </section>
   </main>
 
-  if (view === 'game') return <main className="shell game-shell">
+  if (view === 'game') return <>
+    <main className="shell game-shell" inert={game.status === 'paused' || game.status === 'gameOver'}>
     <header className="topbar game-topbar"><Brand compact /><button className="back-button" onClick={() => { audioRef.current?.leaveGame(); setView('menu'); setNotice('') }}>← Main menu</button></header>
     <section className="game-layout" aria-label="Single-player game">
       <aside className="game-side game-stats">
@@ -479,9 +481,10 @@ function App() {
     <p className="controller-status" aria-live="polite">{controllerStatus}</p>
     <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">{gameAnnouncement}</p>
     <p className="control-hint" aria-label="Keyboard controls">{keyLabel(bindings.moveLeft)} {keyLabel(bindings.moveRight)} Move · {keyLabel(bindings.softDrop)} Soft drop · {keyLabel(bindings.rotateCounterclockwise)} {keyLabel(bindings.rotateClockwise)} Rotate · {personal.hardDropEnabled ? `${keyLabel(bindings.hardDrop)} Hard drop` : 'Hard Drop off'}{game.holdEnabled ? ` · ${keyLabel(bindings.hold)} Hold` : ''} · {keyLabel(bindings.pause)} / Esc Pause</p>
-    {game.status === 'paused' && <div className="game-overlay"><section className="overlay-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title"><h1 id="overlay-title">Paused</h1><button className="button button-primary" autoFocus onClick={() => apply('resume')}>Resume</button><button className="overlay-link" onClick={() => { audioRef.current?.leaveGame(); setView('menu') }}>Main menu</button></section></div>}
-    {game.status === 'gameOver' && <div className="game-overlay"><section className="overlay-card result-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title"><h1 id="overlay-title">Game over</h1>{isNewRecord && <p className="record-badge">New record</p>}{notice && <p className="notice" role="status">{notice}</p>}<div className="result-stats"><div><span>Final score</span><strong>{game.score.toLocaleString()}</strong></div><div><span>Level</span><strong>{game.level}</strong></div><div><span>Lines</span><strong>{game.lines}</strong></div><div><span>Highscore</span><strong>{resultRank ? `#${resultRank}` : '—'}</strong></div></div><HighscoreTable records={highscores} compact /><button className="button button-primary" autoFocus onClick={beginGame}>Play Again</button><button className="overlay-link" onClick={() => { setCapture(null); setGamepadCapture(null); setView('menu') }}>Main Menu</button></section></div>}
-  </main>
+    </main>
+    {game.status === 'paused' && createPortal(<div className="game-overlay"><section className="overlay-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title"><h1 id="overlay-title">Paused</h1><button className="button button-primary" autoFocus onClick={() => apply('resume')}>Resume</button><button className="overlay-link" onClick={() => { audioRef.current?.leaveGame(); setView('menu') }}>Main menu</button></section></div>, document.body)}
+    {game.status === 'gameOver' && createPortal(<div className="game-overlay"><section className="overlay-card result-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title"><h1 id="overlay-title">Game over</h1>{isNewRecord && <p className="record-badge">New record</p>}{notice && <p className="notice" role="status">{notice}</p>}<div className="result-stats"><div><span>Final score</span><strong>{game.score.toLocaleString()}</strong></div><div><span>Level</span><strong>{game.level}</strong></div><div><span>Lines</span><strong>{game.lines}</strong></div><div><span>Highscore</span><strong>{resultRank ? `#${resultRank}` : '—'}</strong></div></div><HighscoreTable records={highscores} compact /><button className="button button-primary" autoFocus onClick={beginGame}>Play Again</button><button className="overlay-link" onClick={() => { setCapture(null); setGamepadCapture(null); setView('menu') }}>Main Menu</button></section></div>, document.body)}
+  </>
 
   return <main className="shell menu-shell">
     <header className="topbar"><Brand compact /><button aria-label="Open personal settings" className="settings-button" onClick={() => { setDraft(username); setView('settings') }}>⚙<span>Settings</span></button></header>
