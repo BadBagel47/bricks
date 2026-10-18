@@ -48,9 +48,9 @@ Pause and menu exit now cancel pending effect notes and stop active music/effect
 Verification:
 
 - Five deterministic audio lifecycle tests cover pause/resume, rapid replay after Game Over, menu exit, the complete Game Over sequence, and volume/mute changes.
-- The production browser integration test tracks actual Web Audio oscillator endings and verifies that pause/menu exit leave no active sound or delayed notes.
+- The production browser integration test tracks actual Web Audio oscillator endings and verifies that pause/menu exit leave no active sound or delayed notes, including a direct exit from Game Over.
 - `npm test`: 90 passed.
 - `npm run build` and `npm run lint`: passed.
-- `npm run test:browser`: 14 passed in Chromium.
+- `npm run test:browser`: 15 passed in Chromium.
 
 Listening on physical devices remains an owner check. Review this checkpoint before continuing Phase 2. Stop before Phase 3 multiplayer/Firebase.

@@ -350,6 +350,21 @@ test('real Web Audio initializes after start, pauses and obeys saved mute settin
   assert.equal(await page.evaluate(() => window.__audio.tones), 0)
 })
 
+test('leaving Game Over cancels the remaining effect notes before returning to the menu', async () => {
+  const page = await open({ personal: { musicEnabled: false } })
+  await start(page)
+  await finish(page)
+  const exit = page.getByRole('dialog', { name: 'Game over' }).getByRole('button', { name: 'Main Menu', exact: true })
+  await exit.evaluate((button) => button.addEventListener('click', () => {
+    window.__audio.menuToneCount = window.__audio.tones
+  }, { capture: true, once: true }))
+  await exit.click()
+  await page.getByRole('heading', { name: 'Make room for one more.' }).waitFor()
+  await page.waitForTimeout(500)
+  assert.equal(await page.evaluate(() => window.__audio.activeTones), 0)
+  assert.equal(await page.evaluate(() => window.__audio.tones), await page.evaluate(() => window.__audio.menuToneCount))
+})
+
 for (const viewport of [{ width: 1280, height: 800 }, { width: 320, height: 667 }, { width: 390, height: 844 }, { width: 844, height: 390 }, { width: 800, height: 600 }]) {
   test(`layout ${viewport.width} × ${viewport.height}: complete board and largest touch controls fit`, async () => {
     const page = await open({ viewport, personal: { touchButtonSize: 72 }, singlePlayer: { holdEnabled: true } })
