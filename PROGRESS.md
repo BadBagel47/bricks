@@ -41,8 +41,8 @@
 - Added screen-reader announcements for line clears, level changes, pause/resume and Game Over; the visual board is now announced as a 10 × 20 game board instead of exposing 200 decorative cells.
 - Browser coverage verifies the board's accessible name and pause/resume/Game Over announcements.
 - Added predictable keyboard focus when navigating between screens, starting/replaying a game, and resuming from pause. The game board is keyboard-focusable.
-- The board receives focus synchronously and is excluded from sequential Tab stops. On desktop, the first Tab after starting reaches the visible keyboard-controls hint instead of leaving the page. Pause is available through the configured keyboard shortcut or Escape.
-- Browser coverage verifies first-Tab navigation to the keyboard-controls hint and focus movement through a keyboard-only start, pause, resume, and navigation flow.
+- The board receives focus synchronously and is excluded from sequential Tab stops. Tab and Shift+Tab cycle through visible game controls while playing, and through dialog controls when paused or Game Over. Keyboard instructions are plain text. Tabbing never triggers the window-blur pause; the configured pause shortcut and Escape still work.
+- Browser coverage verifies repeated Tab/Shift+Tab cycles before and after resume, no window blur or unexpected pause, and keyboard-only navigation across desktop/mobile viewports.
 - Marked pause and Game Over overlays as modal dialogs for assistive technology, moved them outside the game page, and made the page inert while a dialog is open. Tab/Shift+Tab remain inside each dialog.
 - Browser coverage verifies dialog names, the inert background, focus wrapping in both directions, and repeated Tab presses.
 - Initialized music and effects gain nodes at zero before ramping to the saved volume, preventing the initial full-volume transient.

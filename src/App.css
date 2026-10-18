@@ -22,7 +22,6 @@
   .playfield { width: min(52vw, 300px, calc((100dvh - 330px) / 2)); }
 }
 @media (max-width: 900px) and (max-height: 720px) and (orientation: landscape) {
-  .game-shell { position: relative; overflow: clip; }
   .game-shell { padding-top: 8px; padding-bottom: 6px; }
   .game-topbar { margin-bottom: 4px; }
   .playfield { height: min(50dvh, calc(100dvh - 180px), 250px); width: auto; aspect-ratio: 1/2; }
@@ -31,7 +30,7 @@
   .touch-controls { --touch-size: 44px; margin: 5px auto 0; }
   .touch-actions { display: flex; flex-wrap: nowrap; }
   .game-shell > .controller-status { margin: 2px auto; }
-  .game-shell > .control-hint { position: absolute; right: 12px; bottom: 4px; left: 12px; margin: 0; line-height: 1; }
+  .game-shell > .control-hint { display: none; }
 }
 
 .touch-button.touch-word { font-size: 11px; letter-spacing: 0; }

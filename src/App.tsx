@@ -105,26 +105,24 @@ function App() {
   }, [game.status, gameSession, view])
 
   useLayoutEffect(() => {
-    if (view !== 'game' || (game.status !== 'paused' && game.status !== 'gameOver')) return
+    if (view !== 'game') return
     const dialog = document.querySelector<HTMLElement>('.game-overlay [role="dialog"]')
-    if (!dialog) return
-    const controls = dialogControls(dialog)
-    const first = controls[0]
-    if (first && !dialog.contains(document.activeElement)) first.focus()
+    if (dialog && !dialog.contains(document.activeElement)) focusableControls(dialog)[0]?.focus()
 
     function containTab(event: globalThis.KeyboardEvent) {
       if (event.key !== 'Tab') return
-      const activeDialog = document.querySelector<HTMLElement>('.game-overlay [role="dialog"]')
-      if (!activeDialog) return
-      const focusable = dialogControls(activeDialog)
-      const firstControl = focusable[0]
-      const lastControl = focusable.at(-1)
-      if (!firstControl || !lastControl) return
+      const scope = document.querySelector<HTMLElement>('.game-overlay [role="dialog"]')
+        ?? document.querySelector<HTMLElement>('main.game-shell')
+      if (!scope) return
+      const focusable = focusableControls(scope)
+      if (!focusable.length) return
+      // Cancel native navigation before it can move focus into browser chrome and trigger blur/pause.
+      event.preventDefault()
       const activeIndex = focusable.indexOf(document.activeElement as HTMLElement)
-      if (activeIndex === -1 || (event.shiftKey ? activeIndex === 0 : activeIndex === focusable.length - 1)) {
-        event.preventDefault()
-        ;(event.shiftKey ? lastControl : firstControl).focus()
-      }
+      const nextIndex = activeIndex === -1
+        ? (event.shiftKey ? focusable.length - 1 : 0)
+        : (activeIndex + (event.shiftKey ? -1 : 1) + focusable.length) % focusable.length
+      focusable[nextIndex].focus()
     }
 
     document.addEventListener('keydown', containTab, true)
@@ -480,7 +478,7 @@ function App() {
     {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={personal.touchButtonSize} leftHanded={personal.leftHandedControls} holdEnabled={game.holdEnabled} hardDropEnabled={game.hardDropEnabled} enabled={game.status === 'playing'} apply={apply} />}
     <p className="controller-status" aria-live="polite">{controllerStatus}</p>
     <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">{gameAnnouncement}</p>
-    <p className="control-hint" tabIndex={0} aria-label="Keyboard controls">{keyLabel(bindings.moveLeft)} {keyLabel(bindings.moveRight)} Move · {keyLabel(bindings.softDrop)} Soft drop · {keyLabel(bindings.rotateCounterclockwise)} {keyLabel(bindings.rotateClockwise)} Rotate · {personal.hardDropEnabled ? `${keyLabel(bindings.hardDrop)} Hard drop` : 'Hard Drop off'}{game.holdEnabled ? ` · ${keyLabel(bindings.hold)} Hold` : ''} · {keyLabel(bindings.pause)} / Esc Pause</p>
+    <p className="control-hint" aria-label="Keyboard controls">{keyLabel(bindings.moveLeft)} {keyLabel(bindings.moveRight)} Move · {keyLabel(bindings.softDrop)} Soft drop · {keyLabel(bindings.rotateCounterclockwise)} {keyLabel(bindings.rotateClockwise)} Rotate · {personal.hardDropEnabled ? `${keyLabel(bindings.hardDrop)} Hard drop` : 'Hard Drop off'}{game.holdEnabled ? ` · ${keyLabel(bindings.hold)} Hold` : ''} · {keyLabel(bindings.pause)} / Esc Pause</p>
     </main>
     {game.status === 'paused' && createPortal(<div className="game-overlay"><section className="overlay-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title"><h1 id="overlay-title">Paused</h1><button className="button button-primary" autoFocus onClick={() => apply('resume')}>Resume</button><button className="overlay-link" onClick={() => { audioRef.current?.leaveGame(); setView('menu') }}>Main menu</button></section></div>, document.body)}
     {game.status === 'gameOver' && createPortal(<div className="game-overlay"><section className="overlay-card result-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title"><h1 id="overlay-title">Game over</h1>{isNewRecord && <p className="record-badge">New record</p>}{notice && <p className="notice" role="status">{notice}</p>}<div className="result-stats"><div><span>Final score</span><strong>{game.score.toLocaleString()}</strong></div><div><span>Level</span><strong>{game.level}</strong></div><div><span>Lines</span><strong>{game.lines}</strong></div><div><span>Highscore</span><strong>{resultRank ? `#${resultRank}` : '—'}</strong></div></div><HighscoreTable records={highscores} compact /><button className="button button-primary" autoFocus onClick={beginGame}>Play Again</button><button className="overlay-link" onClick={() => { setCapture(null); setGamepadCapture(null); setView('menu') }}>Main Menu</button></section></div>, document.body)}
@@ -502,8 +500,8 @@ function App() {
 
 interface SwipePoint { readonly x: number; readonly y: number }
 
-function dialogControls(dialog: HTMLElement): HTMLElement[] {
-  return Array.from(dialog.querySelectorAll<HTMLElement>(
+function focusableControls(scope: HTMLElement): HTMLElement[] {
+  return Array.from(scope.querySelectorAll<HTMLElement>(
     'button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
   )).filter((control) => control.offsetWidth > 0 || control.offsetHeight > 0)
 }

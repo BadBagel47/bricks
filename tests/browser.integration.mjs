@@ -76,6 +76,21 @@ const cells = (page) => page.locator('.playfield').evaluate((board) => [...board
 const minX = async (page) => Math.min(...(await cells(page)).map((cell) => cell % 10))
 const mainMenu = (page) => page.getByRole('button', { name: '← Main menu', exact: true }).click()
 const settings = (page) => page.getByRole('button', { name: 'Open personal settings' }).click()
+async function checkGameTabCycle(page) {
+  await page.evaluate(() => {
+    window.__gameTabBlurs = 0
+    window.addEventListener('blur', () => { window.__gameTabBlurs++ }, { once: true })
+  })
+  for (const key of ['Tab', 'Shift+Tab']) {
+    for (let i = 0; i < 12; i++) {
+      await page.keyboard.press(key)
+      assert.equal(await page.evaluate(() => document.hasFocus()), true, `${key} keeps browser focus on the page`)
+      assert.equal(await page.evaluate(() => Boolean(document.activeElement?.closest('main.game-shell') && document.activeElement?.matches('button, a[href]'))), true, `${key} reaches a game control`)
+      assert.equal(await page.getByRole('dialog', { name: 'Paused' }).count(), 0, `${key} does not pause`)
+    }
+  }
+  assert.equal(await page.evaluate(() => window.__gameTabBlurs), 0, 'Tab never blurs the game window, even briefly')
+}
 async function finish(page) {
   for (let i = 0; i < 40 && !await page.getByRole('heading', { name: 'Game over', exact: true }).isVisible(); i++) await page.keyboard.press('Space')
   await page.getByRole('heading', { name: 'Game over', exact: true }).waitFor()
@@ -108,8 +123,13 @@ test('desktop flow: all preview cells, movement, hold, pause/blur, results, rena
   assert.equal(await page.getByRole('dialog', { name: 'Paused' }).evaluate((dialog) => dialog.contains(document.activeElement)), true)
   await page.keyboard.press('Tab')
   assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Main menu')
-  for (let i = 0; i < 8; i++) await page.keyboard.press('Tab')
-  assert.equal(await page.getByRole('dialog', { name: 'Paused' }).evaluate((dialog) => dialog.contains(document.activeElement)), true)
+  for (const key of ['Tab', 'Shift+Tab']) {
+    for (let i = 0; i < 12; i++) {
+      await page.keyboard.press(key)
+      assert.equal(await page.evaluate(() => document.hasFocus()), true)
+      assert.equal(await page.getByRole('dialog', { name: 'Paused' }).evaluate((dialog) => dialog.contains(document.activeElement)), true)
+    }
+  }
   const paused = await cells(page)
   await page.waitForTimeout(850)
   assert.deepEqual(await cells(page), paused)
@@ -125,6 +145,13 @@ test('desktop flow: all preview cells, movement, hold, pause/blur, results, rena
   assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Main Menu')
   await page.keyboard.press('Tab')
   assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Play Again')
+  for (const key of ['Tab', 'Shift+Tab']) {
+    for (let i = 0; i < 12; i++) {
+      await page.keyboard.press(key)
+      assert.equal(await page.evaluate(() => document.hasFocus()), true)
+      assert.equal(await page.getByRole('dialog', { name: 'Game over' }).evaluate((dialog) => dialog.contains(document.activeElement)), true)
+    }
+  }
   assert.equal(await page.locator('.result-card tbody tr').count(), 1)
   await page.getByRole('button', { name: 'Play Again', exact: true }).click()
   assert.equal((await cells(page)).length, 4)
@@ -144,7 +171,8 @@ test('keyboard focus follows navigation, enters the board, and returns after res
   assert.equal(await page.getByRole('button', { name: 'Pause game', exact: true }).count(), 0)
   assert.equal(await page.locator('.playfield').evaluate((board) => getComputedStyle(board).outlineStyle), 'solid')
   await page.keyboard.press('Tab')
-  assert.equal(await page.evaluate(() => document.activeElement?.classList.contains('control-hint')), true)
+  assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('aria-label')), 'Bricks home')
+  await checkGameTabCycle(page)
   await page.keyboard.press('KeyP')
   await page.getByRole('button', { name: 'Resume', exact: true }).waitFor()
   await page.keyboard.press('Shift+Tab')
@@ -153,6 +181,9 @@ test('keyboard focus follows navigation, enters the board, and returns after res
   assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Resume')
   await page.keyboard.press('Space')
   await page.waitForFunction(() => document.activeElement === document.querySelector('.playfield'))
+  await page.keyboard.press('Shift+Tab')
+  assert.equal(await page.evaluate(() => document.activeElement?.textContent), '← Main menu')
+  await checkGameTabCycle(page)
   await mainMenu(page)
   await page.waitForFunction(() => document.activeElement?.textContent?.includes('Make room'))
   await settings(page)
@@ -308,6 +339,7 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 320, height: 667 
         assert.ok(box.x >= 0 && box.x + box.width <= viewport.width && box.y + box.height <= viewport.height)
       }
     }
+    await checkGameTabCycle(page)
     if (process.env.BRICKS_SCREENSHOT_DIR) {
       mkdirSync(process.env.BRICKS_SCREENSHOT_DIR, { recursive: true })
       await page.screenshot({ path: `${process.env.BRICKS_SCREENSHOT_DIR}/${viewport.width}x${viewport.height}.png` })
