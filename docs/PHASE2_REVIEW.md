@@ -33,7 +33,7 @@ Pause and Game Over overlays now expose modal dialog roles and their visible hea
 
 Verification:
 
-- Browser tests verify pause and Game Over dialog names, focus wrapping in both directions, and recovery after focusing a background control.
+- Browser tests verify pause and Game Over dialog names, focus wrapping in both directions, recovery after focusing a background control, and eight consecutive Tab presses staying inside the pause dialog.
 - `npm test`: 85 passed.
 - `npm run lint`: passed.
 - `npm run build`: passed.

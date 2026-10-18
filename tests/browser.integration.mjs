@@ -100,6 +100,8 @@ test('desktop flow: all preview cells, movement, hold, pause/blur, results, rena
   await page.locator('.game-topbar .back-button').evaluate((button) => button.focus())
   await page.keyboard.press('Tab')
   assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Resume')
+  for (let i = 0; i < 8; i++) await page.keyboard.press('Tab')
+  assert.equal(await page.getByRole('dialog', { name: 'Paused' }).evaluate((dialog) => dialog.contains(document.activeElement)), true)
   const paused = await cells(page)
   await page.waitForTimeout(850)
   assert.deepEqual(await cells(page), paused)
