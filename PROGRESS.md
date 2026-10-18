@@ -59,7 +59,7 @@
 - `npm run build`: passed (TypeScript and Vite).
 - `npm run lint`: passed.
 - `npm run test:browser`: 15 passed, 0 failed, 0 skipped in Chromium against the production build. Covers full run/results/rename/replay, keyboard focus navigation, saved settings, touch events, simulated gamepad lifecycle, real Web Audio initialization/muting, oscillator shutdown and Game Over menu exit, frame stalls and five viewports with largest touch controls.
-- Phase 2.5 checks: `npm run build` passed; `npm run lint` passed. Browser tests were not run for this milestone.
+- Phase 2.5 checks: `npm run build` and `npm run lint` passed. `npm run test:browser`: 15 passed, 0 failed, 0 skipped, including complete playfield and largest touch-control fit at 320 × 667, 390 × 844, 844 × 390, and 800 × 600.
 
 ## GitHub Pages
 - Owner approved GitHub Pages as temporary preview hosting and enabled it for this repository.
