@@ -18,7 +18,7 @@ Physical screen-reader behavior has not been checked.
 
 ## 2.2 — Keyboard focus navigation
 
-Screen changes now move keyboard focus to the new page heading. Starting or replaying a game and resuming from pause return focus synchronously to the game board. The board is excluded from sequential Tab stops, so the first Tab on desktop reaches the visible Pause control instead of leaving the page.
+Screen changes now move keyboard focus to the new page heading. Starting or replaying a game and resuming from pause return focus synchronously to the game board. The board is excluded from sequential Tab stops, so the first Tab on desktop reaches the visible keyboard-controls hint instead of leaving the page. Pause remains available through the configured keyboard shortcut or Escape.
 
 Verification:
 
@@ -35,7 +35,7 @@ Music and effects gain nodes start at zero, then ramp to the selected output vol
 
 Verification:
 
-- Browser tests verify first-Tab navigation to Pause, pause and Game Over dialog names, the inert background, focus wrapping in both directions, recovery after attempting to focus a background control, eight consecutive Tab presses staying inside the pause dialog, and both audio buses ramping from zero.
+- Browser tests verify first-Tab navigation to the keyboard-controls hint, pause and Game Over dialog names, the inert background, focus wrapping in both directions, recovery after attempting to focus a background control, eight consecutive Tab presses staying inside the pause dialog, and both audio buses ramping from zero.
 - `npm test`: 85 passed.
 - `npm run lint`: passed.
 - `npm run build`: passed.
