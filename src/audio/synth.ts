@@ -4,12 +4,15 @@ import { frequencyForNote, isDangerStack, musicIntervalMs, ORIGINAL_MELODY } fro
 import type { Board } from '../engine/types.ts'
 
 type AudioSettings = Pick<PersonalSettings, 'musicEnabled' | 'musicVolume' | 'effectsEnabled' | 'effectsVolume'>
+type Voice = { oscillator: OscillatorNode; envelope: GainNode; destination: GainNode }
 
 export class BricksAudio {
   private context: AudioContext | null = null
   private musicGain: GainNode | null = null
   private effectsGain: GainNode | null = null
   private timer: ReturnType<typeof setTimeout> | null = null
+  private readonly effectTimers = new Set<ReturnType<typeof setTimeout>>()
+  private readonly voices = new Set<Voice>()
   private settings: AudioSettings
   private playing = false
   private danger = false
@@ -20,40 +23,47 @@ export class BricksAudio {
   }
 
   beginGame(settings: AudioSettings) {
+    this.stopMusic()
+    this.stopEffects()
+    this.step = 0
+    this.danger = false
     this.settings = settings
     this.playing = true
-    this.ensureAudio()
     this.applyVolumes()
     this.scheduleMusic()
   }
 
   updateSettings(settings: AudioSettings) {
+    const musicWasAudible = this.settings.musicEnabled && this.settings.musicVolume > 0
     this.settings = settings
     this.applyVolumes()
-    if (settings.musicEnabled && this.playing) this.scheduleMusic()
-    else this.stopMusic()
+    if (settings.musicEnabled && settings.musicVolume > 0 && this.playing) {
+      if (!musicWasAudible || this.timer === null) this.scheduleMusic()
+    } else this.stopMusic()
+    if (!settings.effectsEnabled || settings.effectsVolume === 0) this.stopEffects()
   }
 
   pauseGame() {
     this.playing = false
     this.stopMusic()
+    this.stopEffects()
   }
 
   resumeGame() {
     this.playing = true
-    this.ensureAudio()
+    this.applyVolumes()
     this.scheduleMusic()
   }
 
   endGame() {
     this.playing = false
     this.stopMusic()
+    this.stopEffects()
     this.playSequence([59, 55, 50], 0.12, 0.14)
   }
 
   leaveGame() {
-    this.playing = false
-    this.stopMusic()
+    this.pauseGame()
   }
 
   setDanger(board: Board) {
@@ -120,13 +130,49 @@ export class BricksAudio {
   }
 
   private stopMusic() {
-    if (this.timer) clearTimeout(this.timer)
+    if (this.timer !== null) clearTimeout(this.timer)
     this.timer = null
+    this.stopVoices(this.musicGain)
+  }
+
+  private stopEffects() {
+    for (const timer of this.effectTimers) clearTimeout(timer)
+    this.effectTimers.clear()
+    this.stopVoices(this.effectsGain)
+  }
+
+  private stopVoices(destination: GainNode | null) {
+    const now = this.context?.currentTime ?? 0
+    for (const voice of this.voices) {
+      if (voice.destination !== destination) continue
+      this.voices.delete(voice)
+      try {
+        // Briefly fade the current sound instead of cutting a waveform at full amplitude.
+        const gain = voice.envelope.gain
+        if (typeof gain.cancelAndHoldAtTime === 'function') gain.cancelAndHoldAtTime(now)
+        else {
+          const level = gain.value
+          gain.cancelScheduledValues(now)
+          gain.setValueAtTime(level, now)
+        }
+        gain.linearRampToValueAtTime(0, now + 0.008)
+        voice.oscillator.stop(now + 0.01)
+      } catch {
+        voice.oscillator.disconnect()
+        voice.envelope.disconnect()
+      }
+    }
   }
 
   private playSequence(notes: readonly number[], spacing: number, duration: number) {
     if (!this.settings.effectsEnabled || this.settings.effectsVolume === 0 || !this.ensureContext() || !this.context || !this.effectsGain) return
-    notes.forEach((note, index) => setTimeout(() => this.playTone(note, duration, 0.55, 'square', this.effectsGain), index * spacing * 1000))
+    notes.forEach((note, index) => {
+      const timer = setTimeout(() => {
+        this.effectTimers.delete(timer)
+        this.playTone(note, duration, 0.55, 'square', this.effectsGain)
+      }, index * spacing * 1000)
+      this.effectTimers.add(timer)
+    })
   }
 
   private playTone(note: number, duration: number, level: number, type: OscillatorType = 'square', destination = this.effectsGain) {
@@ -143,9 +189,11 @@ export class BricksAudio {
       envelope.gain.exponentialRampToValueAtTime(0.0001, start + duration)
       oscillator.connect(envelope)
       envelope.connect(destination)
-      oscillator.onended = () => { oscillator.disconnect(); envelope.disconnect() }
+      const voice = { oscillator, envelope, destination }
+      oscillator.onended = () => { this.voices.delete(voice); oscillator.disconnect(); envelope.disconnect() }
       oscillator.start(start)
       oscillator.stop(start + duration + 0.01)
+      this.voices.add(voice)
     } catch {
       // Audio can become unavailable if the browser suspends or tears down its device.
     }

@@ -41,4 +41,16 @@ Verification:
 - `npm run build`: passed.
 - `npm run test:browser`: 14 passed in Chromium.
 
-Review this checkpoint before continuing Phase 2. Stop before Phase 3 multiplayer/Firebase.
+## 2.4 — Audio playback lifecycle
+
+Pause and menu exit now cancel pending effect notes and stop active music/effects with an 8 ms fade and oscillator shutdown after 10 ms. Resuming starts music without replaying interrupted effects. New games reset the melody and danger tempo, and cancel leftover Game Over notes. Volume changes preserve the melody position; muting effects cancels their pending notes.
+
+Verification:
+
+- Five deterministic audio lifecycle tests cover pause/resume, rapid replay after Game Over, menu exit, the complete Game Over sequence, and volume/mute changes.
+- The production browser integration test tracks actual Web Audio oscillator endings and verifies that pause/menu exit leave no active sound or delayed notes.
+- `npm test`: 90 passed.
+- `npm run build` and `npm run lint`: passed.
+- `npm run test:browser`: 14 passed in Chromium.
+
+Listening on physical devices remains an owner check. Review this checkpoint before continuing Phase 2. Stop before Phase 3 multiplayer/Firebase.

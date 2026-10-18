@@ -41,11 +41,18 @@ async function open({ viewport = { width: 1280, height: 800 }, personal = {}, si
     crypto.getRandomValues = (array) => array instanceof Uint32Array && array.length === 1 ? (array[0] = 47, array) : nativeRandom(array)
     window.__pads = []
     Object.defineProperty(navigator, 'getGamepads', { value: () => { if (window.__gamepadDenied) throw new DOMException('Disabled', 'SecurityError'); return window.__pads } })
-    window.__audio = { contexts: 0, tones: 0, gainSetValues: [] }
+    window.__audio = { contexts: 0, tones: 0, activeTones: 0, gainSetValues: [] }
     const NativeAudioContext = window.AudioContext
     window.AudioContext = class extends NativeAudioContext {
       constructor(...args) { super(...args); window.__audio.contexts++; window.__audio.state = () => this.state }
-      createOscillator() { window.__audio.tones++; return super.createOscillator() }
+      createOscillator() {
+        window.__audio.tones++
+        const oscillator = super.createOscillator()
+        const start = oscillator.start.bind(oscillator)
+        oscillator.start = (...args) => { start(...args); window.__audio.activeTones++ }
+        oscillator.addEventListener('ended', () => { window.__audio.activeTones-- })
+        return oscillator
+      }
       createGain() {
         const gain = super.createGain()
         const setValueAtTime = gain.gain.setValueAtTime.bind(gain.gain)
@@ -323,13 +330,19 @@ test('real Web Audio initializes after start, pauses and obeys saved mute settin
   await start(page)
   await page.waitForFunction(() => window.__audio.tones > 0 && window.__audio.state() === 'running')
   assert.deepEqual(await page.evaluate(() => window.__audio.gainSetValues.slice(0, 2)), [0, 0])
-  await page.keyboard.press('KeyP'); await page.waitForTimeout(400)
+  await page.keyboard.press('KeyP')
+  await page.waitForFunction(() => window.__audio.activeTones === 0)
   const stopped = await page.evaluate(() => window.__audio.tones)
   await page.waitForTimeout(450)
   assert.equal(await page.evaluate(() => window.__audio.tones), stopped)
   await page.getByRole('button', { name: 'Resume', exact: true }).click()
   assert.ok(await page.evaluate(() => window.__audio.tones) > stopped)
-  await mainMenu(page); await settings(page)
+  await mainMenu(page)
+  await page.waitForFunction(() => window.__audio.activeTones === 0)
+  const menuTones = await page.evaluate(() => window.__audio.tones)
+  await page.waitForTimeout(400)
+  assert.equal(await page.evaluate(() => window.__audio.tones), menuTones)
+  await settings(page)
   await page.getByLabel('Music', { exact: true }).uncheck()
   await page.getByLabel('Sound effects', { exact: true }).uncheck()
   await page.reload(); await start(page)
