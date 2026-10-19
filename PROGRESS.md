@@ -2,7 +2,7 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.1 — Firebase foundation and security architecture
-- **Status:** Implemented; emulator validation in progress
+- **Status:** Implemented locally; full emulator and CI verification blocked by network/GitHub access
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Completed
@@ -57,7 +57,7 @@
 - Added a mobile/tablet Pause button that opens the pause dialog while staying out of the normal Tab order.
 - Added an isolated Firebase client with persisted anonymous identity, concurrent sign-in deduplication, strict emulator/production configuration separation and player-safe errors. The single-player app initializes no Firebase services.
 - Added immutable, identity-bound room-code reservation rules. All room/session/presence paths remain denied pending their feature milestones.
-- Added local Auth/Realtime Database emulator scripts and real permission, concurrent reservation and two-browser anonymous-authentication tests. CI now gates Pages publication on those emulator tests.
+- Added local Auth/Realtime Database emulator scripts and real permission, concurrent reservation and two-browser anonymous-authentication tests. A CI gate for those tests is prepared locally; it has not been pushed or run remotely.
 - Documented the remaining room/session data model, transactions, host ownership, state transitions, synchronization, recovery and Spark limitations in `docs/MULTIPLAYER.md`.
 
 ## Validation
@@ -66,9 +66,10 @@
 - `npm run lint`: passed.
 - `npm run test:browser`: 15 passed, 0 failed, 0 skipped in Chromium against the production build. Covers full run/results/rename/replay, keyboard focus navigation, saved settings, touch events, simulated gamepad lifecycle, real Web Audio initialization/muting, oscillator shutdown and Game Over menu exit, frame stalls and five viewports with largest touch controls.
 - Phase 2.5 checks: `npm run build` and `npm run lint` passed. `npm run test:browser`: 15 passed, 0 failed, 0 skipped, including mobile pause/resume and complete playfield/largest touch-control fit at 320 × 667, 390 × 844, 844 × 390, and 800 × 600.
-- Local `npm run test:firebase` currently cannot start: the official database-emulator JAR download is blocked by the environment's HTTP proxy (403 for `storage.googleapis.com`). A network draft allowing that host was saved; it has not been applied/published. No local Firebase test is counted as passed.
+- Local `npm run test:firebase` currently cannot start: the official database-emulator JAR download is blocked by the environment's HTTP proxy (403 for `storage.googleapis.com`). A network draft allowing that host was saved; it has not been applied/published. No database rules test is counted as passed.
 - `npm run test:firebase:auth`: 1 passed, 1 explicitly skipped. Chromium verified two distinct anonymous identities, deduplicated sign-in and identity persistence after reload; the database ownership check was skipped because this partial command does not run the database emulator.
 - Reinstalled successfully with `npm ci --cache /tmp/bricks-npm-cache`. The environment draft also saves reproducible installation/startup instructions. It does not configure a real Firebase project.
+- GitHub push and read access are currently unavailable: native Git has no credential helper, and an explicit GitHub CLI credential-helper check was rejected as an invalid username/token. The existing `GH_TOKEN` binding was tested without printing its value. The new foundation and CI configuration remain local; no remote CI result or publication is claimed.
 
 ## GitHub Pages
 - Owner approved GitHub Pages as temporary preview hosting and enabled it for this repository.
@@ -85,7 +86,8 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Complete the 3.1 emulator/CI verification, then review the Firebase foundation. Next is 3.2: room creation, joining and invite links with atomic participant-slot claiming. Recommend GPT-6.1 Sol Medium for its transactions and authorization.
+- Apply/publish the saved emulator network permission and restore GitHub authorization, then run `npm run test:firebase`, push the local commits and check CI. Continue using GPT-6.1 Sol Medium for this remaining 3.1 verification.
+- After the 3.1 review, next is 3.2: room creation, joining and invite links with atomic participant-slot claiming. Recommend GPT-6.1 Sol Medium for its transactions and authorization.
 - A real project must be selected/configured before production Firebase can be deployed or verified. Stay on the Spark plan. Stop at the 3.1 review checkpoint before implementing 3.2.
 
 ## Git checkpoints
