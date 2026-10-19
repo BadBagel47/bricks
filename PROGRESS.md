@@ -1,9 +1,9 @@
 # Bricks progress
 
-- **Phase:** 2 — Polish
-- **Milestone:** 2.5 — Mobile layout and readability
-- **Status:** Implemented; awaiting owner review
-- **Previous milestones:** 1.1 was approved; the owner confirmed the published builds through 1.6 work. Visual refinement can continue later; interface copy must remain direct and functional.
+- **Phase:** 3 — Multiplayer (explicitly approved by the owner)
+- **Milestone:** 3.1 — Firebase foundation and security architecture
+- **Status:** Implemented; emulator validation in progress
+- **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Completed
 - React + TypeScript + Vite foundation, first-launch player name, main menu, personal-name settings, responsive base layout and original block/text mark.
@@ -55,13 +55,20 @@
 - Raised touch-button minimums to 48 × 48 px and kept the responsive control sizing within narrow screens.
 - Improved the readability of mobile gameplay instructions, swipe guidance, controller status and game-stat labels.
 - Added a mobile/tablet Pause button that opens the pause dialog while staying out of the normal Tab order.
+- Added an isolated Firebase client with persisted anonymous identity, concurrent sign-in deduplication, strict emulator/production configuration separation and player-safe errors. The single-player app initializes no Firebase services.
+- Added immutable, identity-bound room-code reservation rules. All room/session/presence paths remain denied pending their feature milestones.
+- Added local Auth/Realtime Database emulator scripts and real permission, concurrent reservation and two-browser anonymous-authentication tests. CI now gates Pages publication on those emulator tests.
+- Documented the remaining room/session data model, transactions, host ownership, state transitions, synchronization, recovery and Spark limitations in `docs/MULTIPLAYER.md`.
 
 ## Validation
-- `npm test`: 90 passed, 0 failed, 0 skipped. Covers engine behavior, rendering, corrupt mappings, elapsed-time repeats, persistence, audio tempo and playback lifecycle.
+- `npm test`: 94 passed, 0 failed, 0 skipped. Includes Firebase configuration isolation and safe error messages in addition to the engine/input/audio/persistence checks.
 - `npm run build`: passed (TypeScript and Vite).
 - `npm run lint`: passed.
 - `npm run test:browser`: 15 passed, 0 failed, 0 skipped in Chromium against the production build. Covers full run/results/rename/replay, keyboard focus navigation, saved settings, touch events, simulated gamepad lifecycle, real Web Audio initialization/muting, oscillator shutdown and Game Over menu exit, frame stalls and five viewports with largest touch controls.
 - Phase 2.5 checks: `npm run build` and `npm run lint` passed. `npm run test:browser`: 15 passed, 0 failed, 0 skipped, including mobile pause/resume and complete playfield/largest touch-control fit at 320 × 667, 390 × 844, 844 × 390, and 800 × 600.
+- Local `npm run test:firebase` currently cannot start: the official database-emulator JAR download is blocked by the environment's HTTP proxy (403 for `storage.googleapis.com`). A network draft allowing that host was saved; it has not been applied/published. No local Firebase test is counted as passed.
+- `npm run test:firebase:auth`: 1 passed, 1 explicitly skipped. Chromium verified two distinct anonymous identities, deduplicated sign-in and identity persistence after reload; the database ownership check was skipped because this partial command does not run the database emulator.
+- Reinstalled successfully with `npm ci --cache /tmp/bricks-npm-cache`. The environment draft also saves reproducible installation/startup instructions. It does not configure a real Firebase project.
 
 ## GitHub Pages
 - Owner approved GitHub Pages as temporary preview hosting and enabled it for this repository.
@@ -73,12 +80,13 @@
 - Engine mechanics are NES-inspired and documented, not cycle-accurate NES emulation.
 - Chromium desktop/mobile viewport, touch-event and simulated gamepad tests passed. Physical devices and subjective audio quality remain unverified here.
 - Touch and gamepad behavior should be checked on the owner's physical devices.
-- Snapshot validation for untrusted data, Battle, multiplayer and Firebase are not implemented.
+- Live Firebase is not configured or deployed. No Firebase project, public Web App configuration or Google identity is attached to this environment.
+- Room flows, snapshot validation for untrusted data, Battle and playable multiplayer are not implemented. The security rules intentionally deny those future paths.
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Review the Phase 2.5 mobile layout and readability changes. Recommend GPT-6 Luna Medium for routine interface refinement. Preserve the approved keyboard/pause flow.
-- Stop for approval before multiplayer/Firebase.
+- Complete the 3.1 emulator/CI verification, then review the Firebase foundation. Next is 3.2: room creation, joining and invite links with atomic participant-slot claiming. Recommend GPT-6.1 Sol Medium for its transactions and authorization.
+- A real project must be selected/configured before production Firebase can be deployed or verified. Stay on the Spark plan. Stop at the 3.1 review checkpoint before implementing 3.2.
 
 ## Git checkpoints
 - `fea6aa4`: initial foundation and Pages deployment.

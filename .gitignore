@@ -11,6 +11,11 @@ node_modules
 dist
 dist-ssr
 *.local
+.firebase/
+.env
+.env.*
+!.env.example
+!.env.emulators.example
 
 # Editor directories and files
 .vscode/*
