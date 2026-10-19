@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { CSSProperties, FormEvent, PointerEvent as ReactPointerEvent, Ref } from 'react'
+import type { CSSProperties, FormEvent, PointerEvent as ReactPointerEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { advanceGame, createGame, dispatch, pieceCells } from './engine/index.ts'
 import type { GameAction, GameEvent, GameState, PieceType } from './engine/index.ts'
@@ -76,10 +76,7 @@ function App() {
   const [isNewRecord, setIsNewRecord] = useState(false)
   const [game, setGame] = useState<GameState>(() => createGame())
   const [gameSession, setGameSession] = useState(0)
-  const gameBoardRef = useRef<HTMLDivElement>(null)
   const previousViewRef = useRef(view)
-  const previousGameStatusRef = useRef(game.status)
-  const previousGameSessionRef = useRef(gameSession)
   const gameRef = useRef(game)
   const bindingsRef = useRef(bindings)
   const gamepadBindingsRef = useRef(gamepadBindings)
@@ -91,18 +88,11 @@ function App() {
 
   useLayoutEffect(() => {
     const viewChanged = previousViewRef.current !== view
-    const resumed = previousGameStatusRef.current === 'paused' && game.status === 'playing'
-    const replayed = previousGameSessionRef.current !== gameSession
     previousViewRef.current = view
-    previousGameStatusRef.current = game.status
-    previousGameSessionRef.current = gameSession
-
-    if (view === 'game') {
-      if (viewChanged || resumed || replayed) gameBoardRef.current?.focus()
-    } else if (viewChanged) {
+    if (view !== 'game' && viewChanged) {
       document.querySelector<HTMLElement>('.shell h1')?.focus()
     }
-  }, [game.status, gameSession, view])
+  }, [view])
 
   useLayoutEffect(() => {
     if (view !== 'game') return
@@ -115,7 +105,10 @@ function App() {
         ?? document.querySelector<HTMLElement>('main.game-shell')
       if (!scope) return
       const focusable = focusableControls(scope)
-      if (!focusable.length) return
+      if (!focusable.length) {
+        if (scope.matches('main.game-shell')) event.preventDefault()
+        return
+      }
       // Cancel native navigation before it can move focus into browser chrome and trigger blur/pause.
       event.preventDefault()
       const activeIndex = focusable.indexOf(document.activeElement as HTMLElement)
@@ -472,7 +465,7 @@ function App() {
         <div><span>Level</span><strong>{game.level}</strong></div>
         <div><span>Lines</span><strong>{game.lines}</strong></div>
       </aside>
-      <Playfield ref={gameBoardRef} game={game} swipeMode={personal.mobileControlMethod === 'swipe'} onSwipe={(start, end) => actionsForSwipe(start, end).forEach(apply)} />
+      <Playfield game={game} swipeMode={personal.mobileControlMethod === 'swipe'} onSwipe={(start, end) => actionsForSwipe(start, end).forEach(apply)} />
       <aside className="game-side next-panel"><span>Next</span><PiecePreview type={game.next} level={game.level} />{game.holdEnabled && <><span>Hold</span>{game.held ? <PiecePreview type={game.held} level={game.level} /> : <span className="empty-hold">—</span>}</>}</aside>
     </section>
     {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={personal.touchButtonSize} leftHanded={personal.leftHandedControls} holdEnabled={game.holdEnabled} hardDropEnabled={game.hardDropEnabled} enabled={game.status === 'playing'} apply={apply} />}
@@ -506,11 +499,11 @@ function focusableControls(scope: HTMLElement): HTMLElement[] {
   )).filter((control) => control.offsetWidth > 0 || control.offsetHeight > 0)
 }
 
-function Playfield({ game, swipeMode, onSwipe, ref }: { game: GameState; swipeMode: boolean; onSwipe: (start: SwipePoint, end: SwipePoint) => void; ref: Ref<HTMLDivElement> }) {
+function Playfield({ game, swipeMode, onSwipe }: { game: GameState; swipeMode: boolean; onSwipe: (start: SwipePoint, end: SwipePoint) => void }) {
   const cells: (PieceType | null)[] = game.board.flatMap((row) => [...row])
   const swipeStart = useRef<SwipePoint | null>(null)
   if (game.active) for (const [x, y] of pieceCells(game.active)) cells[y * 10 + x] = game.active.type
-  return <div ref={ref} tabIndex={0} className={`playfield${swipeMode ? ' swipe-active' : ''}`} role="img" aria-label="Game board, 10 columns by 20 rows"
+  return <div className={`playfield${swipeMode ? ' swipe-active' : ''}`} role="img" aria-label="Game board, 10 columns by 20 rows"
     onPointerDown={(event) => { if (swipeMode && event.pointerType !== 'mouse') { swipeStart.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId) } }}
     onPointerUp={(event) => { if (!swipeMode || !swipeStart.current) return; onSwipe(swipeStart.current, { x: event.clientX, y: event.clientY }); swipeStart.current = null }}
     onPointerCancel={() => { swipeStart.current = null }}>

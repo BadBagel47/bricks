@@ -27,6 +27,8 @@ Verification:
 - `npm run lint`: passed.
 - `npm run test:browser`: 14 passed in Chromium.
 
+Follow-up: the owner requested that the game board no longer be focusable. Gameplay shortcuts are handled globally, so removing its Tab stop does not affect keyboard play. During desktop play Tab stays within the page without focusing the board; visible touch controls remain reachable on touch layouts. The Pause button is available by touch and stays out of the normal Tab order.
+
 ## 2.3 — Modal dialog keyboard access
 
 Pause and Game Over overlays now expose modal dialog roles and their visible headings as accessible names. They render outside the game page, while the page is inert until the dialog closes. Tab and Shift+Tab wrap between the available actions; a document-level keyboard guard returns focus to the dialog if it reaches a background control.
@@ -35,7 +37,7 @@ Music and effects gain nodes start at zero, then ramp to the selected output vol
 
 Verification:
 
-- Browser tests verify repeated Tab/Shift+Tab cycles during gameplay before and after resume, returning to the board in both directions, no focus on the logo, gameplay input after returning, no window blur or unexpected pause across five viewports, pause and Game Over dialog names, the inert background, focus wrapping in both directions, recovery after attempting to focus a background control, repeated forward/reverse Tab cycles staying inside both dialogs, and both audio buses ramping from zero.
+- Browser tests for this checkpoint verified repeated Tab/Shift+Tab behavior during gameplay, no focus on the logo, gameplay input, no window blur or unexpected pause across five viewports, pause and Game Over dialog names, the inert background, focus wrapping in both directions, recovery after attempting to focus a background control, repeated forward/reverse Tab cycles staying inside both dialogs, and both audio buses ramping from zero. A later owner-requested follow-up verifies the board is not focusable and shortcuts still work.
 - `npm test`: 85 passed.
 - `npm run lint`: passed.
 - `npm run build`: passed.

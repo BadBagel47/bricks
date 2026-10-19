@@ -40,9 +40,10 @@
 - The owner accepted Phase 1 by confirming the published build works.
 - Added screen-reader announcements for line clears, level changes, pause/resume and Game Over; the visual board is now announced as a 10 × 20 game board instead of exposing 200 decorative cells.
 - Browser coverage verifies the board's accessible name and pause/resume/Game Over announcements.
-- Added predictable keyboard focus when navigating between screens, starting/replaying a game, and resuming from pause. The game board is keyboard-focusable.
-- The board receives focus synchronously and is part of the Tab/Shift+Tab cycle alongside visible game controls. The logo is plain branding with no link or tab stop. There is no Main Menu action on the playing screen: desktop Tab/Shift+Tab keep focus on the board; quitting an active game goes through the pause dialog. Dialogs retain their own focus cycles when paused or Game Over. Keyboard instructions are plain text. Tabbing never triggers the window-blur pause; the configured pause shortcut and Escape still work.
-- Browser coverage verifies returning to the board in both Tab directions before and after resume, gameplay input after returning, no focus on the logo, no window blur or unexpected pause, and keyboard-only navigation across desktop/mobile viewports.
+- Added predictable keyboard focus when navigating between screens and into pause/Game Over dialogs.
+- The game board is not focusable. Keyboard gameplay shortcuts work regardless of focus; Tab stays on the page without focusing the board or triggering a blur pause. The logo is plain branding with no link or tab stop, and there is no Main Menu action on the playing screen. Mobile touch controls remain keyboard reachable except the Pause button, which stays out of the Tab order. Dialogs keep their own focus cycles. Keyboard instructions are plain text; P/Escape and the mobile Pause button open the pause dialog.
+- Browser coverage verifies that repeated Tab presses never focus the board or blur the page, shortcuts still work, the mobile Pause button opens the dialog, and dialog focus remains contained.
+- Owner follow-up checks after removing board focus: `npm test` 90 passed; `npm run test:browser` 15 passed; `npm run build` and `npm run lint` passed.
 - Marked pause and Game Over overlays as modal dialogs for assistive technology, moved them outside the game page, and made the page inert while a dialog is open. Tab/Shift+Tab remain inside each dialog.
 - Browser coverage verifies dialog names, the inert background, focus wrapping in both directions, and repeated Tab presses.
 - Initialized music and effects gain nodes at zero before ramping to the saved volume, preventing the initial full-volume transient.

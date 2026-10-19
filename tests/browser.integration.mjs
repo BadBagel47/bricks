@@ -93,15 +93,12 @@ async function checkGameTabCycle(page) {
     window.addEventListener('blur', () => { window.__gameTabBlurs++ }, { once: true })
   })
   for (const key of ['Tab', 'Shift+Tab']) {
-    let reachedBoard = false
     for (let i = 0; i < 12; i++) {
       await page.keyboard.press(key)
       assert.equal(await page.evaluate(() => document.hasFocus()), true, `${key} keeps browser focus on the page`)
-      assert.equal(await page.evaluate(() => Boolean(document.activeElement?.closest('main.game-shell') && document.activeElement?.matches('button, .playfield'))), true, `${key} reaches a game control or the board`)
-      if (await page.evaluate(() => document.activeElement?.classList.contains('playfield'))) reachedBoard = true
+      assert.equal(await page.evaluate(() => document.activeElement !== document.querySelector('.playfield')), true, `${key} never focuses the board`)
       assert.equal(await page.getByRole('dialog', { name: 'Paused' }).count(), 0, `${key} does not pause`)
     }
-    assert.equal(reachedBoard, true, `${key} returns to the game board`)
   }
   assert.equal(await page.evaluate(() => window.__gameTabBlurs), 0, 'Tab never blurs the game window, even briefly')
 }
@@ -133,8 +130,6 @@ test('desktop flow: all preview cells, movement, hold, pause/blur, results, rena
   assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Main menu')
   await page.keyboard.press('Tab')
   assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Resume')
-  await page.locator('.playfield').evaluate((board) => board.focus())
-  assert.equal(await page.getByRole('dialog', { name: 'Paused' }).evaluate((dialog) => dialog.contains(document.activeElement)), true)
   await page.keyboard.press('Tab')
   assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Main menu')
   for (const key of ['Tab', 'Shift+Tab']) {
@@ -178,16 +173,16 @@ test('desktop flow: all preview cells, movement, hold, pause/blur, results, rena
   assert.equal(await page.locator('tbody tr').first().locator('td').nth(1).textContent(), 'Original Name')
 })
 
-test('keyboard focus follows navigation, enters the board, and returns after resume', async () => {
+test('keyboard shortcuts work without making the game board focusable', async () => {
   const page = await open()
   await start(page)
-  await page.waitForFunction(() => document.activeElement === document.querySelector('.playfield'))
+  assert.equal(await page.locator('.playfield').getAttribute('tabindex'), null)
+  assert.equal(await page.evaluate(() => document.activeElement !== document.querySelector('.playfield')), true)
   assert.equal(await page.getByRole('button', { name: 'Pause game', exact: true }).count(), 0)
   assert.equal(await page.getByRole('link', { name: 'Bricks home', exact: true }).count(), 0)
-  assert.equal(await page.locator('.playfield').evaluate((board) => getComputedStyle(board).outlineStyle), 'solid')
   for (const key of ['Tab', 'Tab', 'Shift+Tab', 'Shift+Tab']) {
     await page.keyboard.press(key)
-    assert.equal(await page.evaluate(() => document.activeElement === document.querySelector('.playfield')), true)
+    assert.equal(await page.evaluate(() => document.activeElement !== document.querySelector('.playfield')), true)
   }
   const initial = await minX(page)
   await page.keyboard.press('ArrowLeft')
@@ -200,9 +195,9 @@ test('keyboard focus follows navigation, enters the board, and returns after res
   await page.keyboard.press('Tab')
   assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Resume')
   await page.keyboard.press('Space')
-  await page.waitForFunction(() => document.activeElement === document.querySelector('.playfield'))
+  assert.equal(await page.evaluate(() => document.activeElement !== document.querySelector('.playfield')), true)
   await page.keyboard.press('Shift+Tab')
-  assert.equal(await page.evaluate(() => document.activeElement === document.querySelector('.playfield')), true)
+  assert.equal(await page.evaluate(() => document.activeElement !== document.querySelector('.playfield')), true)
   await checkGameTabCycle(page)
   await page.keyboard.press('Escape')
   await page.getByRole('dialog', { name: 'Paused' }).waitFor()
