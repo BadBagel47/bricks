@@ -504,7 +504,7 @@ Use NES-inspired line-clear scores:
 
 Multiply by the current level plus one.
 
-Implement documented classic-inspired Soft Drop scoring where appropriate.
+Soft Drop and Hard Drop award no points. Only line clears award points; do not reward manual falling in a way that can be repeated for score.
 
 Hard Drop must not provide an unfair score bonus simply because a player uses that personal preference.
 

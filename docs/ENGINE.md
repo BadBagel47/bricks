@@ -43,7 +43,7 @@ All complete frames are processed, including multiple locks within one update; e
 | 19–28 | 2 |
 | 29+ | 1 |
 
-Successful automatic and Soft Drop movement reset the gravity-frame counter. Horizontal movement and rotation do not reset it. The input layer can repeat Soft Drop actions; each successful action awards one point, each blocked action awards zero. This is a simple documented classic-inspired rule, not an emulation of NES input-scoring quirks. Hard Drop has no distance bonus. Gravity itself awards no points.
+Successful automatic and Soft Drop movement reset the gravity-frame counter. Horizontal movement and rotation do not reset it. Soft Drop awards no points. Hard Drop has no distance bonus, and gravity itself awards no points.
 
 ## Scores and progression
 

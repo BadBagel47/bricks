@@ -59,12 +59,12 @@ function lockActive(state: GameState, events: GameEvent[]): GameState {
   return spawnNext({ ...state, board: cleared.board, score: state.score + points, lines, level, holdUsed: false }, events)
 }
 
-function fall(state: GameState, softDrop: boolean, events: GameEvent[]): GameState {
+function fall(state: GameState, events: GameEvent[]): GameState {
   if (!state.active) return state
   const active = { ...state.active, y: state.active.y + 1 }
   if (collides(state.board, active)) return lockActive(state, events)
   events.push({ type: 'moved', dx: 0, dy: 1 })
-  return { ...state, active, gravityFrames: 0, score: state.score + (softDrop ? 1 : 0) }
+  return { ...state, active, gravityFrames: 0 }
 }
 
 export function dispatch(state: GameState, action: GameAction): Transition {
@@ -95,7 +95,7 @@ export function dispatch(state: GameState, action: GameAction): Transition {
       return { state: { ...state, active }, events: [{ type: 'rotated', direction }] }
     }
     case 'softDrop':
-      return { state: fall(state, true, events), events }
+      return { state: fall(state, events), events }
     case 'hardDrop': {
       if (!state.hardDropEnabled) return { state, events }
       let active = state.active
@@ -127,7 +127,7 @@ export function advanceFrames(state: GameState, frames: number): Transition {
   for (let frame = 0; frame < frames && current.status === 'playing'; frame++) {
     const gravityFrames = current.gravityFrames + 1
     current = gravityFrames >= framesPerFall(current.level)
-      ? fall(current, false, events)
+      ? fall(current, events)
       : { ...current, gravityFrames }
   }
   return { state: current, events }

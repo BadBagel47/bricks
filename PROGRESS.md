@@ -10,7 +10,7 @@
 - Owner's copy review: retained “Make room for one more.”; removed decorative subheadings, greetings, slogans, menu descriptions and footers.
 - Standalone immutable TypeScript engine: 10 × 20 board, all seven pieces, anchored rotations without kicks, collision, movement, spawning and locking.
 - Fixed 60 Hz gravity with fractional elapsed-time accumulation and single-player pause/resume.
-- Soft Drop (one point per successful cell) and optional personal Hard Drop (default ON, no distance points).
+- Soft Drop and optional personal Hard Drop (default ON) award no points; manual falling cannot be repeated to farm score.
 - One- through four-row clears, classic-inspired scores, starting levels 0–19 and documented transition thresholds/gravity through level 29+.
 - Optional Hold (default OFF), once per active piece; preview consumption, swap/reset and blocked-spawn Game Over.
 - Seeded xorshift32 piece stream with a single repeat/sentinel reroll, serializable version-1 game state and transition events for later UI/audio integration.

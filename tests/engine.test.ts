@@ -222,18 +222,18 @@ test('60 Hz, 120 Hz, irregular frames and batched elapsed time agree across mult
   }
 })
 
-test('soft drop scores one per successful cell and resets the gravity interval', () => {
+test('soft drop moves one cell without scoring and resets the gravity interval', () => {
   const initial = createScenario({ seed: 47, active: spawnPiece('O') })
   let state = advanceFrames(initial, 47).state
   state = dispatch(state, 'softDrop').state
   assert.equal(state.active?.y, 1)
-  assert.equal(state.score, 1)
+  assert.equal(state.score, 0)
   assert.equal(state.gravityFrames, 0)
   state = advanceFrames(state, 1).state
   assert.equal(state.active?.y, 1)
 })
 
-test('blocked soft drop locks without awarding a drop point', () => {
+test('blocked soft drop locks without awarding points', () => {
   const game = createScenario({ seed: 47, active: { ...spawnPiece('O'), y: 18 } })
   const result = dispatch(game, 'softDrop')
   assert.equal(countCells(result.state), 4)
