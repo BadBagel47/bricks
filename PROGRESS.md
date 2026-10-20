@@ -2,7 +2,7 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.2 — Rooms and invitation links
-- **Status:** Implemented; full emulator/CI verification in progress. Live Firebase configuration is still missing.
+- **Status:** Implemented and verified in emulator CI; awaiting live Firebase configuration and owner review.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Completed
@@ -71,10 +71,11 @@
 - `npm run lint`: passed.
 - `npm run test:browser`: 15 passed, 0 failed, 0 skipped in Chromium against the production build. Covers full run/results/rename/replay, keyboard focus navigation, saved settings, touch events, simulated gamepad lifecycle, real Web Audio initialization/muting, oscillator shutdown and Game Over menu exit, frame stalls and five viewports with largest touch controls.
 - Phase 2.5 checks: `npm run build` and `npm run lint` passed. `npm run test:browser`: 15 passed, 0 failed, 0 skipped, including mobile pause/resume and complete playfield/largest touch-control fit at 320 × 667, 390 × 844, 844 × 390, and 800 × 600.
-- Local `npm run test:firebase` still cannot start: the official database-emulator JAR download is blocked by the HTTP proxy (403 for `storage.googleapis.com`), even though the runtime now lists that host as allowed. No local database test is claimed as passed. The 3.1 suite passed in CI; the new 3.2 suite is pending.
+- Local `npm run test:firebase` still cannot start: the official database-emulator JAR download is blocked by the HTTP proxy (403 for `storage.googleapis.com`), even though the runtime now lists that host as allowed. No local database test is claimed as passed. The complete 3.2 suite passed in CI instead.
 - `npm run test:firebase:auth`: 2 passed, 1 explicitly skipped. Chromium verified unconfigured invite onboarding, two distinct anonymous identities, deduplicated sign-in and identity persistence after reload; the database ownership check was skipped by this partial command.
 - Reinstalled successfully with `npm ci --cache /tmp/bricks-npm-cache`. The environment draft also saves reproducible installation/startup instructions. It does not configure a real Firebase project.
 - GitHub Git read/push access was restored. The complete workflow passed for `522f4a9`, including `npm run test:firebase`, the unit/browser suites, lint, build and Pages deployment: https://github.com/BadBagel47/bricks/actions/runs/39409758196 . CI results are distinct from the blocked local database-emulator startup and from live Firebase deployment.
+- Milestone 3.2: full CI and Pages deployment passed for `38d492d`: https://github.com/BadBagel47/bricks/actions/runs/39471615039 . This includes the actual room UI in separate browser sessions and the expanded concurrency/permission suite. Firebase's unsupported name regex was replaced with validated string operations before this successful run.
 
 ## GitHub Pages
 - Owner approved GitHub Pages as temporary preview hosting and enabled it for this repository.
@@ -92,7 +93,8 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Finish 3.2 CI verification and review the room flow. Next is 3.3: lobby and host roles. Recommend GPT-6.1 Sol Medium for host authorization, transfer and presence work; use Luna Medium for later UI-only refinements.
+- Connect a real Spark project's public Web App configuration, enable Anonymous Auth, deploy the reviewed database rules, and verify the published room flow with the owner. The code and emulator CI are ready; the live room service is not configured.
+- After the 3.2 review, next is 3.3: lobby and host roles. Recommend GPT-6.1 Sol Medium for host authorization, transfer and presence work; use Luna Medium for later UI-only refinements.
 - A real project's public Web App configuration is needed to enable the published room flow. Configure Anonymous Auth and Realtime Database and deploy the reviewed rules on Spark; do not infer live deployment from emulator results.
 - Stop at the 3.2 review checkpoint before implementing 3.3.
 
