@@ -1,8 +1,8 @@
 # Bricks progress
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
-- **Milestone:** 3.1 — Firebase foundation and security architecture
-- **Status:** Implemented and verified in CI; awaiting owner review. Local database-emulator download remains blocked.
+- **Milestone:** 3.2 — Rooms and invitation links
+- **Status:** Implemented; full emulator/CI verification in progress. Live Firebase configuration is still missing.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Completed
@@ -56,18 +56,23 @@
 - Improved the readability of mobile gameplay instructions, swipe guidance, controller status and game-stat labels.
 - Added a mobile/tablet Pause button that opens the pause dialog while staying out of the normal Tab order.
 - Added an isolated Firebase client with persisted anonymous identity, concurrent sign-in deduplication, strict emulator/production configuration separation and player-safe errors. The single-player app initializes no Firebase services.
-- Added immutable, identity-bound room-code reservation rules. All room/session/presence paths remain denied pending their feature milestones.
+- Added immutable, identity-bound room-code reservation rules. Sessions and presence remain denied pending their feature milestones.
 - Added local Auth/Realtime Database emulator scripts and real permission, concurrent reservation and two-browser anonymous-authentication tests. Their CI gate is active and passed before Pages publication.
 - Documented the remaining room/session data model, transactions, host ownership, state transitions, synchronization, recovery and Spark limitations in `docs/MULTIPLAYER.md`.
+- Added a lazily loaded 2 Players screen with Host Game, Join Game, original-code reopening and bounded room-code validation.
+- Added atomic two-player membership with complete host/owner/epoch invariants, guest leave, host close and owner-only reopening. Code changes reserve a target and close the original only while empty.
+- Invitation URLs retain the actual origin and path, survive username onboarding and reload, and remain in the address bar. Copy actions include exact-text fallback when clipboard permission is denied.
+- Added readable missing/closed/full/invalid/expired room errors and safe unavailable status when no Web App configuration exists. Pages build wiring accepts the public Web App fields through repository Actions variables.
+- Added concurrent guest-claim and malicious-payload rule tests plus actual UI tests for host, invited guest, third-player rejection, reload, close/reopen, clipboard denial and a 320 px layout.
 
 ## Validation
-- `npm test`: 94 passed, 0 failed, 0 skipped. Includes Firebase configuration isolation and safe error messages in addition to the engine/input/audio/persistence checks.
+- `npm test`: 97 passed, 0 failed, 0 skipped. Includes room-code normalization, invitation paths, bounded room snapshots and guest claims as well as the previous suites.
 - `npm run build`: passed (TypeScript and Vite).
 - `npm run lint`: passed.
 - `npm run test:browser`: 15 passed, 0 failed, 0 skipped in Chromium against the production build. Covers full run/results/rename/replay, keyboard focus navigation, saved settings, touch events, simulated gamepad lifecycle, real Web Audio initialization/muting, oscillator shutdown and Game Over menu exit, frame stalls and five viewports with largest touch controls.
 - Phase 2.5 checks: `npm run build` and `npm run lint` passed. `npm run test:browser`: 15 passed, 0 failed, 0 skipped, including mobile pause/resume and complete playfield/largest touch-control fit at 320 × 667, 390 × 844, 844 × 390, and 800 × 600.
-- Local `npm run test:firebase` still cannot start: the official database-emulator JAR download is blocked by the environment's HTTP proxy (403 for `storage.googleapis.com`). The runtime allowlist remains unchanged despite the saved draft. Full database rules verification was performed in CI instead; no local database test is claimed as passed.
-- `npm run test:firebase:auth`: 1 passed, 1 explicitly skipped. Chromium verified two distinct anonymous identities, deduplicated sign-in and identity persistence after reload; the database ownership check was skipped because this partial command does not run the database emulator.
+- Local `npm run test:firebase` still cannot start: the official database-emulator JAR download is blocked by the HTTP proxy (403 for `storage.googleapis.com`), even though the runtime now lists that host as allowed. No local database test is claimed as passed. The 3.1 suite passed in CI; the new 3.2 suite is pending.
+- `npm run test:firebase:auth`: 2 passed, 1 explicitly skipped. Chromium verified unconfigured invite onboarding, two distinct anonymous identities, deduplicated sign-in and identity persistence after reload; the database ownership check was skipped by this partial command.
 - Reinstalled successfully with `npm ci --cache /tmp/bricks-npm-cache`. The environment draft also saves reproducible installation/startup instructions. It does not configure a real Firebase project.
 - GitHub Git read/push access was restored. The complete workflow passed for `522f4a9`, including `npm run test:firebase`, the unit/browser suites, lint, build and Pages deployment: https://github.com/BadBagel47/bricks/actions/runs/39409758196 . CI results are distinct from the blocked local database-emulator startup and from live Firebase deployment.
 
@@ -82,13 +87,14 @@
 - Chromium desktop/mobile viewport, touch-event and simulated gamepad tests passed. Physical devices and subjective audio quality remain unverified here.
 - Touch and gamepad behavior should be checked on the owner's physical devices.
 - Live Firebase is not configured or deployed. No Firebase project, public Web App configuration or Google identity is attached to this environment.
-- Room flows, snapshot validation for untrusted data, Battle and playable multiplayer are not implemented. The security rules intentionally deny those future paths.
+- Room flows are implemented but cannot connect on the published site until a real project is configured and the reviewed rules are deployed. There is no match start or playable multiplayer yet.
+- Presence/disconnect cleanup, host transfer, gameplay snapshot validation, Battle and recovery remain future milestones. Rooms can retain an offline guest slot until that identity leaves or the owner closes the room.
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Review the completed 3.1 foundation. Next is 3.2: room creation, joining and invite links with atomic participant-slot claiming. Recommend GPT-6.1 Sol Medium for its transactions and authorization.
-- For full local multiplayer development, apply/publish the saved `storage.googleapis.com` network permission and rerun `npm run test:firebase`; GitHub access and CI verification are already restored.
-- A real project must be selected/configured before production Firebase can be deployed or verified. Stay on the Spark plan. Stop at the 3.1 review checkpoint before implementing 3.2.
+- Finish 3.2 CI verification and review the room flow. Next is 3.3: lobby and host roles. Recommend GPT-6.1 Sol Medium for host authorization, transfer and presence work; use Luna Medium for later UI-only refinements.
+- A real project's public Web App configuration is needed to enable the published room flow. Configure Anonymous Auth and Realtime Database and deploy the reviewed rules on Spark; do not infer live deployment from emulator results.
+- Stop at the 3.2 review checkpoint before implementing 3.3.
 
 ## Git checkpoints
 - `fea6aa4`: initial foundation and Pages deployment.

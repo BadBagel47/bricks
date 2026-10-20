@@ -12,7 +12,7 @@ const args = [
   testMode ? 'emulators:exec' : 'emulators:start',
   '--only', authOnly ? 'auth' : 'auth,database', '--project', 'demo-bricks', '--non-interactive',
 ]
-if (testMode) args.push(authOnly ? 'node --test tests/firebase.auth.mjs' : 'node --test --test-concurrency=1 tests/firebase.*.mjs')
+if (testMode) args.push(authOnly ? 'node --test --test-timeout=60000 tests/firebase.auth.mjs' : 'node --test --test-timeout=60000 --test-concurrency=1 tests/firebase.*.mjs')
 const child = spawn(process.execPath, args, {
   cwd: root, stdio: 'inherit',
   env: {

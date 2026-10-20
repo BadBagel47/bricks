@@ -34,6 +34,14 @@
 }
 
 .touch-button.touch-word { font-size: 11px; letter-spacing: 0; }
+.room-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+.room-actions .back-button { min-height: 48px; }
+.room-players { display: grid; gap: 18px; margin: 28px 0; }
+.room-players dt { color: var(--muted); font-size: 14px; }
+.room-players dd { margin: 4px 0 0; font-size: 18px; overflow-wrap: anywhere; }
+.invite-field { display: grid; gap: 8px; font-size: 14px; }
+.invite-field input { width: 100%; min-width: 0; min-height: 48px; padding: 10px; border: 1px solid #454c3f; border-radius: 6px; background: #20241e; color: #f5f2ec; font-size: 16px; }
+button:disabled { cursor: default; opacity: .5; }
 .mobile-pause-button { display: none; }
 
 /* Mobile readability and touch targets follow the interface size guidance. */

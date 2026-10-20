@@ -9,7 +9,9 @@ let browser
 const baseURL = 'http://127.0.0.1:4240'
 before(async () => {
   assert.ok(process.env.FIREBASE_AUTH_EMULATOR_HOST, 'Run with npm run test:firebase')
-  server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', '4240', '--strictPort'], { stdio: 'pipe' })
+  const env = { ...process.env, VITE_FIREBASE_USE_EMULATORS: 'false' }
+  for (const key of ['API_KEY', 'AUTH_DOMAIN', 'DATABASE_URL', 'PROJECT_ID', 'APP_ID']) env[`VITE_FIREBASE_${key}`] = ''
+  server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', '4240', '--strictPort'], { stdio: 'pipe', env })
   let startup = ''
   server.stderr.on('data', chunk => { startup += chunk })
   server.stdout.on('data', chunk => { startup += chunk })
@@ -27,6 +29,23 @@ before(async () => {
 after(async () => { await browser?.close(); server?.kill('SIGTERM') })
 
 const identify = page => page.evaluate(async () => (await import('/tests/fixtures/firebase-browser.ts')).identify())
+
+test('unconfigured multiplayer preserves an invite through onboarding and keeps single-player available', async () => {
+  const context = await browser.newContext()
+  try {
+    const page = await context.newPage()
+    await page.goto(`${baseURL}/?room=BRK724`)
+    await page.getByLabel('Player name', { exact: true }).fill('Invited Player')
+    await page.getByRole('button', { name: 'Continue', exact: true }).click()
+    await page.getByRole('heading', { name: '2 Players', exact: true }).waitFor()
+    await page.getByRole('status').filter({ hasText: 'Multiplayer is not connected yet.' }).waitFor()
+    assert.equal(await page.getByLabel('Room code', { exact: true }).inputValue(), 'BRK724')
+    assert.equal(await page.getByRole('button', { name: 'Host Game', exact: true }).isDisabled(), true)
+    await page.getByRole('button', { name: '← Back to menu', exact: true }).click()
+    assert.equal(new URL(page.url()).searchParams.has('room'), false)
+    assert.equal(await page.getByRole('button', { name: '1 Player', exact: true }).isVisible(), true)
+  } finally { await context.close() }
+})
 
 test('two browser sessions get distinct persistent anonymous identities', { timeout: 60000 }, async () => {
   const first = await browser.newContext()

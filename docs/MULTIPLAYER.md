@@ -1,10 +1,74 @@
-# Multiplayer foundation — milestone 3.1
+# Multiplayer foundation and rooms — milestones 3.1–3.2
 
 The owner approved Phase 3 after the single-player polish review. This milestone
 provides the Firebase boundary, anonymous identity, immutable code reservations,
 emulator tooling and security tests. Room creation/joining is milestone 3.2.
-There is no playable multiplayer UI yet. The single-player engine and app neither
-import nor initialize Firebase.
+Milestone 3.2 adds the room UI and transactions below. Matches cannot start yet.
+The single-player engine is independent from Firebase; the app loads the Firebase
+client only when entering a configured room flow.
+
+## Room flow implemented in 3.2
+
+The 2 Players menu offers Host Game, Join Game and Reopen Previous Room. Invitations
+use the current deployment origin and path, including `/bricks/` on Pages. The
+`room` query survives name onboarding and is normalized after a successful join.
+Copy Code and Copy Invite Link have independent feedback and an exact-text
+selection fallback when clipboard access is denied.
+
+Room data currently has this bounded shape:
+
+```text
+rooms/CODE
+  version: 1
+  ownerUid, hostUid                 # identical until host transfer is added in 3.3
+  epoch                            # starts at 1; increments on reopen
+  status: waiting | closed
+  createdAt
+  players/host: { uid, name }
+  players/guest?: { uid, name }
+```
+
+Creation requires an existing reservation owned by the authenticated creator.
+Room reads require an authenticated user who knows the code; they reveal only
+lobby metadata (names, identities, epoch and waiting/closed state). Listing rooms
+is denied. This limited pre-join read permits atomic join transactions and clear
+not-found/closed/full errors. Sessions and presence remain denied; there is no
+gameplay data at this path.
+
+Joining never creates a room. Root transactions and complete old-to-new rules
+permit one distinct guest and protect the host, owner, timestamp and epoch. Two
+concurrent joins cannot both claim the guest slot. An already joined UID can
+return after reload. A guest can release only their own slot. The owner closes
+the room on explicit exit and may reopen the same code with an incremented epoch
+and no guest. Old-epoch leave requests cannot close a newly reopened room.
+
+A host may change code only while the room has no guest. The target code is
+reserved first, then a transaction closes the original room only if it is still
+empty, and finally opens the owned target. If a guest wins that race, no target
+room opens. If a later step fails, reservations remain owned and rooms can be
+reopened; this multi-step operation is not a cross-room atomic rename. Original
+links show Closed until their owner reopens that code.
+
+The previous-room localStorage value is a hint, never an ownership credential.
+Another UID cannot reopen it even if they copy that value. The room listener
+rejects invalid snapshots or changed epochs. Mutation preflight waits up to eight
+seconds for a database connection before queueing a transaction. A write already
+in flight can still complete after a temporary disconnection; it is not reported
+as cancelled. Presence, disconnect cleanup, transferable host roles and active-tab
+leases belong to later milestones. Offline guests can temporarily occupy a slot
+until they return/leave or the owner closes the room.
+
+The room screen shows unavailable status and disables Host/Join when Web App
+configuration is missing. GitHub Pages reads the five `VITE_FIREBASE_*` fields
+from repository Actions **Variables** during build. Set those public fields only
+after configuring the actual Spark project and deploying the reviewed rules.
+No production project or rules deployment is inferred from emulator tests.
+
+`tests/firebase.rooms.mjs` exercises the actual UI in distinct browser contexts:
+host and custom code, clipboard success/failure, invited guest onboarding,
+reload/rejoin, third-player rejection, invalid/missing/closed codes, leaving,
+reopening and failed ownership theft. The rules suite separately checks concurrent
+guest claims and malicious payloads. The room UI is also checked at 320 px width.
 
 ## Local development
 
@@ -24,9 +88,9 @@ CLI state are kept in ignored `.firebase/`, and no Google login is needed.
 Data is ephemeral. The local emulator has admin endpoints and is bound to
 loopback only; never expose it publicly.
 
-For later multiplayer UI work, copy `.env.emulators.example` to `.env.local` and
-run `npm run dev` separately. The current single-player UI does not consume
-Firebase configuration. Emulator and real project settings cannot be combined.
+For local multiplayer UI work, copy `.env.emulators.example` to `.env.local` and
+run `npm run dev` separately. Single-player does not initialize Firebase.
+Emulator and real project settings cannot be combined.
 
 ```sh
 npm test
@@ -68,9 +132,9 @@ skips the database ownership check; it does not replace the full rules suite.
    emulator results. Until that happens, production Firebase is unverified.
 
 There is deliberately no default production project in `.firebaserc`, no Hosting
-deployment and no automatic rules deployment. Firebase Hosting is Phase 4. Future
-GitHub Pages multiplayer builds will need the public Web App fields supplied as
-build variables; that wiring belongs with the first working room flow.
+deployment and no automatic rules deployment. Firebase Hosting is Phase 4.
+GitHub Pages builds read the public Web App fields from repository Actions
+variables, as wired in milestone 3.2.
 
 For the cloud environment, the local emulator download requires
 `storage.googleapis.com`. Live project work will additionally require the exact
@@ -86,7 +150,7 @@ unavailable without affecting single-player. Invalid or mixed configuration fail
 closed. The initial production configuration accepts the standard
 `PROJECT_ID.firebaseapp.com` auth domain and HTTPS Firebase database URLs.
 
-`firebase-client.ts` is initialized only when a future multiplayer flow asks for
+`firebase-client.ts` is initialized only when the multiplayer room flow asks for
 it. `getPlayer()` waits for persisted authentication before signing in anonymously,
 deduplicates concurrent requests and permits retry after failure. The browser SDK
 persists the anonymous identity. Changing config requires a page reload.
@@ -107,18 +171,18 @@ roomReservations/CODE
   createdAt: server timestamp
 ```
 
-Codes use 6–8 characters from `A–H`, `J–N`, `P–Z`, `2–9`. A future UI will
-normalize case before access. An authenticated player may inspect one known code,
+Codes use 6–8 characters from `A–H`, `J–N`, `P–Z`, `2–9`. The UI normalizes
+case before access. An authenticated player may inspect one known code,
 including its owner's UID, but cannot list reservations. There is no secret in
 reservation metadata. Use a transaction for allocation; knowing a code never
 permits claiming an existing reservation. All fields are immutable and no client,
 including the owner, may delete it. Unknown fields, wrong types, timestamps not
 equal to server time and attempts to reserve for another UID are rejected.
 
-`rooms`, `sessions`, presence and all other paths are denied in this milestone.
-Their rules must be implemented and tested together with their features. Existing
-reservations are retained if creating a room fails, allowing only the original
-owner to retry. Closing a room will not free its reservation.
+The original 3.1 rules denied all other paths. Milestone 3.2 adds the narrowly
+scoped room transitions described above; sessions, presence and all unknown paths
+remain denied. Existing reservations are retained if creating a room fails,
+allowing only the original owner to retry. Closing a room does not free its code.
 
 ## Planned room and session contract
 

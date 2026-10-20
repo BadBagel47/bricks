@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { CSSProperties, FormEvent, PointerEvent as ReactPointerEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { advanceGame, createGame, dispatch, pieceCells } from './engine/index.ts'
@@ -22,7 +22,8 @@ const GAMEPAD_CONTROLS_KEY = 'bricks.gamepad-controls.v1'
 const PERSONAL_KEY = 'bricks.personal.v1'
 const SINGLE_PLAYER_KEY = 'bricks.single-player.v1'
 const HIGHSCORES_KEY = 'bricks.highscores.v1'
-type View = 'welcome' | 'menu' | 'settings' | 'highScores' | 'game'
+type View = 'welcome' | 'menu' | 'settings' | 'highScores' | 'game' | 'multiplayer'
+const MultiplayerScreen = lazy(() => import('./multiplayer/MultiplayerScreen.tsx'))
 
 function readControls() {
   try { return parseBindings(localStorage.getItem(CONTROLS_KEY)) } catch { return parseBindings(null) }
@@ -59,7 +60,7 @@ function readUsername() {
 function App() {
   const [username, setUsername] = useState(readUsername)
   const [draft, setDraft] = useState(username)
-  const [view, setView] = useState<View>(username ? 'menu' : 'welcome')
+  const [view, setView] = useState<View>(() => username ? (new URL(location.href).searchParams.has('room') ? 'multiplayer' : 'menu') : 'welcome')
   const [notice, setNotice] = useState('')
   const [gameAnnouncement, setGameAnnouncement] = useState('')
   const [bindings, setBindings] = useState<KeyboardBindings>(readControls)
@@ -132,7 +133,7 @@ function App() {
     setGamepadCapture(null)
     setUsername(cleanName)
     usernameRef.current = cleanName
-    setView('menu')
+    setView(view === 'welcome' && new URL(location.href).searchParams.has('room') ? 'multiplayer' : 'menu')
     setNotice(saveFailed ? 'Your browser could not save this name. You can still continue.' : '')
   }
 
@@ -404,6 +405,8 @@ function App() {
     </section>
   </main>
 
+  if (view === 'multiplayer') return <Suspense fallback={<main className="shell"><p role="status">Loading…</p></main>}><MultiplayerScreen username={username} branding={<Brand compact />} onBack={() => setView('menu')} /></Suspense>
+
   if (view === 'settings') return <main className="shell">
     <header className="topbar"><Brand compact /><button className="back-button" onClick={() => { setCapture(null); setGamepadCapture(null); setView('menu') }}>← Back to menu</button></header>
     <section className="settings-card">
@@ -483,7 +486,7 @@ function App() {
       <div className="hero-copy"><h1 tabIndex={-1}>Make room<br />for <span>one more.</span></h1></div>
       <div className="menu-actions" aria-label="Main menu">
         <button className="mode-card single-player" onClick={beginGame}><span className="mode-copy"><strong>1 Player</strong></span></button>
-        <div className="mode-card disabled-card" aria-disabled="true"><span className="mode-copy"><strong>2 Players</strong></span><span className="coming-soon">Coming soon</span></div>
+        <button className="mode-card" onClick={() => setView('multiplayer')}><span className="mode-copy"><strong>2 Players</strong></span></button>
         <button className="secondary-card" onClick={() => setView('highScores')}>High Scores</button>
         {notice && <p className="notice menu-notice" role="status">{notice}</p>}
       </div>
