@@ -38,6 +38,13 @@ jobs:
           echo '```text' >> "$GITHUB_STEP_SUMMARY"
           tail -n 160 firebase-tests.log >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
+          if [ "$result" -ne 0 ]; then
+            python3 - <<'PY'
+          import pathlib, re
+          text = re.sub(r'\x1b\[[0-9;]*m', '', pathlib.Path('firebase-tests.log').read_text())[-12000:]
+          print('::error title=Firebase test details::' + text.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
+          PY
+          fi
           exit "$result"
       - run: npm run build
         env:
