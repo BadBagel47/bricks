@@ -52,7 +52,7 @@
               ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 128"
             },
             "name": {
-              ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 16 && newData.val().matches(/^\\S.*\\S$/) && newData.val().matches(/^[^\\r\\n\\t]+$/)"
+              ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 16 && !newData.val().beginsWith(' ') && !newData.val().endsWith(' ') && !newData.val().contains('\\r') && !newData.val().contains('\\n') && !newData.val().contains('\\t')"
             },
             "$other": {
               ".validate": false
@@ -64,7 +64,7 @@
               ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 128"
             },
             "name": {
-              ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 16 && newData.val().matches(/^\\S.*\\S$/) && newData.val().matches(/^[^\\r\\n\\t]+$/)"
+              ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 16 && !newData.val().beginsWith(' ') && !newData.val().endsWith(' ') && !newData.val().contains('\\r') && !newData.val().contains('\\n') && !newData.val().contains('\\t')"
             },
             "$other": {
               ".validate": false
