@@ -100,7 +100,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
     <section className="settings-card multiplayer-card" aria-busy={busy}>
       <h1 ref={heading} tabIndex={-1}>{joined ? `Room ${joined.code}` : '2 Players'}</h1>
       {!available && <p className="notice" role="status">Multiplayer is not connected yet.</p>}
-      {error && <div role="alert"><p className="notice">{error.message}</p><div className="room-actions">
+      {error && <div role="alert"><p className="notice">{error.message}</p>{error.firebaseCode && <p className="notice">Firebase error: {error.firebaseCode}</p>}<div className="room-actions">
         {retry.current && <button className="back-button" disabled={busy} onClick={() => void run(retry.current!)}>Retry</button>}
         {!joined && <button className="back-button" onClick={() => { setError(null); input.current?.focus() }}>Edit code</button>}
       </div></div>}

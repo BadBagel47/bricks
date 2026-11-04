@@ -16,20 +16,23 @@ const MESSAGES: Record<MultiplayerErrorCode, string> = {
 
 export class MultiplayerError extends Error {
   readonly code: MultiplayerErrorCode
+  readonly firebaseCode?: string
 
-  constructor(code: MultiplayerErrorCode) {
+  constructor(code: MultiplayerErrorCode, firebaseCode?: string) {
     super(MESSAGES[code])
     this.name = 'MultiplayerError'
     this.code = code
+    this.firebaseCode = firebaseCode
   }
 }
 
 export function playerFacingError(error: unknown): MultiplayerError {
   if (error instanceof MultiplayerError) return error
   const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined
+  const firebaseCode = typeof code === 'string' && /^[A-Za-z0-9_/-]{1,80}$/.test(code) ? code : undefined
   if (code === 'auth/network-request-failed' || code === 'NETWORK_ERROR' || code === 'DISCONNECTED') {
-    return new MultiplayerError('connection')
+    return new MultiplayerError('connection', firebaseCode)
   }
-  if (code === 'PERMISSION_DENIED' || code === 'auth/unauthorized-domain') return new MultiplayerError('permission')
-  return new MultiplayerError('unavailable')
+  if (code === 'PERMISSION_DENIED' || code === 'auth/unauthorized-domain') return new MultiplayerError('permission', firebaseCode)
+  return new MultiplayerError('unavailable', firebaseCode)
 }
