@@ -76,6 +76,7 @@
 - Reinstalled successfully with `npm ci --cache /tmp/bricks-npm-cache`. The environment draft also saves reproducible installation/startup instructions. It does not configure a real Firebase project.
 - GitHub Git read/push access was restored. The complete workflow passed for `522f4a9`, including `npm run test:firebase`, the unit/browser suites, lint, build and Pages deployment: https://github.com/BadBagel47/bricks/actions/runs/39409758196 . CI results are distinct from the blocked local database-emulator startup and from live Firebase deployment.
 - Milestone 3.2: full CI and Pages deployment passed for `38d492d`: https://github.com/BadBagel47/bricks/actions/runs/39471615039 . This includes the actual room UI in separate browser sessions and the expanded concurrency/permission suite. Firebase's unsupported name regex was replaced with validated string operations before this successful run.
+- Owner reports the live Firebase Realtime Database rules are published, Anonymous Auth is enabled, and all five public Firebase Web App values are configured as GitHub Actions repository variables. A Pages rebuild is needed to put those values into the hosted client bundle; live room creation still needs verification after deployment.
 
 ## GitHub Pages
 - Owner approved GitHub Pages as temporary preview hosting and enabled it for this repository.
@@ -87,15 +88,15 @@
 - Engine mechanics are NES-inspired and documented, not cycle-accurate NES emulation.
 - Chromium desktop/mobile viewport, touch-event and simulated gamepad tests passed. Physical devices and subjective audio quality remain unverified here.
 - Touch and gamepad behavior should be checked on the owner's physical devices.
-- Live Firebase is not configured or deployed. No Firebase project, public Web App configuration or Google identity is attached to this environment.
-- Room flows are implemented but cannot connect on the published site until a real project is configured and the reviewed rules are deployed. There is no match start or playable multiplayer yet.
+- Live Firebase setup is reported complete by the owner, but the configured site rebuild and real browser room-flow verification remain pending.
+- Room flows are implemented. There is no match start or playable multiplayer yet.
 - Presence/disconnect cleanup, host transfer, gameplay snapshot validation, Battle and recovery remain future milestones. Rooms can retain an offline guest slot until that identity leaves or the owner closes the room.
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Connect a real Spark project's public Web App configuration, enable Anonymous Auth, deploy the reviewed database rules, and verify the published room flow with the owner. The code and emulator CI are ready; the live room service is not configured.
+- Rebuild and verify the published room flow against the owner's Spark project; the owner reports Anonymous Auth, database rules and GitHub Actions variables are configured.
 - After the 3.2 review, next is 3.3: lobby and host roles. Recommend GPT-6.1 Sol Medium for host authorization, transfer and presence work; use Luna Medium for later UI-only refinements.
-- A real project's public Web App configuration is needed to enable the published room flow. Configure Anonymous Auth and Realtime Database and deploy the reviewed rules on Spark; do not infer live deployment from emulator results.
+- Do not infer live room functionality from emulator results; verify the deployed build against the configured Spark project.
 - Stop at the 3.2 review checkpoint before implementing 3.3.
 
 ## Git checkpoints
