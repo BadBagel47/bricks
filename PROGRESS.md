@@ -2,10 +2,12 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.3 — Lobby, host roles and Spark quota review
-- **Status:** Implemented and verified in branch CI; production rules and live 3.3 activation pending. Milestone 3.2 live creation/joining confirmed by the owner after correcting the API key.
+- **Status:** Implemented and verified in branch CI. Owner reports 3.3 rules published; Pages activation in progress. Milestone 3.2 live creation/joining confirmed by the owner after correcting the API key.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.3
+- Owner confirmed the new database rules are published; activating the checked 3.3 client on main. Live two-browser lobby review remains pending.
+- Access review: no Google outbound identity is attached, and current tools cannot provision one. Recommended future deployment is a dedicated GitHub Actions identity using Google Workload Identity Federation; setup and limitations are documented in `docs/FIREBASE_ACCESS.md`. No credentials, IAM roles or billing settings were changed.
 - Owner approved lobby/host-role work with explicit free-tier quota optimization.
 - Added atomic host transfer, automatic handover on host leave, and last-player close; immutable reservation ownership survives role changes.
 - Added participant/epoch-scoped connection status via onDisconnect with no application heartbeats, bounded per-connection presence payloads and listener/socket cleanup on lobby exit or failed entry.
