@@ -30,6 +30,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
   const service = useRef<Promise<Rooms> | null>(null)
   const alive = useRef(true)
   const operation = useRef(0)
+  const activeRequest = useRef(false)
   const retry = useRef<(() => Promise<JoinedRoom | void>) | null>(null)
   const input = useRef<HTMLInputElement>(null)
   const heading = useRef<HTMLHeadingElement>(null)
@@ -47,6 +48,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
 
   async function run(task: () => Promise<JoinedRoom | void>) {
     const id = ++operation.current
+    activeRequest.current = true
     retry.current = task
     setBusy(true); setError(null); setNotice(''); setCopyFallback(null)
     try {
@@ -62,7 +64,12 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
         if (!joined) void service.current?.then(repository => repository.suspend())
       }
     }
-    finally { if (alive.current && id === operation.current) setBusy(false) }
+    finally {
+      if (id === operation.current) {
+        activeRequest.current = false
+        if (alive.current) setBusy(false)
+      }
+    }
   }
 
   useEffect(() => {
@@ -92,11 +99,17 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
     }).catch(reason => { if (!cancelled) setError(playerFacingError(reason)) })
     return () => {
       cancelled = true; stops.forEach(stop => stop())
-      void service.current?.then(repository => { if (!alive.current || !currentRoom.current) repository.suspend() })
     }
     // Watch the room epoch, not every incoming participant update.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [joined?.code, joined?.room.epoch])
+
+  useEffect(() => {
+    if (joined || busy || activeRequest.current) return
+    void service.current?.then(repository => {
+      if (!currentRoom.current && !activeRequest.current) repository.suspend()
+    })
+  }, [joined?.code, busy])
 
   async function back() {
     if (joined && connected !== false) {
