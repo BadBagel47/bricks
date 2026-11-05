@@ -170,3 +170,30 @@ test('lobby presence, explicit host transfer, automatic handover on leave and so
     assert.equal(socketClosed, true, 'leaving the room closes its database socket')
   } finally { for (const context of contexts) await context.close() }
 })
+
+test('closing a guest tab frees its slot after the grace period for another identity', { timeout: 60000 }, async () => {
+  const contexts = await Promise.all([browser.newContext(), browser.newContext(), browser.newContext()])
+  try {
+    const [host, guest, replacement] = await Promise.all(contexts.map(context => context.newPage()))
+    for (const page of [host, guest, replacement]) page.setDefaultTimeout(12000)
+    await host.goto(baseURL)
+    await name(host, 'Remaining Host')
+    await host.getByRole('button', { name: '2 Players', exact: true }).click()
+    await host.getByRole('button', { name: 'Host Game', exact: true }).click()
+    await roomHeading(host, /^Room /)
+    const invite = await host.getByLabel('Invite link', { exact: true }).inputValue()
+    await guest.goto(invite)
+    await name(guest, 'Departing Guest')
+    await roomHeading(guest, /^Room /)
+    await host.locator('.room-players > div').nth(1).getByText('Connected', { exact: true }).waitFor()
+    await replacement.goto(invite)
+    await name(replacement, 'Replacement')
+    await replacement.getByRole('alert').filter({ hasText: 'This room already has two players.' }).waitFor()
+    await guest.close()
+    await host.getByRole('status').filter({ hasText: 'Opponent disconnected.' }).waitFor()
+    await host.getByText('Waiting for opponent…', { exact: true }).waitFor({ timeout: 40000 })
+    await replacement.getByRole('button', { name: 'Retry', exact: true }).click()
+    await roomHeading(replacement, /^Room /)
+    await host.getByText('Replacement', { exact: true }).waitFor()
+  } finally { for (const context of contexts) await context.close() }
+})

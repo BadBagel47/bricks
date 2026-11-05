@@ -113,6 +113,7 @@ test('guest writes cannot change the host, ownership, epoch or add a third slot'
   ]) await assertFails(set(ref(db('guest'), `rooms/${code}`), invalid))
   await assertSucceeds(set(ref(db('guest'), `rooms/${code}`), candidate))
   await assertFails(update(ref(db('third'), `rooms/${code}/players/guest`), { uid: 'third', name: 'Third' }))
+  await set(ref(db('guest'), `presence/${code}/1/guest/${'b'.repeat(32)}`), true)
   await assertFails(set(ref(db('host'), `rooms/${code}`), room))
   await assertSucceeds(remove(ref(db('guest'), `rooms/${code}/players/guest`)))
 })
@@ -181,4 +182,18 @@ test('presence is participant-only, epoch-scoped, bounded and cannot impersonate
   await assertSucceeds(set(ref(db('host'), `rooms/${code}`), { ...room, epoch: 2 }))
   await assertFails(get(ref(db('host'), `presence/${code}/1`)))
   await assertSucceeds(remove(ref(db('host'), path + connection)))
+})
+
+test('only the host can free an offline guest; any guest connection blocks cleanup', async () => {
+  const room = await ownedRoom()
+  const joined = { ...room, players: { ...room.players, guest: { uid: 'guest', name: 'Guest' } } }
+  await set(ref(db('guest'), `rooms/${code}`), joined)
+  const path = `presence/${code}/1/guest/${'c'.repeat(32)}`
+  await set(ref(db('guest'), path), true)
+  await assertFails(set(ref(db('host'), `rooms/${code}`), room))
+  await remove(ref(db('guest'), path))
+  await assertFails(set(ref(db('third'), `rooms/${code}`), room))
+  await assertSucceeds(set(ref(db('host'), `rooms/${code}`), room))
+  const replacement = { ...room, players: { ...room.players, guest: { uid: 'third', name: 'Third' } } }
+  await assertSucceeds(set(ref(db('third'), `rooms/${code}`), replacement))
 })

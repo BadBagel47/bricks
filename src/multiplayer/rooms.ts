@@ -149,6 +149,19 @@ export class Rooms {
     } catch (error) { throw playerFacingError(error) }
   }
 
+  async releaseDisconnectedGuest(joined: JoinedRoom, guestUid: string): Promise<void> {
+    try {
+      const uid = await this.identity()
+      if (uid !== joined.uid) throw new MultiplayerError('permission')
+      await this.transact(joined.code, room => {
+        if (room.hostUid !== uid) throw new MultiplayerError('permission')
+        if (room.players.guest?.uid !== guestUid) return room
+        // Server rules check absence across every connection belonging to the guest.
+        return { ...room, players: { host: room.players.host } }
+      }, joined.room.epoch)
+    } catch (error) { throw playerFacingError(error) }
+  }
+
   async transfer(joined: JoinedRoom): Promise<void> {
     try {
       const uid = await this.identity()

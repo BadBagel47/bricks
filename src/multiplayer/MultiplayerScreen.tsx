@@ -111,6 +111,23 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
     })
   }, [joined, busy])
 
+  const guestUid = joined?.room.players.guest?.uid
+  const guestOnline = guestUid ? presence[guestUid] === true : false
+  const localHost = Boolean(joined && joined.uid === joined.room.hostUid)
+  useEffect(() => {
+    if (!joined || !guestUid || !localHost || connected !== true || guestOnline) return
+    const timer = setTimeout(() => {
+      void rooms().then(repository => repository.releaseDisconnectedGuest(joined, guestUid)).catch(reason => {
+        // A guest can reconnect before the server evaluates the cleanup write.
+        const error = playerFacingError(reason)
+        if (alive.current && error.code !== 'permission') setError(error)
+      })
+    }, 30000)
+    return () => clearTimeout(timer)
+    // Preserve the grace period across unrelated room snapshot updates.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [joined?.code, joined?.room.epoch, guestUid, localHost, connected, guestOnline])
+
   async function back() {
     if (joined && connected !== false) {
       await run(async () => { await (await rooms()).leave(joined); setInvite(null); onBack() })
@@ -137,6 +154,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
       {copyFallback && <label className="invite-field">Copy text<input readOnly autoFocus value={copyFallback} onFocus={event => event.currentTarget.select()} /></label>}
       {busy && <p role="status">Connecting…</p>}
       {joined ? <>
+        {localHost && guestUid && !guestOnline && connected === true && <p role="status">Opponent disconnected. Waiting up to 30 seconds before freeing the slot.</p>}
         <dl className="room-players"><div><dt>Host</dt><dd><span>{joined.room.players.host.name}</span> · <span>{status(joined.room.players.host.uid)}</span></dd></div><div><dt>Opponent</dt><dd>{joined.room.players.guest ? <><span>{joined.room.players.guest.name}</span> · <span>{status(joined.room.players.guest.uid)}</span></> : 'Waiting for opponent…'}</dd></div></dl>
         {connected === false && <p className="notice" role="status">Unable to connect. Check your connection and try again.</p>}
         <div className="room-actions">
