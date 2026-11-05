@@ -6,6 +6,7 @@
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.4
+- Owner update 2026-11-06: remove the room-code editor entirely and generate four-character random codes. Preserve legacy room links and reservations; code allocation remains atomic with bounded retries. Local lint/build and 101 unit tests passed; staged rule/client CI pending on milestone-3.4 before owner rule publication.
 - Owner confirmed the new settings/approval rules published. Main commit `72da24e` passed full CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42097090846 .
 - Owner approved proceeding after the published 15-second guest-cleanup correction.
 - Implemented private host drafts, Apply/Cancel, revisioned Score Duel/Battle mode, level 00–19, Hold and optional guest approval. No-op publication does not write or invalidate approval.

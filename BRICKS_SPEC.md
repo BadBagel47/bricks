@@ -906,17 +906,13 @@ Do not add a redundant Penalty Lines toggle.
 
 Selecting Host Game generates a new room and new random code.
 
-Suggested code format:
+Owner update 2026-11-06:
 
-- Six to eight uppercase alphanumeric characters.
-- Avoid confusing characters where practical.
-- Case-insensitive entry.
-
-Allow the host to replace the generated code with a custom code.
-
-Validate format, availability, and ownership.
-
-Do not allow room-code changes after the opponent has joined.
+- Generate four uppercase alphanumeric characters for new rooms.
+- Avoid confusing characters: use `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`.
+- Entry is case-insensitive. Continue accepting existing longer codes and links.
+- Codes are generated automatically; there is no custom-code editor or code-change action.
+- A host transfer keeps the same room code and original reservation ownership.
 
 ## 17.2 Copy actions
 

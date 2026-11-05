@@ -71,12 +71,13 @@ return after reload. A guest can release only their own slot. The last host clos
 transfers the host role. The original owner may reopen a closed room with an
 incremented epoch and no guest. Old-epoch leave requests cannot close a newly reopened room.
 
-A host may change code only while the room has no guest. The target code is
-reserved first, then a transaction closes the original room only if it is still
-empty, and finally opens the owned target. If a guest wins that race, no target
-room opens. If a later step fails, reservations remain owned and rooms can be
-reopened; this multi-step operation is not a cross-room atomic rename. Original
-links show Closed until their owner reopens that code.
+Owner update 2026-11-06: new rooms use four random characters. Code editing has
+been removed from both the lobby UI and repository API. Older 6–8 character
+rooms/links remain accepted (input/rules allow 4–8); reopens keep the owned code.
+Host transfer moves only the host role. The code and its original ownership do
+not move or reset. Allocation still reserves atomically and retries collisions at
+most eight times. Four-character space has 32^4 = 1,048,576 possible codes; code
+knowledge is not a secret credential or a grant of host permissions.
 
 The previous-room localStorage value is a hint, never an ownership credential.
 Another UID cannot reopen it even if they copy that value. The room listener
@@ -94,7 +95,7 @@ after configuring the actual Spark project and deploying the reviewed rules.
 No production project or rules deployment is inferred from emulator tests.
 
 `tests/firebase.rooms.mjs` exercises the actual UI in distinct browser contexts:
-host and custom code, clipboard success/failure, invited guest onboarding,
+host and four-character code, clipboard success/failure, invited guest onboarding,
 reload/rejoin, third-player rejection, invalid/missing/closed codes, leaving,
 reopening and failed ownership theft. The rules suite separately checks concurrent
 guest claims and malicious payloads. The room UI is also checked at 320 px width.

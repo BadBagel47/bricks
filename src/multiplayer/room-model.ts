@@ -21,13 +21,13 @@ export function previousRoomCode(): string | null {
 
 export function normalizeRoomCode(value: string): string {
   const code = value.trim().toUpperCase()
-  if (!/^[A-HJ-NP-Z2-9]{6,8}$/.test(code)) throw new MultiplayerError('invalid-code')
+  if (!/^[A-HJ-NP-Z2-9]{4,8}$/.test(code)) throw new MultiplayerError('invalid-code')
   return code
 }
 
 export function randomRoomCode(): string {
   // The 32-character alphabet divides the byte range exactly, without modulo bias.
-  const bytes = crypto.getRandomValues(new Uint8Array(8))
+  const bytes = crypto.getRandomValues(new Uint8Array(4))
   return [...bytes].map(value => CODE_ALPHABET[value % CODE_ALPHABET.length]).join('')
 }
 

@@ -122,30 +122,13 @@ export class Rooms {
     } catch (error) { throw playerFacingError(error) }
   }
 
-  async leave(joined: JoinedRoom, onlyIfEmpty = false): Promise<void> {
+  async leave(joined: JoinedRoom): Promise<void> {
     try {
       const uid = await this.identity()
       if (uid !== joined.uid) throw new MultiplayerError('permission')
       await this.transact(joined.code, room => {
-        if (onlyIfEmpty && room.players.guest) throw new MultiplayerError('room-full')
         return leaveRoom(room, uid)
       }, joined.room.epoch)
-    } catch (error) { throw playerFacingError(error) }
-  }
-
-  async changeCode(joined: JoinedRoom, input: string, name: string): Promise<JoinedRoom> {
-    try {
-      const code = normalizeRoomCode(input)
-      if (code === joined.code) return joined
-      const uid = await this.identity()
-      if (joined.room.ownerUid !== uid || joined.room.hostUid !== uid) throw new MultiplayerError('permission')
-      await this.reserve(code, uid)
-      const target = await get(ref(this.client.database, `rooms/${code}`))
-      if (target.exists() && parseRoom(target.val()).status !== 'closed') throw new MultiplayerError('code-taken')
-      // Close first, guarded by the live guest slot. If a guest wins the race,
-      // no replacement room opens. Failed later steps leave an owned reservation.
-      await this.leave(joined, true)
-      return await this.reopen(code, name)
     } catch (error) { throw playerFacingError(error) }
   }
 

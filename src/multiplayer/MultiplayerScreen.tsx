@@ -170,11 +170,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
           {isHost && joined.room.players.guest && <button className="back-button" disabled={busy || connected !== true || !presence[joined.room.players.guest.uid]} onClick={() => void run(async () => (await rooms()).transfer(joined))}>Transfer Host</button>}
           <button className="back-button" disabled={busy} onClick={() => void back()}>Leave Lobby</button>
         </div>
-        {isHost && joined.uid === joined.room.ownerUid && <form className="name-form" onSubmit={event => { event.preventDefault(); void run(async () => (await rooms()).changeCode(joined, code, username)) }}>
-          <label htmlFor="custom-room-code">Room code</label>
-          <input autoCapitalize="characters" autoComplete="off" disabled={busy || Boolean(joined.room.players.guest)} id="custom-room-code" maxLength={8} value={code} onChange={event => setCode(event.target.value)} />
-          <button className="button button-primary" disabled={busy || Boolean(joined.room.players.guest)} type="submit">Change Code</button>
-        </form>}
+
       </> : <>
         <div className="menu-actions">
           <button className="button button-primary" disabled={busy || !available} onClick={() => void run(async () => (await rooms()).create(username))}>Host Game</button>

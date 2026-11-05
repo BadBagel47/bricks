@@ -5,9 +5,10 @@ import type { Room } from '../src/multiplayer/room-model.ts'
 
 const room: Room = { version: 1, ownerUid: 'host', hostUid: 'host', epoch: 1, status: 'waiting', createdAt: 1, players: { host: { uid: 'host', name: 'Host' } } }
 test('room codes normalize case and reject forbidden characters without changing invitation paths', () => {
+  assert.equal(normalizeRoomCode(' abcd '), 'ABCD')
   assert.equal(normalizeRoomCode(' brk724 '), 'BRK724')
   for (const input of ['short', 'ROOM01', 'BRK/24', 'BRK724999']) assert.throws(() => normalizeRoomCode(input))
-  for (let i = 0; i < 50; i++) assert.match(randomRoomCode(), /^[A-HJ-NP-Z2-9]{8}$/)
+  for (let i = 0; i < 50; i++) assert.match(randomRoomCode(), /^[A-HJ-NP-Z2-9]{4}$/)
   assert.equal(inviteURL('brk724', 'https://example.com/bricks/?other=value#fragment'), 'https://example.com/bricks/?other=value&room=BRK724')
 })
 test('a second distinct identity claims the guest slot; repeat joins are idempotent and a third cannot join', () => {

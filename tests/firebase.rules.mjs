@@ -221,3 +221,13 @@ test('match settings are host-only, validated, revisioned; approvals belong to t
   await assertFails(set(ref(db('host'), `${path}/approval`), { ...approval, revision: 2, hostUid: 'guest', guestUid: 'host' }))
   await assertSucceeds(set(ref(db('host'), `${path}/approval`), { revision: 2, roleRevision: 1, hostUid: 'guest', guestUid: 'host' }))
 })
+
+
+test('four-character room codes work while legacy codes remain supported', async () => {
+  const short = 'ABCD'
+  await assertSucceeds(set(ref(db('host'), `roomReservations/${short}`), reservation('host')))
+  await assertSucceeds(set(ref(db('host'), `rooms/${short}`), newRoom()))
+  await assertSucceeds(get(ref(db('guest'), `rooms/${short}`)))
+  await assertFails(set(ref(db('host'), 'roomReservations/ABC'), reservation('host')))
+  await assertSucceeds(set(ref(db('host'), 'roomReservations/ABCDEFGH'), reservation('host')))
+})
