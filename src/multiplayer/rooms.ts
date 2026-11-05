@@ -158,13 +158,25 @@ export class Rooms {
   }
 
   watch(joined: JoinedRoom, next: (room: Room) => void, error: (error: MultiplayerError) => void): Unsubscribe {
-    return onValue(ref(this.client.database, `rooms/${joined.code}`), snapshot => {
+    let admitted = false
+    // A transaction's preflight get can leave an older cached room snapshot.
+    // Ignore that pre-join cache until membership is observed, with a bounded wait.
+    const timer = setTimeout(() => { if (!admitted) error(new MultiplayerError('session-expired')) }, 8000)
+    const stop = onValue(ref(this.client.database, `rooms/${joined.code}`), snapshot => {
       try {
         if (!snapshot.exists()) throw new MultiplayerError('room-not-found')
         const room = parseRoom(snapshot.val())
-        if (room.epoch !== joined.room.epoch || (room.status === 'waiting' && room.hostUid !== joined.uid && room.players.guest?.uid !== joined.uid)) throw new MultiplayerError('session-expired')
+        if (room.epoch !== joined.room.epoch) throw new MultiplayerError('session-expired')
+        const member = room.hostUid === joined.uid || room.players.guest?.uid === joined.uid
+        if (room.status === 'waiting' && !member) {
+          if (admitted) throw new MultiplayerError('session-expired')
+          return
+        }
+        admitted = true
+        clearTimeout(timer)
         next(room)
-      } catch (reason) { error(playerFacingError(reason)) }
-    }, reason => error(playerFacingError(reason)))
+      } catch (reason) { clearTimeout(timer); error(playerFacingError(reason)) }
+    }, reason => { clearTimeout(timer); error(playerFacingError(reason)) })
+    return () => { clearTimeout(timer); stop() }
   }
 }
