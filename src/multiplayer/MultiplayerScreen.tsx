@@ -122,7 +122,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
         const error = playerFacingError(reason)
         if (alive.current && error.code !== 'permission') setError(error)
       })
-    }, 30000)
+    }, 15000)
     return () => clearTimeout(timer)
     // Preserve the grace period across unrelated room snapshot updates.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -154,7 +154,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
       {copyFallback && <label className="invite-field">Copy text<input readOnly autoFocus value={copyFallback} onFocus={event => event.currentTarget.select()} /></label>}
       {busy && <p role="status">Connecting…</p>}
       {joined ? <>
-        {localHost && guestUid && !guestOnline && connected === true && <p role="status">Opponent disconnected. Waiting up to 30 seconds before freeing the slot.</p>}
+        {localHost && guestUid && !guestOnline && connected === true && <p role="status">Opponent disconnected. Waiting up to 15 seconds before freeing the slot.</p>}
         <dl className="room-players"><div><dt>Host</dt><dd><span>{joined.room.players.host.name}</span> · <span>{status(joined.room.players.host.uid)}</span></dd></div><div><dt>Opponent</dt><dd>{joined.room.players.guest ? <><span>{joined.room.players.guest.name}</span> · <span>{status(joined.room.players.guest.uid)}</span></> : 'Waiting for opponent…'}</dd></div></dl>
         {connected === false && <p className="notice" role="status">Unable to connect. Check your connection and try again.</p>}
         <div className="room-actions">

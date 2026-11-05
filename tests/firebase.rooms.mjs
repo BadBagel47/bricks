@@ -191,7 +191,7 @@ test('closing a guest tab frees its slot after the grace period for another iden
     await replacement.getByRole('alert').filter({ hasText: 'This room already has two players.' }).waitFor()
     await guest.close()
     await host.getByRole('status').filter({ hasText: 'Opponent disconnected.' }).waitFor()
-    await host.getByText('Waiting for opponent…', { exact: true }).waitFor({ timeout: 40000 })
+    await host.getByText('Waiting for opponent…', { exact: true }).waitFor({ timeout: 25000 })
     await replacement.getByRole('button', { name: 'Retry', exact: true }).click()
     await roomHeading(replacement, /^Room /)
     await host.getByText('Replacement', { exact: true }).waitFor()
