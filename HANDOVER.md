@@ -7,11 +7,11 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 ## Current checkpoint — 2026-11-06
 
 - **Phase 3, milestone 3.4:** Shared match settings and approval (approved).
-- **Live:** https://badbagel47.github.io/bricks/?v=72da24e
-- **Deployed app source:** `72da24e` — shared match settings, private drafts and role/revision-bound approval (includes earlier lobby cleanup and rotation corrections).
-- **CI / Pages:** https://github.com/BadBagel47/bricks/actions/runs/42097090846
-- **Status:** 3.4 is published on Pages after successful main CI for `72da24e`. The owner confirmed updated database rules published. Lint/build and 101 unit tests passed locally; full CI verified security, settings UI and existing lobby/gameplay regressions. Production two-session owner review remains pending.
-- **Next:** Owner requested removal of the custom room-code editor and four-character random codes. Changes are staged on milestone-3.4; full CI passed for `b14e533`: https://github.com/BadBagel47/bricks/actions/runs/42128209110 . Preserve old longer room links. Owner confirmed the short-code rules published. Main activation is blocked: remote Git writes to both main and milestone-3.4 return `fatal error in commit_refs_rules`; reads work and ancestry is valid. No force push or protection changes were attempted. Retry a normal push of HEAD to main, then verify Pages before marking this live. No Google admin identity is attached. Stop for 3.4 review before 3.5.
+- **Live:** https://badbagel47.github.io/bricks/?v=1dd23d3
+- **Deployed app source:** `1dd23d3` — four-character random room codes, no custom-code editor, legacy longer links preserved; includes settings/approval and earlier lobby corrections.
+- **CI / Pages:** https://github.com/BadBagel47/bricks/actions/runs/42130254615
+- **Status:** Short-code follow-up is published on Pages; main CI passed for `1dd23d3`. Owner confirmed updated rules published. Earlier Git writes failed with `fatal error in commit_refs_rules`; a normal retry later succeeded with no credential, permission or protection changes. Do not claim a known root-cause repair. No manual GitHub merge is needed.
+- **Next:** Reload the published client and review four-character new-room codes, absence of code editing across host transfers, legacy links, and settings/approval. Stop at 3.4 review before 3.5. No match start or multiplayer gameplay exists yet.
 
 - **Next model if approved:** GPT-6.1 Sol Medium for the 3.5 host-configuration waiting state and synchronization; Luna Medium for isolated UI-only polish.
 
