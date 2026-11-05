@@ -1,9 +1,16 @@
 # Bricks progress
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
-- **Milestone:** 3.3 — Lobby, host roles and Spark quota review
+- **Milestone:** 3.4 — Shared match settings and approval
 - **Status:** Implemented, CI passed and 3.3 published on GitHub Pages. Owner reports updated rules published; awaiting live two-browser lobby review. Milestone 3.2 live creation/joining confirmed by the owner after correcting the API key.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
+
+## Milestone 3.4
+- Owner approved proceeding after the published 15-second guest-cleanup correction.
+- Implemented private host drafts, Apply/Cancel, revisioned Score Duel/Battle mode, level 00–19, Hold and optional guest approval. No-op publication does not write or invalidate approval.
+- Added guest-only approval bound to settings revision, player identities and an incrementing host-role generation; transferring twice cannot revive old approval. Old rooms treat absent roleRevision as zero.
+- Added model validation tests, server authorization/revision tests and two-browser UI coverage. Lint/build and 101 unit tests passed locally; full branch CI pending. Stage on milestone-3.4 until the owner publishes new rules; do not activate main beforehand.
+- Next checkpoint after deployment/review is 3.5, dedicated host-configuration waiting screen. Recommend GPT-6.1 Sol Medium for synchronized status and permissions (Luna Medium for isolated UI polish).
 
 ## Milestone 3.3
 - Follow-up: owner reported no replacement could join after a guest closes the tab/browser. Explicit Leave Lobby replacement passed branch CI (`daa1183`, run 42057152136). Added host-driven release after 15 seconds of guest absence, protected by server rules checking every guest presence connection. The owner confirmed the updated cleanup rules published. The 15-second version passed branch CI for `5c1f00a`, then main commit `a81a25d` passed full CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42058999029 . Live cleanup review remains pending. Local lint/build and 99 unit tests also passed.
@@ -112,9 +119,8 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Verify the published 3.3 lobby with the owner and stop for review. Do not start 3.4 until approved.
-- After acceptance, 3.4 adds shared match settings and approval. Recommend GPT-6.1 Sol Medium for settings authorization and revision/concurrency handling.
-- Stop for review before 3.4. Full multiplayer gameplay is not implemented yet.
+- Finish 3.4 branch CI, publish reviewed rules via the owner, activate the client on main, and review with two live sessions.
+- Stop before 3.5 until approved. Recommend GPT-6.1 Sol Medium for synchronization; multiplayer gameplay remains later milestones.
 
 ## Git checkpoints
 - `fea6aa4`: initial foundation and Pages deployment.

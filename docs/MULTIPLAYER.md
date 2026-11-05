@@ -326,3 +326,31 @@ match recovery. If the host is also offline there is no cleanup coordinator.
 
 Publish the updated rules before the client. No polling, heartbeat writes or paid
 functions are added. Explicit Leave Lobby still releases the slot immediately.
+
+## Milestone 3.4 — shared settings and approval
+
+`matchSettings/CODE/EPOCH/config` stores five bounded fields: revision, mode
+(score-duel/battle), startLevel (0–19), hold and requireApproval. An absent config
+means defaults: Score Duel, level 00, Hold off, approval off. Only the current host
+may publish; changes increment revision exactly once. No-op Apply and Cancel do
+not write. Drafts are local React state, discarded when changing rooms or roles.
+Stale editors cannot overwrite a newer settings revision. Gameplay remains future
+work; there is no Start Match button in 3.4.
+
+The separate `approval` node contains revision, hostUid, guestUid and roleRevision.
+Only the current guest can approve the current published configuration while
+approval is enabled. Rules reject host/third-player approval, stale revisions,
+wrong roles and extra fields. Effective setting changes invalidate the binding.
+`rooms/CODE/roleRevision` advances on every host change (legacy absent value means
+zero), preventing a double handover from reviving an old approval. Settings survive
+host handover, while the editor resets and the former host must approve anew.
+Membership checks, epoch scoping and bounded payloads are enforced server-side.
+Two small configuration/approval listeners close with the lobby component; no
+polling or heartbeat traffic is added. Epoch-scoped old settings are small but
+not automatically purged yet; do not claim historical metadata has a TTL.
+
+Stage on `milestone-3.4` and run full CI without Pages deployment. The owner must
+publish the updated rules before this client is activated on main. Existing 3.3
+clients must reload after activation: old host-transfer writes do not include the
+new generation. No administrator identity is attached to this runtime. Stop for
+review at 3.4; the dedicated host-configuration waiting screen is 3.5.

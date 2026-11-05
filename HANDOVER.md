@@ -6,13 +6,13 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 
 ## Current checkpoint — 2026-11-05
 
-- **Phase 3, milestone 3.3:** Lobby, host roles, presence and free-tier review.
+- **Phase 3, milestone 3.4:** Shared match settings and approval (approved).
 - **Live:** https://badbagel47.github.io/bricks/?v=a81a25d
 - **Deployed app source:** `a81a25d` — release disconnected lobby guests after 15 seconds when the host remains online (includes the previous rotation correction).
 - **CI / Pages:** https://github.com/BadBagel47/bricks/actions/runs/42058999029
 - **Status:** 3.3 and its database rules were published; the owner confirmed room creation/joining on 3.2. The latest site build is deployed. Owner review of the 3.3 lobby and rotation correction is still pending.
-- **Next:** The owner confirmed the updated guest-cleanup rules published, and main CI deployed the client successfully. Check the live flow: reload the host on the latest version, close the guest tab, wait for the slot to be freed and join with another identity. Cleanup waits 15 seconds after absence is detected and requires a connected host. Stop at 3.3 review; do not begin 3.4 until explicitly approved.
-- **Next model if approved:** GPT-6.1 Sol Medium for shared settings authorization and revision/concurrency. Recommend again at the start of that milestone.
+- **Next:** Finish branch CI for 3.4 on `milestone-3.4`. Publish reviewed Firebase rules through the owner before activating main. New host roleRevision generation prevents approval revival on repeated transfers; old 3.3 clients must reload after activation. Production remains on the existing 3.3 version until then. Review 3.4 and stop before 3.5.
+- **Next model if approved:** GPT-6.1 Sol Medium for the 3.5 host-configuration waiting state and synchronization; Luna Medium for isolated UI-only polish.
 
 ## Product direction and durable constraints
 

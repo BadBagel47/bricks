@@ -62,3 +62,7 @@ button:disabled { cursor: default; opacity: .5; }
 @media (max-width: 900px) and (max-height: 720px) and (orientation: landscape) {
   .touch-controls { --touch-size: 48px; }
 }
+
+.match-settings-editor { display: flex; flex-direction: column; gap: 11px; margin-top: 20px; }
+.match-settings-editor select { min-height: 48px; font: inherit; }
+.match-settings-editor input[type="checkbox"] { width: 24px; height: 24px; accent-color: var(--lime); }

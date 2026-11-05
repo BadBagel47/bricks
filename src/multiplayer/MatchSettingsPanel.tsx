@@ -57,11 +57,11 @@ export default function MatchSettingsPanel({ database, joined, connected }: { da
       {settings.requireApproval && <p role="status">{!joined.room.players.guest ? 'Waiting for opponent…' : approved ? 'Settings approved.' : 'Waiting for opponent approval.'}</p>}
       {!host && settings.requireApproval && <button className="back-button" disabled={!connected || busy || approved} onClick={() => void approve()}>👍 Approve settings</button>}
       {host && !draft && <button className="back-button" disabled={!connected || busy} onClick={() => setDraft({ ...settings })}>Edit Match Settings</button>}
-      {host && draft && <form className="name-form" aria-label="Edit match settings" onSubmit={event => { event.preventDefault(); void save() }}>
-        <label>Match mode<select value={draft.mode} disabled={busy} onChange={event => setDraft({ ...draft, mode: event.target.value as MatchSettings['mode'] })}><option value="score-duel">Score Duel</option><option value="battle">Battle</option></select></label>
-        <label>Start level<select value={draft.startLevel} disabled={busy} onChange={event => setDraft({ ...draft, startLevel: Number(event.target.value) })}>{Array.from({ length: 20 }, (_, level) => <option key={level} value={level}>{String(level).padStart(2, '0')}</option>)}</select></label>
-        <label><input type="checkbox" checked={draft.hold} disabled={busy} onChange={event => setDraft({ ...draft, hold: event.target.checked })} /> Hold piece</label>
-        <label><input type="checkbox" checked={draft.requireApproval} disabled={busy} onChange={event => setDraft({ ...draft, requireApproval: event.target.checked })} /> Require approval</label>
+      {host && draft && <form className="match-settings-editor" aria-label="Edit match settings" onSubmit={event => { event.preventDefault(); void save() }}>
+        <label className="setting-select-row">Match mode<select value={draft.mode} disabled={busy} onChange={event => setDraft({ ...draft, mode: event.target.value as MatchSettings['mode'] })}><option value="score-duel">Score Duel</option><option value="battle">Battle</option></select></label>
+        <label className="setting-select-row">Start level<select value={draft.startLevel} disabled={busy} onChange={event => setDraft({ ...draft, startLevel: Number(event.target.value) })}>{Array.from({ length: 20 }, (_, level) => <option key={level} value={level}>{String(level).padStart(2, '0')}</option>)}</select></label>
+        <label className="toggle-row"><input type="checkbox" checked={draft.hold} disabled={busy} onChange={event => setDraft({ ...draft, hold: event.target.checked })} /> Hold piece</label>
+        <label className="toggle-row"><input type="checkbox" checked={draft.requireApproval} disabled={busy} onChange={event => setDraft({ ...draft, requireApproval: event.target.checked })} /> Require approval</label>
         <div className="room-actions"><button className="button button-primary" disabled={!connected || busy} type="submit">Apply Settings</button><button className="back-button" disabled={busy} type="button" onClick={() => setDraft(null)}>Cancel</button></div>
       </form>}
     </>}
