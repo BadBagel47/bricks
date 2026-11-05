@@ -2,10 +2,11 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.4 — Shared match settings and approval
-- **Status:** 3.4 implemented and staged on milestone-3.4; branch CI passed. New Firebase rules must be published before client activation. Public site remains on the verified 3.3 build.
+- **Status:** Owner confirmed 3.4 rules published; activating the verified client on main. Live two-session review remains pending.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.4
+- Owner confirmed the new settings/approval rules published; main deployment in progress.
 - Owner approved proceeding after the published 15-second guest-cleanup correction.
 - Implemented private host drafts, Apply/Cancel, revisioned Score Duel/Battle mode, level 00–19, Hold and optional guest approval. No-op publication does not write or invalidate approval.
 - Added guest-only approval bound to settings revision, player identities and an incrementing host-role generation; transferring twice cannot revive old approval. Old rooms treat absent roleRevision as zero.
