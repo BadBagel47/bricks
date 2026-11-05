@@ -33,6 +33,11 @@ async function name(page, value) {
   await page.getByRole('button', { name: 'Continue', exact: true }).click()
 }
 const menu = page => page.getByRole('button', { name: '← Back to menu', exact: true }).click()
+async function roomHeading(page, name) {
+  try { await page.getByRole('heading', { name, exact: typeof name === 'string' }).waitFor() }
+  catch (error) { throw new Error(`Lobby screen: ${await page.locator('body').innerText()}`, { cause: error }) }
+}
+
 
 test('real room UI: host, change code, invite onboarding, join/reload, errors, leave, close and reopen', { timeout: 60000 }, async () => {
   const contexts = await Promise.all([browser.newContext(), browser.newContext(), browser.newContext()])
@@ -65,12 +70,12 @@ test('real room UI: host, change code, invite onboarding, join/reload, errors, l
 
     await guest.goto(invite)
     await name(guest, 'Guest Player')
-    await guest.getByRole('heading', { name: 'Room BRKS77', exact: true }).waitFor()
+    await roomHeading(guest, 'Room BRKS77')
     await host.getByText('Guest Player', { exact: true }).waitFor()
     assert.equal(new URL(guest.url()).searchParams.get('room'), 'BRKS77')
     assert.equal(await host.getByRole('button', { name: 'Change Code', exact: true }).isDisabled(), true)
     await guest.reload()
-    await guest.getByRole('heading', { name: 'Room BRKS77', exact: true }).waitFor()
+    await roomHeading(guest, 'Room BRKS77')
     await host.getByText('Guest Player', { exact: true }).waitFor()
 
     await third.goto(baseURL)
@@ -98,7 +103,7 @@ test('real room UI: host, change code, invite onboarding, join/reload, errors, l
     await host.getByRole('button', { name: 'Reopen Previous Room', exact: true }).click()
     await host.getByRole('heading', { name: 'Room BRKS77', exact: true }).waitFor()
     await guest.goto(invite)
-    await guest.getByRole('heading', { name: 'Room BRKS77', exact: true }).waitFor()
+    await roomHeading(guest, 'Room BRKS77')
     await host.getByText('Guest Player', { exact: true }).waitFor()
     await host.setViewportSize({ width: 320, height: 667 })
     assert.equal(await host.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true)
@@ -130,7 +135,7 @@ test('lobby presence, explicit host transfer, automatic handover on leave and so
     const owner = await host.evaluate(async code => (await import('/tests/fixtures/firebase-browser.ts')).ownerOf(code), code)
     await guest.goto(invite)
     await name(guest, 'Second Player')
-    await guest.getByRole('heading', { name: /^Room / }).waitFor()
+    await roomHeading(guest, /^Room /)
     const opponentStatus = host.locator('.room-players > div').nth(1)
     await opponentStatus.getByText('Connected', { exact: true }).waitFor()
     assert.equal(await guest.getByRole('button', { name: 'Transfer Host', exact: true }).count(), 0)
