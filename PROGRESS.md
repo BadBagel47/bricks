@@ -2,14 +2,14 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.4 — Shared match settings and approval
-- **Status:** Implemented, CI passed and 3.3 published on GitHub Pages. Owner reports updated rules published; awaiting live two-browser lobby review. Milestone 3.2 live creation/joining confirmed by the owner after correcting the API key.
+- **Status:** 3.4 implemented and staged on milestone-3.4; branch CI passed. New Firebase rules must be published before client activation. Public site remains on the verified 3.3 build.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.4
 - Owner approved proceeding after the published 15-second guest-cleanup correction.
 - Implemented private host drafts, Apply/Cancel, revisioned Score Duel/Battle mode, level 00–19, Hold and optional guest approval. No-op publication does not write or invalidate approval.
 - Added guest-only approval bound to settings revision, player identities and an incrementing host-role generation; transferring twice cannot revive old approval. Old rooms treat absent roleRevision as zero.
-- Added model validation tests, server authorization/revision tests and two-browser UI coverage. Lint/build and 101 unit tests passed locally; full branch CI pending. Stage on milestone-3.4 until the owner publishes new rules; do not activate main beforehand.
+- Added model validation tests, server authorization/revision tests and two-browser UI coverage. Lint/build and 101 unit tests passed locally; full branch CI passed for `3a0b659`: https://github.com/BadBagel47/bricks/actions/runs/42061752873 . Additional published-change UI assertion awaiting rerun. Stage on milestone-3.4 until the owner publishes new rules; do not activate main beforehand.
 - Next checkpoint after deployment/review is 3.5, dedicated host-configuration waiting screen. Recommend GPT-6.1 Sol Medium for synchronized status and permissions (Luna Medium for isolated UI polish).
 
 ## Milestone 3.3
