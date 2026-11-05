@@ -9,7 +9,7 @@
 - Owner approved proceeding after the published 15-second guest-cleanup correction.
 - Implemented private host drafts, Apply/Cancel, revisioned Score Duel/Battle mode, level 00–19, Hold and optional guest approval. No-op publication does not write or invalidate approval.
 - Added guest-only approval bound to settings revision, player identities and an incrementing host-role generation; transferring twice cannot revive old approval. Old rooms treat absent roleRevision as zero.
-- Added model validation tests, server authorization/revision tests and two-browser UI coverage. Lint/build and 101 unit tests passed locally; full branch CI passed for `3a0b659`: https://github.com/BadBagel47/bricks/actions/runs/42061752873 . Additional published-change UI assertion awaiting rerun. Stage on milestone-3.4 until the owner publishes new rules; do not activate main beforehand.
+- Added model validation tests, server authorization/revision tests and two-browser UI coverage. Lint/build and 101 unit tests passed locally; full branch CI passed for `3a0b659`: https://github.com/BadBagel47/bricks/actions/runs/42061752873 . Final branch CI also passed with the explicit published-change approval assertion for `cdebc0c`: https://github.com/BadBagel47/bricks/actions/runs/42062286973 . Stage on milestone-3.4 until the owner publishes new rules; do not activate main beforehand.
 - Next checkpoint after deployment/review is 3.5, dedicated host-configuration waiting screen. Recommend GPT-6.1 Sol Medium for synchronized status and permissions (Luna Medium for isolated UI polish).
 
 ## Milestone 3.3

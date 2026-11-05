@@ -10,8 +10,9 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 - **Live:** https://badbagel47.github.io/bricks/?v=a81a25d
 - **Deployed app source:** `a81a25d` — release disconnected lobby guests after 15 seconds when the host remains online (includes the previous rotation correction).
 - **CI / Pages:** https://github.com/BadBagel47/bricks/actions/runs/42058999029
-- **Status:** 3.3 and its database rules were published; the owner confirmed room creation/joining on 3.2. The latest site build is deployed. Owner review of the 3.3 lobby and rotation correction is still pending.
-- **Next:** Finish branch CI for 3.4 on `milestone-3.4`. Publish reviewed Firebase rules through the owner before activating main. New host roleRevision generation prevents approval revival on repeated transfers; old 3.3 clients must reload after activation. Production remains on the existing 3.3 version until then. Review 3.4 and stop before 3.5.
+- **Status:** 3.4 is implemented on `milestone-3.4`. Lint/build and 101 unit tests passed locally. Full branch CI passed for `cdebc0c`: https://github.com/BadBagel47/bricks/actions/runs/42062286973 . It covers host drafts, no-op/cancel preservation, published-change invalidation, role-bound approval and existing lobby/security/browser regressions. Public site is still 3.3.
+- **Next:** Owner must publish `firebase/database.rules.json` from milestone-3.4. Then record confirmation in a normal commit and push main to activate Pages. Old clients need to reload; roleRevision is now required on host handover. Verify live 3.4 with two sessions and stop before 3.5. No match start/gameplay is implemented yet.
+
 - **Next model if approved:** GPT-6.1 Sol Medium for the 3.5 host-configuration waiting state and synchronization; Luna Medium for isolated UI-only polish.
 
 ## Product direction and durable constraints
