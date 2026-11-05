@@ -159,7 +159,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
       {joined ? <>
         {database && <MatchSettingsPanel key={`${joined.code}:${joined.room.epoch}:${joined.room.roleRevision ?? 0}`} database={database} joined={joined} connected={connected === true} />}
         {localHost && guestUid && !guestOnline && connected === true && <p role="status">Opponent disconnected. Waiting up to 15 seconds before freeing the slot.</p>}
-        <dl className="room-players"><div><dt>Host</dt><dd><span>{joined.room.players.host.name}</span> · <span>{status(joined.room.players.host.uid)}</span></dd></div><div><dt>Opponent</dt><dd>{joined.room.players.guest ? <><span>{joined.room.players.guest.name}</span> · <span>{status(joined.room.players.guest.uid)}</span></> : 'Waiting for opponent…'}</dd></div></dl>
+        <dl className="room-players" aria-label="Players"><div><dt>Host</dt><dd><span>{joined.room.players.host.name}</span> · <span>{status(joined.room.players.host.uid)}</span></dd></div><div><dt>Opponent</dt><dd>{joined.room.players.guest ? <><span>{joined.room.players.guest.name}</span> · <span>{status(joined.room.players.guest.uid)}</span></> : 'Waiting for opponent…'}</dd></div></dl>
         {connected === false && <p className="notice" role="status">Unable to connect. Check your connection and try again.</p>}
         <div className="room-actions">
           <button className="back-button" onClick={() => void copy(joined.code, 'Code copied.')}>Copy Code</button>
