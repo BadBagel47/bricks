@@ -2,11 +2,11 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.3 — Lobby, host roles and Spark quota review
-- **Status:** Implemented and verified in branch CI. Owner reports 3.3 rules published; Pages activation in progress. Milestone 3.2 live creation/joining confirmed by the owner after correcting the API key.
+- **Status:** Implemented, CI passed and 3.3 published on GitHub Pages. Owner reports updated rules published; awaiting live two-browser lobby review. Milestone 3.2 live creation/joining confirmed by the owner after correcting the API key.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.3
-- Owner confirmed the new database rules are published; activating the checked 3.3 client on main. Live two-browser lobby review remains pending.
+- Owner confirmed the new database rules are published. Main commit `baa7b30` passed all CI gates and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42000586479 . Live two-browser lobby review remains pending.
 - Access review: no Google outbound identity is attached, and current tools cannot provision one. Recommended future deployment is a dedicated GitHub Actions identity using Google Workload Identity Federation; setup and limitations are documented in `docs/FIREBASE_ACCESS.md`. No credentials, IAM roles or billing settings were changed.
 - Owner approved lobby/host-role work with explicit free-tier quota optimization.
 - Added atomic host transfer, automatic handover on host leave, and last-player close; immutable reservation ownership survives role changes.
@@ -102,13 +102,13 @@
 - Engine mechanics are NES-inspired and documented, not cycle-accurate NES emulation.
 - Chromium desktop/mobile viewport, touch-event and simulated gamepad tests passed. Physical devices and subjective audio quality remain unverified here.
 - Touch and gamepad behavior should be checked on the owner's physical devices.
-- Live 3.2 room creation and two-player joining are confirmed by the owner. Updated 3.3 production rules and live lobby verification remain pending.
+- Live 3.2 room creation and two-player joining are confirmed by the owner. The owner reports updated 3.3 rules published and CI deployed the new client; live lobby review remains pending.
 - Room flows are implemented. There is no match start or playable multiplayer yet.
 - Presence and host transfer are implemented in 3.3. Offline players retain their slots; coordinated match recovery, active-control leases, snapshot validation and Battle remain later milestones.
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Publish reviewed 3.3 database rules, then push the checked branch to main, verify the published lobby with the owner and stop for review.
+- Verify the published 3.3 lobby with the owner and stop for review. Do not start 3.4 until approved.
 - After acceptance, 3.4 adds shared match settings and approval. Recommend GPT-6.1 Sol Medium for settings authorization and revision/concurrency handling.
 - Stop for review before 3.4. Full multiplayer gameplay is not implemented yet.
 
