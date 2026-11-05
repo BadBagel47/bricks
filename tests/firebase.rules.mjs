@@ -151,7 +151,7 @@ test('only the current host can transfer to the existing guest; reservation owne
   const room = await ownedRoom()
   const joined = { ...room, players: { ...room.players, guest: { uid: 'guest', name: 'Guest' } } }
   await set(ref(db('guest'), `rooms/${code}`), joined)
-  const transferred = { ...joined, hostUid: 'guest', players: { host: joined.players.guest, guest: joined.players.host } }
+  const transferred = { ...joined, roleRevision: 1, hostUid: 'guest', players: { host: joined.players.guest, guest: joined.players.host } }
   for (const uid of ['guest', 'third']) await assertFails(set(ref(db(uid), `rooms/${code}`), transferred))
   await assertFails(set(ref(db('host'), `rooms/${code}`), { ...transferred, ownerUid: 'guest' }))
   await assertFails(set(ref(db('host'), `rooms/${code}`), { ...transferred, players: { ...transferred.players, host: { uid: 'guest', name: 'Spoofed' } } }))
@@ -162,7 +162,7 @@ test('only the current host can transfer to the existing guest; reservation owne
   await assertFails(set(ref(db('host'), `rooms/${code}`), { ...alone, status: 'closed' }))
   await assertSucceeds(set(ref(db('guest'), `rooms/${code}`), { ...alone, status: 'closed' }))
   await assertFails(set(ref(db('guest'), `rooms/${code}`), { ...alone, epoch: 2 }))
-  await assertSucceeds(set(ref(db('host'), `rooms/${code}`), { ...room, epoch: 2 }))
+  await assertSucceeds(set(ref(db('host'), `rooms/${code}`), { ...room, roleRevision: 2, epoch: 2 }))
   assert.equal((await get(ref(db('host'), `roomReservations/${code}`))).val().ownerUid, 'host')
 })
 
@@ -196,4 +196,28 @@ test('only the host can free an offline guest; any guest connection blocks clean
   await assertSucceeds(set(ref(db('host'), `rooms/${code}`), room))
   const replacement = { ...room, players: { ...room.players, guest: { uid: 'third', name: 'Third' } } }
   await assertSucceeds(set(ref(db('third'), `rooms/${code}`), replacement))
+})
+
+test('match settings are host-only, validated, revisioned; approvals belong to the current guest and roles', async () => {
+  const room = await ownedRoom()
+  const joined = { ...room, players: { ...room.players, guest: { uid: 'guest', name: 'Guest' } } }
+  await set(ref(db('guest'), `rooms/${code}`), joined)
+  const path = `matchSettings/${code}/1`
+  const settings = { revision: 1, mode: 'score-duel', startLevel: 0, hold: false, requireApproval: true }
+  await assertFails(set(ref(db('guest'), `${path}/config`), settings))
+  await assertSucceeds(set(ref(db('host'), `${path}/config`), settings))
+  await assertFails(set(ref(db('host'), `${path}/config`), { ...settings, revision: 2 }))
+  await assertFails(set(ref(db('host'), `${path}/config`), { ...settings, revision: 2, startLevel: 20 }))
+  const approval = { revision: 1, roleRevision: 0, hostUid: 'host', guestUid: 'guest' }
+  await assertFails(set(ref(db('host'), `${path}/approval`), approval))
+  await assertFails(set(ref(db('third'), `${path}/approval`), approval))
+  await assertSucceeds(set(ref(db('guest'), `${path}/approval`), approval))
+  await assertSucceeds(set(ref(db('host'), `${path}/config`), { ...settings, revision: 2, hold: true }))
+  await assertFails(set(ref(db('guest'), `${path}/approval`), approval))
+  await assertFails(get(ref(db('third'), path)))
+  await assertFails(set(ref(db('host'), `matchSettings/${code}/2/config`), settings))
+  const transferred = { ...joined, roleRevision: 1, hostUid: 'guest', players: { host: joined.players.guest, guest: joined.players.host } }
+  await assertSucceeds(set(ref(db('host'), `rooms/${code}`), transferred))
+  await assertFails(set(ref(db('host'), `${path}/approval`), { ...approval, revision: 2, hostUid: 'guest', guestUid: 'host' }))
+  await assertSucceeds(set(ref(db('host'), `${path}/approval`), { revision: 2, roleRevision: 1, hostUid: 'guest', guestUid: 'host' }))
 })

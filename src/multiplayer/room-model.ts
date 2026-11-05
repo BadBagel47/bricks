@@ -2,6 +2,7 @@ import { MultiplayerError } from './errors.ts'
 
 export interface RoomPlayer { readonly uid: string; readonly name: string }
 export interface Room {
+  readonly roleRevision?: number
   readonly version: 1
   readonly ownerUid: string
   readonly hostUid: string
@@ -50,7 +51,7 @@ export function parseRoom(value: unknown): Room {
       !Number.isSafeInteger(value.epoch) || (value.epoch as number) < 1 || (value.epoch as number) > 1_000_000_000 ||
       !Number.isSafeInteger(value.createdAt) || (value.createdAt as number) < 0 ||
       (value.status !== 'waiting' && value.status !== 'closed') || !object(value.players) || !player(value.players.host) ||
-      value.players.host.uid !== value.hostUid || Object.keys(value).length !== 7 ||
+      value.players.host.uid !== value.hostUid || (Object.keys(value).length !== (value.roleRevision === undefined ? 7 : 8) || (value.roleRevision !== undefined && (!Number.isSafeInteger(value.roleRevision) || (value.roleRevision as number) < 0 || (value.roleRevision as number) > 1000000000))) ||
       Object.keys(value.players).some(key => key !== 'host' && key !== 'guest') ||
       (value.players.guest !== undefined && (!player(value.players.guest) || value.players.guest.uid === value.hostUid || value.status !== 'waiting'))) {
     throw new MultiplayerError('session-expired')
@@ -75,7 +76,7 @@ export function claimGuest(room: Room, who: RoomPlayer): Room {
 export function transferHost(room: Room, uid: string): Room {
   if (room.status !== 'waiting' || room.hostUid !== uid) throw new MultiplayerError('permission')
   if (!room.players.guest) throw new MultiplayerError('room-not-found')
-  return { ...room, hostUid: room.players.guest.uid, players: { host: room.players.guest, guest: room.players.host } }
+  return { ...room, roleRevision: (room.roleRevision ?? 0) + 1, hostUid: room.players.guest.uid, players: { host: room.players.guest, guest: room.players.host } }
 }
 
 export function leaveRoom(room: Room, uid: string): Room {

@@ -115,7 +115,7 @@ export class Rooms {
       const room = await this.transact(code, current => {
         if (current.ownerUid !== uid) throw new MultiplayerError('ownership-lost')
         if (current.status === 'waiting' && current.hostUid !== uid && current.players.guest?.uid !== uid) throw new MultiplayerError('permission')
-        return current.status === 'waiting' ? current : { ...current, epoch: current.epoch + 1, status: 'waiting', players: { host } }
+        return current.status === 'waiting' ? current : { ...current, roleRevision: (current.roleRevision ?? 0) + (current.hostUid === uid ? 0 : 1), epoch: current.epoch + 1, status: 'waiting', players: { host } }
       })
       remember(code)
       return { code, room, uid }

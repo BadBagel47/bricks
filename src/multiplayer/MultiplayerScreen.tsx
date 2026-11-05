@@ -1,3 +1,4 @@
+import MatchSettingsPanel from './MatchSettingsPanel.tsx'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { readFirebaseConfig } from './config.ts'
@@ -21,6 +22,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
   const [previous, setPrevious] = useState(previousRoomCode)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<MultiplayerError | null>(null)
+  const [database, setDatabase] = useState<import('firebase/database').Database | null>(null)
   const [presence, setPresence] = useState<RoomPresence>({})
   const [notice, setNotice] = useState('')
   const [copyFallback, setCopyFallback] = useState<string | null>(null)
@@ -87,6 +89,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
     const stops: (() => void)[] = []
     void rooms().then(repository => {
       if (cancelled) return
+      setDatabase(repository.database)
       stops.push(repository.connection(setConnected, setError))
       stops.push(observePresence(repository.database, joined, setPresence, setError))
       stops.push(repository.watch(joined, room => {
@@ -154,6 +157,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
       {copyFallback && <label className="invite-field">Copy text<input readOnly autoFocus value={copyFallback} onFocus={event => event.currentTarget.select()} /></label>}
       {busy && <p role="status">Connecting…</p>}
       {joined ? <>
+        {database && <MatchSettingsPanel key={`${joined.code}:${joined.room.epoch}:${joined.room.roleRevision ?? 0}`} database={database} joined={joined} connected={connected === true} />}
         {localHost && guestUid && !guestOnline && connected === true && <p role="status">Opponent disconnected. Waiting up to 15 seconds before freeing the slot.</p>}
         <dl className="room-players"><div><dt>Host</dt><dd><span>{joined.room.players.host.name}</span> · <span>{status(joined.room.players.host.uid)}</span></dd></div><div><dt>Opponent</dt><dd>{joined.room.players.guest ? <><span>{joined.room.players.guest.name}</span> · <span>{status(joined.room.players.guest.uid)}</span></> : 'Waiting for opponent…'}</dd></div></dl>
         {connected === false && <p className="notice" role="status">Unable to connect. Check your connection and try again.</p>}
