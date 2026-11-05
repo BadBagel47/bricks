@@ -4,14 +4,15 @@ function cells(...rows: string[]): readonly Offset[] {
   return rows.flatMap((row, y) => [...row].flatMap((cell, x) => cell === '#' ? [[x, y] as const] : []))
 }
 
-// Anchored orientation tables: I/S/Z have two states, O one, J/L/T four.
-// Rotation changes orientation only; there are no wall or floor kicks.
+// Orientation tables rotate around the center of their 3x3 or 4x4 frame.
+// Even symmetric pieces keep all four pivot positions to avoid snapping on
+// half turns. O is invariant. There are no wall or floor kicks.
 const SHAPES: Record<PieceType, readonly (readonly Offset[])[]> = {
-  I: [cells('....', '####'), cells('..#.', '..#.', '..#.', '..#.')],
+  I: [cells('....', '####', '....', '....'), cells('..#.', '..#.', '..#.', '..#.'), cells('....', '....', '####', '....'), cells('.#..', '.#..', '.#..', '.#..')],
   O: [cells('.##', '.##')],
   T: [cells('.#.', '###'), cells('.#.', '.##', '.#.'), cells('...', '###', '.#.'), cells('.#.', '##.', '.#.')],
-  S: [cells('.##', '##.'), cells('.#.', '.##', '..#')],
-  Z: [cells('##.', '.##'), cells('..#', '.##', '.#.')],
+  S: [cells('.##', '##.', '...'), cells('.#.', '.##', '..#'), cells('...', '.##', '##.'), cells('#..', '##.', '.#.')],
+  Z: [cells('##.', '.##', '...'), cells('..#', '.##', '.#.'), cells('...', '##.', '.##'), cells('.#.', '##.', '#..')],
   J: [cells('#..', '###'), cells('.##', '.#.', '.#.'), cells('...', '###', '..#'), cells('.#.', '.#.', '##.')],
   L: [cells('..#', '###'), cells('.#.', '.#.', '.##'), cells('...', '###', '#..'), cells('##.', '.#.', '.#.')],
 }

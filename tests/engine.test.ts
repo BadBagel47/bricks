@@ -104,8 +104,20 @@ for (const type of PIECE_TYPES) {
   })
 }
 
-test('orientation counts use classic two-state I/S/Z, single-state O and four-state J/L/T', () => {
-  assert.deepEqual(PIECE_TYPES.map(orientationCount), [2, 1, 4, 2, 2, 4, 4])
+test('orientation counts retain all four pivot positions for symmetric pieces; O is invariant', () => {
+  assert.deepEqual(PIECE_TYPES.map(orientationCount), [4, 1, 4, 4, 4, 4, 4])
+})
+
+test('I, S and Z preserve their true pivot through a half turn and return after four turns', () => {
+  for (const type of ['I', 'S', 'Z'] as const) {
+    const initial = spawnPiece(type)
+    const halfTurn = rotatedPiece(rotatedPiece(initial, 'clockwise'), 'clockwise')
+    assert.notDeepEqual(pieceCells(halfTurn), pieceCells(initial), `${type} half turn must keep its pivot offset`)
+    let fullTurn = initial
+    for (let turn = 0; turn < 4; turn++) fullTurn = rotatedPiece(fullTurn, 'clockwise')
+    assert.deepEqual(pieceCells(fullTurn), pieceCells(initial), `${type} returns after four quarter turns`)
+    assert.deepEqual(rotatedPiece(rotatedPiece(initial, 'clockwise'), 'counterclockwise'), initial)
+  }
 })
 
 test('T clockwise and counterclockwise rotations use anchored orientations', () => {
