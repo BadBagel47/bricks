@@ -109,7 +109,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
     void service.current?.then(repository => {
       if (!currentRoom.current && !activeRequest.current) repository.suspend()
     })
-  }, [joined?.code, busy])
+  }, [joined, busy])
 
   async function back() {
     if (joined && connected !== false) {

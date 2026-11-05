@@ -8,7 +8,7 @@
 ## Milestone 3.3
 - Owner approved lobby/host-role work with explicit free-tier quota optimization.
 - Added atomic host transfer, automatic handover on host leave, and last-player close; immutable reservation ownership survives role changes.
-- Added participant/epoch-scoped connection status via onDisconnect with no application heartbeats, bounded per-tab presence records and listener/socket cleanup on lobby exit or failed entry.
+- Added participant/epoch-scoped connection status via onDisconnect with no application heartbeats, bounded per-connection presence payloads and listener/socket cleanup on lobby exit or failed entry.
 - Added malicious host-transfer/presence rules checks and two-browser UI coverage for disconnect/reconnect, transfers, host departure and socket release.
 - Recorded the Spark budget, monitoring and retention constraints in `docs/FIREBASE_QUOTA.md`. Current official pricing could not be refreshed (cloud proxy 403); reference limits are explicitly marked as planning baselines.
 - New rules must be published before activating the client. CI runs on `milestone-3.3` without deploying Pages; main retains the working 3.2 client until the owner installs the new rules.

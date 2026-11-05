@@ -25,8 +25,8 @@ Official sources:
   writes. Room metadata and presence are separate, narrowly scoped listeners.
 - Presence writes one boolean under a random per-tab connection ID on connection;
   `onDisconnect` deletes it server-side. Multiple tabs do not mark each other
-  offline. At most four connection records per participant/epoch are accepted by
-  rules. SDK transport keepalives still exist; this is not zero idle bandwidth.
+  offline. Each record has a fixed-length ID and a boolean payload. RTDB rules cannot
+  enforce a per-identity child-count limit; active-tab control is deferred to 3.12. SDK transport keepalives still exist; this is not zero idle bandwidth.
 - Reconnects register cleanup before publishing presence again. Leaving removes
   listeners and takes the database offline. Failed joins/creation also take it
   offline; Retry reconnects explicitly. Menu and single-player need no DB socket.

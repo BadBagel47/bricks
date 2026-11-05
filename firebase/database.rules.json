@@ -84,7 +84,6 @@
         "$epoch": {
           ".read": "auth != null && root.child('rooms').child($code).child('epoch').val() + '' === $epoch && (root.child('rooms').child($code).child('hostUid').val() === auth.uid || root.child('rooms').child($code).child('players/guest/uid').val() === auth.uid)",
           "$uid": {
-            ".validate": "newData.numChildren() <= 4",
             "$connection": {
               ".write": "auth != null && auth.uid === $uid && $code.matches(/^[A-HJ-NP-Z2-9]{6,8}$/) && $connection.matches(/^[a-f0-9]{32}$/) && (!newData.exists() || (root.child('rooms').child($code).child('epoch').val() + '' === $epoch && (root.child('rooms').child($code).child('hostUid').val() === auth.uid || root.child('rooms').child($code).child('players/guest/uid').val() === auth.uid) && root.child('rooms').child($code).child('status').val() === 'waiting'))",
               ".validate": "newData.val() === true"

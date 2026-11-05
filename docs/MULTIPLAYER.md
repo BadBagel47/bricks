@@ -14,7 +14,7 @@ their respective milestones.
 
 Presence is stored separately at `presence/CODE/EPOCH/UID/CONNECTION_ID`, with a
 boolean record per lobby tab. Writes are authenticated, membership/epoch checked,
-and limited to four records per identity. Reads require current room membership.
+and limited to boolean records with fixed-length connection IDs. Reads require current room membership.
 Cleanup is registered with `onDisconnect` before each connection is advertised.
 There are no application heartbeat writes. A failed entry or leaving the room
 disconnects the database; menu and single-player use no database connection.
