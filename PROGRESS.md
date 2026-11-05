@@ -78,6 +78,7 @@
 - Milestone 3.2: full CI and Pages deployment passed for `38d492d`: https://github.com/BadBagel47/bricks/actions/runs/39471615039 . This includes the actual room UI in separate browser sessions and the expanded concurrency/permission suite. Firebase's unsupported name regex was replaced with validated string operations before this successful run.
 - Owner reports the live Firebase Realtime Database rules are published, Anonymous Auth is enabled, and all five public Firebase Web App values are configured as GitHub Actions repository variables. A Pages rebuild is needed to put those values into the hosted client bundle; live room creation still needs verification after deployment.
 - When the owner retried room creation after adding the GitHub Pages domain to Authorized domains, the generic unavailable message persisted. The UI now includes a sanitized Firebase error code when present; lint and production build pass. Use the next live retry to identify the remaining setup issue.
+- The live Authentication signup response identified `API_KEY_INVALID`. The owner has replaced the GitHub Actions API-key variable by copying directly from Firebase. Rebuild Pages to include the corrected value, then verify room creation again; no key value is recorded here.
 
 ## GitHub Pages
 - Owner approved GitHub Pages as temporary preview hosting and enabled it for this repository.
