@@ -2,7 +2,7 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.3 — Lobby, host roles and Spark quota review
-- **Status:** Implemented; local checks passed, emulator validation and production rule deployment pending. Milestone 3.2 live creation/joining confirmed by the owner after correcting the API key.
+- **Status:** Implemented and verified in branch CI; production rules and live 3.3 activation pending. Milestone 3.2 live creation/joining confirmed by the owner after correcting the API key.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.3
@@ -11,6 +11,7 @@
 - Added participant/epoch-scoped connection status via onDisconnect with no application heartbeats, bounded per-connection presence payloads and listener/socket cleanup on lobby exit or failed entry.
 - Added malicious host-transfer/presence rules checks and two-browser UI coverage for disconnect/reconnect, transfers, host departure and socket release.
 - Recorded the Spark budget, monitoring and retention constraints in `docs/FIREBASE_QUOTA.md`. Current official pricing could not be refreshed (cloud proxy 403); reference limits are explicitly marked as planning baselines.
+- Full branch CI passed for `096240c`: https://github.com/BadBagel47/bricks/actions/runs/41942127658 . Includes rules/security tests and real browser rooms, presence, reconnect, transfer, host departure and connection release; Pages deployment was skipped by design. Local lint/build and 98 unit tests passed; the 15 single-player browser tests passed. Local emulator rules upload is still blocked by a cancelled loopback request despite the JAR download now succeeding.
 - New rules must be published before activating the client. CI runs on `milestone-3.3` without deploying Pages; main retains the working 3.2 client until the owner installs the new rules.
 
 ## Completed
@@ -104,7 +105,7 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Complete 3.3 emulator verification, publish reviewed database rules, activate the client and review with the owner.
+- Publish reviewed 3.3 database rules, then push the checked branch to main, verify the published lobby with the owner and stop for review.
 - After acceptance, 3.4 adds shared match settings and approval. Recommend GPT-6.1 Sol Medium for settings authorization and revision/concurrency handling.
 - Stop for review before 3.4. Full multiplayer gameplay is not implemented yet.
 

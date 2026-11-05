@@ -84,8 +84,8 @@ rejects invalid snapshots or changed epochs. Mutation preflight waits up to eigh
 seconds for a database connection before queueing a transaction. A write already
 in flight can still complete after a temporary disconnection; it is not reported
 as cancelled. Presence and transferable host roles are implemented in 3.3; active-tab
-leases and coordinated match recovery remain later milestones. Offline guests can temporarily occupy a slot
-until they return/leave or the owner closes the room.
+leases and coordinated match recovery remain later milestones. Offline guests retain their slot until they return and leave. Automatic eviction
+and recovery of a lobby stranded after a host handover remain future recovery work.
 
 The room screen shows unavailable status and disables Host/Join when Web App
 configuration is missing. GitHub Pages reads the five `VITE_FIREBASE_*` fields

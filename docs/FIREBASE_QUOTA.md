@@ -7,6 +7,8 @@ The reference Spark Realtime Database limits are **100 simultaneous connections*
 not a claim of a fresh pricing lookup: access to firebase.google.com was blocked
 by this cloud environment on 2026-11-05. Confirm the current project allowances
 in the Firebase console before a public launch. Authentication has separate limits.
+Static JS/CSS files are served by GitHub Pages and do not use RTDB download
+allowance. Authentication requests have their own allowances.
 Database downloads include protocol/encryption overhead, reconnects and console
 usage, not just JSON payloads. Spark is not unlimited; exhausting an allowance can
 interrupt the service. No billing or paid backend is enabled by this implementation.
