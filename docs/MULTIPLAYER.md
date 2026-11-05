@@ -312,3 +312,17 @@ Official references:
 - https://firebase.google.com/docs/database/security/core-syntax
 - https://firebase.google.com/docs/database/security/test-rules-emulator
 - https://firebase.google.com/docs/emulator-suite/connect_rtdb
+
+## Disconnected guest follow-up
+
+Closing a tab removes presence but used to retain the guest slot indefinitely.
+The staged follow-up has the connected host wait 30 seconds of observed guest
+absence, then transact a release of that specific guest in the same room epoch.
+Reconnects and any other open tab for the guest cancel the timer. The rules require
+current host authority, unchanged host/ownership/epoch and no guest presence record
+at evaluation time. The grace timer is client policy; rules enforce actual absence,
+not an independently measured 30-second interval. This is lobby cleanup, not active
+match recovery. If the host is also offline there is no cleanup coordinator.
+
+Publish the updated rules before the client. No polling, heartbeat writes or paid
+functions are added. Explicit Leave Lobby still releases the slot immediately.
