@@ -8,7 +8,8 @@
 ## Milestone 3.3
 - Owner confirmed the new database rules are published. Main commit `baa7b30` passed all CI gates and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42000586479 . Live two-browser lobby review remains pending.
 - Rotation review found that I/S/Z collapsed after two states, causing a one-cell pivot snap. These pieces now retain all four geometric pivot positions; targeted engine tests verify half-turn offsets and full-turn return.
-- Rotation pivot correction passed `npm run lint`, `npm run build`, `npm test` (99 passed) and `npm run test:browser` (15 passed); publishing the correction to Pages.
+- Rotation pivot correction passed `npm run lint`, `npm run build`, `npm test` (99 passed) and `npm run test:browser` (15 passed). Main commit `3b5cce9` passed full CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42034248905 .
+- Added root `HANDOVER.md` as the current-session index for owner-approved goals, workflow, current checkpoint/model, deployment/access state, limitations and links to detailed sources. `AGENTS.md` now requires reading and maintaining it at new sessions/checkpoints.
 - Access review: no Google outbound identity is attached, and current tools cannot provision one. Recommended future deployment is a dedicated GitHub Actions identity using Google Workload Identity Federation; setup and limitations are documented in `docs/FIREBASE_ACCESS.md`. No credentials, IAM roles or billing settings were changed.
 - Owner approved lobby/host-role work with explicit free-tier quota optimization.
 - Added atomic host transfer, automatic handover on host leave, and last-player close; immutable reservation ownership survives role changes.
