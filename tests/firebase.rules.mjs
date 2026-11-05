@@ -129,16 +129,56 @@ test('concurrent guest claims allow exactly one second participant', async () =>
   assert.ok(['guest', 'third'].includes(room.players.guest.uid))
 })
 
-test('only the owner can close/reopen; reopening advances the epoch and clears the guest', async () => {
+test('a host cannot evict a guest by closing; the original owner alone reopens closed rooms', async () => {
   const room = await ownedRoom()
   const joined = { ...room, players: { ...room.players, guest: { uid: 'guest', name: 'Guest' } } }
   await set(ref(db('guest'), `rooms/${code}`), joined)
   const closed = { ...room, status: 'closed' }
   await assertFails(set(ref(db('guest'), `rooms/${code}`), closed))
+  await assertFails(set(ref(db('host'), `rooms/${code}`), closed))
+  await remove(ref(db('guest'), `rooms/${code}/players/guest`))
   await assertSucceeds(set(ref(db('host'), `rooms/${code}`), closed))
   await assertFails(set(ref(db('guest'), `rooms/${code}`), joined))
   await assertFails(set(ref(db('host'), `rooms/${code}`), room))
   const reopened = { ...room, epoch: 2 }
   await assertSucceeds(set(ref(db('host'), `rooms/${code}`), reopened))
   await assertFails(set(ref(db('host'), `rooms/${code}`), closed))
+})
+
+
+test('only the current host can transfer to the existing guest; reservation ownership survives host departure', async () => {
+  const room = await ownedRoom()
+  const joined = { ...room, players: { ...room.players, guest: { uid: 'guest', name: 'Guest' } } }
+  await set(ref(db('guest'), `rooms/${code}`), joined)
+  const transferred = { ...joined, hostUid: 'guest', players: { host: joined.players.guest, guest: joined.players.host } }
+  for (const uid of ['guest', 'third']) await assertFails(set(ref(db(uid), `rooms/${code}`), transferred))
+  await assertFails(set(ref(db('host'), `rooms/${code}`), { ...transferred, ownerUid: 'guest' }))
+  await assertFails(set(ref(db('host'), `rooms/${code}`), { ...transferred, players: { ...transferred.players, host: { uid: 'guest', name: 'Spoofed' } } }))
+  await assertSucceeds(set(ref(db('host'), `rooms/${code}`), transferred))
+  await assertFails(set(ref(db('host'), `rooms/${code}`), joined))
+  const alone = { ...transferred, players: { host: transferred.players.host } }
+  await assertSucceeds(set(ref(db('host'), `rooms/${code}`), alone))
+  await assertFails(set(ref(db('host'), `rooms/${code}`), { ...alone, status: 'closed' }))
+  await assertSucceeds(set(ref(db('guest'), `rooms/${code}`), { ...alone, status: 'closed' }))
+  await assertFails(set(ref(db('guest'), `rooms/${code}`), { ...alone, epoch: 2 }))
+  await assertSucceeds(set(ref(db('host'), `rooms/${code}`), { ...room, epoch: 2 }))
+  assert.equal((await get(ref(db('host'), `roomReservations/${code}`))).val().ownerUid, 'host')
+})
+
+test('presence is participant-only, epoch-scoped, bounded and cannot impersonate another player', async () => {
+  const room = await ownedRoom()
+  const path = `presence/${code}/1/host/`
+  const connection = 'a'.repeat(32)
+  await assertSucceeds(set(ref(db('host'), path + connection), true))
+  await assertFails(set(ref(db('guest'), path + connection), true))
+  await assertFails(set(ref(db('guest'), `presence/${code}/1/guest/${connection}`), true))
+  await assertFails(get(ref(db('guest'), `presence/${code}/1`)))
+  await assertFails(set(ref(db('host'), path + connection), { payload: 'unexpected' }))
+  for (const char of ['b','c','d']) await assertSucceeds(set(ref(db('host'), path + char.repeat(32)), true))
+  await assertFails(set(ref(db('host'), path + 'e'.repeat(32)), true))
+  await assertFails(set(ref(db('host'), `presence/${code}/2/host/${connection}`), true))
+  await assertSucceeds(set(ref(db('host'), `rooms/${code}`), { ...room, status: 'closed' }))
+  await assertSucceeds(set(ref(db('host'), `rooms/${code}`), { ...room, epoch: 2 }))
+  await assertFails(get(ref(db('host'), `presence/${code}/1`)))
+  await assertSucceeds(remove(ref(db('host'), path + connection)))
 })

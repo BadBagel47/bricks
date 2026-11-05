@@ -1,0 +1,89 @@
+# Firebase Spark budget
+
+## Limits and verification
+
+The reference Spark Realtime Database limits are **100 simultaneous connections**,
+**1 GB stored**, and **10 GB downloaded per month**. These are planning baselines,
+not a claim of a fresh pricing lookup: access to firebase.google.com was blocked
+by this cloud environment on 2026-11-05. Confirm the current project allowances
+in the Firebase console before a public launch. Authentication has separate limits.
+Database downloads include protocol/encryption overhead, reconnects and console
+usage, not just JSON payloads. Spark is not unlimited; exhausting an allowance can
+interrupt the service. No billing or paid backend is enabled by this implementation.
+
+Official sources:
+- https://firebase.google.com/pricing
+- https://firebase.google.com/docs/database/usage/limits
+- https://firebase.google.com/docs/database/usage/billing
+- https://firebase.google.com/docs/database/web/offline-capabilities
+
+## Implemented in milestone 3.3
+
+- One Firebase app/database instance per tab. Anonymous identity persists; no
+  repeated signups on navigation or forced logouts.
+- No root database listeners, room-list queries, polling or application heartbeat
+  writes. Room metadata and presence are separate, narrowly scoped listeners.
+- Presence writes one boolean under a random per-tab connection ID on connection;
+  `onDisconnect` deletes it server-side. Multiple tabs do not mark each other
+  offline. At most four connection records per participant/epoch are accepted by
+  rules. SDK transport keepalives still exist; this is not zero idle bandwidth.
+- Reconnects register cleanup before publishing presence again. Leaving removes
+  listeners and takes the database offline. Failed joins/creation also take it
+  offline; Retry reconnects explicitly. Menu and single-player need no DB socket.
+- Host-role changes use a bounded room transaction, without copying presence or
+  unrelated data. Only two participants and bounded name/UID/room-code sizes are
+  permitted. Reservation collision retries stop after eight attempts.
+- Presence has no historical timestamps/logs. Empty branches disappear as their
+  connection records are removed. Old-epoch presence cannot be read by a new room
+  epoch. Each identity can remove its own obsolete connection records.
+
+## Retention
+
+Code ownership is intentionally permanent under the approved specification.
+Reservations cannot be deleted/reassigned by the browser, and a closed room retains
+only small lobby metadata needed for reopening the original link. There are no
+stored gameplay snapshots or match logs yet. Automatic deletion of reservations
+would change the promised reuse of saved room links, so it is not implemented.
+Later session payloads must be bounded and pruned by authorized participants,
+while keeping the small code reservation. Spark has no paid scheduled cleanup.
+Clients alone cannot guarantee cleanup when all players disappear permanently.
+
+No strong per-person rate limit exists: someone can create many anonymous accounts
+and rooms. UI restrictions cannot enforce a service-wide quota. Monitor abuse;
+consider App Check separately after compatibility and deployment review.
+
+## Gameplay budget for milestone 3.7
+
+Use an initial cap of **two compact snapshots per second per player**, send only
+when state changes, and handle essential events separately. Keep game simulation
+and input local at their normal frame rate. This lowers scheduled snapshot traffic
+by 60% compared with the earlier five-per-second target. It is a design budget;
+multiplayer snapshot transmission is not implemented in 3.3.
+
+For a conservative model with 700-byte snapshots, two producers, two recipients
+per update, two updates/second and a ten-minute match:
+
+`700 × 2 × 2 × 2 × 600 = 3,360,000 bytes` of JSON deliveries.
+
+This excludes transport overhead, extra events, retries and initial synchronization;
+it is not a measured match cost or a promise of matches per month. Recalculate with
+real payloads and actual RTDB usage before enabling live opponent boards. Never
+send an entire board at every render frame or publish every keypress.
+
+## Operations
+
+The owner can inspect the Database Usage panel at:
+https://console.firebase.google.com/project/bricks-8f56b/database
+
+Record a quiet baseline, then a two-browser lobby session and (once implemented)
+a ten-minute match: connection peak, downloaded bytes and stored bytes before/after.
+Use isolated time windows because aggregate usage includes other visitors. Compare
+many sessions rather than treating one delayed dashboard sample as exact.
+
+Check usage daily during initial public testing and weekly once stable. Review at
+50%, 75% and 90% of monthly download/storage budgets. These are operating thresholds,
+not automated alerts in this app. Plan headroom below 100 connections: 40 normal
+two-player rooms already use about 80 browser connections, and additional tabs,
+admin consoles and reconnects need room. This is capacity planning, not an enforced
+40-room limit. If use approaches limits, reduce updates, pause new-room onboarding
+or review a hosting/backend change with the owner; never upgrade billing silently.

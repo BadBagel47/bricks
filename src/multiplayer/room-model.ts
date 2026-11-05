@@ -46,7 +46,7 @@ function player(value: unknown): value is RoomPlayer {
 }
 
 export function parseRoom(value: unknown): Room {
-  if (!object(value) || value.version !== 1 || typeof value.ownerUid !== 'string' || value.hostUid !== value.ownerUid ||
+  if (!object(value) || value.version !== 1 || typeof value.ownerUid !== 'string' || !value.ownerUid || value.ownerUid.length > 128 || typeof value.hostUid !== 'string' ||
       !Number.isSafeInteger(value.epoch) || (value.epoch as number) < 1 || (value.epoch as number) > 1_000_000_000 ||
       !Number.isSafeInteger(value.createdAt) || (value.createdAt as number) < 0 ||
       (value.status !== 'waiting' && value.status !== 'closed') || !object(value.players) || !player(value.players.host) ||
@@ -69,4 +69,24 @@ export function claimGuest(room: Room, who: RoomPlayer): Room {
   if (room.hostUid === who.uid || room.players.guest?.uid === who.uid) return room
   if (room.players.guest) throw new MultiplayerError('room-full')
   return { ...room, players: { ...room.players, guest: who } }
+}
+
+/** Host authority moves; the immutable reservation owner does not. */
+export function transferHost(room: Room, uid: string): Room {
+  if (room.status !== 'waiting' || room.hostUid !== uid) throw new MultiplayerError('permission')
+  if (!room.players.guest) throw new MultiplayerError('room-not-found')
+  return { ...room, hostUid: room.players.guest.uid, players: { host: room.players.guest, guest: room.players.host } }
+}
+
+export function leaveRoom(room: Room, uid: string): Room {
+  if (room.status !== 'waiting') return room
+  if (room.hostUid === uid) {
+    if (room.players.guest) {
+      const next = transferHost(room, uid)
+      return { ...next, players: { host: next.players.host } }
+    }
+    return { ...room, status: 'closed' }
+  }
+  if (room.players.guest?.uid !== uid) throw new MultiplayerError('session-expired')
+  return { ...room, players: { host: room.players.host } }
 }

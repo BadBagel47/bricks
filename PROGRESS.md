@@ -1,9 +1,17 @@
 # Bricks progress
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
-- **Milestone:** 3.2 — Rooms and invitation links
-- **Status:** Implemented and verified in emulator CI; awaiting live Firebase configuration and owner review.
+- **Milestone:** 3.3 — Lobby, host roles and Spark quota review
+- **Status:** Implemented; local checks passed, emulator validation and production rule deployment pending. Milestone 3.2 live creation/joining confirmed by the owner after correcting the API key.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
+
+## Milestone 3.3
+- Owner approved lobby/host-role work with explicit free-tier quota optimization.
+- Added atomic host transfer, automatic handover on host leave, and last-player close; immutable reservation ownership survives role changes.
+- Added participant/epoch-scoped connection status via onDisconnect with no application heartbeats, bounded per-tab presence records and listener/socket cleanup on lobby exit or failed entry.
+- Added malicious host-transfer/presence rules checks and two-browser UI coverage for disconnect/reconnect, transfers, host departure and socket release.
+- Recorded the Spark budget, monitoring and retention constraints in `docs/FIREBASE_QUOTA.md`. Current official pricing could not be refreshed (cloud proxy 403); reference limits are explicitly marked as planning baselines.
+- New rules must be published before activating the client. CI runs on `milestone-3.3` without deploying Pages; main retains the working 3.2 client until the owner installs the new rules.
 
 ## Completed
 - React + TypeScript + Vite foundation, first-launch player name, main menu, personal-name settings, responsive base layout and original block/text mark.
@@ -90,16 +98,15 @@
 - Engine mechanics are NES-inspired and documented, not cycle-accurate NES emulation.
 - Chromium desktop/mobile viewport, touch-event and simulated gamepad tests passed. Physical devices and subjective audio quality remain unverified here.
 - Touch and gamepad behavior should be checked on the owner's physical devices.
-- Live Firebase setup is reported complete by the owner, but the configured site rebuild and real browser room-flow verification remain pending.
+- Live 3.2 room creation and two-player joining are confirmed by the owner. Updated 3.3 production rules and live lobby verification remain pending.
 - Room flows are implemented. There is no match start or playable multiplayer yet.
-- Presence/disconnect cleanup, host transfer, gameplay snapshot validation, Battle and recovery remain future milestones. Rooms can retain an offline guest slot until that identity leaves or the owner closes the room.
+- Presence and host transfer are implemented in 3.3. Offline players retain their slots; coordinated match recovery, active-control leases, snapshot validation and Battle remain later milestones.
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Rebuild and verify the published room flow against the owner's Spark project; the owner reports Anonymous Auth, database rules and GitHub Actions variables are configured.
-- After the 3.2 review, next is 3.3: lobby and host roles. Recommend GPT-6.1 Sol Medium for host authorization, transfer and presence work; use Luna Medium for later UI-only refinements.
-- Do not infer live room functionality from emulator results; verify the deployed build against the configured Spark project.
-- Stop at the 3.2 review checkpoint before implementing 3.3.
+- Complete 3.3 emulator verification, publish reviewed database rules, activate the client and review with the owner.
+- After acceptance, 3.4 adds shared match settings and approval. Recommend GPT-6.1 Sol Medium for settings authorization and revision/concurrency handling.
+- Stop for review before 3.4. Full multiplayer gameplay is not implemented yet.
 
 ## Git checkpoints
 - `fea6aa4`: initial foundation and Pages deployment.

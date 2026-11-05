@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { claimGuest, inviteURL, normalizeRoomCode, parseRoom, randomRoomCode } from '../src/multiplayer/room-model.ts'
+import { claimGuest, leaveRoom, transferHost, inviteURL, normalizeRoomCode, parseRoom, randomRoomCode } from '../src/multiplayer/room-model.ts'
 import type { Room } from '../src/multiplayer/room-model.ts'
 
 const room: Room = { version: 1, ownerUid: 'host', hostUid: 'host', epoch: 1, status: 'waiting', createdAt: 1, players: { host: { uid: 'host', name: 'Host' } } }
@@ -24,4 +24,17 @@ test('untrusted room snapshots reject extra slots, duplicate identities, malform
     { ...room, players: { ...room.players, guest: { uid: 'host', name: 'Duplicate' } } },
     { ...room, players: { host: { uid: 'host', name: '\nBad' } } },
   ]) assert.throws(() => parseRoom(invalid), { code: 'session-expired' })
+})
+
+test('transfer and host departure preserve code ownership and leave one valid host', () => {
+  const joined = claimGuest(room, { uid: 'guest', name: 'Guest' })
+  assert.throws(() => transferHost(joined, 'guest'), { code: 'permission' })
+  const swapped = parseRoom(transferHost(joined, 'host'))
+  assert.equal(swapped.hostUid, 'guest')
+  assert.equal(swapped.ownerUid, 'host')
+  assert.equal(swapped.players.guest?.uid, 'host')
+  const alone = parseRoom(leaveRoom(joined, 'host'))
+  assert.equal(alone.hostUid, 'guest')
+  assert.equal(alone.players.guest, undefined)
+  assert.equal(parseRoom(leaveRoom(alone, 'guest')).status, 'closed')
 })

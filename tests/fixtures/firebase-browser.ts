@@ -23,3 +23,12 @@ export async function reserve(code: string) {
 export async function ownerOf(code: string): Promise<string> {
   return (await get(ref(client.database, `roomReservations/${code}`))).val().ownerUid
 }
+
+export async function disconnectDatabase() {
+  const { goOffline } = await import('firebase/database')
+  goOffline(client.database)
+}
+export async function reconnectDatabase() {
+  const { goOnline } = await import('firebase/database')
+  goOnline(client.database)
+}

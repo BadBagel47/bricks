@@ -4,6 +4,8 @@ import { readFirebaseConfig } from './config.ts'
 import { MultiplayerError, playerFacingError } from './errors.ts'
 import { inviteURL, previousRoomCode } from './room-model.ts'
 import type { JoinedRoom } from './room-model.ts'
+import { observePresence } from './presence.ts'
+import type { RoomPresence } from './presence.ts'
 import type { Rooms } from './rooms.ts'
 
 function configured() { try { return readFirebaseConfig(import.meta.env) !== null } catch { return false } }
@@ -19,9 +21,12 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
   const [previous, setPrevious] = useState(previousRoomCode)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<MultiplayerError | null>(null)
+  const [presence, setPresence] = useState<RoomPresence>({})
   const [notice, setNotice] = useState('')
   const [copyFallback, setCopyFallback] = useState<string | null>(null)
   const [connected, setConnected] = useState<boolean | null>(null)
+  const currentRoom = useRef(joined)
+  currentRoom.current = joined
   const service = useRef<Promise<Rooms> | null>(null)
   const alive = useRef(true)
   const operation = useRef(0)
@@ -31,7 +36,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
   const available = configured()
 
   useLayoutEffect(() => { heading.current?.focus() }, [joined?.code])
-  useEffect(() => { alive.current = true; return () => { alive.current = false } }, [])
+  useEffect(() => { alive.current = true; return () => { alive.current = false; void service.current?.then(repository => { if (!alive.current) repository.suspend() }) } }, [])
 
   function rooms(): Promise<Rooms> {
     if (!service.current) service.current = Promise.all([import('./firebase-client.ts'), import('./rooms.ts')]).then(([firebase, repository]) => {
@@ -51,7 +56,12 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
         setJoined(result); setCode(result.code); setInvite(result.code); setError(null)
         setPrevious(previousRoomCode())
       }
-    } catch (reason) { if (alive.current && id === operation.current) setError(playerFacingError(reason)) }
+    } catch (reason) {
+      if (alive.current && id === operation.current) {
+        setError(playerFacingError(reason))
+        if (!joined) void service.current?.then(repository => repository.suspend())
+      }
+    }
     finally { if (alive.current && id === operation.current) setBusy(false) }
   }
 
@@ -66,10 +76,12 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
   useEffect(() => {
     if (!joined) return
     let cancelled = false
+    setPresence({}); setConnected(null)
     const stops: (() => void)[] = []
     void rooms().then(repository => {
       if (cancelled) return
       stops.push(repository.connection(setConnected, setError))
+      stops.push(observePresence(repository.database, joined, setPresence, setError))
       stops.push(repository.watch(joined, room => {
         if (room.status === 'closed') {
           retry.current = async () => repository.join(joined.code, username)
@@ -78,7 +90,10 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
         setJoined(current => current?.code === joined.code ? { ...current, room } : current)
       }, reason => { retry.current = async () => repository.join(joined.code, username); setJoined(null); setError(reason) }))
     }).catch(reason => { if (!cancelled) setError(playerFacingError(reason)) })
-    return () => { cancelled = true; stops.forEach(stop => stop()) }
+    return () => {
+      cancelled = true; stops.forEach(stop => stop())
+      void service.current?.then(repository => { if (!alive.current || !currentRoom.current) repository.suspend() })
+    }
     // Watch the room epoch, not every incoming participant update.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [joined?.code, joined?.room.epoch])
@@ -94,13 +109,14 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
     catch { setCopyFallback(value); setNotice('Clipboard is unavailable. Select and copy the text below.') }
   }
 
+  const status = (uid: string) => connected === false ? 'Unknown' : presence[uid] ? 'Connected' : 'Disconnected'
   const isHost = joined?.uid === joined?.room.hostUid
   return <main className="shell">
     <header className="topbar">{branding}<button className="back-button" disabled={busy} onClick={() => void back()}>← Back to menu</button></header>
     <section className="settings-card multiplayer-card" aria-busy={busy}>
       <h1 ref={heading} tabIndex={-1}>{joined ? `Room ${joined.code}` : '2 Players'}</h1>
       {!available && <p className="notice" role="status">Multiplayer is not connected yet.</p>}
-      {error && <div role="alert"><p className="notice">{error.message}</p>{error.firebaseCode && <p className="notice">Firebase error: {error.firebaseCode}</p>}<div className="room-actions">
+      {error && <div role="alert"><p className="notice">{error.message}</p><div className="room-actions">
         {retry.current && <button className="back-button" disabled={busy} onClick={() => void run(retry.current!)}>Retry</button>}
         {!joined && <button className="back-button" onClick={() => { setError(null); input.current?.focus() }}>Edit code</button>}
       </div></div>}
@@ -108,14 +124,18 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
       {copyFallback && <label className="invite-field">Copy text<input readOnly autoFocus value={copyFallback} onFocus={event => event.currentTarget.select()} /></label>}
       {busy && <p role="status">Connecting…</p>}
       {joined ? <>
-        <dl className="room-players"><div><dt>Host</dt><dd>{joined.room.players.host.name}</dd></div><div><dt>Opponent</dt><dd>{joined.room.players.guest?.name ?? 'Waiting for opponent…'}</dd></div></dl>
+        <dl className="room-players"><div><dt>Host</dt><dd><span>{joined.room.players.host.name}</span> · <span>{status(joined.room.players.host.uid)}</span></dd></div><div><dt>Opponent</dt><dd>{joined.room.players.guest ? <><span>{joined.room.players.guest.name}</span> · <span>{status(joined.room.players.guest.uid)}</span></> : 'Waiting for opponent…'}</dd></div></dl>
         {connected === false && <p className="notice" role="status">Unable to connect. Check your connection and try again.</p>}
         <div className="room-actions">
           <button className="back-button" onClick={() => void copy(joined.code, 'Code copied.')}>Copy Code</button>
           <button className="back-button" onClick={() => void copy(inviteURL(joined.code, location.href), 'Invite link copied.')}>Copy Invite Link</button>
         </div>
         <label className="invite-field">Invite link<input readOnly value={inviteURL(joined.code, location.href)} onFocus={event => event.currentTarget.select()} /></label>
-        {isHost && <form className="name-form" onSubmit={event => { event.preventDefault(); void run(async () => (await rooms()).changeCode(joined, code, username)) }}>
+        <div className="room-actions">
+          {isHost && joined.room.players.guest && <button className="back-button" disabled={busy || connected !== true || !presence[joined.room.players.guest.uid]} onClick={() => void run(async () => (await rooms()).transfer(joined))}>Transfer Host</button>}
+          <button className="back-button" disabled={busy} onClick={() => void back()}>Leave Lobby</button>
+        </div>
+        {isHost && joined.uid === joined.room.ownerUid && <form className="name-form" onSubmit={event => { event.preventDefault(); void run(async () => (await rooms()).changeCode(joined, code, username)) }}>
           <label htmlFor="custom-room-code">Room code</label>
           <input autoCapitalize="characters" autoComplete="off" disabled={busy || Boolean(joined.room.players.guest)} id="custom-room-code" maxLength={8} value={code} onChange={event => setCode(event.target.value)} />
           <button className="button button-primary" disabled={busy || Boolean(joined.room.players.guest)} type="submit">Change Code</button>

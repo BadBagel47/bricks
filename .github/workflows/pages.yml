@@ -2,14 +2,14 @@ name: Deploy Bricks to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, milestone-3.3]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: github-pages
+  group: github-pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -59,6 +59,7 @@ jobs:
           path: dist
 
   deploy:
+    if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     permissions:

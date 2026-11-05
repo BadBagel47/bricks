@@ -1,4 +1,34 @@
-# Multiplayer foundation and rooms — milestones 3.1–3.2
+# Multiplayer foundation and rooms — milestones 3.1–3.3
+
+## Milestone 3.3 lobby and quota review
+
+The lobby shows both connection states and permits the current host to transfer
+that role to the existing guest. The transaction swaps the two role slots without
+changing names, reservation owner, timestamp or epoch. Only the original code
+owner can reopen a closed room. An old owner has no host power after transfer.
+Leaving as host hands the role to the remaining player; the last host leaving
+closes the room. Disconnecting marks a player offline, without silently evicting
+their slot or granting another player host power. Full recovery/active-tab leases
+remain milestone 3.12. No settings/approval/Start Match controls are added before
+their respective milestones.
+
+Presence is stored separately at `presence/CODE/EPOCH/UID/CONNECTION_ID`, with a
+boolean record per lobby tab. Writes are authenticated, membership/epoch checked,
+and limited to four records per identity. Reads require current room membership.
+Cleanup is registered with `onDisconnect` before each connection is advertised.
+There are no application heartbeat writes. A failed entry or leaving the room
+disconnects the database; menu and single-player use no database connection.
+
+See [Firebase Spark budget](FIREBASE_QUOTA.md) for quota assumptions, implemented
+traffic limits, retention, operating thresholds and the later snapshot budget.
+
+Deployment order: run emulator/browser CI on `milestone-3.3`, copy its reviewed
+`firebase/database.rules.json` into the production console and publish, then push
+the checked commit to `main`. Branch CI never deploys Pages. Keep the working 3.2
+site live until rules are installed; old tabs must reload before transferred
+roles can be parsed. No Firebase admin credentials are available in this cloud
+instance; production rule installation still requires the owner.
+
 
 The owner approved Phase 3 after the single-player polish review. This milestone
 provides the Firebase boundary, anonymous identity, immutable code reservations,
@@ -20,7 +50,7 @@ Room data currently has this bounded shape:
 ```text
 rooms/CODE
   version: 1
-  ownerUid, hostUid                 # identical until host transfer is added in 3.3
+  ownerUid, hostUid                 # code ownership and current lobby role
   epoch                            # starts at 1; increments on reopen
   status: waiting | closed
   createdAt
@@ -32,15 +62,14 @@ Creation requires an existing reservation owned by the authenticated creator.
 Room reads require an authenticated user who knows the code; they reveal only
 lobby metadata (names, identities, epoch and waiting/closed state). Listing rooms
 is denied. This limited pre-join read permits atomic join transactions and clear
-not-found/closed/full errors. Sessions and presence remain denied; there is no
-gameplay data at this path.
+not-found/closed/full errors. Sessions remain denied; presence uses its separate participant-only path.
 
 Joining never creates a room. Root transactions and complete old-to-new rules
 permit one distinct guest and protect the host, owner, timestamp and epoch. Two
 concurrent joins cannot both claim the guest slot. An already joined UID can
-return after reload. A guest can release only their own slot. The owner closes
-the room on explicit exit and may reopen the same code with an incremented epoch
-and no guest. Old-epoch leave requests cannot close a newly reopened room.
+return after reload. A guest can release only their own slot. The last host closes the room on explicit exit. Leaving while a guest remains
+transfers the host role. The original owner may reopen a closed room with an
+incremented epoch and no guest. Old-epoch leave requests cannot close a newly reopened room.
 
 A host may change code only while the room has no guest. The target code is
 reserved first, then a transaction closes the original room only if it is still
@@ -54,8 +83,8 @@ Another UID cannot reopen it even if they copy that value. The room listener
 rejects invalid snapshots or changed epochs. Mutation preflight waits up to eight
 seconds for a database connection before queueing a transaction. A write already
 in flight can still complete after a temporary disconnection; it is not reported
-as cancelled. Presence, disconnect cleanup, transferable host roles and active-tab
-leases belong to later milestones. Offline guests can temporarily occupy a slot
+as cancelled. Presence and transferable host roles are implemented in 3.3; active-tab
+leases and coordinated match recovery remain later milestones. Offline guests can temporarily occupy a slot
 until they return/leave or the owner closes the room.
 
 The room screen shows unavailable status and disables Host/Join when Web App
@@ -247,14 +276,14 @@ changes reservation ownership.
 
 Gameplay stays local and uses the engine's deterministic seed stream. Future
 network code sends compact snapshots at a capped rate (initial target: at most
-five per second), plus important events; it must never send every frame or
+two per second), plus important events; it must never send every frame or
 keypress. Server rules will bound payload shape, board size, counters and identity.
 A timestamp is not proof of fair play. Client-reported scores and elimination
 times remain untrusted; this architecture cannot guarantee cheat-proof matches.
 
-Presence will use `.info/connected` and `onDisconnect`, with separate connection
-IDs and a transactional active-control lease to prevent two tabs from controlling
-one participant. Reconnection gets approximately 30 seconds. Recovery must check
+Presence uses `.info/connected` and `onDisconnect` with separate connection IDs.
+A transactional active-control lease to prevent two tabs controlling one player
+remains future work before active matches. Reconnection gets approximately 30 seconds. Recovery must check
 the room epoch, session ID, identity and valid saved snapshot before resuming both
 players. Otherwise the match becomes Abandoned and earns no competitive result.
 
