@@ -7,11 +7,11 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 ## Current checkpoint — 2026-11-05
 
 - **Phase 3, milestone 3.3:** Lobby, host roles, presence and free-tier review.
-- **Live:** https://badbagel47.github.io/bricks/?v=3b5cce9
-- **Deployed app source:** `3b5cce9` — pivot-preserving rotations for symmetric pieces.
-- **CI / Pages:** https://github.com/BadBagel47/bricks/actions/runs/42034248905
+- **Live:** https://badbagel47.github.io/bricks/?v=a81a25d
+- **Deployed app source:** `a81a25d` — release disconnected lobby guests after 15 seconds when the host remains online (includes the previous rotation correction).
+- **CI / Pages:** https://github.com/BadBagel47/bricks/actions/runs/42058999029
 - **Status:** 3.3 and its database rules were published; the owner confirmed room creation/joining on 3.2. The latest site build is deployed. Owner review of the 3.3 lobby and rotation correction is still pending.
-- **Next:** Owner confirmed the disconnected-guest cleanup rules published. Activate the verified 15-second client on main, then check the live flow: keep the host open, close the guest tab, wait for the slot to be freed and join with another identity. Branch CI passed for `5c1f00a`: https://github.com/BadBagel47/bricks/actions/runs/42058132481 . Stop at 3.3 review; do not begin 3.4 until explicitly approved.
+- **Next:** The owner confirmed the updated guest-cleanup rules published, and main CI deployed the client successfully. Check the live flow: reload the host on the latest version, close the guest tab, wait for the slot to be freed and join with another identity. Cleanup waits 15 seconds after absence is detected and requires a connected host. Stop at 3.3 review; do not begin 3.4 until explicitly approved.
 - **Next model if approved:** GPT-6.1 Sol Medium for shared settings authorization and revision/concurrency. Recommend again at the start of that milestone.
 
 ## Product direction and durable constraints
