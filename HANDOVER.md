@@ -11,7 +11,7 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 - **Deployed app source:** `3b5cce9` — pivot-preserving rotations for symmetric pieces.
 - **CI / Pages:** https://github.com/BadBagel47/bricks/actions/runs/42034248905
 - **Status:** 3.3 and its database rules were published; the owner confirmed room creation/joining on 3.2. The latest site build is deployed. Owner review of the 3.3 lobby and rotation correction is still pending.
-- **Next:** Finish the disconnected-guest fix staged on `milestone-3.3`: owner closes guest tab, so membership remains despite presence removal. New host-driven 15-second cleanup requires updated rules before client activation; Full CI passed for the 15-second version `5c1f00a`: https://github.com/BadBagel47/bricks/actions/runs/42058132481 . Publish the staged rules, then record confirmation in a normal commit and push main to activate. Stop at the 3.3 review checkpoint. Do not begin 3.4 until explicitly approved.
+- **Next:** Owner confirmed the disconnected-guest cleanup rules published. Activate the verified 15-second client on main, then check the live flow: keep the host open, close the guest tab, wait for the slot to be freed and join with another identity. Branch CI passed for `5c1f00a`: https://github.com/BadBagel47/bricks/actions/runs/42058132481 . Stop at 3.3 review; do not begin 3.4 until explicitly approved.
 - **Next model if approved:** GPT-6.1 Sol Medium for shared settings authorization and revision/concurrency. Recommend again at the start of that milestone.
 
 ## Product direction and durable constraints
