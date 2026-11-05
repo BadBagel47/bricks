@@ -11,7 +11,7 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 - **Deployed app source:** `72da24e` — shared match settings, private drafts and role/revision-bound approval (includes earlier lobby cleanup and rotation corrections).
 - **CI / Pages:** https://github.com/BadBagel47/bricks/actions/runs/42097090846
 - **Status:** 3.4 is published on Pages after successful main CI for `72da24e`. The owner confirmed updated database rules published. Lint/build and 101 unit tests passed locally; full CI verified security, settings UI and existing lobby/gameplay regressions. Production two-session owner review remains pending.
-- **Next:** Owner requested removal of the custom room-code editor and four-character random codes. Changes are staged on milestone-3.4; full CI passed for `b14e533`: https://github.com/BadBagel47/bricks/actions/runs/42128209110 . Preserve old longer room links. Publish the new rules before activating the client (currently no Google admin identity). Stop for 3.4 review before 3.5.
+- **Next:** Owner requested removal of the custom room-code editor and four-character random codes. Changes are staged on milestone-3.4; full CI passed for `b14e533`: https://github.com/BadBagel47/bricks/actions/runs/42128209110 . Preserve old longer room links. Owner confirmed the short-code rules published; main activation in progress (no Google admin identity is attached). Stop for 3.4 review before 3.5.
 
 - **Next model if approved:** GPT-6.1 Sol Medium for the 3.5 host-configuration waiting state and synchronization; Luna Medium for isolated UI-only polish.
 
