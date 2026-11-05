@@ -7,11 +7,11 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 ## Current checkpoint — 2026-11-05
 
 - **Phase 3, milestone 3.4:** Shared match settings and approval (approved).
-- **Live:** https://badbagel47.github.io/bricks/?v=a81a25d
-- **Deployed app source:** `a81a25d` — release disconnected lobby guests after 15 seconds when the host remains online (includes the previous rotation correction).
-- **CI / Pages:** https://github.com/BadBagel47/bricks/actions/runs/42058999029
-- **Status:** 3.4 is implemented on `milestone-3.4`. Lint/build and 101 unit tests passed locally. Full branch CI passed for `cdebc0c`: https://github.com/BadBagel47/bricks/actions/runs/42062286973 . It covers host drafts, no-op/cancel preservation, published-change invalidation, role-bound approval and existing lobby/security/browser regressions. Public site is still 3.3.
-- **Next:** Owner confirmed the 3.4 rules published. Main activation is in progress; wait for successful Pages CI before claiming it live. Old clients need to reload; roleRevision is now required on host handover. Verify live 3.4 with two sessions and stop before 3.5. No match start/gameplay is implemented yet.
+- **Live:** https://badbagel47.github.io/bricks/?v=72da24e
+- **Deployed app source:** `72da24e` — shared match settings, private drafts and role/revision-bound approval (includes earlier lobby cleanup and rotation corrections).
+- **CI / Pages:** https://github.com/BadBagel47/bricks/actions/runs/42097090846
+- **Status:** 3.4 is published on Pages after successful main CI for `72da24e`. The owner confirmed updated database rules published. Lint/build and 101 unit tests passed locally; full CI verified security, settings UI and existing lobby/gameplay regressions. Production two-session owner review remains pending.
+- **Next:** Reload both clients, then review edit/apply/cancel, optional approval, revocation after effective changes and host transfers. Role generation prevents approval revival after repeated transfers. Stop at 3.4 review; do not start 3.5 until approved. No match start/gameplay is implemented yet.
 
 - **Next model if approved:** GPT-6.1 Sol Medium for the 3.5 host-configuration waiting state and synchronization; Luna Medium for isolated UI-only polish.
 

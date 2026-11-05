@@ -2,11 +2,11 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.4 — Shared match settings and approval
-- **Status:** Owner confirmed 3.4 rules published; activating the verified client on main. Live two-session review remains pending.
+- **Status:** 3.4 published on Pages after successful main CI; owner reports updated rules published. Awaiting live two-session review before 3.5.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.4
-- Owner confirmed the new settings/approval rules published; main deployment in progress.
+- Owner confirmed the new settings/approval rules published. Main commit `72da24e` passed full CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42097090846 .
 - Owner approved proceeding after the published 15-second guest-cleanup correction.
 - Implemented private host drafts, Apply/Cancel, revisioned Score Duel/Battle mode, level 00–19, Hold and optional guest approval. No-op publication does not write or invalidate approval.
 - Added guest-only approval bound to settings revision, player identities and an incrementing host-role generation; transferring twice cannot revive old approval. Old rooms treat absent roleRevision as zero.
@@ -120,7 +120,7 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Finish 3.4 branch CI, publish reviewed rules via the owner, activate the client on main, and review with two live sessions.
+- Review the published 3.4 client with two live sessions: edit/apply/cancel settings, guest approval, published-change invalidation and host transfer.
 - Stop before 3.5 until approved. Recommend GPT-6.1 Sol Medium for synchronization; multiplayer gameplay remains later milestones.
 
 ## Git checkpoints
