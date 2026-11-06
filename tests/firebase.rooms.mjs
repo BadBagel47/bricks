@@ -374,7 +374,7 @@ test('two sessions play independently, mirror compact boards and scores, contain
     assert.ok(plan.score > 0)
     const keyFor = { rotateClockwise: 'KeyX', moveLeft: 'ArrowLeft', moveRight: 'ArrowRight', hardDrop: 'Space' }
     for (const action of plan.actions) await host.keyboard.press(keyFor[action])
-    await host.waitForFunction(({ gu, score }) => document.querySelector('[aria-label="Your game"] .live-stats dd')?.textContent === score.toLocaleString(), { gu, score: plan.score })
+    await host.waitForFunction(score => document.querySelector('[aria-label="Your game"] .live-stats dd')?.textContent === score.toLocaleString(), plan.score)
     await guest.waitForFunction(score => document.querySelector('[aria-label="Opponent game"] .live-stats dd')?.textContent === score.toLocaleString(), plan.score)
     state = await data()
     const beforeHost = state.snapshots[hu].board
