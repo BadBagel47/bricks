@@ -364,6 +364,19 @@ test('two sessions play independently, mirror compact boards and scores, contain
     await guest.goto(invite); await name(guest, 'Live Guest'); await roomHeading(guest, /^Room /)
     await host.getByRole('button', { name: 'Start Match', exact: true }).click()
     for (const page of [host, guest]) await page.getByRole('main', { name: 'Multiplayer game', exact: true }).waitFor()
+    for (const viewport of [{ width: 320, height: 667 }, { width: 390, height: 844 }, { width: 844, height: 390 }]) {
+      await guest.setViewportSize(viewport)
+      const fit = await guest.evaluate(() => {
+        const screen = document.querySelector('.multiplayer-game')
+        const boards = [...screen.querySelectorAll('.playfield')].map(node => node.getBoundingClientRect())
+        const buttons = [...screen.querySelectorAll('.touch-button')].map(node => node.getBoundingClientRect())
+        return { height: screen.clientHeight, scroll: screen.scrollHeight, fits: [...boards, ...buttons].every(r => r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= innerHeight), touchSize: buttons.every(r => r.width >= 48 && r.height >= 48) }
+      })
+      assert.equal(fit.fits, true, JSON.stringify({ viewport, fit }))
+      assert.equal(fit.touchSize, true)
+      assert.ok(fit.scroll <= fit.height + 1, JSON.stringify({ viewport, fit }))
+    }
+    await guest.setViewportSize({ width: 390, height: 844 })
     const data = () => host.evaluate(async code => (await import('/tests/fixtures/firebase-browser.ts')).matchData(code), code)
     const deadline = Date.now() + 10000
     let state

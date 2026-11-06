@@ -162,7 +162,7 @@ export default function LiveGame({ database, joined, start, options, onLeave }: 
       </div>
       {!(controller && personal.hideTouchControlsWhenController) && <TouchControls method={personal.mobileControlMethod} buttonSize={personal.touchButtonSize} leftHanded={personal.leftHandedControls} holdEnabled={game.holdEnabled} hardDropEnabled={game.hardDropEnabled} enabled={!finished && !error && !confirm} apply={apply} />}
       <p className="control-hint">Esc / {bindings.pause.replace('Key', '')}: leave match · Multiplayer keeps running while this menu is open.</p>
-      <p className="sr-only" role="status">{announcement}</p>
+      <p className="visually-hidden" role="status">{announcement}</p>
       {error && <p role="alert">{error}</p>}
       {(finished || error) && <button className="back-button" disabled={leaving} onClick={() => setConfirm(true)}>Return to lobby</button>}
     </main>
