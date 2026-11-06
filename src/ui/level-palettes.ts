@@ -8,6 +8,7 @@ const palettes: readonly Record<PieceType, string>[] = [
   { I: '#94e1ff', O: '#ffe58a', T: '#e3a1ff', S: '#a8ee88', Z: '#ff9d8f', J: '#91aaff', L: '#ffd092' },
 ]
 
-export function colorForPiece(type: PieceType, level: number): string {
+export function colorForPiece(type: PieceType | 'G', level: number): string {
+  if (type === 'G') return '#8c9487'
   return palettes[level % palettes.length][type]
 }

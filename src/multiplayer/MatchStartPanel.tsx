@@ -74,7 +74,7 @@ export default function MatchStartPanel({ options, database, joined, settings, a
   }
   const ready = start?.status === 'ready' && valid && connected
   const selected = start && localConnection === (host ? start.hostConnection : start.guestConnection)
-  if (ready && selected) return <LiveGame key={start.id} database={database} joined={joined} start={start} options={options} onLeave={() => transitionMatchStart(database, joined, start.id, 'cancelled')} />
+  if (ready && selected && (start.settings.mode !== 'battle' || start.battleVersion === 1)) return <LiveGame key={start.id} database={database} joined={joined} start={start} options={options} serverTimeOffset={offset ?? 0} onLeave={() => transitionMatchStart(database, joined, start.id, 'cancelled')} />
   const bothConnected = Boolean(connections && localConnection && connections[joined.room.hostUid]?.[localConnection] && joined.room.players.guest && Object.keys(connections[joined.room.players.guest.uid] ?? {}).length)
   const canStart = host && loaded && connected && offset !== null && bothConnected && !editing && !otherEditors && (!settings.requireApproval || approved)
   return <section aria-label="Match start">
@@ -83,6 +83,7 @@ export default function MatchStartPanel({ options, database, joined, settings, a
       <h2>{ready ? 'Match in progress' : 'Starting match'}</h2>
       <p>{start.settings.mode === 'battle' ? 'Battle' : 'Score Duel'} · Level {String(start.settings.startLevel).padStart(2, '0')} · Hold {start.settings.hold ? 'on' : 'off'}</p>
       {start.status === 'countdown' && <p role="status" aria-label="Countdown">{offset === null ? 'Synchronizing…' : countdownSeconds(start, now + offset) || 'Starting…'}</p>}
+      {active && start.settings.mode === 'battle' && start.battleVersion !== 1 && <p role="status">Battle has been updated. Return to the lobby and start a new match.</p>}
       {ready && !selected && <p role="status">This match is controlled by another tab.</p>}
       {!connected && <p role="status">Start interrupted. Reconnecting…</p>}
       <button className="back-button" disabled={!connected || busy} onClick={() => void cancel()}>{start.status === 'ready' ? 'Return to lobby' : 'Cancel start'}</button>

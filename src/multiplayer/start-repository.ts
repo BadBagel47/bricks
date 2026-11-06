@@ -11,7 +11,7 @@ export async function createMatchStart(database: Database, joined: JoinedRoom, s
   const guestUid = joined.room.players.guest?.uid
   const guestConnection = guestUid && Object.keys(connections[guestUid] ?? {}).sort().find(key => connections[guestUid][key])
   if (joined.uid !== joined.room.hostUid || !guestUid || !guestConnection || connections[joined.uid]?.[localConnection] !== true) throw new MultiplayerError('permission')
-  const proposal = { id: crypto.randomUUID().replaceAll('-', ''), status: 'countdown', seed: crypto.getRandomValues(new Uint32Array(1))[0], countdownAt: serverTimestamp(), settings: { ...settings }, roleRevision: joined.room.roleRevision ?? 0, hostUid: joined.uid, guestUid, hostConnection: localConnection, guestConnection }
+  const proposal = { ...(settings.mode === 'battle' ? { battleVersion: 1 } : {}), id: crypto.randomUUID().replaceAll('-', ''), status: 'countdown', seed: crypto.getRandomValues(new Uint32Array(1))[0], countdownAt: serverTimestamp(), settings: { ...settings }, roleRevision: joined.room.roleRevision ?? 0, hostUid: joined.uid, guestUid, hostConnection: localConnection, guestConnection }
   const result = await runTransaction(ref(database, startPath(joined)), value => value === null || parseMatchStart(value)?.status === 'cancelled' ? proposal : undefined, { applyLocally: false })
   if (!result.committed) throw new MultiplayerError('permission')
 }

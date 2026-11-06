@@ -12,7 +12,7 @@ test('compact visible boards round trip all cells and include the falling piece 
   assert.equal(decodeBoard(encoded).flat().filter(Boolean).length, 4)
   assert.equal(JSON.stringify(game), before)
   assert.throws(() => decodeBoard('0'.repeat(199)))
-  assert.throws(() => decodeBoard('8'.repeat(200)))
+  assert.throws(() => decodeBoard('9'.repeat(200)))
 })
 
 test('snapshots omit physics counters, throttle rapid input, suppress unchanged writes and send final state once', () => {

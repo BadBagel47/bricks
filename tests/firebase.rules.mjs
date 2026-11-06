@@ -309,7 +309,7 @@ test('live snapshots are bounded, participant-owned, current-match-bound, rate-l
   await assertFails(set(ref(db(), `${base}/host`), payload))
   await assertFails(set(ref(db('third'), `${base}/third`), { ...payload, connection: gc }))
   await assertFails(set(ref(db('host'), `gameSnapshots/${code}/2/host`), payload))
-  for (const bad of [{ ...payload, matchId: 'd'.repeat(32) }, { ...payload, connection: gc }, { ...payload, seq: 2 }, { ...payload, board: '0'.repeat(201) }, { ...payload, board: '8'.repeat(200) }, { ...payload, extra: 'spam' }, { ...payload, score: -1 }, { ...payload, level: 1.5 }, { ...payload, held: 'X' }, { ...payload, updatedAt: 1 }]) await assertFails(set(location, bad))
+  for (const bad of [{ ...payload, matchId: 'd'.repeat(32) }, { ...payload, connection: gc }, { ...payload, seq: 2 }, { ...payload, board: '0'.repeat(201) }, { ...payload, board: '9'.repeat(200) }, { ...payload, extra: 'spam' }, { ...payload, score: -1 }, { ...payload, level: 1.5 }, { ...payload, held: 'X' }, { ...payload, updatedAt: 1 }]) await assertFails(set(location, bad))
   await assertSucceeds(set(location, payload))
   await assertSucceeds(get(ref(db('guest'), `${base}/host`)))
   await assertFails(get(ref(db('third'), base)))
@@ -329,4 +329,69 @@ test('live snapshots are bounded, participant-owned, current-match-bound, rate-l
   await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), matchPath), { ...ready, id: 'e'.repeat(32) }) })
   await assertFails(set(location, { ...payload, seq: 4 }))
   await assertSucceeds(set(location, { ...payload, matchId: 'e'.repeat(32) }))
+})
+
+test('Battle start requires the new frozen protocol marker; old clients cannot start penalty-free Battle', async () => {
+  const room = await ownedRoom()
+  await set(ref(db('guest'), `rooms/${code}`), { ...room, players: { ...room.players, guest: { uid: 'guest', name: 'Guest' } } })
+  const hc = 'b'.repeat(32), gc = 'c'.repeat(32)
+  await set(ref(db('host'), `presence/${code}/1/host/${hc}`), true)
+  await set(ref(db('guest'), `presence/${code}/1/guest/${gc}`), true)
+  const settings = { revision: 1, mode: 'battle', startLevel: 0, hold: false, requireApproval: false }
+  await set(ref(db('host'), `matchSettings/${code}/1/config`), settings)
+  const proposal = { id: 'a'.repeat(32), status: 'countdown', seed: 47, countdownAt: serverTimestamp(), settings, roleRevision: 0, hostUid: 'host', guestUid: 'guest', hostConnection: hc, guestConnection: gc }
+  const path = `matchStarts/${code}/1`
+  await assertFails(set(ref(db('host'), path), proposal))
+  await assertFails(set(ref(db('host'), path), { ...proposal, battleVersion: 2 }))
+  await assertSucceeds(set(ref(db('host'), path), { ...proposal, battleVersion: 1 }))
+  const current = (await get(ref(db('host'), path))).val()
+  await assertFails(set(ref(db('host'), path), { ...current, battleVersion: 2, status: 'cancelled' }))
+  await assertSucceeds(set(ref(db('guest'), path), { ...current, status: 'cancelled' }))
+  await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), path), { ...proposal, countdownAt: Date.now() - 6000 }) })
+  const legacy = (await get(ref(db('host'), path))).val()
+  await assertFails(set(ref(db('host'), path), { ...legacy, status: 'ready' }))
+  await assertSucceeds(set(ref(db('guest'), path), { ...legacy, status: 'cancelled' }))
+})
+
+test('Battle attack prefixes and finishes enforce ownership, current session, rate, monotonicity and elimination', async () => {
+  const hc = 'b'.repeat(32), gc = 'c'.repeat(32), mid = 'a'.repeat(32)
+  const room = await ownedRoom()
+  await set(ref(db('guest'), `rooms/${code}`), { ...room, players: { ...room.players, guest: { uid: 'guest', name: 'Guest' } } })
+  const ready = { id: mid, battleVersion: 1, status: 'ready', seed: 47, countdownAt: Date.now() - 10000, settings: { revision: 1, mode: 'battle', startLevel: 0, hold: false, requireApproval: false }, roleRevision: 0, hostUid: 'host', guestUid: 'guest', hostConnection: hc, guestConnection: gc }
+  await environment.withSecurityRulesDisabled(async context => {
+    await set(ref(context.database(), `matchStarts/${code}/1`), ready)
+    await set(ref(context.database(), `presence/${code}/1`), { host: { [hc]: true }, guest: { [gc]: true } })
+  })
+  const path = `battleAttacks/${code}/1/host`
+  const attack = { matchId: mid, connection: hc, seq: 1, total: 4, updatedAt: serverTimestamp() }
+  for (const uid of [null, 'guest', 'third']) await assertFails(set(ref(db(uid), path), attack))
+  for (const bad of [{ ...attack, matchId: 'd'.repeat(32) }, { ...attack, connection: gc }, { ...attack, total: 0 }, { ...attack, total: 1000001 }, { ...attack, extra: true }, { ...attack, seq: 2 }, { ...attack, updatedAt: 1 }]) await assertFails(set(ref(db('host'), path), bad))
+  await assertSucceeds(set(ref(db('host'), path), attack))
+  await assertSucceeds(get(ref(db('guest'), path)))
+  await assertFails(get(ref(db('third'), path)))
+  await assertFails(get(ref(db('host'), 'battleAttacks')))
+  await assertFails(remove(ref(db('host'), path)))
+  await assertFails(set(ref(db('host'), path), { ...attack, seq: 2, total: 8 }))
+  await new Promise(resolve => setTimeout(resolve, 550))
+  await assertFails(set(ref(db('host'), path), { ...attack, seq: 2, total: 3 }))
+  await assertSucceeds(set(ref(db('host'), path), { ...attack, seq: 2, total: 8 }))
+  const gp = `gameSnapshots/${code}/1/guest`
+  const guestSnapshot = { matchId: mid, connection: gc, seq: 1, board: '8'.repeat(200), next: 'T', held: '-', status: 'gameOver', score: 0, level: 0, lines: 0, updatedAt: serverTimestamp() }
+  await assertSucceeds(set(ref(db('guest'), gp), guestSnapshot))
+  await new Promise(resolve => setTimeout(resolve, 550))
+  await assertFails(set(ref(db('host'), path), { ...attack, seq: 3, total: 9 }))
+  const finish = { matchId: mid, connection: gc, frame: 30, sent: 0, received: 8, applied: 6, cancelled: 2, updatedAt: serverTimestamp() }
+  const fp = `battleFinishes/${code}/1/guest`
+  await assertFails(set(ref(db('host'), fp), finish))
+  await assertFails(set(ref(db('third'), fp), finish))
+  for (const bad of [{ ...finish, connection: hc }, { ...finish, sent: 1 }, { ...finish, received: 9 }, { ...finish, applied: 7 }, { ...finish, frame: -1 }, { ...finish, frame: 1000000000 }, { ...finish, extra: true }]) await assertFails(set(ref(db('guest'), fp), bad))
+  await assertSucceeds(set(ref(db('guest'), fp), finish))
+  await assertSucceeds(get(ref(db('host'), fp)))
+  await assertFails(get(ref(db('third'), fp)))
+  await assertFails(set(ref(db('guest'), fp), { ...finish, frame: 60 }))
+  await assertFails(remove(ref(db('guest'), fp)))
+  await assertFails(set(ref(db('guest'), `battleAttacks/${code}/1/guest`), { ...attack, connection: gc }))
+  await assertFails(set(ref(db('host'), `battleFinishes/${code}/1/host`), { ...finish, connection: hc, sent: 8, received: 0, applied: 0, cancelled: 0 }))
+  await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), `matchStarts/${code}/1`), { ...ready, status: 'cancelled' }) })
+  await assertFails(set(ref(db('host'), path), { ...attack, seq: 3, total: 10 }))
 })

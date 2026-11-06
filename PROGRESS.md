@@ -1,9 +1,17 @@
 # Bricks progress
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
-- **Milestone:** 3.8 — Score Duel
-- **Status:** 3.8 published on Pages from `a3db2c0`. Full main CI and deployment passed: https://github.com/BadBagel47/bricks/actions/runs/42296466728 . No Firebase rules changed; no manual playtest is required at this checkpoint.
+- **Milestone:** 3.9 — Battle penalties
+- **Status:** 3.9 authorized and implemented; local lint/build, 119 unit tests and 15 production single-player browser checks passed. Full Firebase/two-session validation pending. Production stays on 3.8 until checked rules are published.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
+
+## Milestone 3.9
+- Owner authorized Battle penalties while retaining consolidated manual playtesting. Multi-clears generate 0/1/2/4 rows for 1/2/3/4 lines. Outgoing rows cancel the oldest queued incoming rows, then remaining incoming rows rise at the lock/clear boundary. No combo/T-spin/drop bonuses.
+- Added pure Battle adapter over the existing engine: cumulative incoming-prefix deduplication, bounded numeric queues, overflow/collision Game Over, grey garbage with one independently seeded hole per row, and no piece-stream consumption. Inputs and gravity use a shared server-clock-anchored 60 Hz timeline; catch-up records the exact simulated elimination frame.
+- Added bounded per-player attack prefixes and immutable finishes. Each row's unique identity is (match ID, sender UID, ordinal); overwritten cumulative prefixes recover skipped/coalesced updates without duplicate application or growing history. Attacks stop at the server once either participant is eliminated. Race with an opponent's final snapshot suppresses unsent rows rather than failing board synchronization.
+- Both players continue to Game Over; confirmed elimination frames determine survival victory or a draw. A higher-scoring player can lose by finishing first. Basic queue/sent/applied/cancelled counters and survival outcome are shown; full result persistence/highscores/rematches remain later milestones.
+- Battle protocol marker prevents old clients from silently starting Battle without penalties. Legacy starts remain cancellable and show a restart instruction in the new client. Score Duel retains its snapshot schema and existing rules; Battle allows the grey-cell encoding and adds two participant-only paths.
+- Local lint/build, 119 unit tests and 15 production single-player Chromium checks passed. Full security/real two-session tests pending CI. Stage on milestone-3.9; new reviewed rules must be installed before main activation. No administrator identity is attached.
 
 ## Milestone 3.8
 - Main `a3db2c0` passed complete CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42296466728 . Includes two-session survivor continuation, victory by points despite earlier Game Over, acknowledged final states, stable terminal snapshots, reciprocal win/loss, zero draw, fresh-match reset and keyboard exit. Live: https://badbagel47.github.io/bricks/?v=a3db2c0 .
@@ -157,8 +165,8 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- 3.8 is published and verified. Manual playtesting may wait for a larger checkpoint; no Firebase rule publication was needed.
-- Next milestone 3.9 is Battle penalties; recommend GPT-6.1 Sol Medium.
+- Finish 3.9 automated security/two-session checks and have the owner install the checked rules before activating the staged client. No manual game review is required now.
+- Next milestone 3.10 is match results and highscores; recommend GPT-6.1 Sol Medium.
 
 ## Git checkpoints
 - `fea6aa4`: initial foundation and Pages deployment.

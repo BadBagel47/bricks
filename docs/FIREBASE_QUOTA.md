@@ -104,3 +104,20 @@ Actual download quota usage must be checked in the Firebase console; this is a
 protocol budget, not a verified billed-traffic estimate. Retention remains two
 latest records per room epoch, not a per-frame or per-match history. Old room
 epochs are not automatically pruned yet.
+
+### 3.9 Battle traffic
+
+Boards retain the existing <=2 changed snapshots/second/player and compact 200-cell
+encoding. Battle adds one <=250-byte cumulative attack record/player, written only
+when net outgoing rows exist and at most once per >=500 ms publisher cycle. It
+also adds one small finish record/player/match. There are no per-row events,
+heartbeat writes or growing attack histories. Receivers add two participant-scoped
+listeners (opponent attack prefix and finish); Score Duel adds none.
+
+During sustained attacking, the maximum is two board plus two attack writes per
+second/player, with event-driven preflight reads for the attack transaction. Thus
+Battle has more traffic than the earlier board-only budget. Actual read/transaction
+retry/transport overhead and billed downloads have not been measured in production;
+monitor Firebase usage before expanding public access. Latest records overwrite
+per room epoch; old epochs are still not automatically pruned. No paid service,
+Functions or billing change was introduced.

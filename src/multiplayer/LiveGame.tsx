@@ -1,5 +1,8 @@
+import { BattleGame, battleOutcome } from '../engine/battle.ts'
+import { battlePath, parseAttackStream, parseBattleFinish, publishBattleFinish, sendAttacks } from './battle-repository.ts'
+import type { BattleFinish } from './battle-repository.ts'
 import { scoreDuelOutcome } from './score-duel.ts'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { onValue, ref, serverTimestamp, set } from 'firebase/database'
 import type { Database } from 'firebase/database'
@@ -17,10 +20,18 @@ import type { MatchStart } from './match-start.ts'
 import type { LiveOptions } from './live-options.ts'
 import './live-game.css'
 
-export default function LiveGame({ database, joined, start, options, onLeave }: { database: Database; joined: JoinedRoom; start: MatchStart; options: LiveOptions; onLeave: () => Promise<void> }) {
+export default function LiveGame({ database, joined, start, options, serverTimeOffset, onLeave }: { database: Database; joined: JoinedRoom; start: MatchStart; options: LiveOptions; serverTimeOffset: number; onLeave: () => Promise<void> }) {
   const { preferences: { personal, bindings, gamepadBindings }, audio, onPlaying } = options
   const [game, setGame] = useState(() => createGame({ seed: start.seed, startLevel: start.settings.startLevel, holdEnabled: start.settings.hold, hardDropEnabled: personal.hardDropEnabled }))
   const current = useRef(game)
+  const battle = start.settings.mode === 'battle'
+  const [battleGame] = useState(() => battle ? new BattleGame(game, start.seed, joined.uid === start.hostUid ? 'guest' : 'host') : null)
+  const [clock] = useState(() => ({ at: performance.now(), elapsed: Date.now() + serverTimeOffset - start.countdownAt - 5000 }))
+  const battleFrame = useCallback(() => Math.max(0, Math.floor((clock.elapsed + performance.now() - clock.at) * 60 / 1000)), [clock])
+  const [otherFinish, setOtherFinish] = useState<BattleFinish | null>(null)
+  const [ownFinishFrame, setOwnFinishFrame] = useState<number | null>(null)
+  const [sentRows, setSentRows] = useState(0)
+  const [, refreshBattle] = useState(0)
   const [opponent, setOpponent] = useState<GameSnapshot | null>(null)
   const [error, setError] = useState('')
   const [publishedFinal, setPublishedFinal] = useState<Pick<GameSnapshot, 'status' | 'score'> | null>(null)
@@ -52,7 +63,10 @@ export default function LiveGame({ database, joined, start, options, onLeave }: 
   }
   function apply(action: GameAction) {
     if (controlsBlocked.current || action === 'pause' || action === 'resume') return
-    commit(dispatch(current.current, action))
+    if (battleGame) {
+      commit(battleGame.advanceTo(battleFrame()))
+      commit(battleGame.action(action))
+    } else commit(dispatch(current.current, action))
   }
   const applyRef = useRef(apply)
   const commitRef = useRef(commit)
@@ -66,19 +80,43 @@ export default function LiveGame({ database, joined, start, options, onLeave }: 
       try {
         const next = parseGameSnapshot(snapshot.val())
         if (next?.matchId === start.id && next.connection === otherConnection && next.seq > previousSequence) {
+          if (battleGame && next.status === 'gameOver') battleGame.opponentEnded = true
           previousSequence = next.seq
           setOpponent(next)
         }
       } catch { setError('Opponent data is invalid. Return to the lobby.') }
     }, () => setError('Unable to synchronize. Return to the lobby.'))
+    const stopAttacks = battleGame ? onValue(ref(database, battlePath('battleAttacks', joined, opponentUid)), snapshot => {
+      try {
+        const stream = parseAttackStream(snapshot.val())
+        if (stream?.matchId === start.id && stream.connection === otherConnection) { battleGame.receive(stream.total); refreshBattle(value => value + 1) }
+      } catch { setError('Opponent attacks are invalid. Return to the lobby.') }
+    }, () => setError('Unable to synchronize attacks. Return to the lobby.')) : () => {}
+    const stopFinish = battleGame ? onValue(ref(database, battlePath('battleFinishes', joined, opponentUid)), snapshot => {
+      try { const final = parseBattleFinish(snapshot.val()); if (final?.matchId === start.id && final.connection === otherConnection) setOtherFinish(final) }
+      catch { setError('Opponent result is invalid. Return to the lobby.') }
+    }, () => setError('Unable to synchronize results. Return to the lobby.')) : () => {}
+    let acknowledgedProduced = 0
+    let committedSent = 0
     const gate = new SnapshotGate()
     let timer: ReturnType<typeof setTimeout>
     async function publish() {
       if (!alive) return
       const next = gate.next(current.current, performance.now())
+      const produced = battleGame?.produced ?? 0
+      const finishStats = battleGame?.endedFrame !== null && battleGame ? { frame: battleGame.endedFrame!, received: battleGame.received, applied: battleGame.applied, cancelled: battleGame.cancelled } : null
       try {
+        if (battleGame && produced > acknowledgedProduced) {
+          committedSent = await sendAttacks(database, joined, start, produced - acknowledgedProduced)
+          acknowledgedProduced = produced
+          if (alive) setSentRows(committedSent)
+        }
         if (next) {
           await set(ref(database, `${base}/${joined.uid}`), { ...next, matchId: start.id, connection, updatedAt: serverTimestamp() })
+          if (next.status === 'gameOver' && finishStats) {
+            await publishBattleFinish(database, joined, start, { ...finishStats, sent: committedSent })
+            if (alive) setOwnFinishFrame(finishStats.frame)
+          }
           if (alive && next.status === 'gameOver') setPublishedFinal({ status: next.status, score: next.score })
         }
       } catch {
@@ -90,8 +128,8 @@ export default function LiveGame({ database, joined, start, options, onLeave }: 
       if (alive) timer = setTimeout(() => void publish(), 500)
     }
     timer = setTimeout(() => void publish(), 0)
-    return () => { alive = false; clearTimeout(timer); stop() }
-  }, [database, base, joined.uid, opponentUid, start.id, connection, otherConnection])
+    return () => { alive = false; clearTimeout(timer); stop(); stopAttacks(); stopFinish() }
+  }, [database, base, joined.uid, opponentUid, start.id, connection, otherConnection, battleGame, joined, start])
 
   useLayoutEffect(() => {
     if (confirm) dialog.current?.querySelector('button')?.focus()
@@ -140,7 +178,7 @@ export default function LiveGame({ database, joined, start, options, onLeave }: 
       for (const action of previousPad) if (!actions.has(action as import('../input/keyboard.ts').InputAction)) held.current.release(`pad:${action}`)
       previousPad = new Set(actions)
       // Multiplayer has no local pause. A hidden tab's next frame catches up gravity.
-      if (previous !== null && !error) commitRef.current(advanceGame(current.current, now - previous))
+      if (previous !== null && !error) commitRef.current(battleGame ? battleGame.advanceTo(battleFrame()) : advanceGame(current.current, now - previous))
       previous = now
       for (const action of held.current.due(now)) applyRef.current(action)
       frame = requestAnimationFrame(tick)
@@ -151,7 +189,7 @@ export default function LiveGame({ database, joined, start, options, onLeave }: 
     window.addEventListener('blur', clear)
     document.addEventListener('visibilitychange', clear)
     return () => { cancelAnimationFrame(frame); clear(); window.removeEventListener('keydown', keydown); window.removeEventListener('keyup', keyup); window.removeEventListener('blur', clear); document.removeEventListener('visibilitychange', clear) }
-  }, [bindings, gamepadBindings, audio, error])
+  }, [bindings, gamepadBindings, audio, error, battleGame, battleFrame])
 
   async function leave() {
     setLeaving(true)
@@ -161,7 +199,8 @@ export default function LiveGame({ database, joined, start, options, onLeave }: 
   const finished = game.status === 'gameOver'
   const difference = game.score - (opponent?.score ?? 0)
   const duel = start.settings.mode === 'score-duel'
-  const outcome = duel && !error ? scoreDuelOutcome(publishedFinal, opponent) : null
+  const battleResult = battle && !error && publishedFinal && opponent?.status === 'gameOver' ? battleOutcome(ownFinishFrame, otherFinish?.frame ?? null) : null
+  const outcome = duel && !error ? scoreDuelOutcome(publishedFinal, opponent) : battleResult ? { result: battleResult, difference } : null
   const outcomeTitle = outcome ? outcome.result === 'win' ? 'You win' : outcome.result === 'loss' ? 'You lose' : 'Draw' : ''
   const duelStatus = outcome ? `${outcomeTitle}. ${ownName}: ${game.score.toLocaleString()}. ${otherName}: ${opponent!.score.toLocaleString()}.` : finished ? publishedFinal ? 'Waiting for opponent to finish.' : 'Saving final score…' : opponent?.status === 'gameOver' ? 'Opponent finished. Keep playing.' : ''
   return createPortal(<>
@@ -171,13 +210,14 @@ export default function LiveGame({ database, joined, start, options, onLeave }: 
         <section aria-label="Your game"><h2>{ownName}</h2><dl className="live-stats"><div><dt>Score</dt><dd>{game.score.toLocaleString()}</dd></div><div><dt>Level</dt><dd>{game.level}</dd></div><div><dt>Lines</dt><dd>{game.lines}</dd></div></dl><Playfield game={game} swipeMode={personal.mobileControlMethod === 'swipe' && !finished} onSwipe={(from, to) => actionsForSwipe(from, to).forEach(action => apply(action))} /><div className="live-previews"><div><span>Next</span><PiecePreview type={game.next} level={game.level} /></div>{game.holdEnabled && <div><span>Hold</span>{game.held && <PiecePreview type={game.held} level={game.level} />}</div>}</div><p role="status">{finished ? 'Game over' : 'Playing'}</p></section>
         <section aria-label="Opponent game"><h2>{otherName}</h2><dl className="live-stats"><div><dt>Score</dt><dd>{opponent?.score.toLocaleString() ?? '0'}</dd></div><div><dt>Level</dt><dd>{opponent?.level ?? start.settings.startLevel}</dd></div><div><dt>Lines</dt><dd>{opponent?.lines ?? 0}</dd></div></dl><Playfield game={{ board: decodeBoard(opponent?.board ?? '0'.repeat(200)), active: null, level: opponent?.level ?? start.settings.startLevel }} swipeMode={false} onSwipe={() => {}} /><p role="status">{opponent ? opponent.status === 'gameOver' ? 'Game over' : 'Connected' : 'Synchronizing…'}</p></section>
       </div>
-      {duel && !error && duelStatus && <section className="duel-status" aria-label="Score Duel status" role="status">{outcome ? <><h2>{outcomeTitle}</h2><p>{ownName}: {game.score.toLocaleString()} · {otherName}: {opponent!.score.toLocaleString()}</p><p>Score difference: {Math.abs(outcome.difference).toLocaleString()}</p></> : <p>{duelStatus}</p>}</section>}
+      {battleGame && <p className="battle-stats" aria-label="Battle attacks">Pending: {battleGame.pending} · Sent: {sentRows} · Applied: {battleGame.applied} · Cancelled: {battleGame.cancelled}</p>}
+      {(duel || battle) && !error && duelStatus && <section className="duel-status" aria-label={battle ? "Battle status" : "Score Duel status"} role="status">{outcome ? <><h2>{outcomeTitle}</h2><p>{ownName}: {game.score.toLocaleString()} · {otherName}: {opponent!.score.toLocaleString()}</p><p>{battle ? `Survival: ${(ownFinishFrame! / 60).toFixed(2)} s · ${(otherFinish!.frame / 60).toFixed(2)} s` : `Score difference: ${Math.abs(outcome.difference).toLocaleString()}`}</p></> : <p>{duelStatus}</p>}</section>}
       {!finished && !(controller && personal.hideTouchControlsWhenController) && <TouchControls method={personal.mobileControlMethod} buttonSize={personal.touchButtonSize} leftHanded={personal.leftHandedControls} holdEnabled={game.holdEnabled} hardDropEnabled={game.hardDropEnabled} enabled={!finished && !error && !confirm} apply={apply} />}
       <p className="control-hint">Esc / {bindings.pause.replace('Key', '')}: leave match · Multiplayer keeps running while this menu is open.</p>
       <p className="visually-hidden" role="status">{announcement}</p>
       {error && <p role="alert">{error}</p>}
       {(finished || error) && <button className="back-button" disabled={leaving} onClick={() => { if (outcome) void leave(); else setConfirm(true) }}>Return to lobby</button>}
     </main>
-    {confirm && <div className="game-overlay" style={{ zIndex: 21 }}><div className="overlay-card" role="dialog" aria-modal="true" aria-labelledby="leave-match-title" ref={dialog}><h1 id="leave-match-title">{outcome ? 'Return to lobby?' : 'Leave match?'}</h1><p>{outcome ? 'The duel is complete.' : 'The match keeps running. Returning to the lobby ends this session for both players.'}</p><button className="button button-primary" disabled={leaving} onClick={() => { setConfirm(false); held.current.clear() }}>{outcome ? 'Stay here' : finished ? 'Keep watching' : 'Keep playing'}</button><button className="overlay-link" disabled={leaving} onClick={() => void leave()}>Return to lobby</button></div></div>}
+    {confirm && <div className="game-overlay" style={{ zIndex: 21 }}><div className="overlay-card" role="dialog" aria-modal="true" aria-labelledby="leave-match-title" ref={dialog}><h1 id="leave-match-title">{outcome ? 'Return to lobby?' : 'Leave match?'}</h1><p>{outcome ? 'The match is complete.' : 'The match keeps running. Returning to the lobby ends this session for both players.'}</p><button className="button button-primary" disabled={leaving} onClick={() => { setConfirm(false); held.current.clear() }}>{outcome ? 'Stay here' : finished ? 'Keep watching' : 'Keep playing'}</button><button className="overlay-link" disabled={leaving} onClick={() => void leave()}>Return to lobby</button></div></div>}
   </>, document.body)
 }

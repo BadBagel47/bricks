@@ -6,12 +6,12 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 
 ## Current checkpoint — 2026-11-06
 
-- **Phase 3, milestone 3.8:** Score Duel (authorized).
+- **Phase 3, milestone 3.9:** Battle penalties (authorized).
 - **Live:** https://badbagel47.github.io/bricks/?v=a3db2c0 (3.8).
-- **Status:** 3.8 published from `a3db2c0`. Full main CI and Pages deployment passed: https://github.com/BadBagel47/bricks/actions/runs/42296466728 . Local lint/build, 112 unit tests and 15 production single-player Chromium tests also passed. Firebase rules remain unchanged from published 3.7.
-- **Workflow:** Owner authorized 3.8 and wants manual playtesting consolidated into larger playable checkpoints. Run automated two-session/security checks and publish checked work without asking for a manual test. Later milestones still require authorization.
-- **Next:** 3.8 is complete and published. Begin 3.9 only when authorized. Score Duel waits for both confirmed final scores, then highest points win or equal points draw. The first Game Over does not stop the survivor. Outcomes derive from existing snapshots; full results/highscores/rematches remain later work.
-- **Next model:** GPT-6.1 Sol Medium for 3.9 Battle penalties, after 3.8 checkpoint.
+- **Status:** 3.9 implemented; local lint/build, 119 unit tests and 15 single-player Chromium checks passed. Full server/two-session CI pending. Stage on milestone-3.9 and install checked rules before activating main. No Firebase administrator identity is attached.
+- **Workflow:** Owner wants manual playtesting consolidated into larger playable checkpoints. Finish automated tests before the one required owner action: new Firebase rule publication. Later milestones still need authorization.
+- **Next:** Verify 3.9, publish its checked rules, then deploy the client. Battle has independent penalty-hole RNG, 0/1/2/4 attacks, incoming cancellation, exactly-once prefix processing, garbage at lock boundaries and confirmed survival outcomes. Full results/highscores/recovery remain later work.
+- **Next model:** GPT-6.1 Sol Medium for 3.10 match results and highscores, after 3.9 checkpoint.
 
 ## Product direction and durable constraints
 

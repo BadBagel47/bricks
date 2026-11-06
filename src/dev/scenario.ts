@@ -15,7 +15,7 @@ interface ScenarioOptions extends GameOptions {
 export function createScenario(options: ScenarioOptions): GameState {
   const game = createGame(options)
   const board = options.board ?? game.board
-  if (board.length !== BOARD_HEIGHT || board.some((row) => row.length !== BOARD_WIDTH || row.some((cell) => cell !== null && !PIECE_TYPES.includes(cell)))) {
+  if (board.length !== BOARD_HEIGHT || board.some((row) => row.length !== BOARD_WIDTH || row.some((cell) => cell !== null && cell !== 'G' && !PIECE_TYPES.includes(cell)))) {
     throw new RangeError('Scenario requires a 10 × 20 board containing piece types or null')
   }
   const active = options.active ?? game.active!

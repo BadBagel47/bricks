@@ -1,4 +1,4 @@
-# Multiplayer — milestones 3.1–3.8
+# Multiplayer — milestones 3.1–3.9
 
 ## Milestone 3.3 lobby and quota review
 
@@ -514,3 +514,54 @@ reversed finish order, and Tab/Space return to lobby. Existing Firebase security
 countdown, live-sync and single-player browser suites also passed. No database
 rule or quota increase was required. Full result persistence/highscores, Battle
 and coordinated recovery remain later milestones.
+
+## 3.9 Battle penalties and survival
+
+`engine/battle.ts` is a pure adapter: a line clear generates 0/1/2/4 outgoing rows
+for one/two/three/four lines. First consume the oldest queued incoming rows as
+cancellation, then apply the remaining queue after the piece locks and clears.
+The underlying engine has already spawned; a shifted-board collision or discarded
+occupied top cell produces the same top-out as raising before the next spawn.
+Garbage is a grey `G` cell, encoded as 8 in Battle snapshots, with exactly one hole
+per row. A stateless hash of shared seed, sender role and row ordinal generates
+holes separately from the piece RNG. Scores, levels and piece order are unaffected
+by receiving garbage. Clearing garbage uses normal line scoring.
+
+`battleAttacks/CODE/EPOCH/UID` stores only `{matchId, connection, seq, total,
+updatedAt}`. A row's unique ID is the tuple (match ID, sender UID, ordinal 1..total).
+The receiver retains a high-water prefix and consumed/applied/cancelled counts;
+repeated, late and coalesced snapshots cannot replay rows. Pending counts stay
+numeric, and at most 20 physical rows are allocated even for a maliciously large
+prefix (overflow ends the local game). No event history or per-row writes.
+
+The sender batches net generated rows inside the existing >=500 ms publisher
+cycle, with event-driven preflight reads and a transaction. Server rules bind the
+stream to the current Battle version, selected connection, membership/presence,
+monotone sequence/total, bounded fields and update interval. They reject sending
+after either player's current Game Over. If the opponent finishes between read
+and write, a confirmed final snapshot suppresses unsent rows; other failures stop
+synchronization. Existing queued attacks sent before elimination may still land.
+
+`battleFinishes/CODE/EPOCH/UID` stores one immutable current-match final frame and
+sent/received/applied/cancelled counts, plus match/connection/server update time.
+It requires the player's acknowledged terminal board, exact committed sent count,
+bounded received count and consistent accounting. Final frame may not lie more
+than one second ahead of the server timeline (clock tolerance). This constrains
+payloads, but is not authoritative anti-cheat or replay validation.
+
+Battle runs on a shared 60 Hz frame timeline, anchored once from the Firebase
+clock offset and countdown deadline through monotonic performance time. Inputs
+first catch gravity up to that frame. A catch-up loop stops on the actual fatal
+simulation frame, rather than using the delayed network arrival time. Both
+participants continue until Game Over; longer survival wins and equal frames draw,
+regardless of points. Outcomes require both final board states and acknowledged
+Battle finishes. Disconnect still cancels without a competitive result; recovery
+remains 3.12. Full results/highscores/rematches remain later work.
+
+New starts freeze `battleVersion: 1` for Battle only. Old clients cannot start a
+new penalty-free Battle under these rules; they fail closed on new Battle starts.
+Existing legacy Battle starts can still be cancelled, and the new client asks for
+a new start rather than mounting live Battle without a protocol marker. Score
+Duel retains the eleven-field board protocol and does not initialize Battle paths.
+Install checked rules before activating the new client; reload both clients for
+Battle. Local emulator upload remains blocked, so full CI is the server gate.

@@ -22,18 +22,18 @@ export function visibleBoard(game: Pick<GameState, 'board' | 'active'>): string 
   if (game.active) for (const [x, y] of pieceCells(game.active)) {
     if (x >= 0 && x < 10 && y >= 0 && y < 20) cells[y * 10 + x] = game.active.type
   }
-  return cells.map(cell => cell === null ? '0' : String(PIECE_TYPES.indexOf(cell) + 1)).join('')
+  return cells.map(cell => cell === null ? '0' : cell === 'G' ? '8' : String(PIECE_TYPES.indexOf(cell) + 1)).join('')
 }
 
 export function decodeBoard(encoded: string): Board {
-  if (!/^[0-7]{200}$/.test(encoded)) throw new Error('Invalid board')
-  return Array.from({ length: 20 }, (_, y) => Array.from({ length: 10 }, (_, x) => PIECE_TYPES[Number(encoded[y * 10 + x]) - 1] ?? null))
+  if (!/^[0-8]{200}$/.test(encoded)) throw new Error('Invalid board')
+  return Array.from({ length: 20 }, (_, y) => Array.from({ length: 10 }, (_, x) => encoded[y * 10 + x] === '8' ? 'G' : PIECE_TYPES[Number(encoded[y * 10 + x]) - 1] ?? null))
 }
 
 export function parseGameSnapshot(value: unknown): GameSnapshot | null {
   if (value === null) return null
   const s = value as GameSnapshot
-  if (!s || typeof s !== 'object' || Object.keys(s).length !== 11 || !/^[a-f0-9]{32}$/.test(s.matchId) || !/^[a-f0-9]{32}$/.test(s.connection) || !Number.isSafeInteger(s.seq) || s.seq < 1 || s.seq > 1000000000 || !/^[0-7]{200}$/.test(s.board) || !PIECE_TYPES.includes(s.next) || (s.held !== '-' && !PIECE_TYPES.includes(s.held)) || !['playing', 'gameOver'].includes(s.status) || ![s.score, s.lines, s.level, s.updatedAt].every(n => Number.isSafeInteger(n) && n >= 0) || s.score > 1000000000 || s.lines > 1000000 || s.level > 1000000) throw new Error('Invalid game snapshot')
+  if (!s || typeof s !== 'object' || Object.keys(s).length !== 11 || !/^[a-f0-9]{32}$/.test(s.matchId) || !/^[a-f0-9]{32}$/.test(s.connection) || !Number.isSafeInteger(s.seq) || s.seq < 1 || s.seq > 1000000000 || !/^[0-8]{200}$/.test(s.board) || !PIECE_TYPES.includes(s.next) || (s.held !== '-' && !PIECE_TYPES.includes(s.held)) || !['playing', 'gameOver'].includes(s.status) || ![s.score, s.lines, s.level, s.updatedAt].every(n => Number.isSafeInteger(n) && n >= 0) || s.score > 1000000000 || s.lines > 1000000 || s.level > 1000000) throw new Error('Invalid game snapshot')
   return s
 }
 

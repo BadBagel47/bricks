@@ -5,6 +5,7 @@ import type { MatchSettings } from './match-settings.ts'
 import type { Room } from './room-model.ts'
 
 export interface MatchStart {
+  readonly battleVersion?: 1
   readonly id: string
   readonly status: 'countdown' | 'ready' | 'cancelled'
   readonly seed: number
@@ -20,7 +21,7 @@ export type Connections = Readonly<Record<string, Readonly<Record<string, boolea
 export function parseMatchStart(value: unknown): MatchStart | null {
   if (value === null) return null
   const s = value as MatchStart
-  if (!s || typeof s !== 'object' || Object.keys(s).length !== 10 || !/^[a-f0-9]{32}$/.test(s.id) || !['countdown','ready','cancelled'].includes(s.status) || !Number.isSafeInteger(s.seed) || s.seed < 0 || s.seed > 0xffffffff || !Number.isSafeInteger(s.countdownAt) || s.countdownAt < 0 || !Number.isSafeInteger(s.roleRevision) || s.roleRevision < 0 || s.roleRevision > 1000000000 || typeof s.hostUid !== 'string' || typeof s.guestUid !== 'string' || !s.hostUid || !s.guestUid || s.hostUid === s.guestUid || !/^[a-f0-9]{32}$/.test(s.hostConnection) || !/^[a-f0-9]{32}$/.test(s.guestConnection)) throw new MultiplayerError('session-expired')
+  if (!s || typeof s !== 'object' || Object.keys(s).length !== (s.battleVersion === 1 ? 11 : 10) || (s.battleVersion !== undefined && (s.battleVersion !== 1 || s.settings?.mode !== 'battle')) || !/^[a-f0-9]{32}$/.test(s.id) || !['countdown','ready','cancelled'].includes(s.status) || !Number.isSafeInteger(s.seed) || s.seed < 0 || s.seed > 0xffffffff || !Number.isSafeInteger(s.countdownAt) || s.countdownAt < 0 || !Number.isSafeInteger(s.roleRevision) || s.roleRevision < 0 || s.roleRevision > 1000000000 || typeof s.hostUid !== 'string' || typeof s.guestUid !== 'string' || !s.hostUid || !s.guestUid || s.hostUid === s.guestUid || !/^[a-f0-9]{32}$/.test(s.hostConnection) || !/^[a-f0-9]{32}$/.test(s.guestConnection)) throw new MultiplayerError('session-expired')
   if (s.settings?.revision === 0) {
     if (Object.keys(s.settings).length !== 5 || !sameSettings(s.settings, DEFAULT_MATCH_SETTINGS)) throw new MultiplayerError('session-expired')
   } else parseSettings(s.settings)

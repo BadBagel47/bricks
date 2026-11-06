@@ -162,7 +162,7 @@
         "$epoch": {
           ".read": "auth != null && root.child('rooms').child($code).child('epoch').val() + '' === $epoch && (root.child('rooms').child($code).child('hostUid').val() === auth.uid || root.child('rooms').child($code).child('players/guest/uid').val() === auth.uid)",
           ".write": "auth != null && root.child('rooms').child($code).child('epoch').val() + '' === $epoch && root.child('rooms').child($code).child('status').val() === 'waiting' && newData.exists() && (((!data.exists() || data.child('status').val() === 'cancelled') && root.child('rooms').child($code).child('hostUid').val() === auth.uid && newData.child('status').val() === 'countdown' && newData.child('countdownAt').val() === now && (!data.exists() || newData.child('id').val() !== data.child('id').val()) && !root.child('matchSettings').child($code).child($epoch).child('editors').child(auth.uid).exists() && (newData.child('hostUid').val() === root.child('rooms').child($code).child('hostUid').val() && newData.child('guestUid').val() === root.child('rooms').child($code).child('players/guest/uid').val() && newData.child('roleRevision').val() === (root.child('rooms').child($code).child('roleRevision').exists() ? root.child('rooms').child($code).child('roleRevision').val() : 0) && root.child('presence').child($code).child($epoch).child(newData.child('hostUid').val()).child(newData.child('hostConnection').val()).val() === true && root.child('presence').child($code).child($epoch).child(newData.child('guestUid').val()).child(newData.child('guestConnection').val()).val() === true && newData.child('settings/revision').val() === (root.child('matchSettings').child($code).child($epoch).child('config').exists() ? root.child('matchSettings').child($code).child($epoch).child('config').child('revision').val() : 0) && newData.child('settings/mode').val() === (root.child('matchSettings').child($code).child($epoch).child('config').exists() ? root.child('matchSettings').child($code).child($epoch).child('config').child('mode').val() : \"score-duel\") && newData.child('settings/startLevel').val() === (root.child('matchSettings').child($code).child($epoch).child('config').exists() ? root.child('matchSettings').child($code).child($epoch).child('config').child('startLevel').val() : 0) && newData.child('settings/hold').val() === (root.child('matchSettings').child($code).child($epoch).child('config').exists() ? root.child('matchSettings').child($code).child($epoch).child('config').child('hold').val() : false) && newData.child('settings/requireApproval').val() === (root.child('matchSettings').child($code).child($epoch).child('config').exists() ? root.child('matchSettings').child($code).child($epoch).child('config').child('requireApproval').val() : false) && (newData.child('settings/requireApproval').val() === false || (root.child('matchSettings').child($code).child($epoch).child('approval').child('revision').val() === newData.child('settings/revision').val() && root.child('matchSettings').child($code).child($epoch).child('approval').child('roleRevision').val() === newData.child('roleRevision').val() && root.child('matchSettings').child($code).child($epoch).child('approval').child('hostUid').val() === newData.child('hostUid').val() && root.child('matchSettings').child($code).child($epoch).child('approval').child('guestUid').val() === newData.child('guestUid').val())))) || (data.exists() && data.child('status').val() === 'countdown' && newData.child('status').val() === 'ready' && auth.uid === data.child('hostUid').val() && now >= data.child('countdownAt').val() + 5000 && (newData.child('hostUid').val() === root.child('rooms').child($code).child('hostUid').val() && newData.child('guestUid').val() === root.child('rooms').child($code).child('players/guest/uid').val() && newData.child('roleRevision').val() === (root.child('rooms').child($code).child('roleRevision').exists() ? root.child('rooms').child($code).child('roleRevision').val() : 0) && root.child('presence').child($code).child($epoch).child(newData.child('hostUid').val()).child(newData.child('hostConnection').val()).val() === true && root.child('presence').child($code).child($epoch).child(newData.child('guestUid').val()).child(newData.child('guestConnection').val()).val() === true && newData.child('settings/revision').val() === (root.child('matchSettings').child($code).child($epoch).child('config').exists() ? root.child('matchSettings').child($code).child($epoch).child('config').child('revision').val() : 0) && newData.child('settings/mode').val() === (root.child('matchSettings').child($code).child($epoch).child('config').exists() ? root.child('matchSettings').child($code).child($epoch).child('config').child('mode').val() : \"score-duel\") && newData.child('settings/startLevel').val() === (root.child('matchSettings').child($code).child($epoch).child('config').exists() ? root.child('matchSettings').child($code).child($epoch).child('config').child('startLevel').val() : 0) && newData.child('settings/hold').val() === (root.child('matchSettings').child($code).child($epoch).child('config').exists() ? root.child('matchSettings').child($code).child($epoch).child('config').child('hold').val() : false) && newData.child('settings/requireApproval').val() === (root.child('matchSettings').child($code).child($epoch).child('config').exists() ? root.child('matchSettings').child($code).child($epoch).child('config').child('requireApproval').val() : false) && (newData.child('settings/requireApproval').val() === false || (root.child('matchSettings').child($code).child($epoch).child('approval').child('revision').val() === newData.child('settings/revision').val() && root.child('matchSettings').child($code).child($epoch).child('approval').child('roleRevision').val() === newData.child('roleRevision').val() && root.child('matchSettings').child($code).child($epoch).child('approval').child('hostUid').val() === newData.child('hostUid').val() && root.child('matchSettings').child($code).child($epoch).child('approval').child('guestUid').val() === newData.child('guestUid').val())))) || (data.exists() && (data.child('status').val() === 'countdown' || data.child('status').val() === 'ready') && newData.child('status').val() === 'cancelled' && (auth.uid === data.child('hostUid').val() || auth.uid === data.child('guestUid').val())))",
-          ".validate": "newData.hasChildren([\"id\", \"status\", \"seed\", \"countdownAt\", \"settings\", \"roleRevision\", \"hostUid\", \"guestUid\", \"hostConnection\", \"guestConnection\"]) && (!data.exists() || data.child('status').val() === 'cancelled' || (newData.child('id').val() === data.child('id').val() && newData.child('seed').val() === data.child('seed').val() && newData.child('countdownAt').val() === data.child('countdownAt').val() && newData.child('roleRevision').val() === data.child('roleRevision').val() && newData.child('hostUid').val() === data.child('hostUid').val() && newData.child('guestUid').val() === data.child('guestUid').val() && newData.child('hostConnection').val() === data.child('hostConnection').val() && newData.child('guestConnection').val() === data.child('guestConnection').val() && newData.child('settings/revision').val() === data.child('settings/revision').val() && newData.child('settings/mode').val() === data.child('settings/mode').val() && newData.child('settings/startLevel').val() === data.child('settings/startLevel').val() && newData.child('settings/hold').val() === data.child('settings/hold').val() && newData.child('settings/requireApproval').val() === data.child('settings/requireApproval').val()))",
+          ".validate": "(newData.child('settings/mode').val() === 'battle' ? (newData.child('battleVersion').val() === 1 || (data.exists() && data.child('settings/mode').val() === 'battle' && !data.child('battleVersion').exists() && newData.child('status').val() === 'cancelled' && !newData.child('battleVersion').exists())) : !newData.child('battleVersion').exists()) && (!data.exists() || data.child('status').val() === 'cancelled' || newData.child('battleVersion').val() === data.child('battleVersion').val()) && (newData.hasChildren([\"id\", \"status\", \"seed\", \"countdownAt\", \"settings\", \"roleRevision\", \"hostUid\", \"guestUid\", \"hostConnection\", \"guestConnection\"]) && (!data.exists() || data.child('status').val() === 'cancelled' || (newData.child('id').val() === data.child('id').val() && newData.child('seed').val() === data.child('seed').val() && newData.child('countdownAt').val() === data.child('countdownAt').val() && newData.child('roleRevision').val() === data.child('roleRevision').val() && newData.child('hostUid').val() === data.child('hostUid').val() && newData.child('guestUid').val() === data.child('guestUid').val() && newData.child('hostConnection').val() === data.child('hostConnection').val() && newData.child('guestConnection').val() === data.child('guestConnection').val() && newData.child('settings/revision').val() === data.child('settings/revision').val() && newData.child('settings/mode').val() === data.child('settings/mode').val() && newData.child('settings/startLevel').val() === data.child('settings/startLevel').val() && newData.child('settings/hold').val() === data.child('settings/hold').val() && newData.child('settings/requireApproval').val() === data.child('settings/requireApproval').val())))",
           "id": {
             ".validate": "newData.isString() && newData.val().matches(/^[a-f0-9]{32}$/)"
           },
@@ -213,6 +213,9 @@
           },
           "$other": {
             ".validate": false
+          },
+          "battleVersion": {
+            ".validate": "newData.val() === 1"
           }
         }
       }
@@ -243,7 +246,7 @@
               ".validate": "newData.isNumber() && newData.val() % 1 == 0 && newData.val() >= 0 && newData.val() <= 1000000"
             },
             "board": {
-              ".validate": "newData.isString() && newData.val().matches(/^[0-7]{200}$/)"
+              ".validate": "newData.isString() && (root.child('matchStarts').child($code).child($epoch).child('settings/mode').val() === 'battle' ? newData.val().matches(/^[0-8]{200}$/) : newData.val().matches(/^[0-7]{200}$/))"
             },
             "next": {
               ".validate": "newData.isString() && newData.val().matches(/^[IOTSZJL]$/)"
@@ -260,6 +263,73 @@
             "$other": {
               ".validate": false
             }
+          }
+        }
+      }
+    },
+    "battleAttacks": {
+      "$code": {
+        "$epoch": {
+          ".read": "auth != null && root.child('rooms').child($code).child('epoch').val() + '' == $epoch && (root.child('rooms').child($code).child('players/host/uid').val() == auth.uid || root.child('rooms').child($code).child('players/guest/uid').val() == auth.uid)",
+          "$uid": {
+            ".validate": "newData.hasChildren(['matchId', 'connection', 'seq', 'total', 'updatedAt'])",
+            "matchId": {
+              ".validate": "newData.isString() && newData.val().matches(/^[a-f0-9]{32}$/)"
+            },
+            "connection": {
+              ".validate": "newData.isString() && newData.val().matches(/^[a-f0-9]{32}$/)"
+            },
+            "seq": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 1000000000"
+            },
+            "total": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 1000000"
+            },
+            "updatedAt": {
+              ".validate": "newData.isNumber() && newData.val() === now"
+            },
+            "$other": {
+              ".validate": false
+            },
+            ".write": "(auth != null && root.child('rooms').child($code).child('epoch').val() + '' == $epoch && (root.child('rooms').child($code).child('players/host/uid').val() == auth.uid || root.child('rooms').child($code).child('players/guest/uid').val() == auth.uid)) && auth.uid === $uid && newData.exists() && root.child('matchStarts').child($code).child($epoch).child('status').val() === 'ready' && root.child('matchStarts').child($code).child($epoch).child('settings/mode').val() === 'battle' && root.child('matchStarts').child($code).child($epoch).child('battleVersion').val() === 1 && newData.child('matchId').val() === root.child('matchStarts').child($code).child($epoch).child('id').val() && ((auth.uid === root.child('matchStarts').child($code).child($epoch).child('hostUid').val() && newData.child('connection').val() === root.child('matchStarts').child($code).child($epoch).child('hostConnection').val()) || (auth.uid === root.child('matchStarts').child($code).child($epoch).child('guestUid').val() && newData.child('connection').val() === root.child('matchStarts').child($code).child($epoch).child('guestConnection').val())) && root.child('presence').child($code).child($epoch).child($uid).child(newData.child('connection').val()).val() === true && root.child('presence').child($code).child($epoch).child((auth.uid === root.child('matchStarts').child($code).child($epoch).child('hostUid').val() ? root.child('matchStarts').child($code).child($epoch).child('guestUid').val() : root.child('matchStarts').child($code).child($epoch).child('hostUid').val())).exists() && !(root.child('gameSnapshots').child($code).child($epoch).child((auth.uid === root.child('matchStarts').child($code).child($epoch).child('hostUid').val() ? root.child('matchStarts').child($code).child($epoch).child('guestUid').val() : root.child('matchStarts').child($code).child($epoch).child('hostUid').val())).child('matchId').val() === root.child('matchStarts').child($code).child($epoch).child('id').val() && root.child('gameSnapshots').child($code).child($epoch).child((auth.uid === root.child('matchStarts').child($code).child($epoch).child('hostUid').val() ? root.child('matchStarts').child($code).child($epoch).child('guestUid').val() : root.child('matchStarts').child($code).child($epoch).child('hostUid').val())).child('status').val() === 'gameOver') && !(root.child('gameSnapshots').child($code).child($epoch).child($uid).child('matchId').val() === root.child('matchStarts').child($code).child($epoch).child('id').val() && root.child('gameSnapshots').child($code).child($epoch).child($uid).child('status').val() === 'gameOver') && newData.child('total').val() > 0 && ((!data.exists() || data.child('matchId').val() !== newData.child('matchId').val()) ? newData.child('seq').val() === 1 : (newData.child('seq').val() === data.child('seq').val() + 1 && newData.child('total').val() > data.child('total').val() && newData.child('updatedAt').val() >= data.child('updatedAt').val() + 500 && newData.child('connection').val() === data.child('connection').val()))"
+          }
+        }
+      }
+    },
+    "battleFinishes": {
+      "$code": {
+        "$epoch": {
+          ".read": "auth != null && root.child('rooms').child($code).child('epoch').val() + '' == $epoch && (root.child('rooms').child($code).child('players/host/uid').val() == auth.uid || root.child('rooms').child($code).child('players/guest/uid').val() == auth.uid)",
+          "$uid": {
+            ".validate": "newData.hasChildren(['matchId', 'connection', 'frame', 'sent', 'received', 'applied', 'cancelled', 'updatedAt'])",
+            "matchId": {
+              ".validate": "newData.isString() && newData.val().matches(/^[a-f0-9]{32}$/)"
+            },
+            "connection": {
+              ".validate": "newData.isString() && newData.val().matches(/^[a-f0-9]{32}$/)"
+            },
+            "frame": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 1000000000"
+            },
+            "sent": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 1000000"
+            },
+            "received": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 1000000"
+            },
+            "applied": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 1000000"
+            },
+            "cancelled": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 1000000"
+            },
+            "updatedAt": {
+              ".validate": "newData.isNumber() && newData.val() === now"
+            },
+            "$other": {
+              ".validate": false
+            },
+            ".write": "(auth != null && root.child('rooms').child($code).child('epoch').val() + '' == $epoch && (root.child('rooms').child($code).child('players/host/uid').val() == auth.uid || root.child('rooms').child($code).child('players/guest/uid').val() == auth.uid)) && auth.uid === $uid && newData.exists() && root.child('matchStarts').child($code).child($epoch).child('status').val() === 'ready' && root.child('matchStarts').child($code).child($epoch).child('settings/mode').val() === 'battle' && root.child('matchStarts').child($code).child($epoch).child('battleVersion').val() === 1 && newData.child('matchId').val() === root.child('matchStarts').child($code).child($epoch).child('id').val() && ((auth.uid === root.child('matchStarts').child($code).child($epoch).child('hostUid').val() && newData.child('connection').val() === root.child('matchStarts').child($code).child($epoch).child('hostConnection').val()) || (auth.uid === root.child('matchStarts').child($code).child($epoch).child('guestUid').val() && newData.child('connection').val() === root.child('matchStarts').child($code).child($epoch).child('guestConnection').val())) && root.child('presence').child($code).child($epoch).child($uid).child(newData.child('connection').val()).val() === true && (!data.exists() || data.child('matchId').val() !== newData.child('matchId').val()) && root.child('gameSnapshots').child($code).child($epoch).child($uid).child('matchId').val() === root.child('matchStarts').child($code).child($epoch).child('id').val() && root.child('gameSnapshots').child($code).child($epoch).child($uid).child('status').val() === 'gameOver' && newData.child('frame').val() * 1000 <= (now - root.child('matchStarts').child($code).child($epoch).child('countdownAt').val() - 5000) * 60 + 60000 && newData.child('sent').val() === (root.child('battleAttacks').child($code).child($epoch).child($uid).child('matchId').val() === root.child('matchStarts').child($code).child($epoch).child('id').val() ? root.child('battleAttacks').child($code).child($epoch).child($uid).child('total').val() : 0) && newData.child('received').val() <= (root.child('battleAttacks').child($code).child($epoch).child((auth.uid === root.child('matchStarts').child($code).child($epoch).child('hostUid').val() ? root.child('matchStarts').child($code).child($epoch).child('guestUid').val() : root.child('matchStarts').child($code).child($epoch).child('hostUid').val())).child('matchId').val() === root.child('matchStarts').child($code).child($epoch).child('id').val() ? root.child('battleAttacks').child($code).child($epoch).child((auth.uid === root.child('matchStarts').child($code).child($epoch).child('hostUid').val() ? root.child('matchStarts').child($code).child($epoch).child('guestUid').val() : root.child('matchStarts').child($code).child($epoch).child('hostUid').val())).child('total').val() : 0) && newData.child('applied').val() + newData.child('cancelled').val() <= newData.child('received').val()"
           }
         }
       }

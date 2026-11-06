@@ -45,27 +45,15 @@ export async function matchData(code: string) {
   return { start: (await get(ref(client.database, `matchStarts/${base}`))).val(), snapshots: (await get(ref(client.database, `gameSnapshots/${base}`))).val() }
 }
 
-/** Real input script computed with the standalone engine, not an application backdoor. */
-export async function lineClearPlan(code: string) {
-  const { createGame, dispatch } = await import('../../src/engine/game.ts')
+/** Real inputs planned with the standalone engine, never injected application state. */
+export async function lineClearPlan(code: string, minimumRows = 1) {
+  const { planInputs } = await import('./plan-inputs.ts')
   const { start } = await matchData(code)
-  let game = createGame({ seed: start.seed, startLevel: start.settings.startLevel })
-  const actions: import('../../src/engine/types.ts').GameAction[] = []
-  for (let piece = 0; piece < 60 && game.score === 0; piece++) {
-    let best: { cost: number; state: typeof game; actions: typeof actions } | null = null
-    for (let rotation = 0; rotation < 4; rotation++) for (let dx = -5; dx <= 5; dx++) {
-      const candidate: typeof actions = [...Array.from({ length: rotation }, () => 'rotateClockwise' as const), ...Array.from({ length: Math.abs(dx) }, () => dx < 0 ? 'moveLeft' as const : 'moveRight' as const), 'hardDrop']
-      let state = game
-      for (const action of candidate) state = dispatch(state, action).state
-      if (state.status !== 'playing') continue
-      const heights = Array.from({ length: 10 }, (_, x) => { const y = state.board.findIndex(row => row[x] !== null); return y < 0 ? 0 : 20 - y })
-      const holes = heights.reduce((sum, h, x) => sum + state.board.slice(20 - h).filter(row => row[x] === null).length, 0)
-      const bumps = heights.slice(1).reduce((sum, h, i) => sum + Math.abs(h - heights[i]), 0)
-      const cost = holes * 20 + heights.reduce((sum, h) => sum + h, 0) + bumps * 2 - state.score * 100
-      if (!best || cost < best.cost) best = { cost, state, actions: candidate }
-    }
-    if (!best) break
-    game = best.state; actions.push(...best.actions)
-  }
-  return { actions, score: game.score, lines: game.lines }
+  return planInputs(start.seed, start.settings.startLevel, minimumRows)
+}
+
+export async function battleData(code: string) {
+  const common = await matchData(code)
+  const epoch = (await get(ref(client.database, `rooms/${code}/epoch`))).val()
+  return { ...common, attacks: (await get(ref(client.database, `battleAttacks/${code}/${epoch}`))).val(), finishes: (await get(ref(client.database, `battleFinishes/${code}/${epoch}`))).val() }
 }

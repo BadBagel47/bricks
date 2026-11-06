@@ -1,13 +1,13 @@
 import { useEffect, useRef } from 'react'
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import { pieceCells } from '../engine/index.ts'
-import type { GameAction, GameState, PieceType } from '../engine/index.ts'
+import type { Cell, GameAction, GameState, PieceType } from '../engine/index.ts'
 import { colorForPiece } from './level-palettes.ts'
 import { previewCells } from './piece-preview.ts'
 interface SwipePoint { readonly x: number; readonly y: number }
 
 export function Playfield({ game, swipeMode, onSwipe }: { game: Pick<GameState, 'board' | 'active' | 'level'>; swipeMode: boolean; onSwipe: (start: SwipePoint, end: SwipePoint) => void }) {
-  const cells: (PieceType | null)[] = game.board.flatMap((row) => [...row])
+  const cells: Cell[] = game.board.flatMap((row) => [...row])
   const swipeStart = useRef<SwipePoint | null>(null)
   if (game.active) for (const [x, y] of pieceCells(game.active)) cells[y * 10 + x] = game.active.type
   return <div className={`playfield${swipeMode ? ' swipe-active' : ''}`} role="img" aria-label="Game board, 10 columns by 20 rows"
