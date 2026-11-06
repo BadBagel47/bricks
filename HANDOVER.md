@@ -7,11 +7,12 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 ## Current checkpoint — 2026-11-06
 
 - **Phase 3, milestone 3.6:** Countdown and shared starting state (approved).
-- **Live:** https://badbagel47.github.io/bricks/?v=96f40fe
-- **Deployed app source:** `96f40fe` — synchronized host-configuration waiting, 50 local shuffle-bag messages and confirmed-membership listener gating; includes previous settings, short codes and lobby corrections.
-- **CI / Pages:** https://github.com/BadBagel47/bricks/actions/runs/42139135333
-- **Status:** 3.6 implemented on milestone-3.6. Local lint/build and 106 unit tests passed; full branch CI passed for `7ace18f`: https://github.com/BadBagel47/bricks/actions/runs/42257292319 . Server deadline, authorization, +2-minute guest clock skew, equal starts, disconnect cancellation/restart and leave were verified. Public site remains the 3.5 release linked above.
-- **Next:** Owner confirmed the countdown/lock rules published. Main activation is in progress; verify Pages CI success before marking 3.6 live. Reload both clients and review shared five-second timing, settings/approval locks, disconnect/leave cancellation and equal opening piece/preview. Ready is a read-only initialized state; gameplay controls/opponent boards are not implemented here. Stop for 3.6 review before 3.7.
+- **Live:** https://badbagel47.github.io/bricks/?v=1d97208
+- **Deployed app source:** `1d97208` — server-timed countdown, frozen settings/participants/connections and deterministic shared initial state; includes previous lobby and waiting-screen features.
+- **CI / Pages:** https://github.com/BadBagel47/bricks/actions/runs/42258240145
+- **Status:** 3.6 is published on Pages. Main commit `1d97208` passed complete CI, including server rules, clock skew, countdown, locks, cancellation and equal starting state. The owner confirmed the reviewed rules published. Local lint/build and 106 unit tests passed; live owner review is pending.
+- **Next:** Reload both clients and review host-only start, optional approval, shared five-second timing, locks and disconnect/leave cancellation. Ready shows a read-only opening state; live controls and opponent boards are not implemented. Stop for 3.6 review before 3.7.
+
 - **Next model if approved:** GPT-6.1 Sol Medium for 3.7 live multiplayer controls, bounded opponent snapshots and score synchronization.
 
 ## Product direction and durable constraints
@@ -22,8 +23,8 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 - Engine rules stay separate from React, rendering, input, audio, persistence and
   Firebase. The game is NES-inspired, not a cycle-accurate emulator.
 - Current multiplayer has room creation, join/invite/reopen, two-player lobby,
-  host handover and connection presence. It has **no match start or playable
-  multiplayer yet**. An offline player may retain a slot; coordinated recovery
+  host handover and connection presence. It has a five-second countdown and read-only prepared starting state, but
+  **no live multiplayer controls or opponent boards yet**. An offline player may retain a slot; coordinated recovery
   and active-tab leases belong to later work.
 - Stay on Firebase Spark. No paid backend/functions or billing upgrade without
   explicit owner approval. Keep application heartbeat writes out; planned game

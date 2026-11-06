@@ -2,11 +2,11 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.6 — Synchronized countdown and shared starting state
-- **Status:** Owner confirmed countdown/lock rules published; activating verified 3.6 on main.
+- **Status:** 3.6 published on Pages after successful main CI; owner confirmed countdown/lock rules published. Live two-session review remains pending before 3.7.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.6
-- Owner confirmed the reviewed countdown/lock rules published; main activation in progress.
+- Owner confirmed the reviewed countdown/lock rules published. Main commit `1d97208` passed complete CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42258240145 .
 - Owner approved the countdown/seeded-start milestone. Added a server-timestamped five-second preparation, frozen settings/identities/role generation/connection IDs and common seed.
 - Rules enforce current host authority, both selected connections, current optional approval, server deadline and immutable bundle; active preparations lock settings and room/host mutations. Stale cancellation cannot overwrite another start id.
 - Fresh presence IDs after reconnect prevent old socket identities being reused. Participants cancel an interrupted preparation; explicit lobby exit cancels before leaving. Full recovery/active-control leases remain future work.
@@ -132,12 +132,12 @@
 - Chromium desktop/mobile viewport, touch-event and simulated gamepad tests passed. Physical devices and subjective audio quality remain unverified here.
 - Touch and gamepad behavior should be checked on the owner's physical devices.
 - Live 3.2 room creation and two-player joining are confirmed by the owner. The owner reports updated 3.3 rules published and CI deployed the new client; live lobby review remains pending.
-- Room flows are implemented. There is no match start or playable multiplayer yet.
+- Room flows, countdown and read-only initialized starting state are implemented. Interactive multiplayer controls, live opponent boards and competitive results are not implemented yet.
 - Presence and host transfer are implemented in 3.3. Offline players retain their slots; coordinated match recovery, active-control leases, snapshot validation and Battle remain later milestones.
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Owner publishes reviewed 3.6 rules from milestone-3.6; record confirmation in a normal deployment commit, push main, verify Pages and review with two live sessions.
+- Review published 3.6 with two live sessions: host-only Start Match, required approval, shared five-second timing, identical opening state, settings/host locks and disconnect/leave cancellation.
 - Stop before 3.7 until approved. Recommend GPT-6.1 Sol Medium for local multiplayer controls, bounded opponent snapshots and score synchronization.
 
 ## Git checkpoints
