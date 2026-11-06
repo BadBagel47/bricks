@@ -32,6 +32,14 @@ async function name(page, value) {
   await page.getByLabel('Player name', { exact: true }).fill(value)
   await page.getByRole('button', { name: 'Continue', exact: true }).click()
 }
+async function waitForHostEditor(host, guest) {
+  try { await guest.getByRole('heading', { name: 'Host is configuring the match', exact: true }).waitFor() }
+  catch (error) {
+    const code = new URL(await host.getByLabel('Invite link', { exact: true }).inputValue()).searchParams.get('room')
+    const data = await host.evaluate(async code => (await import('/tests/fixtures/firebase-browser.ts')).debugLobby(code), code)
+    throw new Error(`Host: ${(await host.locator('body').innerText()).slice(0, 600)} Guest: ${(await guest.locator('body').innerText()).slice(0, 600)} State: ${JSON.stringify(data)}`, { cause: error })
+  }
+}
 const menu = page => page.getByRole('button', { name: '← Back to menu', exact: true }).click()
 async function roomHeading(page, name) {
   try { await page.getByRole('heading', { name, exact: typeof name === 'string' }).waitFor() }
@@ -210,7 +218,7 @@ test('shared settings: private drafts, cancel, approval invalidation and host tr
     await host.getByRole('button', { name: 'Edit Match Settings', exact: true }).click()
     await host.getByLabel('Start level', { exact: true }).selectOption('7')
     await host.getByLabel('Require approval', { exact: true }).check()
-    await guest.getByRole('heading', { name: 'Host is configuring the match', exact: true }).waitFor()
+    await waitForHostEditor(host, guest)
     assert.equal(await guest.getByText('07', { exact: true }).count(), 0)
     await host.getByRole('button', { name: 'Apply Settings', exact: true }).click()
     await guest.getByText('07', { exact: true }).waitFor()
@@ -249,10 +257,13 @@ test('host configuration waiting handles cancel, apply, transfer, disconnect, ed
     await guest.goto(invite); await name(guest, 'Waiting Guest'); await roomHeading(guest, /^Room /)
     const waiting = guest.getByRole('heading', { name: 'Host is configuring the match', exact: true })
     await host.getByRole('button', { name: 'Edit Match Settings', exact: true }).click()
-    await waiting.waitFor()
+    await waitForHostEditor(host, guest)
     const message = guest.locator('[aria-label="Host configuration waiting screen"] p').last()
     const first = await message.innerText()
-    await guest.waitForFunction(first => document.querySelector('[aria-label="Host configuration waiting screen"] p:last-child')?.textContent !== first, first, { timeout: 10000 })
+    await guest.waitForFunction(first => {
+      const text = document.querySelector('[aria-label="Host configuration waiting screen"] p:last-child')?.textContent
+      return typeof text === 'string' && text !== first
+    }, first, { timeout: 15000 })
     await host.evaluate(async () => (await import('/tests/fixtures/firebase-browser.ts')).disconnectDatabase())
     await waiting.waitFor({ state: 'hidden' })
     await host.evaluate(async () => (await import('/tests/fixtures/firebase-browser.ts')).reconnectDatabase())

@@ -32,3 +32,9 @@ export async function reconnectDatabase() {
   const { goOnline } = await import('firebase/database')
   goOnline(client.database)
 }
+
+export async function debugLobby(code: string) {
+  const room = (await get(ref(client.database, `rooms/${code}`))).val()
+  const base = `matchSettings/${code}/${room.epoch}`
+  return { room, editors: (await get(ref(client.database, `${base}/editors`))).val(), presence: (await get(ref(client.database, `presence/${code}/${room.epoch}`))).val() }
+}
