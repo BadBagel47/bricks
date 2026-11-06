@@ -2,11 +2,11 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.5 — Host configuration waiting screen
-- **Status:** Owner confirmed editor-marker rules published; activating 3.5 on main after successful branch verification.
+- **Status:** 3.5 published on Pages after successful main CI. Owner confirmed editor-marker rules published; awaiting live two-session review before 3.6.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.5
-- Owner confirmed the updated editor-marker rules are published; main activation in progress.
+- Owner confirmed the updated editor-marker rules published. Main commit `96f40fe` passed full CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42139135333 .
 - Owner approved the host-configuration waiting milestone. Added current-host/role/epoch-bound per-tab editor markers, onDisconnect cleanup and guest waiting status without draft exposure.
 - Apply/Cancel/transfer/leave and disconnected host presence end the relevant waiting state. Multiple host editors are independent; waiting continues if another current host tab still edits.
 - Added all 50 approved spec messages, local eight-second shuffle-bag rotation, session persistence and five-message cycle boundary exclusion. No timed Firebase writes.
@@ -129,7 +129,7 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Have the owner publish reviewed 3.5 rules, record confirmation in a normal commit and push main to activate Pages, then verify the waiting screen with the owner in two live sessions.
+- Review published 3.5 with two live sessions: host opens the editor, guest waits with rotating messages, and Apply/Cancel/transfer/leave/disconnection end the relevant wait. Stop before 3.6 until approved.
 - Stop before 3.6 until approved. Recommend GPT-6.1 Sol Medium for synchronized five-second countdown, shared seed and start-time authorization.
 
 ## Git checkpoints

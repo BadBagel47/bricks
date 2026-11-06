@@ -7,11 +7,12 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 ## Current checkpoint — 2026-11-06
 
 - **Phase 3, milestone 3.5:** Host configuration waiting screen (approved).
-- **Live:** https://badbagel47.github.io/bricks/?v=1dd23d3
-- **Deployed app source:** `1dd23d3` — four-character random room codes, no custom-code editor, legacy longer links preserved; includes settings/approval and earlier lobby corrections.
-- **CI / Pages:** https://github.com/BadBagel47/bricks/actions/runs/42130254615
-- **Status:** 3.5 is implemented on `milestone-3.5`; lint/build and 103 unit tests passed locally. Full branch CI passed for `064528b`: https://github.com/BadBagel47/bricks/actions/runs/42135488117 . All waiting lifecycle, message rotation and prior lobby/security/browser tests passed. Public site remains the 3.4 short-code release linked above.
-- **Next:** Owner confirmed editor-marker rules published. Main activation is in progress; verify successful Pages CI before marking 3.5 live. Participant-only listeners now wait for confirmed room membership; do not revert this race fix. Verify Apply/Cancel/transfer/leave/disconnection behavior and local message rotation with two live sessions. Stop for 3.5 review; no countdown or multiplayer gameplay is implemented yet.
+- **Live:** https://badbagel47.github.io/bricks/?v=96f40fe
+- **Deployed app source:** `96f40fe` — synchronized host-configuration waiting, 50 local shuffle-bag messages and confirmed-membership listener gating; includes previous settings, short codes and lobby corrections.
+- **CI / Pages:** https://github.com/BadBagel47/bricks/actions/runs/42139135333
+- **Status:** 3.5 is published on Pages. Main commit `96f40fe` passed the complete CI gate and deployed successfully; the owner confirmed editor-marker rules published. Lint/build and 103 unit tests passed locally; CI verified waiting lifecycle, real eight-second message changes and previous security/browser suites. Live owner review remains pending.
+- **Next:** Reload both clients and verify the guest waiting screen while the host edits, then Apply/Cancel/transfer/leave/disconnection. Participant-only listeners now wait for confirmed membership; preserve this race fix. Stop at 3.5 review before 3.6. No countdown or multiplayer gameplay is implemented yet.
+
 - **Next model if approved:** GPT-6.1 Sol Medium for 3.6 synchronized countdown, common seed and authorized start time.
 
 ## Product direction and durable constraints
