@@ -8,7 +8,7 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 
 - **Phase 3, milestone 3.7:** Live boards and score synchronization (authorized).
 - **Live:** https://badbagel47.github.io/bricks/?v=1d97208 (3.6).
-- **Status:** 3.7 complete on `milestone-3.7`, source `a4d5641`. Full CI passed: https://github.com/BadBagel47/bricks/actions/runs/42261496444 . Owner has now confirmed snapshot rules published; main deployment is pending. No Firebase administrator identity is attached.
+- **Status:** 3.7 complete on `milestone-3.7`, source `a4d5641`. Full CI passed: https://github.com/BadBagel47/bricks/actions/runs/42261496444 . Owner has now confirmed snapshot rules published; main build/tests passed, but the Pages deploy job failed with a generic retry-later error (run 42267746304). Retrying the same app code. No Firebase administrator identity is attached.
 - **Workflow update:** Owner waived manual 3.6 review and authorized 3.7; consolidate manual tests into larger playable checkpoints. Automatic two-session/rules checks remain mandatory. This does not authorize every later milestone.
 - **Next:** Verify main CI and Pages deployment of the checked 3.7 client. Manual playtesting may wait; do not claim the staged client is already live.
 - **Next model:** GPT-6.1 Sol Medium for 3.8 Score Duel, after 3.7 checkpoint.

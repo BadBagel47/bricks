@@ -2,10 +2,11 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.7 — Live boards and score synchronization
-- **Status:** Owner waived manual review of 3.6 and authorized 3.7. Owner confirmed the checked snapshot rules published. 3.7 source `a4d5641` passed full branch CI; main deployment is now pending.
+- **Status:** Owner waived manual review of 3.6 and authorized 3.7. Owner confirmed the checked snapshot rules published. 3.7 source `a4d5641` passed full branch CI; main build/tests passed, but the Pages deployment failed with a generic retry-later error; retrying with unchanged app code.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.7
+- Main `76cc92e` passed all build/test checks, but Pages run https://github.com/BadBagel47/bricks/actions/runs/42267746304 failed in the deploy job with “Deployment failed, try again later.” No application or rules failure was reported. Retrying publication without app-code changes; production status remains unverified until a deployment succeeds.
 - Owner confirmed publication of the checked 3.7 snapshot rules. Proceeding with main deployment of the unchanged tested client; no manual playtest is required at this checkpoint.
 - Owner asks to consolidate manual playtesting into larger playable checkpoints; 3.7 explicitly approved without manual 3.6 review. Later competitive rules/results milestones remain separate.
 - Added locally simulated multiplayer with saved keyboard/gamepad/touch/swipe controls, audio, complete own/opponent boards, score/level/lines, Next/Hold, signed score difference and Game Over status. Pure engine remains independent; no multiplayer highscores/results or Battle penalties yet.
