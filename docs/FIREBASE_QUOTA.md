@@ -89,3 +89,18 @@ two-player rooms already use about 80 browser connections, and additional tabs,
 admin consoles and reconnects need room. This is capacity planning, not an enforced
 40-room limit. If use approaches limits, reduce updates, pause new-room onboarding
 or review a hosting/backend change with the owner; never upgrade billing silently.
+
+### 3.7 implementation budget
+
+The visible board is 200 characters; the complete 11-field payload is under
+600 UTF-8 bytes in automated tests. Each player writes changed snapshots only,
+with one request in flight and at least 500 ms after acknowledgement. Rules also
+enforce the minimum interval. Unchanged gravity counters and stable final states
+produce no writes. Each client subscribes only to the opponent's current record.
+At the 2 Hz ceiling, two active players produce at most 2.4 KB/s of JSON snapshot
+payload (about 1.44 MB per ten-minute match); TLS/WebSocket/Firebase overhead and
+other lobby traffic are additional and have not been measured in production.
+Actual download quota usage must be checked in the Firebase console; this is a
+protocol budget, not a verified billed-traffic estimate. Retention remains two
+latest records per room epoch, not a per-frame or per-match history. Old room
+epochs are not automatically pruned yet.

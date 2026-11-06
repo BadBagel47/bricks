@@ -22,6 +22,9 @@ export class BricksAudio {
     this.settings = settings
   }
 
+  /** Unlock a silent context from a lobby user gesture, before the countdown. */
+  unlock() { this.ensureAudio() }
+
   beginGame(settings: AudioSettings) {
     this.stopMusic()
     this.stopEffects()

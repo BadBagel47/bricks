@@ -1,9 +1,17 @@
 # Bricks progress
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
-- **Milestone:** 3.6 — Synchronized countdown and shared starting state
-- **Status:** 3.6 published on Pages after successful main CI; owner confirmed countdown/lock rules published. Live two-session review remains pending before 3.7.
+- **Milestone:** 3.7 — Live boards and score synchronization
+- **Status:** Owner waived manual review of 3.6 and authorized 3.7. Implementation and automated validation in progress; production remains on 3.6 until new snapshot rules are published.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
+
+## Milestone 3.7
+- Owner asks to consolidate manual playtesting into larger playable checkpoints; 3.7 explicitly approved without manual 3.6 review. Later competitive rules/results milestones remain separate.
+- Added locally simulated multiplayer with saved keyboard/gamepad/touch/swipe controls, audio, complete own/opponent boards, score/level/lines, Next/Hold, signed score difference and Game Over status. Pure engine remains independent; no multiplayer highscores/results or Battle penalties yet.
+- Opponent display protocol packs the visible 200 cells into 200 characters; strict 11-field snapshots stay below 600 bytes in tests. Changed-only writes wait at least 500 ms after acknowledgement; listeners read only the opponent path. No per-frame/key traffic, heartbeats, growing match history or paid service.
+- Snapshot rules bind writes to the current ready match, participant UID, frozen connection and presence; constrain schema/ranges, monotone sequence/counters, server timestamps, 500 ms minimum intervals and terminal Game Over. Snapshots are display-only and do not provide server-authoritative anti-cheat or full recovery.
+- Extra tabs cannot control an already selected connection. Disconnect cancels the session as in 3.6; complete recovery is 3.12. Esc/the saved Pause key opens a leave confirmation while both games keep running; Tab stays on the game/dialog and boards remain unfocusable.
+- Shared board/touch/preview components extracted with no single-player rule changes. Local lint/build and 109 unit tests passed. Full server/two-browser checks pending CI. New rules must be published before activating the main client.
 
 ## Milestone 3.6
 - Owner confirmed the reviewed countdown/lock rules published. Main commit `1d97208` passed complete CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42258240145 .
@@ -137,8 +145,8 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Review published 3.6 with two live sessions: host-only Start Match, required approval, shared five-second timing, identical opening state, settings/host locks and disconnect/leave cancellation.
-- Stop before 3.7 until approved. Recommend GPT-6.1 Sol Medium for local multiplayer controls, bounded opponent snapshots and score synchronization.
+- Finish 3.7 automated validation, publish reviewed snapshot rules, then deploy the playable block. Owner manual testing may wait for a larger checkpoint.
+- Next milestone 3.8 is Score Duel; recommend GPT-6.1 Sol Medium.
 
 ## Git checkpoints
 - `fea6aa4`: initial foundation and Pages deployment.

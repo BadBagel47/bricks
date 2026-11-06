@@ -1,14 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import LiveGame from './LiveGame.tsx'
+import type { LiveOptions } from './live-options.ts'
+import { useEffect, useRef, useState } from 'react'
 import { onValue, ref } from 'firebase/database'
 import type { Database } from 'firebase/database'
 import type { JoinedRoom } from './room-model.ts'
 import type { MatchSettings } from './match-settings.ts'
-import { countdownSeconds, initialMatchState, parseMatchStart, startStillValid } from './match-start.ts'
+import { countdownSeconds, parseMatchStart, startStillValid } from './match-start.ts'
 import type { Connections, MatchStart } from './match-start.ts'
 import { createMatchStart, startPath, transitionMatchStart } from './start-repository.ts'
 import { playerFacingError } from './errors.ts'
 
-export default function MatchStartPanel({ database, joined, settings, approved, editing, otherEditors, connected, connections, localConnection, onLocked }: { database: Database; joined: JoinedRoom; settings: MatchSettings; approved: boolean; editing: boolean; otherEditors: boolean; connected: boolean; connections: Connections | null; localConnection: string | null; onLocked: (value: boolean) => void }) {
+export default function MatchStartPanel({ options, database, joined, settings, approved, editing, otherEditors, connected, connections, localConnection, onLocked }: { options: LiveOptions; database: Database; joined: JoinedRoom; settings: MatchSettings; approved: boolean; editing: boolean; otherEditors: boolean; connected: boolean; connections: Connections | null; localConnection: string | null; onLocked: (value: boolean) => void }) {
   const [start, setStart] = useState<MatchStart | null>(null)
   const [loaded, setLoaded] = useState(false)
   const [offset, setOffset] = useState<number | null>(null)
@@ -70,16 +72,18 @@ export default function MatchStartPanel({ database, joined, settings, approved, 
     catch (reason) { setError(playerFacingError(reason).message) }
     finally { setBusy(false) }
   }
-  const initial = useMemo(() => start?.status === 'ready' ? initialMatchState(start) : null, [start])
+  const ready = start?.status === 'ready' && valid && connected
+  const selected = start && localConnection === (host ? start.hostConnection : start.guestConnection)
+  if (ready && selected) return <LiveGame key={start.id} database={database} joined={joined} start={start} options={options} onLeave={() => transitionMatchStart(database, joined, start.id, 'cancelled')} />
   const bothConnected = Boolean(connections && localConnection && connections[joined.room.hostUid]?.[localConnection] && joined.room.players.guest && Object.keys(connections[joined.room.players.guest.uid] ?? {}).length)
   const canStart = host && loaded && connected && offset !== null && bothConnected && !editing && !otherEditors && (!settings.requireApproval || approved)
   return <section aria-label="Match start">
     {error && <p className="notice" role="alert">{error}</p>}
     {active && start ? <>
-      <h2>{initial && valid && connected ? 'Match ready' : 'Starting match'}</h2>
+      <h2>{ready ? 'Match in progress' : 'Starting match'}</h2>
       <p>{start.settings.mode === 'battle' ? 'Battle' : 'Score Duel'} · Level {String(start.settings.startLevel).padStart(2, '0')} · Hold {start.settings.hold ? 'on' : 'off'}</p>
       {start.status === 'countdown' && <p role="status" aria-label="Countdown">{offset === null ? 'Synchronizing…' : countdownSeconds(start, now + offset) || 'Starting…'}</p>}
-      {initial && valid && connected && <dl className="room-players" aria-label="Starting state"><div><dt>First piece</dt><dd>{initial.active?.type}</dd></div><div><dt>Next piece</dt><dd>{initial.next}</dd></div><div><dt>Score</dt><dd>{initial.score}</dd></div></dl>}
+      {ready && !selected && <p role="status">This match is controlled by another tab.</p>}
       {!connected && <p role="status">Start interrupted. Reconnecting…</p>}
       <button className="back-button" disabled={!connected || busy} onClick={() => void cancel()}>{start.status === 'ready' ? 'Return to lobby' : 'Cancel start'}</button>
     </> : <>

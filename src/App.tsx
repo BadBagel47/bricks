@@ -1,16 +1,15 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { CSSProperties, FormEvent, PointerEvent as ReactPointerEvent } from 'react'
+import type { FormEvent } from 'react'
 import { createPortal } from 'react-dom'
-import { advanceGame, createGame, dispatch, pieceCells } from './engine/index.ts'
-import type { GameAction, GameEvent, GameState, PieceType } from './engine/index.ts'
+import { advanceGame, createGame, dispatch } from './engine/index.ts'
+import type { GameAction, GameEvent, GameState } from './engine/index.ts'
 import { ACTION_LABELS, actionForCode, DEFAULT_BINDINGS, INPUT_ACTIONS, isRepeatable, keyLabel, parseBindings, remapKey } from './input/keyboard.ts'
 import type { InputAction, KeyboardBindings } from './input/keyboard.ts'
 import { DEFAULT_GAMEPAD_BINDINGS, gamepadActions, gamepadButtonLabel, parseGamepadBindings, remapGamepadButton } from './input/gamepad.ts'
 import type { GamepadBindings } from './input/gamepad.ts'
 import { HeldInputs } from './input/repeat.ts'
 import { actionsForSwipe } from './input/swipe.ts'
-import { colorForPiece } from './ui/level-palettes.ts'
-import { previewCells } from './ui/piece-preview.ts'
+import { Playfield, PiecePreview, TouchControls } from './ui/GameViews.tsx'
 import { addHighscore, DEFAULT_PERSONAL_SETTINGS, DEFAULT_SINGLE_PLAYER_SETTINGS, parseHighscores, parsePersonalSettings, parseSinglePlayerSettings, serializeHighscores } from './persistence.ts'
 import type { HighscoreRecord, PersonalSettings, SinglePlayerSettings } from './persistence.ts'
 import { BricksAudio } from './audio/synth.ts'
@@ -405,7 +404,7 @@ function App() {
     </section>
   </main>
 
-  if (view === 'multiplayer') return <Suspense fallback={<main className="shell"><p role="status">Loading…</p></main>}><MultiplayerScreen username={username} branding={<Brand compact />} onBack={() => setView('menu')} /></Suspense>
+  if (view === 'multiplayer') return <Suspense fallback={<main className="shell"><p role="status">Loading…</p></main>}><MultiplayerScreen preferences={{ personal, bindings, gamepadBindings }} username={username} branding={<Brand compact />} onBack={() => setView('menu')} /></Suspense>
 
   if (view === 'settings') return <main className="shell">
     <header className="topbar"><Brand compact /><button className="back-button" onClick={() => { setCapture(null); setGamepadCapture(null); setView('menu') }}>← Back to menu</button></header>
@@ -494,83 +493,10 @@ function App() {
   </main>
 }
 
-interface SwipePoint { readonly x: number; readonly y: number }
-
 function focusableControls(scope: HTMLElement): HTMLElement[] {
   return Array.from(scope.querySelectorAll<HTMLElement>(
     'button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
   )).filter((control) => control.offsetWidth > 0 || control.offsetHeight > 0)
-}
-
-function Playfield({ game, swipeMode, onSwipe }: { game: GameState; swipeMode: boolean; onSwipe: (start: SwipePoint, end: SwipePoint) => void }) {
-  const cells: (PieceType | null)[] = game.board.flatMap((row) => [...row])
-  const swipeStart = useRef<SwipePoint | null>(null)
-  if (game.active) for (const [x, y] of pieceCells(game.active)) cells[y * 10 + x] = game.active.type
-  return <div className={`playfield${swipeMode ? ' swipe-active' : ''}`} role="img" aria-label="Game board, 10 columns by 20 rows"
-    onPointerDown={(event) => { if (swipeMode && event.pointerType !== 'mouse') { swipeStart.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId) } }}
-    onPointerUp={(event) => { if (!swipeMode || !swipeStart.current) return; onSwipe(swipeStart.current, { x: event.clientX, y: event.clientY }); swipeStart.current = null }}
-    onPointerCancel={() => { swipeStart.current = null }}>
-    {cells.map((type, index) => <div className={`board-cell${type ? ' filled' : ''}`} key={index} style={type ? { '--cell-color': colorForPiece(type, game.level) } as CSSProperties : undefined} />)}
-  </div>
-}
-
-function TouchControls({ method, buttonSize, leftHanded, holdEnabled, hardDropEnabled, enabled, apply }: {
-  method: 'dpad' | 'swipe'; buttonSize: number; leftHanded: boolean; holdEnabled: boolean; hardDropEnabled: boolean; enabled: boolean; apply: (action: GameAction) => void
-}) {
-  return <section className={`touch-controls${leftHanded ? ' left-handed' : ''}`} style={{ '--preferred-touch-size': `${buttonSize}px` } as CSSProperties} aria-label="Touch controls">
-    {method === 'dpad' ? <div className="touch-pad" aria-label="Directional pad">
-      <span />
-      <TouchButton enabled={enabled} label="Move left" mark="←" action="moveLeft" apply={apply} repeat />
-      <span />
-      <TouchButton enabled={enabled} label="Move right" mark="→" action="moveRight" apply={apply} repeat />
-      <TouchButton enabled={enabled} label="Soft drop" mark="↓" action="softDrop" apply={apply} repeat />
-    </div> : <p className="swipe-instructions">Tap to rotate · Swipe left/right to move · Swipe down to soft drop · Swipe up to hard drop</p>}
-    <div className="touch-actions">
-      <TouchButton enabled={enabled} label="Rotate counterclockwise" mark="B" action="rotateCounterclockwise" apply={apply} />
-      <TouchButton enabled={enabled} label="Rotate clockwise" mark="A" action="rotateClockwise" apply={apply} />
-      {hardDropEnabled && <TouchButton enabled={enabled} label="Hard drop" mark="DROP" action="hardDrop" apply={apply} primary />}
-      {holdEnabled && <TouchButton enabled={enabled} label="Hold piece" mark="HOLD" action="hold" apply={apply} />}
-    </div>
-  </section>
-}
-
-function TouchButton({ label, mark, action, apply, enabled, repeat = false, primary = false }: {
-  label: string; mark: string; action: GameAction; apply: (action: GameAction) => void; enabled: boolean; repeat?: boolean; primary?: boolean
-}) {
-  const activePointer = useRef<number | null>(null)
-  const delay = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const interval = useRef<ReturnType<typeof setInterval> | null>(null)
-  function stop() {
-    if (delay.current) clearTimeout(delay.current)
-    if (interval.current) clearInterval(interval.current)
-    delay.current = null
-    interval.current = null
-    activePointer.current = null
-  }
-  function press(event: ReactPointerEvent<HTMLButtonElement>) {
-    event.preventDefault()
-    if (!enabled || activePointer.current !== null) return
-    stop()
-    activePointer.current = event.pointerId
-    event.currentTarget.setPointerCapture(event.pointerId)
-    apply(action)
-    if (repeat) delay.current = setTimeout(() => { apply(action); interval.current = setInterval(() => apply(action), action === 'softDrop' ? 65 : 48) }, 160)
-  }
-  function release(event: ReactPointerEvent<HTMLButtonElement>) {
-    if (activePointer.current === event.pointerId) stop()
-  }
-  useEffect(() => { if (!enabled) stop(); return stop }, [enabled])
-  return <button aria-label={label} disabled={!enabled} className={`touch-button${primary ? ' touch-primary' : ''}${mark.length > 2 ? ' touch-word' : ''}`} onClick={(event) => { if (event.detail === 0) apply(action) }} onLostPointerCapture={release} onPointerCancel={release} onPointerDown={press} onPointerUp={release} type="button">{mark}</button>
-}
-
-function PiecePreview({ type, level }: { type: PieceType; level: number }) {
-  const cells = previewCells(type)
-  return <div className="piece-preview" aria-label={`${type} piece`}>
-    {Array.from({ length: 16 }, (_, index) => {
-      const filled = cells.has(index)
-      return <span className={filled ? 'filled' : ''} key={index} style={filled ? { '--cell-color': colorForPiece(type, level) } as CSSProperties : undefined} />
-    })}
-  </div>
 }
 
 function HighscoreTable({ records, compact = false }: { records: readonly HighscoreRecord[]; compact?: boolean }) {

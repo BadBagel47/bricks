@@ -1,3 +1,4 @@
+import type { LiveOptions } from './live-options.ts'
 import MatchStartPanel from './MatchStartPanel.tsx'
 import type { Connections } from './match-start.ts'
 import HostWaiting from './HostWaiting.tsx'
@@ -11,7 +12,7 @@ import { DEFAULT_MATCH_SETTINGS, isApproved, parseSettings, sameSettings } from 
 import type { Approval, MatchSettings } from './match-settings.ts'
 import { MultiplayerError, playerFacingError } from './errors.ts'
 
-export default function MatchSettingsPanel({ database, joined, connected, hostConnected, messages, connections, localConnection, locked, onLocked }: { database: Database; joined: JoinedRoom; connected: boolean; hostConnected: boolean; messages: WaitingMessages; connections: Connections | null; localConnection: string | null; locked: boolean; onLocked: (value: boolean) => void }) {
+export default function MatchSettingsPanel({ options, database, joined, connected, hostConnected, messages, connections, localConnection, locked, onLocked }: { options: LiveOptions; database: Database; joined: JoinedRoom; connected: boolean; hostConnected: boolean; messages: WaitingMessages; connections: Connections | null; localConnection: string | null; locked: boolean; onLocked: (value: boolean) => void }) {
   const [settings, setSettings] = useState(DEFAULT_MATCH_SETTINGS)
   const [approval, setApproval] = useState<Approval | null>(null)
   const [draft, setDraft] = useState<MatchSettings | null>(null)
@@ -81,7 +82,7 @@ export default function MatchSettingsPanel({ database, joined, connected, hostCo
         <label className="toggle-row"><input type="checkbox" checked={draft.requireApproval} disabled={busy} onChange={event => setDraft({ ...draft, requireApproval: event.target.checked })} /> Require approval</label>
         <div className="room-actions"><button className="button button-primary" disabled={!connected || busy} type="submit">Apply Settings</button><button className="back-button" disabled={busy} type="button" onClick={() => setDraft(null)}>Cancel</button></div>
       </form>}
-      <MatchStartPanel database={database} joined={joined} settings={settings} approved={approved} editing={editing} otherEditors={Object.keys(editors[joined.room.hostUid] ?? {}).length > 0} connected={connected} connections={connections} localConnection={localConnection} onLocked={onLocked} />
+      <MatchStartPanel options={options} database={database} joined={joined} settings={settings} approved={approved} editing={editing} otherEditors={Object.keys(editors[joined.room.hostUid] ?? {}).length > 0} connected={connected} connections={connections} localConnection={localConnection} onLocked={onLocked} />
     </>}
   </section>
 }

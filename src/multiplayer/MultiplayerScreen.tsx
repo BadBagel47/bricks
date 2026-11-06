@@ -1,3 +1,5 @@
+import { BricksAudio } from '../audio/synth.ts'
+import type { MultiplayerPreferences } from './live-options.ts'
 import { cancelCurrentStart } from './start-repository.ts'
 import type { Connections } from './match-start.ts'
 import { WaitingMessages } from './waiting-messages.ts'
@@ -19,7 +21,10 @@ function setInvite(code: string | null) {
   history.replaceState(null, '', url)
 }
 
-export default function MultiplayerScreen({ username, branding, onBack }: { username: string; branding: ReactNode; onBack: () => void }) {
+export default function MultiplayerScreen({ username, branding, onBack, preferences }: { preferences: MultiplayerPreferences; username: string; branding: ReactNode; onBack: () => void }) {
+  const [playing, setPlaying] = useState(false)
+  const [audio] = useState(() => new BricksAudio(preferences.personal))
+
   const [code, setCode] = useState(() => new URL(location.href).searchParams.get('room') ?? '')
   const [joined, setJoined] = useState<JoinedRoom | null>(null)
   const [previous, setPrevious] = useState(previousRoomCode)
@@ -160,7 +165,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
 
   const status = (uid: string) => connected === false ? 'Unknown' : presence[uid] ? 'Connected' : 'Disconnected'
   const isHost = joined?.uid === joined?.room.hostUid
-  return <main className="shell">
+  return <main className="shell" inert={playing} onPointerDownCapture={() => audio.unlock()} onKeyDownCapture={() => audio.unlock()}>
     <header className="topbar">{branding}<button className="back-button" disabled={busy} onClick={() => void back()}>← Back to menu</button></header>
     <section className="settings-card multiplayer-card" aria-busy={busy}>
       <h1 ref={heading} tabIndex={-1}>{joined ? `Room ${joined.code}` : '2 Players'}</h1>
@@ -173,7 +178,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
       {copyFallback && <label className="invite-field">Copy text<input readOnly autoFocus value={copyFallback} onFocus={event => event.currentTarget.select()} /></label>}
       {busy && <p role="status">Connecting…</p>}
       {joined ? <>
-        {database && <MatchSettingsPanel key={`${joined.code}:${joined.room.epoch}:${joined.room.roleRevision ?? 0}`} database={database} joined={joined} connected={connected === true} hostConnected={presence[joined.room.hostUid] === true} messages={waitingMessages.current.messages} connections={connections} localConnection={localConnection} locked={starting} onLocked={setStarting} />}
+        {database && <MatchSettingsPanel options={{ preferences, audio, onPlaying: setPlaying }} key={`${joined.code}:${joined.room.epoch}:${joined.room.roleRevision ?? 0}`} database={database} joined={joined} connected={connected === true} hostConnected={presence[joined.room.hostUid] === true} messages={waitingMessages.current.messages} connections={connections} localConnection={localConnection} locked={starting} onLocked={setStarting} />}
         {localHost && guestUid && !guestOnline && connected === true && <p role="status">Opponent disconnected. Waiting up to 15 seconds before freeing the slot.</p>}
         <dl className="room-players" aria-label="Players"><div><dt>Host</dt><dd><span>{joined.room.players.host.name}</span> · <span>{status(joined.room.players.host.uid)}</span></dd></div><div><dt>Opponent</dt><dd>{joined.room.players.guest ? <><span>{joined.room.players.guest.name}</span> · <span>{status(joined.room.players.guest.uid)}</span></> : 'Waiting for opponent…'}</dd></div></dl>
         {connected === false && <p className="notice" role="status">Unable to connect. Check your connection and try again.</p>}

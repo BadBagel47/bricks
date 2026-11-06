@@ -289,3 +289,44 @@ test('only the host starts; approval, connections, settings and five-second serv
   await assertSucceeds(set(ref(db('host'), path), { ...proposal, id: 'e'.repeat(32), seed: 48 }))
   await assertFails(set(ref(db('host'), path), { ...current, status: 'cancelled' }))
 })
+
+test('live snapshots are bounded, participant-owned, current-match-bound, rate-limited and terminal', async () => {
+  const hc = 'b'.repeat(32), gc = 'c'.repeat(32), mid = 'a'.repeat(32)
+  const room = await ownedRoom()
+  const joined = { ...room, players: { ...room.players, guest: { uid: 'guest', name: 'Guest' } } }
+  await set(ref(db('guest'), `rooms/${code}`), joined)
+  const matchPath = `matchStarts/${code}/1`
+  const ready = { id: mid, status: 'ready', seed: 47, countdownAt: Date.now() - 6000, settings: { revision: 0, mode: 'score-duel', startLevel: 0, hold: false, requireApproval: false }, roleRevision: 0, hostUid: 'host', guestUid: 'guest', hostConnection: hc, guestConnection: gc }
+  // Countdown authorization is covered separately. Seed a prepared session for snapshot isolation.
+  await environment.withSecurityRulesDisabled(async context => {
+    await set(ref(context.database(), matchPath), ready)
+    await set(ref(context.database(), `presence/${code}/1`), { host: { [hc]: true }, guest: { [gc]: true } })
+  })
+  const base = `gameSnapshots/${code}/1`
+  const location = ref(db('host'), `${base}/host`)
+  const payload = { matchId: mid, connection: hc, seq: 1, board: '0'.repeat(200), next: 'T', held: '-', status: 'playing', score: 0, level: 0, lines: 0, updatedAt: serverTimestamp() }
+  await assertFails(set(ref(db('guest'), `${base}/host`), payload))
+  await assertFails(set(ref(db(), `${base}/host`), payload))
+  await assertFails(set(ref(db('third'), `${base}/third`), { ...payload, connection: gc }))
+  await assertFails(set(ref(db('host'), `gameSnapshots/${code}/2/host`), payload))
+  for (const bad of [{ ...payload, matchId: 'd'.repeat(32) }, { ...payload, connection: gc }, { ...payload, seq: 2 }, { ...payload, board: '0'.repeat(201) }, { ...payload, board: '8'.repeat(200) }, { ...payload, extra: 'spam' }, { ...payload, score: -1 }, { ...payload, level: 1.5 }, { ...payload, held: 'X' }, { ...payload, updatedAt: 1 }]) await assertFails(set(location, bad))
+  await assertSucceeds(set(location, payload))
+  await assertSucceeds(get(ref(db('guest'), `${base}/host`)))
+  await assertFails(get(ref(db('third'), base)))
+  await assertFails(get(ref(db('host'), 'gameSnapshots')))
+  await assertFails(remove(location))
+  await assertFails(set(location, { ...payload, seq: 2, score: 40 }))
+  await new Promise(resolve => setTimeout(resolve, 550))
+  await assertFails(set(location, payload))
+  await assertSucceeds(set(location, { ...payload, seq: 2, score: 40, lines: 1 }))
+  await new Promise(resolve => setTimeout(resolve, 550))
+  await assertFails(set(location, { ...payload, seq: 3, score: 0 }))
+  await assertSucceeds(set(location, { ...payload, seq: 3, score: 40, lines: 1, status: 'gameOver' }))
+  await new Promise(resolve => setTimeout(resolve, 550))
+  await assertFails(set(location, { ...payload, seq: 4, score: 100, lines: 2 }))
+  await set(ref(db('host'), matchPath), { ...ready, status: 'cancelled' })
+  await assertFails(set(ref(db('guest'), `${base}/guest`), { ...payload, connection: gc }))
+  await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), matchPath), { ...ready, id: 'e'.repeat(32) }) })
+  await assertFails(set(location, { ...payload, seq: 4 }))
+  await assertSucceeds(set(location, { ...payload, matchId: 'e'.repeat(32) }))
+})

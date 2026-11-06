@@ -437,3 +437,37 @@ Stage on milestone-3.6 and verify emulator/browser CI. Publish reviewed rules vi
 the owner before main activation; reload both clients. Stop for 3.6 review before
 implementing live boards in 3.7. Configuration history/metadata retention remains
 as previously documented; current preparation itself has no accumulating event log.
+
+## 3.7 live display synchronization
+
+Gameplay uses the same local engine and saved personal input/audio preferences as
+single-player. Both clients derive their stream from the frozen shared seed. The
+opponent is display-only: received data never drives the local engine. Shared
+board, preview and touch components retain the earlier focus/volume fixes.
+
+`gameSnapshots/CODE/EPOCH/UID` contains only each participant's latest state, with
+match ID, frozen connection, monotone sequence, server update time, 200 visible
+cells encoded as digits 0–7, Next/Hold, status, score, level and lines. Eleven
+bounded fields; no histories. Stale match IDs and sequences are ignored. The client
+publishes only changed visible state, with one request in flight and a minimum
+500 ms delay after acknowledgement; the server also enforces 500 ms between
+updates. Terminal Game Over is sent once, through the same budget.
+
+Rules restrict writes to the owning participant and the current ready session's
+selected present connection. Numbers, pieces, schema, monotonicity and terminal
+state are checked. These bounds do not validate a complete legal input replay:
+client-owned scores are not server-authoritative anti-cheat. A same-UID malicious
+tab can reproduce a connection ID; full control leases/recovery remain 3.12.
+
+The game page is a portal outside the inert lobby. Tab is prevented before native
+focus movement and cycles only visible game/dialog controls; boards have no tab
+stop. Esc/the personal Pause binding opens a leave confirmation without pausing
+multiplayer gravity. Returning cancels the prepared session for both players.
+Current disconnect behavior cancels the session and records no competitive result.
+Score Duel completion, Battle penalties, results, highscores and rematches retain
+their later milestones.
+
+The owner authorized this step without a manual 3.6 review and wants fewer manual
+test interruptions. Full automated security and real two-session checks remain
+required. Stage on `milestone-3.7`; install its reviewed snapshot rules before
+publishing the client from main.

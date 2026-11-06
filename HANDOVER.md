@@ -6,14 +6,11 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 
 ## Current checkpoint — 2026-11-06
 
-- **Phase 3, milestone 3.6:** Countdown and shared starting state (approved).
-- **Live:** https://badbagel47.github.io/bricks/?v=1d97208
-- **Deployed app source:** `1d97208` — server-timed countdown, frozen settings/participants/connections and deterministic shared initial state; includes previous lobby and waiting-screen features.
-- **CI / Pages:** https://github.com/BadBagel47/bricks/actions/runs/42258240145
-- **Status:** 3.6 is published on Pages. Main commit `1d97208` passed complete CI, including server rules, clock skew, countdown, locks, cancellation and equal starting state. The owner confirmed the reviewed rules published. Local lint/build and 106 unit tests passed; live owner review is pending.
-- **Next:** Reload both clients and review host-only start, optional approval, shared five-second timing, locks and disconnect/leave cancellation. Ready shows a read-only opening state; live controls and opponent boards are not implemented. Stop for 3.6 review before 3.7.
-
-- **Next model if approved:** GPT-6.1 Sol Medium for 3.7 live multiplayer controls, bounded opponent snapshots and score synchronization.
+- **Phase 3, milestone 3.7:** Live boards and score synchronization (authorized).
+- **Live:** https://badbagel47.github.io/bricks/?v=1d97208 (3.6).
+- **Status:** 3.7 implementation/automated validation in progress. New snapshot rules require owner publication before main activation. No Firebase administrator identity is attached.
+- **Workflow update:** Owner waived manual 3.6 review and authorized 3.7; consolidate manual tests into larger playable checkpoints. Automatic two-session/rules checks remain mandatory. This does not authorize every later milestone.
+- **Next model:** GPT-6.1 Sol Medium for 3.8 Score Duel, after 3.7 checkpoint.
 
 ## Product direction and durable constraints
 
@@ -23,8 +20,7 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 - Engine rules stay separate from React, rendering, input, audio, persistence and
   Firebase. The game is NES-inspired, not a cycle-accurate emulator.
 - Current multiplayer has room creation, join/invite/reopen, two-player lobby,
-  host handover and connection presence. It has a five-second countdown and read-only prepared starting state, but
-  **no live multiplayer controls or opponent boards yet**. An offline player may retain a slot; coordinated recovery
+  host handover and connection presence. Published 3.6 has a countdown/read-only prepared start; staged 3.7 adds live controls, opponent boards and compact snapshots. An offline player may retain a slot; coordinated recovery
   and active-tab leases belong to later work.
 - Stay on Firebase Spark. No paid backend/functions or billing upgrade without
   explicit owner approval. Keep application heartbeat writes out; planned game
@@ -32,7 +28,7 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
   before activation. Retain small room-code reservations to preserve ownership
   and saved links; no automatic reservation expiry is implemented.
 - Only the owner can authorize entering a new milestone or changing a product
-  rule. Stop at milestone review checkpoints.
+  rule. Stop at milestone checkpoints unless the owner waived the relevant manual review.
 
 ## Working method and communication
 
