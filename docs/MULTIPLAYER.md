@@ -1,4 +1,4 @@
-# Multiplayer foundation and rooms — milestones 3.1–3.3
+# Multiplayer — milestones 3.1–3.7
 
 ## Milestone 3.3 lobby and quota review
 
@@ -33,7 +33,7 @@ instance; production rule installation still requires the owner.
 The owner approved Phase 3 after the single-player polish review. This milestone
 provides the Firebase boundary, anonymous identity, immutable code reservations,
 emulator tooling and security tests. Room creation/joining is milestone 3.2.
-Milestone 3.2 adds the room UI and transactions below. Matches cannot start yet.
+Milestone 3.2 adds the room UI and transactions below. Later sections cover settings, countdown and live play.
 The single-player engine is independent from Firebase; the app loads the Firebase
 client only when entering a configured room flow.
 
@@ -471,3 +471,11 @@ The owner authorized this step without a manual 3.6 review and wants fewer manua
 test interruptions. Full automated security and real two-session checks remain
 required. Stage on `milestone-3.7`; install its reviewed snapshot rules before
 publishing the client from main.
+
+3.7 validation: `a4d5641` passed full branch CI (https://github.com/BadBagel47/bricks/actions/runs/42261496444), including real two-session
+line clears and score mirroring, independent keyboard/touch movement, snapshot
+rate/payload bounds, terminal Game Over, focus containment, three mobile
+viewports, and server-side ownership/schema/rate/stale-match/terminal checks.
+Local lint/build, 109 unit tests and 15 production single-player Chromium checks
+also passed. Local Database Emulator rule upload remains blocked as previously
+recorded; the complete server result is from CI. Pages deploy was skipped.

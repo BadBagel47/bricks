@@ -8,8 +8,9 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 
 - **Phase 3, milestone 3.7:** Live boards and score synchronization (authorized).
 - **Live:** https://badbagel47.github.io/bricks/?v=1d97208 (3.6).
-- **Status:** 3.7 implementation/automated validation in progress. New snapshot rules require owner publication before main activation. No Firebase administrator identity is attached.
+- **Status:** 3.7 complete on `milestone-3.7`, source `a4d5641`. Full CI passed: https://github.com/BadBagel47/bricks/actions/runs/42261496444 . New snapshot rules require owner publication before main activation. No Firebase administrator identity is attached.
 - **Workflow update:** Owner waived manual 3.6 review and authorized 3.7; consolidate manual tests into larger playable checkpoints. Automatic two-session/rules checks remain mandatory. This does not authorize every later milestone.
+- **Next:** Owner installs the checked rules from `a4d5641`, then deploy the checked client to Pages. Manual playtesting may wait; do not claim the staged client is already live.
 - **Next model:** GPT-6.1 Sol Medium for 3.8 Score Duel, after 3.7 checkpoint.
 
 ## Product direction and durable constraints
@@ -24,8 +25,7 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
   and active-tab leases belong to later work.
 - Stay on Firebase Spark. No paid backend/functions or billing upgrade without
   explicit owner approval. Keep application heartbeat writes out; planned game
-  snapshots target at most two compact updates/second/player and must be measured
-  before activation. Retain small room-code reservations to preserve ownership
+  snapshots are implemented at at most two compact updates/second/player; automated tests verify the payload/rate budget. Actual billed traffic still needs production monitoring. Retain small room-code reservations to preserve ownership
   and saved links; no automatic reservation expiry is implemented.
 - Only the owner can authorize entering a new milestone or changing a product
   rule. Stop at milestone checkpoints unless the owner waived the relevant manual review.

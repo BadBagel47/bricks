@@ -2,7 +2,7 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.7 — Live boards and score synchronization
-- **Status:** Owner waived manual review of 3.6 and authorized 3.7. Implementation and automated validation in progress; production remains on 3.6 until new snapshot rules are published.
+- **Status:** Owner waived manual review of 3.6 and authorized 3.7. 3.7 complete and fully checked on milestone-3.7 (`a4d5641`); production remains on 3.6 until new snapshot rules are published.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.7
@@ -11,7 +11,7 @@
 - Opponent display protocol packs the visible 200 cells into 200 characters; strict 11-field snapshots stay below 600 bytes in tests. Changed-only writes wait at least 500 ms after acknowledgement; listeners read only the opponent path. No per-frame/key traffic, heartbeats, growing match history or paid service.
 - Snapshot rules bind writes to the current ready match, participant UID, frozen connection and presence; constrain schema/ranges, monotone sequence/counters, server timestamps, 500 ms minimum intervals and terminal Game Over. Snapshots are display-only and do not provide server-authoritative anti-cheat or full recovery.
 - Extra tabs cannot control an already selected connection. Disconnect cancels the session as in 3.6; complete recovery is 3.12. Esc/the saved Pause key opens a leave confirmation while both games keep running; Tab stays on the game/dialog and boards remain unfocusable.
-- Shared board/touch/preview components extracted with no single-player rule changes. Local lint/build, 109 unit tests and all 15 production Chromium single-player regression tests passed. Full server/two-browser checks pending CI. New rules must be published before activating the main client.
+- Shared board/touch/preview components extracted with no single-player rule changes. Local lint/build, 109 unit tests and all 15 production Chromium single-player regression tests passed. Complete branch CI passed for `a4d5641`: https://github.com/BadBagel47/bricks/actions/runs/42261496444 . Includes actual line-clear score mirroring, independent keyboard/touch play, payload/rate budget, terminal Game Over, Tab/dialog focus, mobile portrait/landscape fit, countdown clock skew/cancellation and all server authorization/rate/replay checks. Pages deployment was skipped as intended. New rules must be published before activating the main client.
 
 ## Milestone 3.6
 - Owner confirmed the reviewed countdown/lock rules published. Main commit `1d97208` passed complete CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42258240145 .
@@ -140,12 +140,12 @@
 - Chromium desktop/mobile viewport, touch-event and simulated gamepad tests passed. Physical devices and subjective audio quality remain unverified here.
 - Touch and gamepad behavior should be checked on the owner's physical devices.
 - Live 3.2 room creation and two-player joining are confirmed by the owner. The owner reports updated 3.3 rules published and CI deployed the new client; live lobby review remains pending.
-- Room flows, countdown and read-only initialized starting state are implemented. Interactive multiplayer controls, live opponent boards and competitive results are not implemented yet.
-- Presence and host transfer are implemented in 3.3. Offline players retain their slots; coordinated match recovery, active-control leases, snapshot validation and Battle remain later milestones.
+- Published 3.6 has the room flow/countdown and read-only starting state. Staged 3.7 adds interactive controls and live opponent boards; competitive completion/results remain later milestones.
+- Presence and host transfer are implemented. The host releases an absent lobby guest after 15 seconds; active interruptions currently cancel the session. Snapshot schema/ownership checks are in 3.7; coordinated recovery, robust active-control leases and Battle remain later milestones.
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Finish 3.7 automated validation, publish reviewed snapshot rules, then deploy the playable block. Owner manual testing may wait for a larger checkpoint.
+- Owner publishes the checked 3.7 snapshot rules, then deploy the checked client from main. Owner manual testing may wait for a larger checkpoint.
 - Next milestone 3.8 is Score Duel; recommend GPT-6.1 Sol Medium.
 
 ## Git checkpoints
