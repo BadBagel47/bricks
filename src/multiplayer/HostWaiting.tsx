@@ -8,7 +8,7 @@ export default function HostWaiting({ messages }: { messages: WaitingMessages })
     return () => clearInterval(timer)
   }, [messages])
   return <section aria-label="Host configuration waiting screen">
-    <h2 role="status">Host is configuring the match</h2>
+    <h2 aria-live="polite">Host is configuring the match</h2>
     <p>Waiting for the host to finish adjusting the rules.</p>
     <p aria-live="off">{message}</p>
   </section>

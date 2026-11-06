@@ -355,3 +355,35 @@ publish the updated rules before this client is activated on main. Existing 3.3
 clients must reload after activation: old host-transfer writes do not include the
 new generation. No administrator identity is attached to this runtime. Stop for
 review at 3.4; the dedicated host-configuration waiting screen is 3.5.
+
+## Milestone 3.5 — host configuration waiting
+
+A guest sees the dedicated host-configuration status while any connected current
+host tab is editing. The panel hides published-settings approval controls during
+that wait, but room navigation/Leave remain available. No draft values are sent.
+Only Apply publishes the effective settings; unchanged Apply and Cancel preserve
+approval as before.
+
+`matchSettings/CODE/EPOCH/editors/UID/CONNECTION_ID` contains only roleRevision.
+The marker is written once on editor opening after registering onDisconnect
+cleanup, and removed on close. Writes require current host identity, waiting room,
+matching epoch and role generation; cleanup can remove the writer's own obsolete
+marker. Guests cannot advertise editing or inject draft fields. Old markers cannot
+keep the UI waiting after role changes; host presence gates waiting during network
+loss. Separate tab IDs keep one tab's cleanup from erasing another editor's state.
+The editor re-advertises after reconnect only if the local draft is still open.
+No polling/heartbeat writes are used. Normal marker cleanup is best-effort with
+onDisconnect fallback; it is not a server TTL or an absolute guarantee under
+revoked authentication.
+
+The 50 approved messages from spec section 30 use a client-only shuffle bag.
+Each full cycle contains all 50 once; its first five exclude the preceding five.
+The bag survives waiting-screen unmounts and host-role changes within the same
+room/epoch and resets when leaving that lobby. Reading the current message is
+idempotent, including React StrictMode rendering. Only a visible waiting screen
+runs the eight-second interval; no messages are rendered over active gameplay.
+Changing a message has no Firebase operation and does not repeatedly announce
+text to screen readers.
+
+Stage on `milestone-3.5`; publish reviewed marker rules before main activation.
+Stop after owner review of 3.5. Five-second countdown/seeded start remains 3.6.

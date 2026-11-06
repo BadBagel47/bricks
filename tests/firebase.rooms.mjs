@@ -236,7 +236,7 @@ test('shared settings: private drafts, cancel, approval invalidation and host tr
   } finally { for (const context of contexts) await context.close() }
 })
 
-test('host configuration waiting ends on cancel, unchanged apply, transfer and editing-tab close', { timeout: 60000 }, async () => {
+test('host configuration waiting handles cancel, apply, transfer, disconnect, editing-tab close and leave', { timeout: 60000 }, async () => {
   const contexts = await Promise.all([browser.newContext(), browser.newContext()])
   try {
     const [host, guest] = await Promise.all(contexts.map(context => context.newPage()))
@@ -253,6 +253,10 @@ test('host configuration waiting ends on cancel, unchanged apply, transfer and e
     const message = guest.locator('[aria-label="Host configuration waiting screen"] p').last()
     const first = await message.innerText()
     await guest.waitForFunction(first => document.querySelector('[aria-label="Host configuration waiting screen"] p:last-child')?.textContent !== first, first, { timeout: 10000 })
+    await host.evaluate(async () => (await import('/tests/fixtures/firebase-browser.ts')).disconnectDatabase())
+    await waiting.waitFor({ state: 'hidden' })
+    await host.evaluate(async () => (await import('/tests/fixtures/firebase-browser.ts')).reconnectDatabase())
+    await waiting.waitFor()
     await host.getByRole('button', { name: 'Cancel', exact: true }).click()
     await waiting.waitFor({ state: 'hidden' })
     await host.getByRole('button', { name: 'Edit Match Settings', exact: true }).click()
@@ -271,5 +275,10 @@ test('host configuration waiting ends on cancel, unchanged apply, transfer and e
     await guest.close()
     await host.getByRole('heading', { name: 'Host is configuring the match', exact: true }).waitFor({ state: 'hidden' })
     await host.locator('dl[aria-label="Players"] > div').first().getByText('Connected', { exact: true }).waitFor()
+    await extra.getByRole('button', { name: 'Edit Match Settings', exact: true }).click()
+    await host.getByRole('heading', { name: 'Host is configuring the match', exact: true }).waitFor()
+    await extra.getByRole('button', { name: 'Leave Lobby', exact: true }).click()
+    await host.getByRole('heading', { name: 'Host is configuring the match', exact: true }).waitFor({ state: 'hidden' })
+    await host.getByRole('button', { name: 'Edit Match Settings', exact: true }).waitFor()
   } finally { for (const context of contexts) await context.close() }
 })

@@ -6,14 +6,13 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 
 ## Current checkpoint — 2026-11-06
 
-- **Phase 3, milestone 3.4:** Shared match settings and approval (approved).
+- **Phase 3, milestone 3.5:** Host configuration waiting screen (approved).
 - **Live:** https://badbagel47.github.io/bricks/?v=1dd23d3
 - **Deployed app source:** `1dd23d3` — four-character random room codes, no custom-code editor, legacy longer links preserved; includes settings/approval and earlier lobby corrections.
 - **CI / Pages:** https://github.com/BadBagel47/bricks/actions/runs/42130254615
-- **Status:** Short-code follow-up is published on Pages; main CI passed for `1dd23d3`. Owner confirmed updated rules published. Earlier Git writes failed with `fatal error in commit_refs_rules`; a normal retry later succeeded with no credential, permission or protection changes. Do not claim a known root-cause repair. No manual GitHub merge is needed.
-- **Next:** Reload the published client and review four-character new-room codes, absence of code editing across host transfers, legacy links, and settings/approval. Stop at 3.4 review before 3.5. No match start or multiplayer gameplay exists yet.
-
-- **Next model if approved:** GPT-6.1 Sol Medium for the 3.5 host-configuration waiting state and synchronization; Luna Medium for isolated UI-only polish.
+- **Status:** 3.5 is implemented on `milestone-3.5`; lint/build and 103 unit tests passed locally. Branch CI pending. Public site remains the 3.4 short-code release linked above.
+- **Next:** Complete CI, have the owner publish reviewed editor-marker rules, then activate main via a normal deployment commit. Verify Apply/Cancel/transfer/leave/disconnection behavior and local message rotation with two live sessions. Stop for 3.5 review; no countdown or multiplayer gameplay is implemented yet.
+- **Next model if approved:** GPT-6.1 Sol Medium for 3.6 synchronized countdown, common seed and authorized start time.
 
 ## Product direction and durable constraints
 
