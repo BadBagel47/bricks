@@ -1,3 +1,5 @@
+import { cancelCurrentStart } from './start-repository.ts'
+import type { Connections } from './match-start.ts'
 import { WaitingMessages } from './waiting-messages.ts'
 import MatchSettingsPanel from './MatchSettingsPanel.tsx'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
@@ -25,6 +27,9 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
   const [error, setError] = useState<MultiplayerError | null>(null)
   const [admitted, setAdmitted] = useState<{ key: string; database: import('firebase/database').Database } | null>(null)
   const [presence, setPresence] = useState<RoomPresence>({})
+  const [connections, setConnections] = useState<Connections | null>(null)
+  const [localConnection, setLocalConnection] = useState<string | null>(null)
+  const [starting, setStarting] = useState(false)
   const [notice, setNotice] = useState('')
   const [copyFallback, setCopyFallback] = useState<string | null>(null)
   const [connected, setConnected] = useState<boolean | null>(null)
@@ -91,7 +96,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
   useEffect(() => {
     if (!joined) return
     let cancelled = false
-    setPresence({}); setConnected(null)
+    setPresence({}); setConnections(null); setLocalConnection(null); setConnected(null)
     const stops: (() => void)[] = []
     let presenceStarted = false
     void rooms().then(repository => {
@@ -106,7 +111,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
         if (!presenceStarted) {
           presenceStarted = true
           setAdmitted({ key: `${joined.code}:${joined.room.epoch}`, database: repository.database })
-          stops.push(observePresence(repository.database, joined, setPresence, setError))
+          stops.push(observePresence(repository.database, joined, setPresence, setError, setConnections, setLocalConnection))
         }
         setJoined(current => current?.code === joined.code ? { ...current, room } : current)
       }, reason => { retry.current = async () => repository.join(joined.code, username); setAdmitted(null); setJoined(null); setError(reason) }))
@@ -129,7 +134,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
   const guestOnline = guestUid ? presence[guestUid] === true : false
   const localHost = Boolean(joined && joined.uid === joined.room.hostUid)
   useEffect(() => {
-    if (!joined || !guestUid || !localHost || connected !== true || guestOnline) return
+    if (!joined || !guestUid || !localHost || connected !== true || guestOnline || starting) return
     const timer = setTimeout(() => {
       void rooms().then(repository => repository.releaseDisconnectedGuest(joined, guestUid)).catch(reason => {
         // A guest can reconnect before the server evaluates the cleanup write.
@@ -140,11 +145,11 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
     return () => clearTimeout(timer)
     // Preserve the grace period across unrelated room snapshot updates.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [joined?.code, joined?.room.epoch, guestUid, localHost, connected, guestOnline])
+  }, [joined?.code, joined?.room.epoch, guestUid, localHost, connected, guestOnline, starting])
 
   async function back() {
     if (joined && connected !== false) {
-      await run(async () => { await (await rooms()).leave(joined); setInvite(null); onBack() })
+      await run(async () => { if (database) await cancelCurrentStart(database, joined); await (await rooms()).leave(joined); setInvite(null); onBack() })
     } else { setInvite(null); onBack() }
   }
 
@@ -168,7 +173,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
       {copyFallback && <label className="invite-field">Copy text<input readOnly autoFocus value={copyFallback} onFocus={event => event.currentTarget.select()} /></label>}
       {busy && <p role="status">Connecting…</p>}
       {joined ? <>
-        {database && <MatchSettingsPanel key={`${joined.code}:${joined.room.epoch}:${joined.room.roleRevision ?? 0}`} database={database} joined={joined} connected={connected === true} hostConnected={presence[joined.room.hostUid] === true} messages={waitingMessages.current.messages} />}
+        {database && <MatchSettingsPanel key={`${joined.code}:${joined.room.epoch}:${joined.room.roleRevision ?? 0}`} database={database} joined={joined} connected={connected === true} hostConnected={presence[joined.room.hostUid] === true} messages={waitingMessages.current.messages} connections={connections} localConnection={localConnection} locked={starting} onLocked={setStarting} />}
         {localHost && guestUid && !guestOnline && connected === true && <p role="status">Opponent disconnected. Waiting up to 15 seconds before freeing the slot.</p>}
         <dl className="room-players" aria-label="Players"><div><dt>Host</dt><dd><span>{joined.room.players.host.name}</span> · <span>{status(joined.room.players.host.uid)}</span></dd></div><div><dt>Opponent</dt><dd>{joined.room.players.guest ? <><span>{joined.room.players.guest.name}</span> · <span>{status(joined.room.players.guest.uid)}</span></> : 'Waiting for opponent…'}</dd></div></dl>
         {connected === false && <p className="notice" role="status">Unable to connect. Check your connection and try again.</p>}
@@ -178,7 +183,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
         </div>
         <label className="invite-field">Invite link<input readOnly value={inviteURL(joined.code, location.href)} onFocus={event => event.currentTarget.select()} /></label>
         <div className="room-actions">
-          {isHost && joined.room.players.guest && <button className="back-button" disabled={busy || connected !== true || !presence[joined.room.players.guest.uid]} onClick={() => void run(async () => (await rooms()).transfer(joined))}>Transfer Host</button>}
+          {isHost && joined.room.players.guest && <button className="back-button" disabled={busy || starting || connected !== true || !presence[joined.room.players.guest.uid]} onClick={() => void run(async () => (await rooms()).transfer(joined))}>Transfer Host</button>}
           <button className="back-button" disabled={busy} onClick={() => void back()}>Leave Lobby</button>
         </div>
 

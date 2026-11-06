@@ -119,7 +119,8 @@ test('real room UI: host, four-character codes, invite onboarding, join/reload, 
     await host.getByText('Guest Player', { exact: true }).waitFor()
     await host.setViewportSize({ width: 320, height: 667 })
     assert.equal(await host.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true)
-    assert.equal(await host.getByRole('button', { name: 'Start Match', exact: true }).count(), 0)
+    await host.getByRole('button', { name: 'Start Match', exact: true }).waitFor()
+    assert.equal(await host.getByRole('button', { name: 'Start Match', exact: true }).count(), 1)
 
     await menu(third)
     await third.evaluate(value => localStorage.setItem('bricks.previous-room.v1', value), code)
@@ -291,5 +292,59 @@ test('host configuration waiting handles cancel, apply, transfer, disconnect, ed
     await extra.getByRole('button', { name: 'Leave Lobby', exact: true }).click()
     await host.getByRole('heading', { name: 'Host is configuring the match', exact: true }).waitFor({ state: 'hidden' })
     await host.getByRole('button', { name: 'Edit Match Settings', exact: true }).waitFor()
+  } finally { for (const context of contexts) await context.close() }
+})
+
+test('countdown freezes approved settings, produces identical starts despite clock skew, cancels on lost connection and leave', { timeout: 60000 }, async () => {
+  const contexts = await Promise.all([browser.newContext(), browser.newContext()])
+  try {
+    const [host, guest] = await Promise.all(contexts.map(context => context.newPage()))
+    for (const page of [host, guest]) page.setDefaultTimeout(12000)
+    await guest.addInitScript(() => {
+      const OriginalDate = Date
+      globalThis.Date = new Proxy(OriginalDate, {
+        construct(target, args, next) { return Reflect.construct(target, args.length ? args : [OriginalDate.now() + 120000], next) },
+        apply() { return new OriginalDate(OriginalDate.now() + 120000).toString() },
+        get(target, key) { return key === 'now' ? () => OriginalDate.now() + 120000 : Reflect.get(target, key) },
+      })
+    })
+    await host.goto(baseURL); await name(host, 'Countdown Host')
+    await host.getByRole('button', { name: '2 Players', exact: true }).click()
+    await host.getByRole('button', { name: 'Host Game', exact: true }).click()
+    await roomHeading(host, /^Room /)
+    await host.getByRole('button', { name: 'Start Match', exact: true }).waitFor()
+    assert.equal(await host.getByRole('button', { name: 'Start Match', exact: true }).isDisabled(), true)
+    const invite = await host.getByLabel('Invite link', { exact: true }).inputValue()
+    await guest.goto(invite); await name(guest, 'Countdown Guest'); await roomHeading(guest, /^Room /)
+    await host.getByRole('button', { name: 'Edit Match Settings', exact: true }).click()
+    await host.getByLabel('Require approval', { exact: true }).check()
+    await host.getByLabel('Start level', { exact: true }).selectOption('7')
+    await host.getByRole('button', { name: 'Apply Settings', exact: true }).click()
+    await guest.getByRole('button', { name: '👍 Approve settings', exact: true }).waitFor()
+    assert.equal(await host.getByRole('button', { name: 'Start Match', exact: true }).isDisabled(), true)
+    await guest.getByRole('button', { name: '👍 Approve settings', exact: true }).click()
+    const beganAt = Date.now()
+    await host.getByRole('button', { name: 'Start Match', exact: true }).click()
+    await host.getByRole('status', { name: 'Countdown', exact: true }).waitFor()
+    await guest.getByRole('status', { name: 'Countdown', exact: true }).waitFor()
+    await guest.waitForFunction(() => /^[1-5]$/.test(document.querySelector('[aria-label="Countdown"]')?.textContent ?? ''))
+    assert.equal(await host.getByRole('button', { name: 'Edit Match Settings', exact: true }).isDisabled(), true)
+    assert.equal(await host.getByRole('button', { name: 'Transfer Host', exact: true }).isDisabled(), true)
+    await host.getByRole('heading', { name: 'Match ready', exact: true }).waitFor()
+    await guest.getByRole('heading', { name: 'Match ready', exact: true }).waitFor()
+    assert.ok(Date.now() - beganAt >= 4800)
+    assert.equal(await host.getByLabel('Starting state', { exact: true }).innerText(), await guest.getByLabel('Starting state', { exact: true }).innerText())
+    await host.getByRole('button', { name: 'Return to lobby', exact: true }).click()
+    await host.getByRole('button', { name: 'Start Match', exact: true }).click()
+    await guest.getByRole('status', { name: 'Countdown', exact: true }).waitFor()
+    await guest.evaluate(async () => (await import('/tests/fixtures/firebase-browser.ts')).disconnectDatabase())
+    await host.getByText('Start cancelled. Return to the lobby to try again.', { exact: true }).waitFor()
+    assert.equal(await host.getByRole('heading', { name: 'Match ready', exact: true }).count(), 0)
+    await guest.evaluate(async () => (await import('/tests/fixtures/firebase-browser.ts')).reconnectDatabase())
+    await host.getByRole('button', { name: 'Start Match', exact: true }).click()
+    await guest.getByRole('status', { name: 'Countdown', exact: true }).waitFor()
+    await guest.getByRole('button', { name: 'Leave Lobby', exact: true }).click()
+    await host.getByText('Waiting for opponent…', { exact: true }).first().waitFor()
+    assert.equal(await host.getByRole('button', { name: 'Start Match', exact: true }).isDisabled(), true)
   } finally { for (const context of contexts) await context.close() }
 })

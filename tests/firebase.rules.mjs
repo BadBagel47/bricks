@@ -251,3 +251,41 @@ test('editing markers contain no draft, are current-host-only and bound to role 
   await assertSucceeds(remove(ref(db('host'), path)))
   await assertSucceeds(set(ref(db('guest'), `${base}/guest/${'e'.repeat(32)}`), { roleRevision: 1 }))
 })
+
+test('only the host starts; approval, connections, settings and five-second server deadline are enforced', async () => {
+  const room = await ownedRoom()
+  const joined = { ...room, players: { ...room.players, guest: { uid: 'guest', name: 'Guest' } } }
+  await set(ref(db('guest'), `rooms/${code}`), joined)
+  const hc = 'b'.repeat(32), gc = 'c'.repeat(32)
+  await set(ref(db('host'), `presence/${code}/1/host/${hc}`), true)
+  await set(ref(db('guest'), `presence/${code}/1/guest/${gc}`), true)
+  const settings = { revision: 1, mode: 'score-duel', startLevel: 7, hold: true, requireApproval: true }
+  await set(ref(db('host'), `matchSettings/${code}/1/config`), settings)
+  const proposal = { id: 'a'.repeat(32), status: 'countdown', seed: 47, countdownAt: serverTimestamp(), settings, roleRevision: 0, hostUid: 'host', guestUid: 'guest', hostConnection: hc, guestConnection: gc }
+  const path = `matchStarts/${code}/1`
+  await assertFails(set(ref(db('host'), path), proposal))
+  await set(ref(db('guest'), `matchSettings/${code}/1/approval`), { revision: 1, roleRevision: 0, hostUid: 'host', guestUid: 'guest' })
+  await assertFails(set(ref(db('guest'), path), proposal))
+  await assertFails(set(ref(db('third'), path), proposal))
+  for (const bad of [{ ...proposal, settings: { ...settings, startLevel: 19 } }, { ...proposal, seed: -1 }, { ...proposal, countdownAt: 0 }, { ...proposal, guestConnection: 'f'.repeat(32) }, { ...proposal, roleRevision: 1 }, { ...proposal, extra: true }]) await assertFails(set(ref(db('host'), path), bad))
+  const editor = `matchSettings/${code}/1/editors/host/${'d'.repeat(32)}`
+  await set(ref(db('host'), editor), { roleRevision: 0 })
+  await assertFails(set(ref(db('host'), path), proposal))
+  await remove(ref(db('host'), editor))
+  await assertSucceeds(set(ref(db('host'), path), proposal))
+  const current = (await get(ref(db('host'), path))).val()
+  await assertFails(set(ref(db('host'), path), { ...current, status: 'ready' }))
+  await assertFails(set(ref(db('host'), `matchSettings/${code}/1/config`), { ...settings, revision: 2, hold: false }))
+  await assertFails(set(ref(db('host'), editor), { roleRevision: 0 }))
+  await assertFails(remove(ref(db('guest'), `rooms/${code}/players/guest`)))
+  await assertFails(set(ref(db('host'), `rooms/${code}`), { ...joined, roleRevision: 1, hostUid: 'guest', players: { host: joined.players.guest, guest: joined.players.host } }))
+  await assertFails(get(ref(db('third'), path)))
+  await new Promise(resolve => setTimeout(resolve, 5100))
+  await assertFails(set(ref(db('guest'), path), { ...current, status: 'ready' }))
+  await assertSucceeds(set(ref(db('host'), path), { ...current, status: 'ready' }))
+  await assertFails(set(ref(db('host'), path), { ...current, seed: 999, status: 'ready' }))
+  await assertFails(set(ref(db('third'), path), { ...current, status: 'cancelled' }))
+  await assertSucceeds(set(ref(db('guest'), path), { ...current, status: 'cancelled' }))
+  await assertSucceeds(set(ref(db('host'), path), { ...proposal, id: 'e'.repeat(32), seed: 48 }))
+  await assertFails(set(ref(db('host'), path), { ...current, status: 'cancelled' }))
+})
