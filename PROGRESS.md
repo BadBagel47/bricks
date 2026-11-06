@@ -11,7 +11,7 @@
 - Opponent display protocol packs the visible 200 cells into 200 characters; strict 11-field snapshots stay below 600 bytes in tests. Changed-only writes wait at least 500 ms after acknowledgement; listeners read only the opponent path. No per-frame/key traffic, heartbeats, growing match history or paid service.
 - Snapshot rules bind writes to the current ready match, participant UID, frozen connection and presence; constrain schema/ranges, monotone sequence/counters, server timestamps, 500 ms minimum intervals and terminal Game Over. Snapshots are display-only and do not provide server-authoritative anti-cheat or full recovery.
 - Extra tabs cannot control an already selected connection. Disconnect cancels the session as in 3.6; complete recovery is 3.12. Esc/the saved Pause key opens a leave confirmation while both games keep running; Tab stays on the game/dialog and boards remain unfocusable.
-- Shared board/touch/preview components extracted with no single-player rule changes. Local lint/build and 109 unit tests passed. Full server/two-browser checks pending CI. New rules must be published before activating the main client.
+- Shared board/touch/preview components extracted with no single-player rule changes. Local lint/build, 109 unit tests and all 15 production Chromium single-player regression tests passed. Full server/two-browser checks pending CI. New rules must be published before activating the main client.
 
 ## Milestone 3.6
 - Owner confirmed the reviewed countdown/lock rules published. Main commit `1d97208` passed complete CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42258240145 .
