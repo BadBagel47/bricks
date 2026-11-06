@@ -62,6 +62,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
       const result = await task()
       if (!alive.current || id !== operation.current) return
       if (result) {
+        if (!joined || joined.code !== result.code || joined.room.epoch !== result.room.epoch) setAdmitted(null)
         setJoined(result); setCode(result.code); setInvite(result.code); setError(null)
         setPrevious(previousRoomCode())
       }
@@ -100,7 +101,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
         if (cancelled) return
         if (room.status === 'closed') {
           retry.current = async () => repository.join(joined.code, username)
-          setJoined(null); setError(new MultiplayerError('room-closed')); return
+          setAdmitted(null); setJoined(null); setError(new MultiplayerError('room-closed')); return
         }
         if (!presenceStarted) {
           presenceStarted = true
@@ -108,7 +109,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
           stops.push(observePresence(repository.database, joined, setPresence, setError))
         }
         setJoined(current => current?.code === joined.code ? { ...current, room } : current)
-      }, reason => { retry.current = async () => repository.join(joined.code, username); setJoined(null); setError(reason) }))
+      }, reason => { retry.current = async () => repository.join(joined.code, username); setAdmitted(null); setJoined(null); setError(reason) }))
     }).catch(reason => { if (!cancelled) setError(playerFacingError(reason)) })
     return () => {
       cancelled = true; stops.forEach(stop => stop())
