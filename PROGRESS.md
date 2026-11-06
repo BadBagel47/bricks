@@ -2,10 +2,11 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.7 — Live boards and score synchronization
-- **Status:** Owner waived manual review of 3.6 and authorized 3.7. Owner confirmed the checked snapshot rules published. 3.7 source `a4d5641` passed full branch CI; main build/tests passed, but the Pages deployment failed with a generic retry-later error; retrying with unchanged app code.
+- **Status:** 3.7 published on Pages from `ae0f5c8` after complete main CI and successful deployment. Owner confirmed the checked snapshot rules published. Manual playtesting may wait for a larger checkpoint.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.7
+- Publication retry succeeded: main `ae0f5c8` passed all tests/build and deployed Pages in run https://github.com/BadBagel47/bricks/actions/runs/42293952072 . App code is unchanged from checked `a4d5641`. The first deploy service failure did not require code, credential or rules changes.
 - Main `76cc92e` passed all build/test checks, but Pages run https://github.com/BadBagel47/bricks/actions/runs/42267746304 failed in the deploy job with “Deployment failed, try again later.” No application or rules failure was reported. Retrying publication without app-code changes; production status remains unverified until a deployment succeeds.
 - Owner confirmed publication of the checked 3.7 snapshot rules. Proceeding with main deployment of the unchanged tested client; no manual playtest is required at this checkpoint.
 - Owner asks to consolidate manual playtesting into larger playable checkpoints; 3.7 explicitly approved without manual 3.6 review. Later competitive rules/results milestones remain separate.
@@ -147,7 +148,7 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Verify the 3.7 main CI and Pages deployment. Owner manual testing may wait for a larger checkpoint.
+- 3.7 is published and deployment verified. Owner manual testing may wait for a larger checkpoint.
 - Next milestone 3.8 is Score Duel; recommend GPT-6.1 Sol Medium.
 
 ## Git checkpoints

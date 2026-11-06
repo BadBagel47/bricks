@@ -7,10 +7,10 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 ## Current checkpoint — 2026-11-06
 
 - **Phase 3, milestone 3.7:** Live boards and score synchronization (authorized).
-- **Live:** https://badbagel47.github.io/bricks/?v=1d97208 (3.6).
-- **Status:** 3.7 complete on `milestone-3.7`, source `a4d5641`. Full CI passed: https://github.com/BadBagel47/bricks/actions/runs/42261496444 . Owner has now confirmed snapshot rules published; main build/tests passed, but the Pages deploy job failed with a generic retry-later error (run 42267746304). Retrying the same app code. No Firebase administrator identity is attached.
+- **Live:** https://badbagel47.github.io/bricks/?v=ae0f5c8 (3.7).
+- **Status:** 3.7 published from main `ae0f5c8`; full CI and Pages deployment succeeded: https://github.com/BadBagel47/bricks/actions/runs/42293952072 . App source is unchanged from checked `a4d5641`. Owner confirmed snapshot rules published. The earlier Pages service failure was resolved by a normal publication retry; no admin identity is attached.
 - **Workflow update:** Owner waived manual 3.6 review and authorized 3.7; consolidate manual tests into larger playable checkpoints. Automatic two-session/rules checks remain mandatory. This does not authorize every later milestone.
-- **Next:** Verify main CI and Pages deployment of the checked 3.7 client. Manual playtesting may wait; do not claim the staged client is already live.
+- **Next:** 3.8 Score Duel when authorized. Owner manual playtesting may wait for a larger checkpoint.
 - **Next model:** GPT-6.1 Sol Medium for 3.8 Score Duel, after 3.7 checkpoint.
 
 ## Product direction and durable constraints
@@ -21,7 +21,7 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 - Engine rules stay separate from React, rendering, input, audio, persistence and
   Firebase. The game is NES-inspired, not a cycle-accurate emulator.
 - Current multiplayer has room creation, join/invite/reopen, two-player lobby,
-  host handover and connection presence. Published 3.6 has a countdown/read-only prepared start; staged 3.7 adds live controls, opponent boards and compact snapshots. An offline player may retain a slot; coordinated recovery
+  host handover and connection presence. Published 3.7 has the countdown, live controls, opponent boards and compact snapshots. Competitive completion/results and Battle penalties remain later milestones. An offline player may retain a slot; coordinated recovery
   and active-tab leases belong to later work.
 - Stay on Firebase Spark. No paid backend/functions or billing upgrade without
   explicit owner approval. Keep application heartbeat writes out; planned game
