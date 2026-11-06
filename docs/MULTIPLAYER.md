@@ -387,3 +387,10 @@ text to screen readers.
 
 Stage on `milestone-3.5`; publish reviewed marker rules before main activation.
 Stop after owner review of 3.5. Five-second countdown/seeded start remains 3.6.
+
+Participant-only presence/settings listeners now start after the room watcher has
+observed confirmed membership. A transaction/get cache may otherwise produce a
+join result before all participant reads are authorized, permanently cancelling
+an early listener with Permission Denied. Admission is cleared on room errors and
+fresh joins, including a retry into the same room/epoch. Room-known-code reads
+remain narrow and existing participant-only security rules are not relaxed.

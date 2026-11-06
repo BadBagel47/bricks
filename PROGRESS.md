@@ -2,14 +2,15 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.5 — Host configuration waiting screen
-- **Status:** 3.5 implemented on milestone-3.5; lint/build and 103 unit tests passed locally. Full branch CI pending; production remains on 3.4.
+- **Status:** 3.5 implemented and full branch CI passed; production remains on 3.4 until the owner publishes new editor-marker rules.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.5
 - Owner approved the host-configuration waiting milestone. Added current-host/role/epoch-bound per-tab editor markers, onDisconnect cleanup and guest waiting status without draft exposure.
 - Apply/Cancel/transfer/leave and disconnected host presence end the relevant waiting state. Multiple host editors are independent; waiting continues if another current host tab still edits.
 - Added all 50 approved spec messages, local eight-second shuffle-bag rotation, session persistence and five-message cycle boundary exclusion. No timed Firebase writes.
-- Added rule impersonation/payload tests and two-browser waiting lifecycle coverage; 103 unit tests, lint and build passed locally. Branch CI pending. Rules must be published before activating the client.
+- Fixed an initial admission race by starting participant-only settings/presence reads after membership confirmation, and clearing admission before retries. No read rules were broadened.
+- Added rule impersonation/payload tests and two-browser waiting lifecycle coverage; 103 unit tests, lint and build passed locally. Full branch CI passed for `064528b`: https://github.com/BadBagel47/bricks/actions/runs/42135488117 . Includes waiting lifecycle, real eight-second text changes, host disconnect/reconnect, editing-tab close while another host tab remains, and Leave Lobby. Rules must be published before activating the client.
 
 ## Milestone 3.4
 - Owner update 2026-11-06: remove the room-code editor entirely and generate four-character random codes. Preserve legacy room links and reservations; code allocation remains atomic with bounded retries. Local lint/build and 101 unit tests passed. Full branch CI passed for `b14e533`: https://github.com/BadBagel47/bricks/actions/runs/42128209110 . Owner confirmed the updated short-code rules published. Git writes initially failed with `fatal error in commit_refs_rules`, then a normal retry succeeded without credential or permission changes. Main commit `1dd23d3` passed full CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42130254615 . The underlying transient server failure was not independently diagnosed.
@@ -127,7 +128,7 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Finish 3.5 branch CI, have the owner publish reviewed rules, activate Pages and verify the guest waiting screen in two live sessions.
+- Have the owner publish reviewed 3.5 rules, record confirmation in a normal commit and push main to activate Pages, then verify the waiting screen with the owner in two live sessions.
 - Stop before 3.6 until approved. Recommend GPT-6.1 Sol Medium for synchronized five-second countdown, shared seed and start-time authorization.
 
 ## Git checkpoints

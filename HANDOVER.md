@@ -10,8 +10,8 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 - **Live:** https://badbagel47.github.io/bricks/?v=1dd23d3
 - **Deployed app source:** `1dd23d3` — four-character random room codes, no custom-code editor, legacy longer links preserved; includes settings/approval and earlier lobby corrections.
 - **CI / Pages:** https://github.com/BadBagel47/bricks/actions/runs/42130254615
-- **Status:** 3.5 is implemented on `milestone-3.5`; lint/build and 103 unit tests passed locally. Branch CI pending. Public site remains the 3.4 short-code release linked above.
-- **Next:** Complete CI, have the owner publish reviewed editor-marker rules, then activate main via a normal deployment commit. Verify Apply/Cancel/transfer/leave/disconnection behavior and local message rotation with two live sessions. Stop for 3.5 review; no countdown or multiplayer gameplay is implemented yet.
+- **Status:** 3.5 is implemented on `milestone-3.5`; lint/build and 103 unit tests passed locally. Full branch CI passed for `064528b`: https://github.com/BadBagel47/bricks/actions/runs/42135488117 . All waiting lifecycle, message rotation and prior lobby/security/browser tests passed. Public site remains the 3.4 short-code release linked above.
+- **Next:** Have the owner publish reviewed editor-marker rules from milestone-3.5, then record confirmation and activate main via a normal deployment commit. Participant-only listeners now wait for confirmed room membership; do not revert this race fix. Verify Apply/Cancel/transfer/leave/disconnection behavior and local message rotation with two live sessions. Stop for 3.5 review; no countdown or multiplayer gameplay is implemented yet.
 - **Next model if approved:** GPT-6.1 Sol Medium for 3.6 synchronized countdown, common seed and authorized start time.
 
 ## Product direction and durable constraints
