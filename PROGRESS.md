@@ -2,16 +2,17 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.8 — Score Duel
-- **Status:** 3.8 authorized and implemented; local lint/build and 112 unit tests passed. Full two-session CI and Pages publication pending. Live remains 3.7 (`ae0f5c8`).
+- **Status:** 3.8 published on Pages from `a3db2c0`. Full main CI and deployment passed: https://github.com/BadBagel47/bricks/actions/runs/42296466728 . No Firebase rules changed; no manual playtest is required at this checkpoint.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.8
+- Main `a3db2c0` passed complete CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42296466728 . Includes two-session survivor continuation, victory by points despite earlier Game Over, acknowledged final states, stable terminal snapshots, reciprocal win/loss, zero draw, fresh-match reset and keyboard exit. Live: https://badbagel47.github.io/bricks/?v=a3db2c0 .
 - Owner authorized Score Duel and consolidated manual playtesting. Implemented independent continuation after the first Game Over, a waiting/saving state and win/loss/draw once both final scores are confirmed. Highest points win; survival order has no effect. No penalty rows.
 - Own final score becomes eligible only after the existing snapshot write is acknowledged; opponent final score must belong to the current match/selected connection. The existing terminal snapshot rules prevent subsequent score changes. Synchronization failure or leaving/disconnection cannot create a result.
 - Outcome is derived from the two existing bounded snapshots. No new database paths, writes, listeners, credentials or Firebase rules. No owner rule-publication step is needed. Final senders now stop their local polling after acknowledgement.
 - Completed players can return to the lobby directly; unfinished players get an explicit confirmation before cancelling both games. Tab/Space work on the completed-match action. No local highscore is written; full results/highscores/rematches remain later milestones.
 - Added 3 unit tests for incomplete/unacknowledged finals, win/loss symmetry and zero/positive draws. Added two-session coverage for a higher-scoring player who finishes first, continued survivor control, stable final snapshots, reciprocal outcomes, stale-state reset, keyboard exit and a zero-score draw with the opposite finish order.
-- Local lint/build, 112 unit tests and all 15 production single-player Chromium regression tests passed. Full Firebase/two-session CI gates main publication. Firebase rules are unchanged from published 3.7.
+- Local lint/build, 112 unit tests and all 15 production single-player Chromium regression tests passed. Full Firebase/two-session CI and Pages publication passed for `a3db2c0` (https://github.com/BadBagel47/bricks/actions/runs/42296466728). Firebase rules are unchanged from published 3.7.
 
 ## Milestone 3.7
 - Publication retry succeeded: main `ae0f5c8` passed all tests/build and deployed Pages in run https://github.com/BadBagel47/bricks/actions/runs/42293952072 . App code is unchanged from checked `a4d5641`. The first deploy service failure did not require code, credential or rules changes.
@@ -151,12 +152,12 @@
 - Chromium desktop/mobile viewport, touch-event and simulated gamepad tests passed. Physical devices and subjective audio quality remain unverified here.
 - Touch and gamepad behavior should be checked on the owner's physical devices.
 - Live 3.2 room creation and two-player joining are confirmed by the owner. The owner reports updated 3.3 rules published and CI deployed the new client; live lobby review remains pending.
-- Published 3.6 has the room flow/countdown and read-only starting state. Staged 3.7 adds interactive controls and live opponent boards; competitive completion/results remain later milestones.
+- Published 3.6 has the room flow/countdown and read-only starting state. 3.7 adds interactive controls and live opponent boards; 3.8 settles Score Duel outcomes. Full results/highscores remain later milestones.
 - Presence and host transfer are implemented. The host releases an absent lobby guest after 15 seconds; active interruptions currently cancel the session. Snapshot schema/ownership checks are in 3.7; coordinated recovery, robust active-control leases and Battle remain later milestones.
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Verify 3.8 full CI/Pages publication without requiring manual playtesting or Firebase rule publication.
+- 3.8 is published and verified. Manual playtesting may wait for a larger checkpoint; no Firebase rule publication was needed.
 - Next milestone 3.9 is Battle penalties; recommend GPT-6.1 Sol Medium.
 
 ## Git checkpoints

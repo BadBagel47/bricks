@@ -505,3 +505,12 @@ Two-session tests cover independent continuation, higher-score victory despite
 finishing first, reciprocal outcomes, zero draws with reversed finish order,
 terminal stability, no solo highscore pollution, reset into a fresh match and
 Tab/Space exit. No manual Firebase rule installation is needed for this step.
+
+3.8 validation: main `a3db2c0` passed complete CI and deployed Pages (https://github.com/BadBagel47/bricks/actions/runs/42296466728).
+The new two-browser test completed a real positive-score duel with the winner
+eliminated first, confirmed continuing control for the survivor, reciprocal
+outcomes, stable acknowledged finals, a zero-score draw in a fresh session with
+reversed finish order, and Tab/Space return to lobby. Existing Firebase security,
+countdown, live-sync and single-player browser suites also passed. No database
+rule or quota increase was required. Full result persistence/highscores, Battle
+and coordinated recovery remain later milestones.

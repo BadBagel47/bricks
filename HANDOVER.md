@@ -7,10 +7,10 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 ## Current checkpoint — 2026-11-06
 
 - **Phase 3, milestone 3.8:** Score Duel (authorized).
-- **Live:** https://badbagel47.github.io/bricks/?v=ae0f5c8 (3.7).
-- **Status:** 3.8 implemented; local lint/build and 112 unit tests pass. Full two-session CI and deployment pending. Firebase rules are unchanged from published 3.7; no owner rule installation is needed.
+- **Live:** https://badbagel47.github.io/bricks/?v=a3db2c0 (3.8).
+- **Status:** 3.8 published from `a3db2c0`. Full main CI and Pages deployment passed: https://github.com/BadBagel47/bricks/actions/runs/42296466728 . Local lint/build, 112 unit tests and 15 production single-player Chromium tests also passed. Firebase rules remain unchanged from published 3.7.
 - **Workflow:** Owner authorized 3.8 and wants manual playtesting consolidated into larger playable checkpoints. Run automated two-session/security checks and publish checked work without asking for a manual test. Later milestones still require authorization.
-- **Next:** Complete 3.8 verification/deployment. Score Duel waits for both confirmed final scores, then highest points win or equal points draw. The first Game Over does not stop the survivor. Outcomes derive from existing snapshots; full results/highscores/rematches remain later work.
+- **Next:** 3.8 is complete and published. Begin 3.9 only when authorized. Score Duel waits for both confirmed final scores, then highest points win or equal points draw. The first Game Over does not stop the survivor. Outcomes derive from existing snapshots; full results/highscores/rematches remain later work.
 - **Next model:** GPT-6.1 Sol Medium for 3.9 Battle penalties, after 3.8 checkpoint.
 
 ## Product direction and durable constraints
