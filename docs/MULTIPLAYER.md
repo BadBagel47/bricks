@@ -565,3 +565,14 @@ a new start rather than mounting live Battle without a protocol marker. Score
 Duel retains the eleven-field board protocol and does not initialize Battle paths.
 Install checked rules before activating the new client; reload both clients for
 Battle. Local emulator upload remains blocked, so full CI is the server gate.
+
+3.9 validation: source `8a90d27` passed complete branch CI (https://github.com/BadBagel47/bricks/actions/runs/42310387560). The two real
+browser sessions generated a multi-row clear via keyboard inputs, sent a real
+attack prefix, showed it queued without early board changes, applied the grey
+rows at lock, avoided reapplication on the next lock, and confirmed that later
+survival wins even with fewer points. Final prefixes/frames remained stable and
+return to lobby worked. Server tests covered protocol marker/migration, identity,
+epoch/match/connection, counters, rate, terminal restrictions, immutable finishes
+and payload bounds, alongside all existing suites. Local lint/build, 119 unit
+tests and 15 production single-player Chromium checks passed. Pages was skipped;
+owner rule installation is the only outstanding external step before activation.

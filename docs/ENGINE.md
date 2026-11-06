@@ -20,7 +20,7 @@ game = advanceGame(game, 1000 / 60).state
 
 ## Board, spawning and rotation
 
-- The board has 10 columns and 20 rows. `(0, 0)` is top left. Cells are `null` or a piece type; color belongs to the renderer's future level palettes.
+- The board has 10 columns and 20 rows. `(0, 0)` is top left. Cells are `null`, a piece type, or Battle garbage `G`; color belongs to the renderer's future level palettes.
 - Active cells are separate from locked board cells. Spawn anchor is `(3, 0)`, rotation 0. There are no hidden rows. O occupies columns 4–5, rows 0–1. I starts horizontally in columns 3–6, row 1. Other pieces occupy the top two rows.
 - `pieces.ts` contains four pivot-preserving orientations for I/S/Z/J/L/T and one invariant O orientation. Symmetric pieces retain all four pivot positions instead of snapping back after a half turn. Counterclockwise traverses the same tables in reverse. Rotation is rejected on wall, floor, ceiling or locked-cell collision; there are no SRS kicks, T-spin bonuses or ghost piece.
 - A successful downward step moves one cell. On a blocked gravity/Soft Drop step, the piece locks immediately; there is no extra lock delay. A piece that just lands remains movable until its next downward attempt. Hard Drop moves to the lowest legal position and locks immediately, even at distance zero.
@@ -31,7 +31,7 @@ game = advanceGame(game, 1000 / 60).state
 
 Simulation uses fixed 60 Hz frames. `advanceFrames(state, n)` is the exact integer-frame API for deterministic replays. `advanceGame(state, elapsedMs)` accumulates partial frames and executes only complete frames. A tolerance of less than 0.0000001 ms removes floating-point noise at frame boundaries. The same elapsed time and action schedule produce the same simulation regardless of rendering cadence; actions must be applied at the same simulated boundaries when comparing replays.
 
-All complete frames are processed, including multiple locks within one update; elapsed time is not silently clamped or discarded. Pause freezes gravity, partial-frame time, actions and the randomizer. The UI must reset its real-time timestamp on resume and pause on backgrounding where appropriate, so wall-clock suspension does not become catch-up gameplay. Personal pause is currently single-player only; multiplayer remains unimplemented.
+All complete frames are processed, including multiple locks within one update; elapsed time is not silently clamped or discarded. Pause freezes gravity, partial-frame time, actions and the randomizer. The UI must reset its real-time timestamp on resume and pause on backgrounding where appropriate, so wall-clock suspension does not become catch-up gameplay. Personal pause is single-player only; multiplayer continues running while its leave confirmation is open. Battle uses an explicit shared-frame adapter described below.
 
 | Level | Frames per downward cell |
 | --- | ---: |
@@ -84,3 +84,25 @@ The helper validates board dimensions/cells, active placement and numeric scores
 ## Validation
 
 Run `npm test` with Node.js 24. It first type-checks the engine, scenarios and tests with strict TypeScript, then runs Node's built-in test runner. No additional test dependencies are required. `npm run lint` and `npm run build` remain separate checks. GitHub Pages CI runs all three before deployment.
+
+## Battle adapter — milestone 3.9
+
+Import `BattleGame`, `addGarbage`, `penaltyRows`, `garbageHole` and `battleOutcome`
+from `src/engine/battle.ts`. This module remains independent of React, clocks,
+Firebase and audio. `BattleGame` owns one local session; supply absolute shared
+frame numbers to `advanceTo`, and route gameplay through `action`. It emits the
+same transitions/events as the base engine, queues incoming cumulative row
+prefixes with `receive`, cancels them before sending net outgoing rows, and applies
+remaining garbage only after a locking/clearing boundary. Counts expose pending,
+produced, applied and cancelled rows for the multiplayer boundary.
+
+A cumulative prefix implicitly identifies each row as (match, sender, ordinal).
+The network layer validates match/connection identities; the engine consumes only
+monotone totals. Deterministic garbage holes use a separate stateless hash, never
+the piece randomizer. Rows contain grey `G` cells with one empty hole; overflow or
+spawn collision ends the game without awarding points or advancing line counts.
+Actual clears still score normally. Large queues stay numeric and allocate at
+most 20 rows. `endedFrame` captures the fatal simulation frame even when advancing
+a large batch; the UI anchors these frame numbers to the shared start timeline.
+The caller stops sending to an eliminated opponent. `battleOutcome` compares only
+confirmed final frame numbers: larger wins, equality draws; score is irrelevant.

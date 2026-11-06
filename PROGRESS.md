@@ -2,7 +2,7 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.9 — Battle penalties
-- **Status:** 3.9 authorized and implemented; local lint/build, 119 unit tests and 15 production single-player browser checks passed. Full Firebase/two-session validation pending. Production stays on 3.8 until checked rules are published.
+- **Status:** 3.9 complete and fully validated on milestone-3.9 (`8a90d27`): https://github.com/BadBagel47/bricks/actions/runs/42310387560 . Production stays on 3.8 until the owner publishes the checked new rules; manual playtesting can wait.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.9
@@ -11,7 +11,7 @@
 - Added bounded per-player attack prefixes and immutable finishes. Each row's unique identity is (match ID, sender UID, ordinal); overwritten cumulative prefixes recover skipped/coalesced updates without duplicate application or growing history. Attacks stop at the server once either participant is eliminated. Race with an opponent's final snapshot suppresses unsent rows rather than failing board synchronization.
 - Both players continue to Game Over; confirmed elimination frames determine survival victory or a draw. A higher-scoring player can lose by finishing first. Basic queue/sent/applied/cancelled counters and survival outcome are shown; full result persistence/highscores/rematches remain later milestones.
 - Battle protocol marker prevents old clients from silently starting Battle without penalties. Legacy starts remain cancellable and show a restart instruction in the new client. Score Duel retains its snapshot schema and existing rules; Battle allows the grey-cell encoding and adds two participant-only paths.
-- Local lint/build, 119 unit tests and 15 production single-player Chromium checks passed. Full security/real two-session tests pending CI. Stage on milestone-3.9; new reviewed rules must be installed before main activation. No administrator identity is attached.
+- Local lint/build, 119 unit tests and 15 production single-player Chromium checks passed. Complete branch CI passed for `8a90d27`: https://github.com/BadBagel47/bricks/actions/runs/42310387560 . Includes actual multi-row-clear attack emission, queued delivery, boundary application, duplicate suppression, terminal stability, survival victory despite lower score, protocol upgrade/cancellation, attack/finish authorization and all earlier suites. Pages deployment was skipped as intended. Stage on milestone-3.9; new reviewed rules must be installed before main activation. No administrator identity is attached.
 
 ## Milestone 3.8
 - Main `a3db2c0` passed complete CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42296466728 . Includes two-session survivor continuation, victory by points despite earlier Game Over, acknowledged final states, stable terminal snapshots, reciprocal win/loss, zero draw, fresh-match reset and keyboard exit. Live: https://badbagel47.github.io/bricks/?v=a3db2c0 .
@@ -165,7 +165,7 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Finish 3.9 automated security/two-session checks and have the owner install the checked rules before activating the staged client. No manual game review is required now.
+- Owner installs checked 3.9 rules from `8a90d27`, then deploy the verified client from main. No manual game review is required now.
 - Next milestone 3.10 is match results and highscores; recommend GPT-6.1 Sol Medium.
 
 ## Git checkpoints
