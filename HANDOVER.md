@@ -10,8 +10,8 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 - **Live:** https://badbagel47.github.io/bricks/?v=96f40fe
 - **Deployed app source:** `96f40fe` — synchronized host-configuration waiting, 50 local shuffle-bag messages and confirmed-membership listener gating; includes previous settings, short codes and lobby corrections.
 - **CI / Pages:** https://github.com/BadBagel47/bricks/actions/runs/42139135333
-- **Status:** 3.6 implemented on milestone-3.6. Local lint/build and 106 unit tests passed; full branch CI pending. Public site remains the 3.5 release linked above.
-- **Next:** Finish CI, have the owner publish reviewed countdown/lock rules, then activate main with a normal deployment commit. Reload both clients and review shared five-second timing, settings/approval locks, disconnect/leave cancellation and equal opening piece/preview. Ready is a read-only initialized state; gameplay controls/opponent boards are not implemented here. Stop for 3.6 review before 3.7.
+- **Status:** 3.6 implemented on milestone-3.6. Local lint/build and 106 unit tests passed; full branch CI passed for `7ace18f`: https://github.com/BadBagel47/bricks/actions/runs/42257292319 . Server deadline, authorization, +2-minute guest clock skew, equal starts, disconnect cancellation/restart and leave were verified. Public site remains the 3.5 release linked above.
+- **Next:** Have the owner publish reviewed countdown/lock rules from milestone-3.6, then record confirmation and activate main with a normal deployment commit. Reload both clients and review shared five-second timing, settings/approval locks, disconnect/leave cancellation and equal opening piece/preview. Ready is a read-only initialized state; gameplay controls/opponent boards are not implemented here. Stop for 3.6 review before 3.7.
 - **Next model if approved:** GPT-6.1 Sol Medium for 3.7 live multiplayer controls, bounded opponent snapshots and score synchronization.
 
 ## Product direction and durable constraints

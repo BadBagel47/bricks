@@ -2,7 +2,7 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.6 — Synchronized countdown and shared starting state
-- **Status:** 3.6 implemented and staged on milestone-3.6. Local lint/build and 106 unit tests passed; full branch CI pending. Production remains on 3.5.
+- **Status:** 3.6 implemented and full branch CI passed. Production remains on 3.5 until the owner publishes reviewed countdown/lock rules.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.6
@@ -10,7 +10,7 @@
 - Rules enforce current host authority, both selected connections, current optional approval, server deadline and immutable bundle; active preparations lock settings and room/host mutations. Stale cancellation cannot overwrite another start id.
 - Fresh presence IDs after reconnect prevent old socket identities being reused. Participants cancel an interrupted preparation; explicit lobby exit cancels before leaving. Full recovery/active-control leases remain future work.
 - Ready state derives identical engine initial state locally and shows opening piece/preview/score. No live multiplayer controls, snapshots, penalties or results are implemented yet.
-- Lint/build and 106 unit tests passed locally. Emulator/browser tests include clock skew, approval/lock enforcement, five-second deadline, equal starts, disconnect cancellation and leave. Branch CI pending; publish reviewed rules before client activation.
+- Lint/build and 106 unit tests passed locally. Emulator/browser tests include clock skew, approval/lock enforcement, five-second deadline, equal starts, disconnect cancellation and leave. Full branch CI passed for `7ace18f`: https://github.com/BadBagel47/bricks/actions/runs/42257292319 . Includes a guest clock skewed by two minutes, server deadline/authorization checks, equal initial state, disconnect cancellation, restart and explicit leave. Publish reviewed rules before client activation.
 
 ## Milestone 3.5
 - Owner confirmed the updated editor-marker rules published. Main commit `96f40fe` passed full CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42139135333 .
@@ -136,7 +136,7 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Finish 3.6 branch CI; owner publishes reviewed rules; activate Pages and review with two live sessions.
+- Owner publishes reviewed 3.6 rules from milestone-3.6; record confirmation in a normal deployment commit, push main, verify Pages and review with two live sessions.
 - Stop before 3.7 until approved. Recommend GPT-6.1 Sol Medium for local multiplayer controls, bounded opponent snapshots and score synchronization.
 
 ## Git checkpoints
