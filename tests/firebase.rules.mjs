@@ -231,3 +231,23 @@ test('four-character room codes work while legacy codes remain supported', async
   await assertFails(set(ref(db('host'), 'roomReservations/ABC'), reservation('host')))
   await assertSucceeds(set(ref(db('host'), 'roomReservations/ABCDEFGH'), reservation('host')))
 })
+
+test('editing markers contain no draft, are current-host-only and bound to role generation', async () => {
+  const room = await ownedRoom()
+  const joined = { ...room, players: { ...room.players, guest: { uid: 'guest', name: 'Guest' } } }
+  await set(ref(db('guest'), `rooms/${code}`), joined)
+  const base = `matchSettings/${code}/1/editors`
+  const path = `${base}/host/${'d'.repeat(32)}`
+  await assertFails(set(ref(db('guest'), path), { roleRevision: 0 }))
+  await assertFails(set(ref(db('guest'), `${base}/guest/${'d'.repeat(32)}`), { roleRevision: 0 }))
+  await assertFails(set(ref(db('host'), path), { roleRevision: 1 }))
+  await assertFails(set(ref(db('host'), path), { roleRevision: 0, draft: { startLevel: 19 } }))
+  await assertSucceeds(set(ref(db('host'), path), { roleRevision: 0 }))
+  await assertSucceeds(get(ref(db('guest'), base)))
+  await assertFails(get(ref(db('third'), base)))
+  const transferred = { ...joined, roleRevision: 1, hostUid: 'guest', players: { host: joined.players.guest, guest: joined.players.host } }
+  await set(ref(db('host'), `rooms/${code}`), transferred)
+  await assertFails(set(ref(db('host'), path), { roleRevision: 0 }))
+  await assertSucceeds(remove(ref(db('host'), path)))
+  await assertSucceeds(set(ref(db('guest'), `${base}/guest/${'e'.repeat(32)}`), { roleRevision: 1 }))
+})

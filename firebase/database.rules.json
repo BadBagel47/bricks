@@ -139,6 +139,20 @@
             "$other": {
               ".validate": false
             }
+          },
+          "editors": {
+            "$uid": {
+              "$connection": {
+                ".write": "auth != null && auth.uid === $uid && $connection.matches(/^[a-f0-9]{32}$/) && (!newData.exists() || (root.child('rooms').child($code).child('epoch').val() + '' === $epoch && root.child('rooms').child($code).child('status').val() === 'waiting' && root.child('rooms').child($code).child('hostUid').val() === auth.uid))",
+                ".validate": "newData.hasChildren(['roleRevision']) && newData.child('roleRevision').val() === (root.child('rooms').child($code).child('roleRevision').exists() ? root.child('rooms').child($code).child('roleRevision').val() : 0)",
+                "roleRevision": {
+                  ".validate": "newData.isNumber()"
+                },
+                "$other": {
+                  ".validate": false
+                }
+              }
+            }
           }
         }
       }

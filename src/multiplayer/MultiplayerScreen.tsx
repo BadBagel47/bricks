@@ -1,3 +1,4 @@
+import { WaitingMessages } from './waiting-messages.ts'
 import MatchSettingsPanel from './MatchSettingsPanel.tsx'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
@@ -37,6 +38,9 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
   const input = useRef<HTMLInputElement>(null)
   const heading = useRef<HTMLHeadingElement>(null)
   const available = configured()
+  const waitingMessages = useRef<{ key: string; messages: WaitingMessages } | null>(null)
+  const lobbyKey = joined ? `${joined.code}:${joined.room.epoch}` : ''
+  if (waitingMessages.current?.key !== lobbyKey) waitingMessages.current = { key: lobbyKey, messages: new WaitingMessages() }
 
   useLayoutEffect(() => { heading.current?.focus() }, [joined?.code])
   useEffect(() => { alive.current = true; return () => { alive.current = false; void service.current?.then(repository => { if (!alive.current) repository.suspend() }) } }, [])
@@ -157,7 +161,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
       {copyFallback && <label className="invite-field">Copy text<input readOnly autoFocus value={copyFallback} onFocus={event => event.currentTarget.select()} /></label>}
       {busy && <p role="status">Connecting…</p>}
       {joined ? <>
-        {database && <MatchSettingsPanel key={`${joined.code}:${joined.room.epoch}:${joined.room.roleRevision ?? 0}`} database={database} joined={joined} connected={connected === true} />}
+        {database && <MatchSettingsPanel key={`${joined.code}:${joined.room.epoch}:${joined.room.roleRevision ?? 0}`} database={database} joined={joined} connected={connected === true} hostConnected={presence[joined.room.hostUid] === true} messages={waitingMessages.current.messages} />}
         {localHost && guestUid && !guestOnline && connected === true && <p role="status">Opponent disconnected. Waiting up to 15 seconds before freeing the slot.</p>}
         <dl className="room-players" aria-label="Players"><div><dt>Host</dt><dd><span>{joined.room.players.host.name}</span> · <span>{status(joined.room.players.host.uid)}</span></dd></div><div><dt>Opponent</dt><dd>{joined.room.players.guest ? <><span>{joined.room.players.guest.name}</span> · <span>{status(joined.room.players.guest.uid)}</span></> : 'Waiting for opponent…'}</dd></div></dl>
         {connected === false && <p className="notice" role="status">Unable to connect. Check your connection and try again.</p>}

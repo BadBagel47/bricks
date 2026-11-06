@@ -1,3 +1,6 @@
+import HostWaiting from './HostWaiting.tsx'
+import { publishEditor } from './editor-session.ts'
+import type { WaitingMessages } from './waiting-messages.ts'
 import { useEffect, useState } from 'react'
 import { get, onValue, ref, runTransaction, set } from 'firebase/database'
 import type { Database } from 'firebase/database'
@@ -6,10 +9,11 @@ import { DEFAULT_MATCH_SETTINGS, isApproved, parseSettings, sameSettings } from 
 import type { Approval, MatchSettings } from './match-settings.ts'
 import { MultiplayerError, playerFacingError } from './errors.ts'
 
-export default function MatchSettingsPanel({ database, joined, connected }: { database: Database; joined: JoinedRoom; connected: boolean }) {
+export default function MatchSettingsPanel({ database, joined, connected, hostConnected, messages }: { database: Database; joined: JoinedRoom; connected: boolean; hostConnected: boolean; messages: WaitingMessages }) {
   const [settings, setSettings] = useState(DEFAULT_MATCH_SETTINGS)
   const [approval, setApproval] = useState<Approval | null>(null)
   const [draft, setDraft] = useState<MatchSettings | null>(null)
+  const [editors, setEditors] = useState<Record<string, Record<string, { roleRevision?: number }>>>({})
   const [loaded, setLoaded] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -21,8 +25,17 @@ export default function MatchSettingsPanel({ database, joined, connected }: { da
       catch (reason) { setError(playerFacingError(reason).message) }
     }, reason => setError(playerFacingError(reason).message))
     const stopApproval = onValue(ref(database, `${base}/approval`), snapshot => setApproval(snapshot.val()), reason => setError(playerFacingError(reason).message))
-    return () => { stopConfig(); stopApproval() }
+    const stopEditors = onValue(ref(database, `${base}/editors`), snapshot => setEditors(snapshot.val() ?? {}), reason => setError(playerFacingError(reason).message))
+    return () => { stopConfig(); stopApproval(); stopEditors() }
   }, [database, base])
+  const editing = draft !== null
+  useEffect(() => {
+    if (!editing || !host || !connected) return
+    return publishEditor(database, joined, reason => setError(playerFacingError(reason).message))
+    // The parent keys this panel by room/epoch/role generation. Draft changes
+    // stay private and must not cause marker writes on every edit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editing, host, connected, database, base])
   async function save() {
     if (!draft) return
     if (sameSettings(settings, draft)) { setDraft(null); return }
@@ -50,6 +63,8 @@ export default function MatchSettingsPanel({ database, joined, connected }: { da
     finally { setBusy(false) }
   }
   const approved = isApproved(settings, approval, joined.room.hostUid, joined.room.players.guest?.uid, joined.room.roleRevision ?? 0)
+  const waiting = !host && connected && hostConnected && Object.values(editors[joined.room.hostUid] ?? {}).some(value => value?.roleRevision === (joined.room.roleRevision ?? 0))
+  if (waiting) return <HostWaiting messages={messages} />
   return <section aria-label="Match settings">
     {error && <p className="notice" role="alert">{error}</p>}
     {!loaded ? <p role="status">Loading match settings…</p> : <>
