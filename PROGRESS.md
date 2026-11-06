@@ -1,9 +1,16 @@
 # Bricks progress
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
-- **Milestone:** 3.5 — Host configuration waiting screen
-- **Status:** 3.5 published on Pages after successful main CI. Owner confirmed editor-marker rules published; awaiting live two-session review before 3.6.
+- **Milestone:** 3.6 — Synchronized countdown and shared starting state
+- **Status:** 3.6 implemented and staged on milestone-3.6. Local lint/build and 106 unit tests passed; full branch CI pending. Production remains on 3.5.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
+
+## Milestone 3.6
+- Owner approved the countdown/seeded-start milestone. Added a server-timestamped five-second preparation, frozen settings/identities/role generation/connection IDs and common seed.
+- Rules enforce current host authority, both selected connections, current optional approval, server deadline and immutable bundle; active preparations lock settings and room/host mutations. Stale cancellation cannot overwrite another start id.
+- Fresh presence IDs after reconnect prevent old socket identities being reused. Participants cancel an interrupted preparation; explicit lobby exit cancels before leaving. Full recovery/active-control leases remain future work.
+- Ready state derives identical engine initial state locally and shows opening piece/preview/score. No live multiplayer controls, snapshots, penalties or results are implemented yet.
+- Lint/build and 106 unit tests passed locally. Emulator/browser tests include clock skew, approval/lock enforcement, five-second deadline, equal starts, disconnect cancellation and leave. Branch CI pending; publish reviewed rules before client activation.
 
 ## Milestone 3.5
 - Owner confirmed the updated editor-marker rules published. Main commit `96f40fe` passed full CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42139135333 .
@@ -129,8 +136,8 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Review published 3.5 with two live sessions: host opens the editor, guest waits with rotating messages, and Apply/Cancel/transfer/leave/disconnection end the relevant wait. Stop before 3.6 until approved.
-- Stop before 3.6 until approved. Recommend GPT-6.1 Sol Medium for synchronized five-second countdown, shared seed and start-time authorization.
+- Finish 3.6 branch CI; owner publishes reviewed rules; activate Pages and review with two live sessions.
+- Stop before 3.7 until approved. Recommend GPT-6.1 Sol Medium for local multiplayer controls, bounded opponent snapshots and score synchronization.
 
 ## Git checkpoints
 - `fea6aa4`: initial foundation and Pages deployment.

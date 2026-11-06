@@ -6,14 +6,13 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 
 ## Current checkpoint — 2026-11-06
 
-- **Phase 3, milestone 3.5:** Host configuration waiting screen (approved).
+- **Phase 3, milestone 3.6:** Countdown and shared starting state (approved).
 - **Live:** https://badbagel47.github.io/bricks/?v=96f40fe
 - **Deployed app source:** `96f40fe` — synchronized host-configuration waiting, 50 local shuffle-bag messages and confirmed-membership listener gating; includes previous settings, short codes and lobby corrections.
 - **CI / Pages:** https://github.com/BadBagel47/bricks/actions/runs/42139135333
-- **Status:** 3.5 is published on Pages. Main commit `96f40fe` passed the complete CI gate and deployed successfully; the owner confirmed editor-marker rules published. Lint/build and 103 unit tests passed locally; CI verified waiting lifecycle, real eight-second message changes and previous security/browser suites. Live owner review remains pending.
-- **Next:** Reload both clients and verify the guest waiting screen while the host edits, then Apply/Cancel/transfer/leave/disconnection. Participant-only listeners now wait for confirmed membership; preserve this race fix. Stop at 3.5 review before 3.6. No countdown or multiplayer gameplay is implemented yet.
-
-- **Next model if approved:** GPT-6.1 Sol Medium for 3.6 synchronized countdown, common seed and authorized start time.
+- **Status:** 3.6 implemented on milestone-3.6. Local lint/build and 106 unit tests passed; full branch CI pending. Public site remains the 3.5 release linked above.
+- **Next:** Finish CI, have the owner publish reviewed countdown/lock rules, then activate main with a normal deployment commit. Reload both clients and review shared five-second timing, settings/approval locks, disconnect/leave cancellation and equal opening piece/preview. Ready is a read-only initialized state; gameplay controls/opponent boards are not implemented here. Stop for 3.6 review before 3.7.
+- **Next model if approved:** GPT-6.1 Sol Medium for 3.7 live multiplayer controls, bounded opponent snapshots and score synchronization.
 
 ## Product direction and durable constraints
 

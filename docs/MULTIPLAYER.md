@@ -394,3 +394,46 @@ join result before all participant reads are authorized, permanently cancelling
 an early listener with Permission Denied. Admission is cleared on room errors and
 fresh joins, including a retry into the same room/epoch. Room-known-code reads
 remain narrow and existing participant-only security rules are not relaxed.
+
+## Milestone 3.6 — countdown and shared starting state
+
+`matchStarts/CODE/EPOCH` is one bounded current preparation record, not a match
+history. It contains a random id, unsigned 32-bit seed, frozen five-field settings,
+role generation, host/guest UIDs, selected connection IDs, server countdownAt and
+status countdown/ready/cancelled. The common start time is countdownAt + 5000 ms.
+Only the host can create it with two live selected connections, no open host
+editor and current guest approval when required. Server rules compare every frozen
+setting/role to the current lobby; unknown fields and forged timestamps are denied.
+
+Readiness requires five seconds to have elapsed on the server and all frozen
+roles, settings and selected connections to remain valid. The host schedules one
+readiness transition using `.info/serverTimeOffset`, with a small transport margin;
+the server enforces the deadline independently of either browser's wall clock.
+Counters render locally; no timer writes are sent per second or animation frame.
+Settings, approvals, new editor markers and room membership/host changes are
+blocked while countdown/ready is active. Explicit lobby exit first cancels the
+preparation. Cancellation is participant-only and compares the exact start id;
+a delayed old cancellation cannot cancel a replacement start. The next attempt
+uses a fresh id and freshly drawn seed and overwrites the cancelled record.
+
+Presence now uses a fresh per-tab ID after every reconnect. A selected connection
+loss cancels the preparation when observed by a connected participant. The host
+must still be on the initiating connection to promote it to ready. If all clients
+are offline no coordinator can immediately write cancellation; once a client
+returns, missing old connection IDs cause cancellation rather than silent revival.
+Presence detection is subject to server socket-loss detection latency, not perfect
+instant partition detection. Extra tabs do not provide an active-control lease;
+full gameplay tab ownership/recovery remains later work.
+
+At ready, each client derives the same empty board, opening piece/preview, level,
+Hold rule and deterministic randomizer from the frozen seed/settings. The UI shows
+the initial piece/preview and score as a read-only prepared state. No inputs,
+gravity, opponent snapshots, penalties or competitive results are enabled here;
+those belong to subsequent milestones. Personal Hard Drop/audio/input preferences
+remain personal and are not published as shared settings. Late readiness is not a
+claim of zero-latency gameplay synchronization.
+
+Stage on milestone-3.6 and verify emulator/browser CI. Publish reviewed rules via
+the owner before main activation; reload both clients. Stop for 3.6 review before
+implementing live boards in 3.7. Configuration history/metadata retention remains
+as previously documented; current preparation itself has no accumulating event log.
