@@ -1,3 +1,4 @@
+import { scoreDuelOutcome } from './score-duel.ts'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { onValue, ref, serverTimestamp, set } from 'firebase/database'
@@ -22,6 +23,7 @@ export default function LiveGame({ database, joined, start, options, onLeave }: 
   const current = useRef(game)
   const [opponent, setOpponent] = useState<GameSnapshot | null>(null)
   const [error, setError] = useState('')
+  const [publishedFinal, setPublishedFinal] = useState<Pick<GameSnapshot, 'status' | 'score'> | null>(null)
   const [leaving, setLeaving] = useState(false)
   const [confirm, setConfirm] = useState(false)
   const [controller, setController] = useState(false)
@@ -75,11 +77,15 @@ export default function LiveGame({ database, joined, start, options, onLeave }: 
       if (!alive) return
       const next = gate.next(current.current, performance.now())
       try {
-        if (next) await set(ref(database, `${base}/${joined.uid}`), { ...next, matchId: start.id, connection, updatedAt: serverTimestamp() })
+        if (next) {
+          await set(ref(database, `${base}/${joined.uid}`), { ...next, matchId: start.id, connection, updatedAt: serverTimestamp() })
+          if (alive && next.status === 'gameOver') setPublishedFinal({ status: next.status, score: next.score })
+        }
       } catch {
         if (alive) setError('Unable to synchronize. Return to the lobby.')
         return
       }
+      if (next?.status === 'gameOver') return
       // Wait after server acknowledgement: no queued writes, no per-frame traffic.
       if (alive) timer = setTimeout(() => void publish(), 500)
     }
@@ -108,6 +114,7 @@ export default function LiveGame({ database, joined, start, options, onLeave }: 
     let previousPad = new Set<string>()
     function keydown(event: KeyboardEvent) {
       if (event.code === 'Tab') return
+      if (current.current.status === 'gameOver' && event.target instanceof HTMLButtonElement && (event.code === 'Space' || event.code === 'Enter')) return
       const action = event.code === 'Escape' ? 'pause' : actionForCode(bindings, event.code)
       if (!action) return
       // Keep Enter/Space available to the confirmation dialog.
@@ -153,19 +160,24 @@ export default function LiveGame({ database, joined, start, options, onLeave }: 
   }
   const finished = game.status === 'gameOver'
   const difference = game.score - (opponent?.score ?? 0)
+  const duel = start.settings.mode === 'score-duel'
+  const outcome = duel && !error ? scoreDuelOutcome(publishedFinal, opponent) : null
+  const outcomeTitle = outcome ? outcome.result === 'win' ? 'You win' : outcome.result === 'loss' ? 'You lose' : 'Draw' : ''
+  const duelStatus = outcome ? `${outcomeTitle}. ${ownName}: ${game.score.toLocaleString()}. ${otherName}: ${opponent!.score.toLocaleString()}.` : finished ? publishedFinal ? 'Waiting for opponent to finish.' : 'Saving final score…' : opponent?.status === 'gameOver' ? 'Opponent finished. Keep playing.' : ''
   return createPortal(<>
     <main ref={screen} className="multiplayer-game" inert={confirm} aria-label="Multiplayer game">
-      <header className="multiplayer-hud"><strong>{start.settings.mode === 'battle' ? 'Battle' : 'Score Duel'}</strong><span aria-label="Score difference">{difference > 0 ? '+' : ''}{difference.toLocaleString()}</span><button tabIndex={-1} className="back-button" onClick={() => setConfirm(true)}>Leave match</button></header>
+      <header className="multiplayer-hud"><strong>{start.settings.mode === 'battle' ? 'Battle' : 'Score Duel'}</strong><span aria-label="Score difference">{difference > 0 ? '+' : ''}{difference.toLocaleString()}</span>{!outcome && <button tabIndex={-1} className="back-button" onClick={() => setConfirm(true)}>Leave match</button>}</header>
       <div className="duel-boards">
         <section aria-label="Your game"><h2>{ownName}</h2><dl className="live-stats"><div><dt>Score</dt><dd>{game.score.toLocaleString()}</dd></div><div><dt>Level</dt><dd>{game.level}</dd></div><div><dt>Lines</dt><dd>{game.lines}</dd></div></dl><Playfield game={game} swipeMode={personal.mobileControlMethod === 'swipe' && !finished} onSwipe={(from, to) => actionsForSwipe(from, to).forEach(action => apply(action))} /><div className="live-previews"><div><span>Next</span><PiecePreview type={game.next} level={game.level} /></div>{game.holdEnabled && <div><span>Hold</span>{game.held && <PiecePreview type={game.held} level={game.level} />}</div>}</div><p role="status">{finished ? 'Game over' : 'Playing'}</p></section>
         <section aria-label="Opponent game"><h2>{otherName}</h2><dl className="live-stats"><div><dt>Score</dt><dd>{opponent?.score.toLocaleString() ?? '0'}</dd></div><div><dt>Level</dt><dd>{opponent?.level ?? start.settings.startLevel}</dd></div><div><dt>Lines</dt><dd>{opponent?.lines ?? 0}</dd></div></dl><Playfield game={{ board: decodeBoard(opponent?.board ?? '0'.repeat(200)), active: null, level: opponent?.level ?? start.settings.startLevel }} swipeMode={false} onSwipe={() => {}} /><p role="status">{opponent ? opponent.status === 'gameOver' ? 'Game over' : 'Connected' : 'Synchronizing…'}</p></section>
       </div>
-      {!(controller && personal.hideTouchControlsWhenController) && <TouchControls method={personal.mobileControlMethod} buttonSize={personal.touchButtonSize} leftHanded={personal.leftHandedControls} holdEnabled={game.holdEnabled} hardDropEnabled={game.hardDropEnabled} enabled={!finished && !error && !confirm} apply={apply} />}
+      {duel && !error && duelStatus && <section className="duel-status" aria-label="Score Duel status" role="status">{outcome ? <><h2>{outcomeTitle}</h2><p>{ownName}: {game.score.toLocaleString()} · {otherName}: {opponent!.score.toLocaleString()}</p><p>Score difference: {Math.abs(outcome.difference).toLocaleString()}</p></> : <p>{duelStatus}</p>}</section>}
+      {!finished && !(controller && personal.hideTouchControlsWhenController) && <TouchControls method={personal.mobileControlMethod} buttonSize={personal.touchButtonSize} leftHanded={personal.leftHandedControls} holdEnabled={game.holdEnabled} hardDropEnabled={game.hardDropEnabled} enabled={!finished && !error && !confirm} apply={apply} />}
       <p className="control-hint">Esc / {bindings.pause.replace('Key', '')}: leave match · Multiplayer keeps running while this menu is open.</p>
       <p className="visually-hidden" role="status">{announcement}</p>
       {error && <p role="alert">{error}</p>}
-      {(finished || error) && <button className="back-button" disabled={leaving} onClick={() => setConfirm(true)}>Return to lobby</button>}
+      {(finished || error) && <button className="back-button" disabled={leaving} onClick={() => { if (outcome) void leave(); else setConfirm(true) }}>Return to lobby</button>}
     </main>
-    {confirm && <div className="game-overlay" style={{ zIndex: 21 }}><div className="overlay-card" role="dialog" aria-modal="true" aria-labelledby="leave-match-title" ref={dialog}><h1 id="leave-match-title">Leave match?</h1><p>The match keeps running. Returning to the lobby ends this session for both players.</p><button className="button button-primary" disabled={leaving} onClick={() => { setConfirm(false); held.current.clear() }}>Keep playing</button><button className="overlay-link" disabled={leaving} onClick={() => void leave()}>Return to lobby</button></div></div>}
+    {confirm && <div className="game-overlay" style={{ zIndex: 21 }}><div className="overlay-card" role="dialog" aria-modal="true" aria-labelledby="leave-match-title" ref={dialog}><h1 id="leave-match-title">{outcome ? 'Return to lobby?' : 'Leave match?'}</h1><p>{outcome ? 'The duel is complete.' : 'The match keeps running. Returning to the lobby ends this session for both players.'}</p><button className="button button-primary" disabled={leaving} onClick={() => { setConfirm(false); held.current.clear() }}>{outcome ? 'Stay here' : finished ? 'Keep watching' : 'Keep playing'}</button><button className="overlay-link" disabled={leaving} onClick={() => void leave()}>Return to lobby</button></div></div>}
   </>, document.body)
 }

@@ -1,9 +1,17 @@
 # Bricks progress
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
-- **Milestone:** 3.7 — Live boards and score synchronization
-- **Status:** 3.7 published on Pages from `ae0f5c8` after complete main CI and successful deployment. Owner confirmed the checked snapshot rules published. Manual playtesting may wait for a larger checkpoint.
+- **Milestone:** 3.8 — Score Duel
+- **Status:** 3.8 authorized and implemented; local lint/build and 112 unit tests passed. Full two-session CI and Pages publication pending. Live remains 3.7 (`ae0f5c8`).
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
+
+## Milestone 3.8
+- Owner authorized Score Duel and consolidated manual playtesting. Implemented independent continuation after the first Game Over, a waiting/saving state and win/loss/draw once both final scores are confirmed. Highest points win; survival order has no effect. No penalty rows.
+- Own final score becomes eligible only after the existing snapshot write is acknowledged; opponent final score must belong to the current match/selected connection. The existing terminal snapshot rules prevent subsequent score changes. Synchronization failure or leaving/disconnection cannot create a result.
+- Outcome is derived from the two existing bounded snapshots. No new database paths, writes, listeners, credentials or Firebase rules. No owner rule-publication step is needed. Final senders now stop their local polling after acknowledgement.
+- Completed players can return to the lobby directly; unfinished players get an explicit confirmation before cancelling both games. Tab/Space work on the completed-match action. No local highscore is written; full results/highscores/rematches remain later milestones.
+- Added 3 unit tests for incomplete/unacknowledged finals, win/loss symmetry and zero/positive draws. Added two-session coverage for a higher-scoring player who finishes first, continued survivor control, stable final snapshots, reciprocal outcomes, stale-state reset, keyboard exit and a zero-score draw with the opposite finish order.
+- Local lint/build, 112 unit tests and all 15 production single-player Chromium regression tests passed. Full Firebase/two-session CI gates main publication. Firebase rules are unchanged from published 3.7.
 
 ## Milestone 3.7
 - Publication retry succeeded: main `ae0f5c8` passed all tests/build and deployed Pages in run https://github.com/BadBagel47/bricks/actions/runs/42293952072 . App code is unchanged from checked `a4d5641`. The first deploy service failure did not require code, credential or rules changes.
@@ -148,8 +156,8 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- 3.7 is published and deployment verified. Owner manual testing may wait for a larger checkpoint.
-- Next milestone 3.8 is Score Duel; recommend GPT-6.1 Sol Medium.
+- Verify 3.8 full CI/Pages publication without requiring manual playtesting or Firebase rule publication.
+- Next milestone 3.9 is Battle penalties; recommend GPT-6.1 Sol Medium.
 
 ## Git checkpoints
 - `fea6aa4`: initial foundation and Pages deployment.

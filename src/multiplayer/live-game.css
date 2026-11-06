@@ -31,3 +31,5 @@
   .multiplayer-game>.touch-controls{grid-column:2;grid-row:2;align-self:center;display:flex;flex-direction:column;gap:14px}
   .multiplayer-game .touch-actions{max-width:210px}
 }
+
+.duel-status{width:100%;text-align:center}.duel-status h2{font-size:24px;margin:0 0 8px}.duel-status p{font-size:14px;margin:4px 0}.duel-status[role="status"]{color:var(--lime)}

@@ -1,4 +1,4 @@
-# Multiplayer — milestones 3.1–3.7
+# Multiplayer — milestones 3.1–3.8
 
 ## Milestone 3.3 lobby and quota review
 
@@ -479,3 +479,29 @@ viewports, and server-side ownership/schema/rate/stale-match/terminal checks.
 Local lint/build, 109 unit tests and 15 production single-player Chromium checks
 also passed. Local Database Emulator rule upload remains blocked as previously
 recorded; the complete server result is from CI. Pages deploy was skipped.
+
+## 3.8 Score Duel
+
+Both local engines keep running independently until their own Game Over. No
+penalty events are sent. A finished player sees a saving state until its terminal
+snapshot write is acknowledged, then waits and watches the opponent. The survivor
+can keep moving/clearing lines. Neither a live lead nor the first elimination
+settles the duel. Only two current, confirmed Game Over scores yield win/loss or
+a draw, from each participant's perspective. Highest final score wins; finish
+order is irrelevant. Exact equality, including zero, draws.
+
+The outcome is a pure derivation from the existing snapshots, with no new paths,
+writes, listeners or rules. It is not a durable shared result record or a
+server-authoritative anti-cheat system. Existing rule-enforced terminal states,
+match/connection IDs and monotone sequences still apply. Own final eligibility is
+set only on successful write acknowledgement; sync errors suppress settlement.
+Disconnect/leave still cancels the session as in 3.7; full recovery and durable
+results remain later work. No highscore is recorded in this milestone.
+
+Completed games retain both boards/final scores and show an inline outcome, with
+a direct Return to lobby action. An unfinished duel still asks before cancelling
+both players. Final publishers stop their local timer after acknowledgement.
+Two-session tests cover independent continuation, higher-score victory despite
+finishing first, reciprocal outcomes, zero draws with reversed finish order,
+terminal stability, no solo highscore pollution, reset into a fresh match and
+Tab/Space exit. No manual Firebase rule installation is needed for this step.

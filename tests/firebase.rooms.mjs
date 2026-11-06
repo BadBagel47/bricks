@@ -436,3 +436,71 @@ test('two sessions play independently, mirror compact boards and scores, contain
     assert.equal(await host.evaluate(() => localStorage.getItem('bricks.highscores.v1')), null)
   } finally { for (const context of contexts) await context.close() }
 })
+
+test('Score Duel waits for both final scores, lets the survivor continue, settles by points and supports a zero draw', { timeout: 60000 }, async () => {
+  const contexts = await Promise.all([browser.newContext(), browser.newContext()])
+  try {
+    const [host, guest] = await Promise.all(contexts.map(context => context.newPage()))
+    for (const page of [host, guest]) page.setDefaultTimeout(12000)
+    const playing = page => page.getByRole('main', { name: 'Multiplayer game', exact: true })
+    const duel = page => page.getByRole('status', { name: 'Score Duel status', exact: true })
+    async function finish(page) {
+      for (let i = 0; i < 40; i++) await page.keyboard.press('Space')
+      await page.getByLabel('Your game', { exact: true }).getByText('Game over', { exact: true }).waitFor()
+    }
+    async function start() {
+      await host.getByRole('button', { name: 'Start Match', exact: true }).click()
+      for (const page of [host, guest]) await playing(page).waitFor()
+    }
+    await host.goto(baseURL); await name(host, 'Duel Host')
+    await host.getByRole('button', { name: '2 Players', exact: true }).click()
+    await host.getByRole('button', { name: 'Host Game', exact: true }).click()
+    await roomHeading(host, /^Room /)
+    const invite = await host.getByLabel('Invite link', { exact: true }).inputValue()
+    const code = new URL(invite).searchParams.get('room')
+    await guest.goto(invite); await name(guest, 'Duel Guest'); await roomHeading(guest, /^Room /)
+    await start()
+    const plan = await host.evaluate(async code => (await import('/tests/fixtures/firebase-browser.ts')).lineClearPlan(code), code)
+    assert.ok(plan.score > 0)
+    const keyFor = { rotateClockwise: 'KeyX', moveLeft: 'ArrowLeft', moveRight: 'ArrowRight', hardDrop: 'Space' }
+    for (const action of plan.actions) await host.keyboard.press(keyFor[action])
+    await host.waitForFunction(score => document.querySelector('[aria-label="Your game"] .live-stats dd')?.textContent === score.toLocaleString(), plan.score)
+    await finish(host)
+    await duel(host).getByText('Waiting for opponent to finish.', { exact: true }).waitFor()
+    await duel(guest).getByText('Opponent finished. Keep playing.', { exact: true }).waitFor()
+    assert.equal(await host.getByRole('heading', { name: 'You win', exact: true }).count(), 0)
+    assert.equal(await guest.getByRole('heading', { name: 'You lose', exact: true }).count(), 0)
+    const before = await guest.getByLabel('Your game', { exact: true }).locator('.playfield').innerHTML()
+    await guest.keyboard.press('ArrowLeft')
+    assert.notEqual(await guest.getByLabel('Your game', { exact: true }).locator('.playfield').innerHTML(), before)
+    await guest.keyboard.press('ArrowRight')
+    await finish(guest)
+    await duel(host).getByRole('heading', { name: 'You win', exact: true }).waitFor()
+    await duel(guest).getByRole('heading', { name: 'You lose', exact: true }).waitFor()
+    assert.equal(await host.getByLabel('Your game', { exact: true }).locator('.live-stats dd').first().innerText(), await guest.getByLabel('Opponent game', { exact: true }).locator('.live-stats dd').first().innerText())
+    const final = await host.evaluate(async code => (await import('/tests/fixtures/firebase-browser.ts')).matchData(code), code)
+    const hs = final.snapshots[final.start.hostUid], gs = final.snapshots[final.start.guestUid]
+    assert.ok(hs.score > gs.score)
+    assert.equal(gs.score, 0)
+    assert.equal(await host.evaluate(() => localStorage.getItem('bricks.highscores.v1')), null)
+    // Existing terminal snapshots stay stable; outcome adds no result/history writes.
+    await host.waitForTimeout(1100)
+    const stable = await host.evaluate(async code => (await import('/tests/fixtures/firebase-browser.ts')).matchData(code), code)
+    assert.deepEqual(stable.snapshots, final.snapshots)
+    // Tab reaches the only completed-match action; Space activates it rather than dropping.
+    await host.keyboard.press('Tab')
+    assert.equal(await host.evaluate(() => document.activeElement.textContent), 'Return to lobby')
+    await host.keyboard.press('Space')
+    await host.getByRole('button', { name: 'Start Match', exact: true }).waitFor()
+    await playing(guest).waitFor({ state: 'detached' })
+    await start()
+    for (const page of [host, guest]) assert.equal(await page.getByRole('heading', { name: /^(You win|You lose|Draw)$/ }).count(), 0)
+    await finish(guest)
+    await duel(guest).getByText('Waiting for opponent to finish.', { exact: true }).waitFor()
+    assert.equal(await host.getByRole('heading', { name: 'Draw', exact: true }).count(), 0)
+    await finish(host)
+    for (const page of [host, guest]) await duel(page).getByRole('heading', { name: 'Draw', exact: true }).waitFor()
+    await guest.getByRole('button', { name: 'Return to lobby', exact: true }).click()
+    await host.getByRole('button', { name: 'Start Match', exact: true }).waitFor()
+  } finally { for (const context of contexts) await context.close() }
+})

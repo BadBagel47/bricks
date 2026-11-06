@@ -6,12 +6,12 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 
 ## Current checkpoint — 2026-11-06
 
-- **Phase 3, milestone 3.7:** Live boards and score synchronization (authorized).
+- **Phase 3, milestone 3.8:** Score Duel (authorized).
 - **Live:** https://badbagel47.github.io/bricks/?v=ae0f5c8 (3.7).
-- **Status:** 3.7 published from main `ae0f5c8`; full CI and Pages deployment succeeded: https://github.com/BadBagel47/bricks/actions/runs/42293952072 . App source is unchanged from checked `a4d5641`. Owner confirmed snapshot rules published. The earlier Pages service failure was resolved by a normal publication retry; no admin identity is attached.
-- **Workflow update:** Owner waived manual 3.6 review and authorized 3.7; consolidate manual tests into larger playable checkpoints. Automatic two-session/rules checks remain mandatory. This does not authorize every later milestone.
-- **Next:** 3.8 Score Duel when authorized. Owner manual playtesting may wait for a larger checkpoint.
-- **Next model:** GPT-6.1 Sol Medium for 3.8 Score Duel, after 3.7 checkpoint.
+- **Status:** 3.8 implemented; local lint/build and 112 unit tests pass. Full two-session CI and deployment pending. Firebase rules are unchanged from published 3.7; no owner rule installation is needed.
+- **Workflow:** Owner authorized 3.8 and wants manual playtesting consolidated into larger playable checkpoints. Run automated two-session/security checks and publish checked work without asking for a manual test. Later milestones still require authorization.
+- **Next:** Complete 3.8 verification/deployment. Score Duel waits for both confirmed final scores, then highest points win or equal points draw. The first Game Over does not stop the survivor. Outcomes derive from existing snapshots; full results/highscores/rematches remain later work.
+- **Next model:** GPT-6.1 Sol Medium for 3.9 Battle penalties, after 3.8 checkpoint.
 
 ## Product direction and durable constraints
 
@@ -21,7 +21,7 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 - Engine rules stay separate from React, rendering, input, audio, persistence and
   Firebase. The game is NES-inspired, not a cycle-accurate emulator.
 - Current multiplayer has room creation, join/invite/reopen, two-player lobby,
-  host handover and connection presence. Published 3.7 has the countdown, live controls, opponent boards and compact snapshots. Competitive completion/results and Battle penalties remain later milestones. An offline player may retain a slot; coordinated recovery
+  host handover and connection presence. Published 3.7 has the countdown, live controls, opponent boards and compact snapshots. 3.8 adds Score Duel outcomes; full results/highscores and Battle penalties remain later milestones. An offline player may retain a slot; coordinated recovery
   and active-tab leases belong to later work.
 - Stay on Firebase Spark. No paid backend/functions or billing upgrade without
   explicit owner approval. Keep application heartbeat writes out; planned game

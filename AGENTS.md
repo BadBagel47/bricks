@@ -7,5 +7,6 @@
 - Work in the existing checkout; do not create a worktree. Preserve user changes and make only changes required by the approved milestone.
 - Recommend the economical suitable model at each milestone. Escalate difficult gameplay engineering only when justified; wait for approval before starting a stronger-model task if the specification requires a model switch.
 - Owner update 2026-11-06: proceed with 3.7 without requiring manual review of 3.6; consolidate owner playtesting into larger playable checkpoints and use automated two-session checks between steps. This authorizes 3.7, not all later milestones.
+- Owner subsequently authorized 3.8 Score Duel. Continue consolidating manual playtesting; no manual review is required before its checked deployment. Later milestones still require authorization.
 - Stop at milestone review checkpoints unless the owner has waived the relevant review. Do not begin multiplayer/Firebase or a later phase without explicit approval.
 - Keep interface copy direct and functional. Retain the approved “Make room for one more.” headline; avoid decorative subheadings, slogans, menu descriptions, and footers. Keep necessary instructions, validation, and availability status.
