@@ -23,7 +23,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
   const [previous, setPrevious] = useState(previousRoomCode)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<MultiplayerError | null>(null)
-  const [database, setDatabase] = useState<import('firebase/database').Database | null>(null)
+  const [admitted, setAdmitted] = useState<{ key: string; database: import('firebase/database').Database } | null>(null)
   const [presence, setPresence] = useState<RoomPresence>({})
   const [notice, setNotice] = useState('')
   const [copyFallback, setCopyFallback] = useState<string | null>(null)
@@ -40,6 +40,7 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
   const available = configured()
   const waitingMessages = useRef<{ key: string; messages: WaitingMessages } | null>(null)
   const lobbyKey = joined ? `${joined.code}:${joined.room.epoch}` : ''
+  const database = admitted?.key === lobbyKey ? admitted.database : null
   if (waitingMessages.current?.key !== lobbyKey) waitingMessages.current = { key: lobbyKey, messages: new WaitingMessages() }
 
   useLayoutEffect(() => { heading.current?.focus() }, [joined?.code])
@@ -91,15 +92,20 @@ export default function MultiplayerScreen({ username, branding, onBack }: { user
     let cancelled = false
     setPresence({}); setConnected(null)
     const stops: (() => void)[] = []
+    let presenceStarted = false
     void rooms().then(repository => {
       if (cancelled) return
-      setDatabase(repository.database)
       stops.push(repository.connection(setConnected, setError))
-      stops.push(observePresence(repository.database, joined, setPresence, setError))
       stops.push(repository.watch(joined, room => {
+        if (cancelled) return
         if (room.status === 'closed') {
           retry.current = async () => repository.join(joined.code, username)
           setJoined(null); setError(new MultiplayerError('room-closed')); return
+        }
+        if (!presenceStarted) {
+          presenceStarted = true
+          setAdmitted({ key: `${joined.code}:${joined.room.epoch}`, database: repository.database })
+          stops.push(observePresence(repository.database, joined, setPresence, setError))
         }
         setJoined(current => current?.code === joined.code ? { ...current, room } : current)
       }, reason => { retry.current = async () => repository.join(joined.code, username); setJoined(null); setError(reason) }))
