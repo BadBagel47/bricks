@@ -1,10 +1,13 @@
+import { MatchResults } from './ResultViews.tsx'
+import { recordResult } from './results.ts'
+import type { MatchResult } from './results.ts'
 import { BricksAudio } from '../audio/synth.ts'
 import type { MultiplayerPreferences } from './live-options.ts'
 import { cancelCurrentStart } from './start-repository.ts'
 import type { Connections } from './match-start.ts'
 import { WaitingMessages } from './waiting-messages.ts'
 import MatchSettingsPanel from './MatchSettingsPanel.tsx'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { readFirebaseConfig } from './config.ts'
 import { MultiplayerError, playerFacingError } from './errors.ts'
@@ -23,6 +26,11 @@ function setInvite(code: string | null) {
 
 export default function MultiplayerScreen({ username, branding, onBack, preferences }: { preferences: MultiplayerPreferences; username: string; branding: ReactNode; onBack: () => void }) {
   const [playing, setPlaying] = useState(false)
+  const [completed, setCompleted] = useState<{ result: MatchResult; uid: string } | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
+  const [resultBusy, setResultBusy] = useState(false)
+  const [resultError, setResultError] = useState('')
   const [audio] = useState(() => new BricksAudio(preferences.personal))
 
   const [code, setCode] = useState(() => new URL(location.href).searchParams.get('room') ?? '')
@@ -55,6 +63,20 @@ export default function MultiplayerScreen({ username, branding, onBack, preferen
 
   useLayoutEffect(() => { heading.current?.focus() }, [joined?.code])
   useEffect(() => { alive.current = true; return () => { alive.current = false; void service.current?.then(repository => { if (!alive.current) repository.suspend() }) } }, [])
+
+  const onCompleted = useCallback((result: MatchResult, uid: string) => {
+    if (alive.current) { setCompleted({ result, uid }); setSaving(true); setSaveError('') }
+    // Save even if the view left while the final server acknowledgement was in flight.
+    void recordResult(result).catch(() => {
+      if (alive.current) setSaveError('Results could not be saved on this device.')
+    }).finally(() => { if (alive.current) setSaving(false) })
+  }, [])
+  async function resultLobby() {
+    setResultBusy(true); setResultError('')
+    try { if (database && joined) await cancelCurrentStart(database, joined); setCompleted(null) }
+    catch { setResultError('Unable to return to the lobby. Check your connection and try again.') }
+    finally { setResultBusy(false) }
+  }
 
   function rooms(): Promise<Rooms> {
     if (!service.current) service.current = Promise.all([import('./firebase-client.ts'), import('./rooms.ts')]).then(([firebase, repository]) => {
@@ -165,7 +187,7 @@ export default function MultiplayerScreen({ username, branding, onBack, preferen
 
   const status = (uid: string) => connected === false ? 'Unknown' : presence[uid] ? 'Connected' : 'Disconnected'
   const isHost = joined?.uid === joined?.room.hostUid
-  return <main className="shell" inert={playing} onPointerDownCapture={() => audio.unlock()} onKeyDownCapture={() => audio.unlock()}>
+  return <><main className="shell" inert={playing || completed !== null} onPointerDownCapture={() => audio.unlock()} onKeyDownCapture={() => audio.unlock()}>
     <header className="topbar">{branding}<button className="back-button" disabled={busy} onClick={() => void back()}>← Back to menu</button></header>
     <section className="settings-card multiplayer-card" aria-busy={busy}>
       <h1 ref={heading} tabIndex={-1}>{joined ? `Room ${joined.code}` : '2 Players'}</h1>
@@ -178,7 +200,7 @@ export default function MultiplayerScreen({ username, branding, onBack, preferen
       {copyFallback && <label className="invite-field">Copy text<input readOnly autoFocus value={copyFallback} onFocus={event => event.currentTarget.select()} /></label>}
       {busy && <p role="status">Connecting…</p>}
       {joined ? <>
-        {database && <MatchSettingsPanel options={{ preferences, audio, onPlaying: setPlaying }} key={`${joined.code}:${joined.room.epoch}:${joined.room.roleRevision ?? 0}`} database={database} joined={joined} connected={connected === true} hostConnected={presence[joined.room.hostUid] === true} messages={waitingMessages.current.messages} connections={connections} localConnection={localConnection} locked={starting} onLocked={setStarting} />}
+        {database && <MatchSettingsPanel options={{ preferences, audio, onPlaying: setPlaying, completedId: completed?.result.id ?? null, onCompleted }} key={`${joined.code}:${joined.room.epoch}:${joined.room.roleRevision ?? 0}`} database={database} joined={joined} connected={connected === true} hostConnected={presence[joined.room.hostUid] === true} messages={waitingMessages.current.messages} connections={connections} localConnection={localConnection} locked={starting} onLocked={setStarting} />}
         {localHost && guestUid && !guestOnline && connected === true && <p role="status">Opponent disconnected. Waiting up to 15 seconds before freeing the slot.</p>}
         <dl className="room-players" aria-label="Players"><div><dt>Host</dt><dd><span>{joined.room.players.host.name}</span> · <span>{status(joined.room.players.host.uid)}</span></dd></div><div><dt>Opponent</dt><dd>{joined.room.players.guest ? <><span>{joined.room.players.guest.name}</span> · <span>{status(joined.room.players.guest.uid)}</span></> : 'Waiting for opponent…'}</dd></div></dl>
         {connected === false && <p className="notice" role="status">Unable to connect. Check your connection and try again.</p>}
@@ -205,4 +227,6 @@ export default function MultiplayerScreen({ username, branding, onBack, preferen
       </>}
     </section>
   </main>
+    {completed && <MatchResults result={completed.result} uid={completed.uid} saving={saving} saveError={saveError} actionError={resultError || error?.message || ''} busy={busy || resultBusy} onRetrySave={() => onCompleted(completed.result, completed.uid)} onLobby={() => void resultLobby()} onMenu={() => void back()} />}
+  </>
 }

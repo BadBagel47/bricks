@@ -1,3 +1,4 @@
+import { ResultCollector } from './results.ts'
 import { BattleGame, battleOutcome } from '../engine/battle.ts'
 import { battlePath, parseAttackStream, parseBattleFinish, publishBattleFinish, sendAttacks } from './battle-repository.ts'
 import type { BattleFinish } from './battle-repository.ts'
@@ -23,6 +24,8 @@ import './live-game.css'
 export default function LiveGame({ database, joined, start, options, serverTimeOffset, onLeave }: { database: Database; joined: JoinedRoom; start: MatchStart; options: LiveOptions; serverTimeOffset: number; onLeave: () => Promise<void> }) {
   const { preferences: { personal, bindings, gamepadBindings }, audio, onPlaying } = options
   const [game, setGame] = useState(() => createGame({ seed: start.seed, startLevel: start.settings.startLevel, holdEnabled: start.settings.hold, hardDropEnabled: personal.hardDropEnabled }))
+  const [collector] = useState(() => new ResultCollector(start, joined, result => options.onCompleted(result, joined.uid)))
+  const resultsVisible = options.completedId !== null
   const current = useRef(game)
   const battle = start.settings.mode === 'battle'
   const [battleGame] = useState(() => battle ? new BattleGame(game, start.seed, joined.uid === start.hostUid ? 'guest' : 'host') : null)
@@ -82,6 +85,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
         if (next?.matchId === start.id && next.connection === otherConnection && next.seq > previousSequence) {
           if (battleGame && next.status === 'gameOver') battleGame.opponentEnded = true
           previousSequence = next.seq
+          collector.opponent(next)
           setOpponent(next)
         }
       } catch { setError('Opponent data is invalid. Return to the lobby.') }
@@ -93,7 +97,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
       } catch { setError('Opponent attacks are invalid. Return to the lobby.') }
     }, () => setError('Unable to synchronize attacks. Return to the lobby.')) : () => {}
     const stopFinish = battleGame ? onValue(ref(database, battlePath('battleFinishes', joined, opponentUid)), snapshot => {
-      try { const final = parseBattleFinish(snapshot.val()); if (final?.matchId === start.id && final.connection === otherConnection) setOtherFinish(final) }
+      try { const final = parseBattleFinish(snapshot.val()); if (final?.matchId === start.id && final.connection === otherConnection) { collector.opponentFinish(final); setOtherFinish(final) } }
       catch { setError('Opponent result is invalid. Return to the lobby.') }
     }, () => setError('Unable to synchronize results. Return to the lobby.')) : () => {}
     let acknowledgedProduced = 0
@@ -117,6 +121,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
             await publishBattleFinish(database, joined, start, { ...finishStats, sent: committedSent })
             if (alive) setOwnFinishFrame(finishStats.frame)
           }
+          if (next.status === 'gameOver') collector.acknowledgeOwn(next, finishStats ? { ...finishStats, sent: committedSent } : null)
           if (alive && next.status === 'gameOver') setPublishedFinal({ status: next.status, score: next.score })
         }
       } catch {
@@ -129,9 +134,10 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     }
     timer = setTimeout(() => void publish(), 0)
     return () => { alive = false; clearTimeout(timer); stop(); stopAttacks(); stopFinish() }
-  }, [database, base, joined.uid, opponentUid, start.id, connection, otherConnection, battleGame, joined, start])
+  }, [database, base, joined.uid, opponentUid, start.id, connection, otherConnection, battleGame, joined, start, collector])
 
   useLayoutEffect(() => {
+    if (resultsVisible) return
     if (confirm) dialog.current?.querySelector('button')?.focus()
     function tab(event: KeyboardEvent) {
       if (event.code !== 'Tab') return
@@ -144,9 +150,10 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     }
     window.addEventListener('keydown', tab, true)
     return () => window.removeEventListener('keydown', tab, true)
-  }, [confirm, game.status, error])
+  }, [confirm, game.status, error, resultsVisible])
 
   useEffect(() => {
+    if (resultsVisible) return
     let frame = 0
     let previous: number | null = null
     let previousPad = new Set<string>()
@@ -189,7 +196,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     window.addEventListener('blur', clear)
     document.addEventListener('visibilitychange', clear)
     return () => { cancelAnimationFrame(frame); clear(); window.removeEventListener('keydown', keydown); window.removeEventListener('keyup', keyup); window.removeEventListener('blur', clear); document.removeEventListener('visibilitychange', clear) }
-  }, [bindings, gamepadBindings, audio, error, battleGame, battleFrame])
+  }, [bindings, gamepadBindings, audio, error, battleGame, battleFrame, resultsVisible])
 
   async function leave() {
     setLeaving(true)
@@ -203,6 +210,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
   const outcome = duel && !error ? scoreDuelOutcome(publishedFinal, opponent) : battleResult ? { result: battleResult, difference } : null
   const outcomeTitle = outcome ? outcome.result === 'win' ? 'You win' : outcome.result === 'loss' ? 'You lose' : 'Draw' : ''
   const duelStatus = outcome ? `${outcomeTitle}. ${ownName}: ${game.score.toLocaleString()}. ${otherName}: ${opponent!.score.toLocaleString()}.` : finished ? publishedFinal ? 'Waiting for opponent to finish.' : 'Saving final score…' : opponent?.status === 'gameOver' ? 'Opponent finished. Keep playing.' : ''
+  if (resultsVisible) return null
   return createPortal(<>
     <main ref={screen} className="multiplayer-game" inert={confirm} aria-label="Multiplayer game">
       <header className="multiplayer-hud"><strong>{start.settings.mode === 'battle' ? 'Battle' : 'Score Duel'}</strong><span aria-label="Score difference">{difference > 0 ? '+' : ''}{difference.toLocaleString()}</span>{!outcome && <button tabIndex={-1} className="back-button" onClick={() => setConfirm(true)}>Leave match</button>}</header>

@@ -6,12 +6,12 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 
 ## Current checkpoint — 2026-11-07
 
-- **Phase 3, milestone 3.9:** Battle penalties (authorized).
+- **Phase 3, milestone 3.10:** Match results and local highscores (authorized).
 - **Live:** https://badbagel47.github.io/bricks/?v=1eaa086 (3.9).
-- **Status:** 3.9 published from main `1eaa086`. Complete CI and Pages deployment succeeded: https://github.com/BadBagel47/bricks/actions/runs/42323293594 . App source is unchanged from checked `8a90d27`. Owner confirmed checked rules published. Local lint/build, 119 unit tests and 15 single-player Chromium checks passed; no administrator identity is attached.
-- **Workflow:** Owner wants manual playtesting consolidated into larger playable checkpoints. Automated tests and owner rule publication for 3.9 are complete. Later milestones still need authorization.
-- **Next:** 3.9 is complete and published. Begin 3.10 only when authorized. Battle has independent penalty-hole RNG, 0/1/2/4 attacks, incoming cancellation, exactly-once prefix processing, garbage at lock boundaries and confirmed survival outcomes. Full results/highscores/recovery remain later work.
-- **Next model:** GPT-6.1 Sol Medium for 3.10 match results and highscores, after 3.9 checkpoint.
+- **Status:** 3.10 implemented; local lint/build, 126 unit tests and 15 single-player browser checks passed. Full two-session CI/publication pending. No Firebase rule changes.
+- **Workflow:** Owner wants manual testing consolidated into larger playable checkpoints; automatically verify and publish checked 3.10. Later milestones still require authorization.
+- **Next:** Verify 3.10 CI/Pages. Results freeze both participants' confirmed terminal data; both device archives store both historical names/UIDs and outcomes once. Local rankings remain separate by mode. Dedicated rematch/readiness and fresh approval remain 3.11; full recovery remains 3.12.
+- **Next model:** GPT-6.1 Sol Medium for 3.11 rematches, after 3.10 checkpoint.
 
 ## Product direction and durable constraints
 
@@ -21,7 +21,7 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 - Engine rules stay separate from React, rendering, input, audio, persistence and
   Firebase. The game is NES-inspired, not a cycle-accurate emulator.
 - Current multiplayer has room creation, join/invite/reopen, two-player lobby,
-  host handover and connection presence. Published 3.9 has the countdown, live controls, compact opponent snapshots, Score Duel outcomes, Battle penalties/cancellation and survival outcomes. Full results/highscores remain later milestones. An offline player may retain a slot; coordinated recovery
+  host handover and connection presence. Published 3.9 has the countdown, live controls, compact opponent snapshots, Score Duel outcomes, Battle penalties/cancellation and survival outcomes. 3.10 adds full results and local mode-specific rankings. Rematch coordination/recovery remain later milestones. An offline player may retain a slot; coordinated recovery
   and active-tab leases belong to later work.
 - Stay on Firebase Spark. No paid backend/functions or billing upgrade without
   explicit owner approval. Keep application heartbeat writes out; planned game

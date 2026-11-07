@@ -434,6 +434,7 @@ test('two sessions play independently, mirror compact boards and scores, contain
     await host.getByText('Start cancelled. Return to the lobby to try again.', { exact: true }).waitFor()
     assert.equal(await host.getByRole('main', { name: 'Multiplayer game', exact: true }).count(), 0)
     assert.equal(await host.evaluate(() => localStorage.getItem('bricks.highscores.v1')), null)
+    assert.equal(await host.evaluate(() => localStorage.getItem('bricks.multiplayer-results.v1')), null)
   } finally { for (const context of contexts) await context.close() }
 })
 
@@ -444,6 +445,11 @@ test('Score Duel waits for both final scores, lets the survivor continue, settle
     for (const page of [host, guest]) page.setDefaultTimeout(12000)
     const playing = page => page.getByRole('main', { name: 'Multiplayer game', exact: true })
     const duel = page => page.getByRole('status', { name: 'Score Duel status', exact: true })
+    const results = page => page.getByRole('main', { name: 'Match results', exact: true })
+    await guest.addInitScript(() => {
+      const original = Storage.prototype.setItem; let fail = true
+      Storage.prototype.setItem = function(key, value) { if (key === 'bricks.multiplayer-results.v1' && fail) { fail = false; throw new DOMException('Test quota', 'QuotaExceededError') } return original.call(this, key, value) }
+    })
     async function finish(page) {
       for (let i = 0; i < 40; i++) await page.keyboard.press('Space')
       await page.getByLabel('Your game', { exact: true }).getByText('Game over', { exact: true }).waitFor()
@@ -475,9 +481,25 @@ test('Score Duel waits for both final scores, lets the survivor continue, settle
     assert.notEqual(await guest.getByLabel('Your game', { exact: true }).locator('.playfield').innerHTML(), before)
     await guest.keyboard.press('ArrowRight')
     await finish(guest)
-    await duel(host).getByRole('heading', { name: 'You win', exact: true }).waitFor()
-    await duel(guest).getByRole('heading', { name: 'You lose', exact: true }).waitFor()
-    assert.equal(await host.getByLabel('Your game', { exact: true }).locator('.live-stats dd').first().innerText(), await guest.getByLabel('Opponent game', { exact: true }).locator('.live-stats dd').first().innerText())
+    await results(host).getByRole('heading', { name: 'You win', exact: true }).waitFor()
+    await results(guest).getByRole('heading', { name: 'You lose', exact: true }).waitFor()
+    assert.equal(await results(host).getByRole('table', { name: 'Final scores', exact: true }).innerText(), await results(guest).getByRole('table', { name: 'Final scores', exact: true }).innerText())
+    await guest.getByRole('button', { name: 'Retry saving', exact: true }).click()
+    for (const page of [host, guest]) await page.waitForFunction(() => JSON.parse(localStorage.getItem('bricks.multiplayer-results.v1') ?? '{}').matches?.length === 1)
+    const archive = page => page.evaluate(() => JSON.parse(localStorage.getItem('bricks.multiplayer-results.v1')).matches)
+    assert.deepEqual(await archive(host), await archive(guest))
+    assert.notEqual(await host.locator('main.shell').getAttribute('inert'), null)
+    for (const key of ['Tab', 'Shift+Tab']) for (let i = 0; i < 6; i++) {
+      await host.keyboard.press(key)
+      assert.equal(await host.evaluate(() => Boolean(document.activeElement.closest('[aria-label="Match results"]'))), true)
+    }
+    for (const viewport of [{ width: 320, height: 667 }, { width: 844, height: 390 }]) {
+      await guest.setViewportSize(viewport)
+      assert.equal(await results(guest).evaluate(node => node.scrollWidth <= node.clientWidth + 1), true)
+    }
+    await guest.setViewportSize({ width: 1280, height: 800 })
+    // Restore heading focus so the first Tab selects the first result action.
+    await results(host).getByRole('heading', { name: 'You win', exact: true }).focus()
     const final = await host.evaluate(async code => (await import('/tests/fixtures/firebase-browser.ts')).matchData(code), code)
     const hs = final.snapshots[final.start.hostUid], gs = final.snapshots[final.start.guestUid]
     assert.ok(hs.score > gs.score)
@@ -492,16 +514,35 @@ test('Score Duel waits for both final scores, lets the survivor continue, settle
     assert.equal(await host.evaluate(() => document.activeElement.textContent), 'Return to lobby')
     await host.keyboard.press('Space')
     await host.getByRole('button', { name: 'Start Match', exact: true }).waitFor()
-    await playing(guest).waitFor({ state: 'detached' })
+    await results(guest).getByRole('heading', { name: 'You lose', exact: true }).waitFor()
+    await guest.getByRole('button', { name: 'Return to lobby', exact: true }).click()
     await start()
     for (const page of [host, guest]) assert.equal(await page.getByRole('heading', { name: /^(You win|You lose|Draw)$/ }).count(), 0)
     await finish(guest)
     await duel(guest).getByText('Waiting for opponent to finish.', { exact: true }).waitFor()
     assert.equal(await host.getByRole('heading', { name: 'Draw', exact: true }).count(), 0)
     await finish(host)
-    for (const page of [host, guest]) await duel(page).getByRole('heading', { name: 'Draw', exact: true }).waitFor()
-    await guest.getByRole('button', { name: 'Return to lobby', exact: true }).click()
-    await host.getByRole('button', { name: 'Start Match', exact: true }).waitFor()
+    for (const page of [host, guest]) await results(page).getByRole('heading', { name: 'Draw', exact: true }).waitFor()
+    for (const page of [host, guest]) await page.waitForFunction(() => JSON.parse(localStorage.getItem('bricks.multiplayer-results.v1') ?? '{}').matches?.length === 2)
+    assert.deepEqual(await archive(host), await archive(guest))
+    // One participant exits: the other keeps the frozen results and saved records.
+    await guest.getByRole('button', { name: 'Main Menu', exact: true }).click()
+    await guest.getByRole('button', { name: '2 Players', exact: true }).waitFor()
+    await results(host).getByRole('heading', { name: 'Draw', exact: true }).waitFor()
+    assert.equal((await archive(host)).length, 2)
+    await host.getByRole('button', { name: 'Main Menu', exact: true }).click()
+    await host.getByRole('button', { name: 'Open personal settings', exact: true }).click()
+    await host.getByLabel('Player name', { exact: true }).fill('New Duel Name')
+    await host.getByRole('button', { name: 'Save name', exact: true }).click()
+    for (const page of [host, guest]) {
+      await page.reload()
+      await page.getByRole('button', { name: 'High Scores', exact: true }).click()
+      const table = page.getByRole('table', { name: 'Score Duel highscores', exact: true })
+      await table.waitFor()
+      assert.equal(await table.locator('tbody tr').count(), 4)
+      assert.match(await table.innerText(), /Duel Host/)
+      assert.doesNotMatch(await table.innerText(), /New Duel Name/)
+    }
   } finally { for (const context of contexts) await context.close() }
 })
 
@@ -546,8 +587,8 @@ test('Battle sends real multi-clear attacks, queues/deduplicates rows, applies a
     await host.getByRole('status', { name: 'Battle status' }).getByText('Waiting for opponent to finish.', { exact: true }).waitFor()
     assert.equal(await host.getByRole('heading', { name: /^(You win|You lose|Draw)$/ }).count(), 0)
     for (let i = 0; i < 40; i++) await guest.keyboard.press('Space')
-    await host.getByRole('status', { name: 'Battle status' }).getByRole('heading', { name: 'You lose', exact: true }).waitFor()
-    await guest.getByRole('status', { name: 'Battle status' }).getByRole('heading', { name: 'You win', exact: true }).waitFor()
+    await host.getByRole('main', { name: 'Match results', exact: true }).getByRole('heading', { name: 'You lose', exact: true }).waitFor()
+    await guest.getByRole('main', { name: 'Match results', exact: true }).getByRole('heading', { name: 'You win', exact: true }).waitFor()
     const result = await host.evaluate(async code => (await import('/tests/fixtures/firebase-browser.ts')).battleData(code), code)
     const { hostUid, guestUid } = result.start
     assert.ok(result.snapshots[hostUid].score > result.snapshots[guestUid].score, 'Battle winner is not the highest score')
@@ -557,7 +598,17 @@ test('Battle sends real multi-clear attacks, queues/deduplicates rows, applies a
     assert.ok(JSON.stringify(result.attacks[hostUid]).length < 250)
     await host.waitForTimeout(1100)
     assert.deepEqual(await host.evaluate(async code => (await import('/tests/fixtures/firebase-browser.ts')).battleData(code), code), result)
+    for (const page of [host, guest]) {
+      await page.getByRole('table', { name: 'Battle statistics', exact: true }).waitFor()
+      await page.getByRole('table', { name: 'Battle highscores', exact: true }).waitFor()
+      assert.equal(await page.getByRole('table', { name: 'Battle highscores', exact: true }).locator('tbody tr').count(), 2)
+      await page.waitForFunction(() => JSON.parse(localStorage.getItem('bricks.multiplayer-results.v1') ?? '{}').matches?.length === 1)
+    }
     await guest.getByRole('button', { name: 'Return to lobby', exact: true }).click()
-    await host.getByRole('button', { name: 'Start Match', exact: true }).waitFor()
+    await host.getByRole('main', { name: 'Match results', exact: true }).getByRole('heading', { name: 'You lose', exact: true }).waitFor()
+    await host.getByRole('button', { name: 'Main Menu', exact: true }).click()
+    await host.getByRole('button', { name: 'High Scores', exact: true }).click()
+    const ranking = host.getByRole('table', { name: 'Battle highscores', exact: true })
+    assert.match(await ranking.locator('tbody tr').first().innerText(), /Battle Guest/)
   } finally { for (const context of contexts) await context.close() }
 })

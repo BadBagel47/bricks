@@ -1,4 +1,4 @@
-# Multiplayer — milestones 3.1–3.9
+# Multiplayer — milestones 3.1–3.10
 
 ## Milestone 3.3 lobby and quota review
 
@@ -581,3 +581,47 @@ owner rule installation is the only outstanding external step before activation.
 Main `1eaa086` passed complete CI and deployed Pages (https://github.com/BadBagel47/bricks/actions/runs/42323293594); app source is
 unchanged from validated `8a90d27`. Reload both clients before starting Battle.
 Manual playtesting remains consolidated; no owner test is required at this stop.
+
+## 3.10 frozen results and local rankings
+
+A `ResultCollector` per live match accepts the opponent's current match/connection
+snapshots and Battle finish metadata. It emits exactly once only after own terminal
+write acknowledgement and both participants' terminal state. Battle also needs
+both confirmed frames/counters. The collector is independent of the game view's
+lifetime, allowing a late own acknowledgement to save after peer-driven lobby
+return. Canonical peer terminal data precedes its subsequent cancellation on the
+same Firebase socket. Incomplete/rejected/stale records never settle a match.
+
+The parent holds the immutable results view separately from the live lobby, so
+peer return/host transfer/disconnect cannot erase an already completed result.
+Underlying session observers remain active until cancellation. Game input handlers
+are disabled while results show; the underlying page is inert and result Tab order
+is contained. Both terminal boards become a full results table, winner/draw,
+point difference and Battle statistics. Return to lobby uses existing cancellation;
+Main Menu uses existing leave/host handover. Coordinated Rematch/readiness/fresh
+approval is deliberately the next milestone, 3.11, rather than an automatic start
+from the result page.
+
+`bricks.multiplayer-results.v1` stores `{version: 1, matches: MatchResult[]}` locally.
+Each match includes mode, ID, room/epoch, shared start date, and both participants'
+UID, historical name, score, level, lines, outcome and optional Battle counters.
+Each participant's logical record ID is match ID + UID. The pair is stored atomically
+and deduplicated as one completed match on each device. Web Locks serialize tab
+read-modify-write operations where available; the fallback is synchronous per tab
+and does not guarantee cross-tab mutual exclusion. No cloud result/history writes
+or new Firebase listeners/rules are used. This is local history, not cross-device
+cloud synchronization or authoritative anti-cheat.
+
+Storage failures leave the result visible with Retry saving; existing history is
+preserved, including unrecognized future envelopes. History is retained, not
+silently pruned; browser quota/cleared storage/identity loss remain browser limits.
+A view exit does not cancel an already started local save. Closing the whole tab
+before final data arrives is not full recovery and remains later work.
+
+Score Duel top ten includes both participants' individual completed scores, ordered
+by points descending, earlier shared match date, then logical record ID. Battle
+aggregates by UID, never display name: wins descending, win rate (wins / all
+completed games including draws), total points, then UID. It shows wins, games,
+percentage, points, lines and sent rows. The aggregate label uses the latest match
+name; every historical record retains its own original name. Solo storage/ranking
+is unchanged. The main High Scores page exposes all three mode-specific lists.

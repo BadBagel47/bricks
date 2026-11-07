@@ -9,5 +9,6 @@
 - Owner update 2026-11-06: proceed with 3.7 without requiring manual review of 3.6; consolidate owner playtesting into larger playable checkpoints and use automated two-session checks between steps. This authorizes 3.7, not all later milestones.
 - Owner subsequently authorized 3.8 Score Duel. Continue consolidating manual playtesting; no manual review is required before its checked deployment. Later milestones still require authorization.
 - Owner authorized 3.9 Battle penalties. Consolidate manual playtesting; stage rule changes and complete automated two-session/security validation before requesting owner publication of the checked rules. No later milestone is authorized by this step.
+- Owner authorized 3.10 match results and local highscores. Continue automated checks and checked publication without requiring a manual game review. Dedicated rematch coordination remains 3.11.
 - Stop at milestone review checkpoints unless the owner has waived the relevant review. Do not begin multiplayer/Firebase or a later phase without explicit approval.
 - Keep interface copy direct and functional. Retain the approved “Make room for one more.” headline; avoid decorative subheadings, slogans, menu descriptions, and footers. Keep necessary instructions, validation, and availability status.

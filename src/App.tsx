@@ -1,3 +1,4 @@
+import { MultiplayerHighscores } from './multiplayer/ResultViews.tsx'
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { createPortal } from 'react-dom'
@@ -454,7 +455,10 @@ function App() {
     <header className="topbar"><Brand compact /><button className="back-button" onClick={() => { setCapture(null); setGamepadCapture(null); setView('menu') }}>← Back to menu</button></header>
     <section className="settings-card score-list-page">
       <h1 tabIndex={-1}>High Scores</h1>
+      <h2>1 Player</h2>
       {highscores.length === 0 ? <p className="empty-scores">No scores yet.</p> : <HighscoreTable records={highscores} />}
+      <MultiplayerHighscores mode="score-duel" />
+      <MultiplayerHighscores mode="battle" />
     </section>
   </main>
 

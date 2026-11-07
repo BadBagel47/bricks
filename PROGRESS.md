@@ -1,9 +1,17 @@
 # Bricks progress
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
-- **Milestone:** 3.9 — Battle penalties
-- **Status:** 3.9 published on Pages from `1eaa086` after complete main CI and successful deployment: https://github.com/BadBagel47/bricks/actions/runs/42323293594 . Owner confirmed the checked rules published; manual playtesting may wait.
+- **Milestone:** 3.10 — Match results and local highscores
+- **Status:** 3.10 authorized and implemented. Local lint/build, 126 unit tests and 15 single-player production-browser checks passed; full two-session CI and publication pending. Firebase rules are unchanged.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
+
+## Milestone 3.10
+- Owner authorized full match results and local highscores, with consolidated manual review. Completed Score Duel/Battle now show a full results page with both historical names, scores/levels/lines, winner/draw, point difference, Battle survival/attack counters and the relevant local ranking.
+- A per-match collector emits exactly once after own final acknowledgement and the opponent's current terminal data (plus both Battle finishes). It can finish after the game view unmounts if an acknowledgement is late. Frozen results stay visible when the other participant leaves; incomplete/disconnected matches do not create records.
+- Version-1 local match archive stores both participant records atomically on each device, deduplicated by match ID (individual record IDs are match+UID). Web Locks serialize same-origin tab writes where supported. Storage errors are visible and retryable; corrupt/future envelopes and quota failures do not overwrite history. No Firebase result writes/listeners/rule changes.
+- Score Duel top ten includes both participants, by points, then earlier match date and record ID. Battle aggregates by UID and ranks wins, win percentage (all completed games including draws), total points, then UID; historical names remain in per-match records, with latest recorded name used only as the aggregate label.
+- Added mode-specific rankings to High Scores; solo highscores remain separate. Result navigation offers Return to lobby and Main Menu; dedicated rematch/readiness/approval coordination remains 3.11.
+- Added seven unit tests for partial/stale/unacknowledged finals, delayed acknowledgements, frozen names, Battle draws, duplicate/concurrent persistence, storage failure protection and ranking identity/ties. Expanded two-session tests for both-device archives, retry after quota failure, retained results after peer exit, reload/rename persistence, results focus/mobile overflow and Battle statistics/ranking. Full CI pending.
 
 ## Milestone 3.9
 - Main `1eaa086` passed complete CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42323293594 . App code is unchanged from checked `8a90d27`. Live: https://badbagel47.github.io/bricks/?v=1eaa086 .
@@ -167,8 +175,8 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- 3.9 is published and deployment verified. No manual game review is required now.
-- Next milestone 3.10 is match results and highscores; recommend GPT-6.1 Sol Medium.
+- Verify full 3.10 CI and Pages publication; no rule installation or manual game review is required.
+- Next milestone 3.11 is rematches; recommend GPT-6.1 Sol Medium.
 
 ## Git checkpoints
 - `fea6aa4`: initial foundation and Pages deployment.

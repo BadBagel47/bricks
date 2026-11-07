@@ -121,3 +121,10 @@ retry/transport overhead and billed downloads have not been measured in producti
 monitor Firebase usage before expanding public access. Latest records overwrite
 per room epoch; old epochs are still not automatically pruned. No paid service,
 Functions or billing change was introduced.
+
+### 3.10 results
+
+Completed match archives and rankings are local-only. Both participant records
+are derived from existing confirmed snapshots/Battle finishes. No result-history
+Firebase writes, extra listeners, heartbeats, backend functions or billing changes
+were added. Result navigation uses the existing lobby cancel/leave operations.
