@@ -2,7 +2,7 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.11 — Coordinated rematches
-- **Status:** 3.11 complete on milestone-3.11, source `0ddf8c4`. Full CI passed: https://github.com/BadBagel47/bricks/actions/runs/42402648129 . New checked readiness/approval rules require owner publication before activation; live remains 3.10.
+- **Status:** Owner confirmed the 3.11 rules published. Main deployment of checked source is pending.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.11

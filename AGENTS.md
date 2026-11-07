@@ -13,3 +13,5 @@
 - Owner authorized 3.11 rematches. Keep manual testing consolidated; stage and verify new readiness/approval rules before requesting owner rule publication. Later recovery work still requires authorization.
 - Stop at milestone review checkpoints unless the owner has waived the relevant review. Do not begin multiplayer/Firebase or a later phase without explicit approval.
 - Keep interface copy direct and functional. Retain the approved “Make room for one more.” headline; avoid decorative subheadings, slogans, menu descriptions, and footers. Keep necessary instructions, validation, and availability status.
+
+- Owner preference: include GPT-6.1 Terra alongside Sol and Luna when recommending a model and reasoning level at each checkpoint.
