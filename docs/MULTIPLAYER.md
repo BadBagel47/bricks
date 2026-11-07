@@ -576,3 +576,8 @@ epoch/match/connection, counters, rate, terminal restrictions, immutable finishe
 and payload bounds, alongside all existing suites. Local lint/build, 119 unit
 tests and 15 production single-player Chromium checks passed. Pages was skipped;
 owner rule installation is the only outstanding external step before activation.
+
+3.9 publication: owner confirmed the checked rules installed on 2026-11-07.
+Main `1eaa086` passed complete CI and deployed Pages (https://github.com/BadBagel47/bricks/actions/runs/42323293594); app source is
+unchanged from validated `8a90d27`. Reload both clients before starting Battle.
+Manual playtesting remains consolidated; no owner test is required at this stop.

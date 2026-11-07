@@ -2,10 +2,11 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.9 — Battle penalties
-- **Status:** Owner confirmed the checked 3.9 rules published. The tested Battle client is being deployed to main; full main CI/Pages verification pending.
+- **Status:** 3.9 published on Pages from `1eaa086` after complete main CI and successful deployment: https://github.com/BadBagel47/bricks/actions/runs/42323293594 . Owner confirmed the checked rules published; manual playtesting may wait.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.9
+- Main `1eaa086` passed complete CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42323293594 . App code is unchanged from checked `8a90d27`. Live: https://badbagel47.github.io/bricks/?v=1eaa086 .
 - Owner confirmed publication of the checked Battle rules on 2026-11-07. Proceeding with deployment of the unchanged tested client; no manual game review is required now.
 - Owner authorized Battle penalties while retaining consolidated manual playtesting. Multi-clears generate 0/1/2/4 rows for 1/2/3/4 lines. Outgoing rows cancel the oldest queued incoming rows, then remaining incoming rows rise at the lock/clear boundary. No combo/T-spin/drop bonuses.
 - Added pure Battle adapter over the existing engine: cumulative incoming-prefix deduplication, bounded numeric queues, overflow/collision Game Over, grey garbage with one independently seeded hole per row, and no piece-stream consumption. Inputs and gravity use a shared server-clock-anchored 60 Hz timeline; catch-up records the exact simulated elimination frame.
@@ -166,7 +167,7 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Verify main CI and Pages publication of the checked 3.9 client. No manual game review is required now.
+- 3.9 is published and deployment verified. No manual game review is required now.
 - Next milestone 3.10 is match results and highscores; recommend GPT-6.1 Sol Medium.
 
 ## Git checkpoints
