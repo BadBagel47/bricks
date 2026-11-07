@@ -1,3 +1,4 @@
+import { freshSeed, parseReadiness, previousRoundId, readyForRound, readinessPath } from './round-readiness.ts'
 import { get, ref, runTransaction, serverTimestamp } from 'firebase/database'
 import type { Database } from 'firebase/database'
 import { MultiplayerError } from './errors.ts'
@@ -9,10 +10,19 @@ import type { MatchSettings } from './match-settings.ts'
 export function startPath(joined: JoinedRoom) { return `matchStarts/${joined.code}/${joined.room.epoch}` }
 export async function createMatchStart(database: Database, joined: JoinedRoom, settings: MatchSettings, connections: Connections, localConnection: string) {
   const guestUid = joined.room.players.guest?.uid
-  const guestConnection = guestUid && Object.keys(connections[guestUid] ?? {}).sort().find(key => connections[guestUid][key])
+  const before = parseMatchStart((await get(ref(database, startPath(joined)))).val())
+  if (before && before.status !== 'cancelled') throw new MultiplayerError('permission')
+  const previousId = previousRoundId(before)
+  const roleRevision = joined.room.roleRevision ?? 0
+  const readiness = parseReadiness((await get(ref(database, readinessPath(joined)))).val())
+  if (!readyForRound(readiness.host, joined.uid, previousId, roleRevision, connections, localConnection) || !readyForRound(readiness.guest, guestUid, previousId, roleRevision, connections)) throw new MultiplayerError('permission')
+  const guestConnection = readiness.guest?.connection
   if (joined.uid !== joined.room.hostUid || !guestUid || !guestConnection || connections[joined.uid]?.[localConnection] !== true) throw new MultiplayerError('permission')
-  const proposal = { ...(settings.mode === 'battle' ? { battleVersion: 1 } : {}), id: crypto.randomUUID().replaceAll('-', ''), status: 'countdown', seed: crypto.getRandomValues(new Uint32Array(1))[0], countdownAt: serverTimestamp(), settings: { ...settings }, roleRevision: joined.room.roleRevision ?? 0, hostUid: joined.uid, guestUid, hostConnection: localConnection, guestConnection }
-  const result = await runTransaction(ref(database, startPath(joined)), value => value === null || parseMatchStart(value)?.status === 'cancelled' ? proposal : undefined, { applyLocally: false })
+  const proposal = { roundVersion: 1, previousId, ...(settings.mode === 'battle' ? { battleVersion: 1 } : {}), id: crypto.randomUUID().replaceAll('-', ''), status: 'countdown', seed: freshSeed(before?.seed, crypto.getRandomValues(new Uint32Array(1))[0]), countdownAt: serverTimestamp(), settings: { ...settings }, roleRevision: joined.room.roleRevision ?? 0, hostUid: joined.uid, guestUid, hostConnection: localConnection, guestConnection }
+  const result = await runTransaction(ref(database, startPath(joined)), value => {
+    const current = parseMatchStart(value ?? before)
+    return (current?.id ?? '-') === previousId && (!current || current.status === 'cancelled') ? proposal : undefined
+  }, { applyLocally: false })
   if (!result.committed) throw new MultiplayerError('permission')
 }
 export async function transitionMatchStart(database: Database, joined: JoinedRoom, expectedId: string, status: 'ready' | 'cancelled') {

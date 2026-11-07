@@ -286,7 +286,10 @@ test('only the host starts; approval, connections, settings and five-second serv
   await assertFails(set(ref(db('host'), path), { ...current, seed: 999, status: 'ready' }))
   await assertFails(set(ref(db('third'), path), { ...current, status: 'cancelled' }))
   await assertSucceeds(set(ref(db('guest'), path), { ...current, status: 'cancelled' }))
-  await assertSucceeds(set(ref(db('host'), path), { ...proposal, id: 'e'.repeat(32), seed: 48 }))
+  await set(ref(db('host'), `roundReadiness/${code}/1/host`), { uid: 'host', connection: hc, previousId: current.id, roleRevision: 0 })
+  await set(ref(db('guest'), `roundReadiness/${code}/1/guest`), { uid: 'guest', connection: gc, previousId: current.id, roleRevision: 0 })
+  await set(ref(db('guest'), `matchSettings/${code}/1/approval`), { revision: 1, roleRevision: 0, hostUid: 'host', guestUid: 'guest', roundId: current.id })
+  await assertSucceeds(set(ref(db('host'), path), { ...proposal, id: 'e'.repeat(32), seed: 48, roundVersion: 1, previousId: current.id }))
   await assertFails(set(ref(db('host'), path), { ...current, status: 'cancelled' }))
 })
 
@@ -394,4 +397,62 @@ test('Battle attack prefixes and finishes enforce ownership, current session, ra
   await assertFails(set(ref(db('host'), `battleFinishes/${code}/1/host`), { ...finish, connection: hc, sent: 8, received: 0, applied: 0, cancelled: 0 }))
   await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), `matchStarts/${code}/1`), { ...ready, status: 'cancelled' }) })
   await assertFails(set(ref(db('host'), path), { ...attack, seq: 3, total: 10 }))
+})
+
+test('round consent and fresh approval are bound to previous match, roles and selected live connections', async () => {
+  const room = await ownedRoom()
+  const joined = { ...room, players: { ...room.players, guest: { uid: 'guest', name: 'Guest' } } }
+  await set(ref(db('guest'), `rooms/${code}`), joined)
+  const hc = 'b'.repeat(32), gc = 'c'.repeat(32), firstId = 'a'.repeat(32), secondId = 'd'.repeat(32)
+  await set(ref(db('host'), `presence/${code}/1/host/${hc}`), true)
+  await set(ref(db('guest'), `presence/${code}/1/guest/${gc}`), true)
+  const settings = { revision: 1, mode: 'score-duel', startLevel: 0, hold: true, requireApproval: true }
+  await set(ref(db('host'), `matchSettings/${code}/1/config`), settings)
+  const base = `roundReadiness/${code}/1`
+  const hostIntent = { uid: 'host', connection: hc, previousId: '-', roleRevision: 0 }
+  const guestIntent = { uid: 'guest', connection: gc, previousId: '-', roleRevision: 0 }
+  await assertFails(set(ref(db('guest'), `${base}/host`), hostIntent))
+  await assertFails(set(ref(db('third'), `${base}/guest`), guestIntent))
+  for (const bad of [{ ...hostIntent, previousId: firstId }, { ...hostIntent, connection: 'f'.repeat(32) }, { ...hostIntent, roleRevision: 1 }, { ...hostIntent, extra: true }, { ...hostIntent, uid: 'guest' }]) await assertFails(set(ref(db('host'), `${base}/host`), bad))
+  await assertSucceeds(set(ref(db('host'), `${base}/host`), hostIntent))
+  const path = `matchStarts/${code}/1`
+  const approval = { revision: 1, roleRevision: 0, hostUid: 'host', guestUid: 'guest', roundId: '-' }
+  await set(ref(db('guest'), `matchSettings/${code}/1/approval`), approval)
+  const first = { roundVersion: 1, previousId: '-', id: firstId, status: 'countdown', seed: 47, countdownAt: serverTimestamp(), settings, roleRevision: 0, hostUid: 'host', guestUid: 'guest', hostConnection: hc, guestConnection: gc }
+  await assertFails(set(ref(db('host'), path), first))
+  await assertSucceeds(set(ref(db('guest'), `${base}/guest`), guestIntent))
+  await assertSucceeds(set(ref(db('host'), path), first))
+  const current = (await get(ref(db('host'), path))).val()
+  await assertFails(set(ref(db('host'), path), { ...current, previousId: firstId, status: 'cancelled' }))
+  await set(ref(db('guest'), path), { ...current, status: 'cancelled' })
+  const second = { ...first, previousId: firstId, id: secondId, seed: 48 }
+  await assertFails(set(ref(db('host'), path), second))
+  const { roundVersion: _version, previousId: _previous, ...legacy } = second
+  await assertFails(set(ref(db('host'), path), legacy))
+  await set(ref(db('host'), `${base}/host`), { ...hostIntent, previousId: firstId })
+  await assertFails(set(ref(db('host'), path), second))
+  await set(ref(db('guest'), `${base}/guest`), { ...guestIntent, previousId: firstId })
+  await assertFails(set(ref(db('host'), path), second), 'old settings approval cannot start a new round')
+  await assertFails(set(ref(db('guest'), `matchSettings/${code}/1/approval`), { ...approval, roundId: secondId }))
+  await set(ref(db('guest'), `matchSettings/${code}/1/approval`), { ...approval, roundId: firstId })
+  await assertFails(set(ref(db('host'), path), { ...second, seed: 47 }))
+  await assertFails(set(ref(db('guest'), path), second))
+  await assertSucceeds(set(ref(db('host'), path), second))
+  const next = (await get(ref(db('host'), path))).val()
+  await assertSucceeds(remove(ref(db('guest'), `${base}/guest`)))
+  // Isolate readiness from the already-covered five-second server deadline.
+  const mature = { ...next, countdownAt: Date.now() - 6000 }
+  await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), path), mature) })
+  await assertFails(set(ref(db('host'), path), { ...mature, status: 'ready' }))
+  await set(ref(db('host'), path), { ...mature, status: 'cancelled' })
+  await set(ref(db('host'), `rooms/${code}`), { ...joined, roleRevision: 1, hostUid: 'guest', players: { host: joined.players.guest, guest: joined.players.host } })
+  await set(ref(db('guest'), `${base}/host`), { uid: 'guest', connection: gc, previousId: secondId, roleRevision: 1 })
+  await set(ref(db('host'), `${base}/guest`), { uid: 'host', connection: hc, previousId: secondId, roleRevision: 1 })
+  const third = { ...second, previousId: secondId, id: 'e'.repeat(32), seed: 49, roleRevision: 1, hostUid: 'guest', guestUid: 'host', hostConnection: gc, guestConnection: hc }
+  await assertFails(set(ref(db('guest'), path), third))
+  await set(ref(db('host'), `matchSettings/${code}/1/approval`), { ...approval, roleRevision: 1, hostUid: 'guest', guestUid: 'host', roundId: secondId })
+  await assertSucceeds(set(ref(db('guest'), path), third))
+  await assertFails(remove(ref(db('guest'), `${base}/guest`)))
+  await assertFails(get(ref(db('third'), base)))
+  await assertFails(get(ref(db('host'), 'roundReadiness')))
 })

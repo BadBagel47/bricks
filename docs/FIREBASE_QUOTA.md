@@ -128,3 +128,15 @@ Completed match archives and rankings are local-only. Both participant records
 are derived from existing confirmed snapshots/Battle finishes. No result-history
 Firebase writes, extra listeners, heartbeats, backend functions or billing changes
 were added. Result navigation uses the existing lobby cancel/leave operations.
+
+### 3.11 rematch readiness
+
+Readiness is two bounded role slots per room epoch, not a growing match history.
+Each lobby/round/connection/generation change can write one small intent per
+participant; identical intents skip writes. Results withdraw that connection's
+intent. Approval writes occur only on explicit guest approval and no longer need
+a settings revision bump per round. There are event-driven preflight reads and
+one participant-scoped readiness listener, with no polling/heartbeats. Existing
+start/approval path listeners are shared by the Firebase client. Gameplay snapshot
+and Battle update budgets are unchanged. Old room epochs still need future
+retention/cleanup policy.

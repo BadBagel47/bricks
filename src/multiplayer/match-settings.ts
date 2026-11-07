@@ -7,7 +7,7 @@ export interface MatchSettings {
   readonly hold: boolean
   readonly requireApproval: boolean
 }
-export interface Approval { readonly roleRevision: number; readonly revision: number; readonly hostUid: string; readonly guestUid: string }
+export interface Approval { readonly roundId?: string; readonly roleRevision: number; readonly revision: number; readonly hostUid: string; readonly guestUid: string }
 export const DEFAULT_MATCH_SETTINGS: MatchSettings = { revision: 0, mode: 'score-duel', startLevel: 0, hold: false, requireApproval: false }
 export function parseSettings(value: unknown): MatchSettings {
   if (value === null) return DEFAULT_MATCH_SETTINGS
@@ -18,6 +18,6 @@ export function parseSettings(value: unknown): MatchSettings {
 export function sameSettings(a: MatchSettings, b: MatchSettings): boolean {
   return a.mode === b.mode && a.startLevel === b.startLevel && a.hold === b.hold && a.requireApproval === b.requireApproval
 }
-export function isApproved(settings: MatchSettings, approval: Approval | null, hostUid: string, guestUid?: string, roleRevision = 0): boolean {
-  return Boolean(guestUid && approval && approval.roleRevision === roleRevision && approval.revision === settings.revision && approval.hostUid === hostUid && approval.guestUid === guestUid)
+export function isApproved(settings: MatchSettings, approval: Approval | null, hostUid: string, guestUid?: string, roleRevision = 0, roundId?: string): boolean {
+  return Boolean(guestUid && approval && approval.roleRevision === roleRevision && (roundId === undefined || approval.roundId === roundId) && approval.revision === settings.revision && approval.hostUid === hostUid && approval.guestUid === guestUid)
 }

@@ -1,9 +1,17 @@
 # Bricks progress
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
-- **Milestone:** 3.10 — Match results and local highscores
-- **Status:** 3.10 published on Pages from `5744540`. Complete main CI and deployment passed: https://github.com/BadBagel47/bricks/actions/runs/42327837605 . Firebase rules are unchanged; manual playtesting can wait.
+- **Milestone:** 3.11 — Coordinated rematches
+- **Status:** 3.11 authorized and implemented. Local lint/build, 130 unit tests and 15 single-player browser checks passed. New readiness/approval rules require full CI and owner publication before client activation; live remains 3.10.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
+
+## Milestone 3.11
+- Owner authorized rematches with consolidated manual review. Results now offer Rematch, returning to the same lobby/settings; both participants must enter that lobby before the current host can start the next countdown. A player reviewing results cannot be silently pulled into a new game.
+- Added two bounded role slots for round readiness, tied to UID, exact live connection, role revision and previous match ID. Ready intent is idempotent and event-driven; results withdraw this connection's intent. Superseded async intent operations are aborted so old cleanup cannot delete a newer explicit consent.
+- Fresh guest approval is bound to the previous match ID in addition to settings and role generations. Starting/cancelling an attempt consumes approval; host transfer also invalidates it. Active countdown approval remains bound to its frozen previous ID.
+- New starts freeze roundVersion 1 and previousId. Server creation/readiness/approval checks block stale consent and legacy rematch bypass; readiness withdrawal cancels a countdown before gameplay. Legacy first/active matches remain supported/cancellable during rollout.
+- Every new round has a different ID and seed (repeated RNG output is adjusted), with fresh engine/Battle/collector instances. Old snapshot, attack and finish records are ignored by match identity; both players' local result history remains intact. Countdown display refreshes time immediately for a subsequent attempt.
+- Added unit and server tests for intent schema, exact connections/roles/rounds, approval consumption, fresh seed wrapping, stale/forged intents and protocol migration. Real two-session tests cover readiness while the peer reviews results, fresh approval, transfer between rounds, reused settings, new ID/seed, cleared Hold/board/score/penalties and preserved history. Full CI pending on milestone-3.11.
 
 ## Milestone 3.10
 - Main `5744540` passed complete CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42327837605 . Includes both-device archives, quota-error retry, retained results after peer exit, reload/name-change persistence, focus/mobile width checks, Battle ranking/statistics and all existing suites. Live: https://badbagel47.github.io/bricks/?v=5744540 .
@@ -176,8 +184,8 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- 3.10 is published and verified. No rule installation or manual game review is required.
-- Next milestone 3.11 is rematches; recommend GPT-6.1 Sol Medium.
+- Verify 3.11 full CI, have owner install the checked readiness/approval rules, then activate the client. No manual game review is required now.
+- Next milestone 3.12 is reconnection and recovery; recommend GPT-6.1 Sol Medium.
 
 ## Git checkpoints
 - `fea6aa4`: initial foundation and Pages deployment.

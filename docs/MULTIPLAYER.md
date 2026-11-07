@@ -1,4 +1,4 @@
-# Multiplayer — milestones 3.1–3.10
+# Multiplayer — milestones 3.1–3.11
 
 ## Milestone 3.3 lobby and quota review
 
@@ -635,3 +635,42 @@ statistics/ranking. All earlier server/security/gameplay suites also passed.
 Local lint/build, 126 unit tests and 15 single-player production Chromium checks
 passed. No production rules or administrator actions were needed. Manual review
 remains consolidated into a later playable checkpoint.
+
+## 3.11 rematch consent and approval generations
+
+Results offer Rematch and Main Menu. Rematch returns to the same lobby; published
+settings remain the defaults and the host may edit them or transfer host role.
+Both participants must accept the lobby before a new countdown; the host alone
+presses Start Match. A participant still reviewing results does not consent.
+
+`roundReadiness/CODE/EPOCH/host|guest` stores at most two four-field intents:
+UID, connection, previousId, roleRevision. Lobby entry publishes idempotent intent
+only after membership/presence and current start data are confirmed. Results
+withdraw only this connection's intent. Superseded asynchronous operations check
+relevance before applying a transaction, preventing old withdrawal from erasing a
+new Rematch acceptance. Presence invalidates stale connection intents without
+heartbeats. Slots are overwritten across guest changes/host transfers, not
+accumulated per participant or round.
+
+New starts freeze `roundVersion: 1` and `previousId` (the last start ID, or `-` for
+the first). Creation requires both exact UID/connection/generation intents for
+that previous ID. Countdown-to-ready rechecks the same frozen intents, so a
+withdrawal cancels preparation. Live-ready matches do not require old consent to
+remain after completion. Only the current host may create/advance starts. Every
+new ID/seed differs from the previous pair; repeated random seed output increments
+within uint32. Fresh engine/Battle/collector instances plus match-ID filters reset
+boards, scores, Hold, penalties and elimination state while preserving archives.
+
+Approvals add `roundId`, matching the previous start ID for a new attempt. Settings
+revision and role/participant binding still apply. Approval stays bound to the
+frozen previous ID through the active countdown, but a cancellation/new attempt
+needs approval for the last ID again. No-op settings publication still writes
+nothing. Guest departure/replacement or host transfer cannot revive approval or
+readiness from an earlier generation.
+
+For rollout, legacy first starts are still accepted only when no start record
+exists; existing legacy matches can finish/cancel. An old client cannot create a
+rematch after any previous start. New clients parse both generations for safe
+cancellation. Install checked rules before activating the new client and reload
+both clients. No paid backend or result-history writes were added. Active-control
+leases and coordinated interruption recovery remain milestone 3.12.

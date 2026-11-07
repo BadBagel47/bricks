@@ -27,6 +27,7 @@ function setInvite(code: string | null) {
 export default function MultiplayerScreen({ username, branding, onBack, preferences }: { preferences: MultiplayerPreferences; username: string; branding: ReactNode; onBack: () => void }) {
   const [playing, setPlaying] = useState(false)
   const [completed, setCompleted] = useState<{ result: MatchResult; uid: string } | null>(null)
+  const [lastCompletedId, setLastCompletedId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
   const [resultBusy, setResultBusy] = useState(false)
@@ -65,7 +66,7 @@ export default function MultiplayerScreen({ username, branding, onBack, preferen
   useEffect(() => { alive.current = true; return () => { alive.current = false; void service.current?.then(repository => { if (!alive.current) repository.suspend() }) } }, [])
 
   const onCompleted = useCallback((result: MatchResult, uid: string) => {
-    if (alive.current) { setCompleted({ result, uid }); setSaving(true); setSaveError('') }
+    if (alive.current) { setCompleted({ result, uid }); setLastCompletedId(result.id); setSaving(true); setSaveError('') }
     // Save even if the view left while the final server acknowledgement was in flight.
     void recordResult(result).catch(() => {
       if (alive.current) setSaveError('Results could not be saved on this device.')
@@ -200,7 +201,7 @@ export default function MultiplayerScreen({ username, branding, onBack, preferen
       {copyFallback && <label className="invite-field">Copy text<input readOnly autoFocus value={copyFallback} onFocus={event => event.currentTarget.select()} /></label>}
       {busy && <p role="status">Connecting…</p>}
       {joined ? <>
-        {database && <MatchSettingsPanel options={{ preferences, audio, onPlaying: setPlaying, completedId: completed?.result.id ?? null, onCompleted }} key={`${joined.code}:${joined.room.epoch}:${joined.room.roleRevision ?? 0}`} database={database} joined={joined} connected={connected === true} hostConnected={presence[joined.room.hostUid] === true} messages={waitingMessages.current.messages} connections={connections} localConnection={localConnection} locked={starting} onLocked={setStarting} />}
+        {database && <MatchSettingsPanel options={{ preferences, audio, onPlaying: setPlaying, completedId: completed?.result.id ?? null, lastCompletedId, onCompleted }} key={`${joined.code}:${joined.room.epoch}:${joined.room.roleRevision ?? 0}`} database={database} joined={joined} connected={connected === true} hostConnected={presence[joined.room.hostUid] === true} messages={waitingMessages.current.messages} connections={connections} localConnection={localConnection} locked={starting} onLocked={setStarting} />}
         {localHost && guestUid && !guestOnline && connected === true && <p role="status">Opponent disconnected. Waiting up to 15 seconds before freeing the slot.</p>}
         <dl className="room-players" aria-label="Players"><div><dt>Host</dt><dd><span>{joined.room.players.host.name}</span> · <span>{status(joined.room.players.host.uid)}</span></dd></div><div><dt>Opponent</dt><dd>{joined.room.players.guest ? <><span>{joined.room.players.guest.name}</span> · <span>{status(joined.room.players.guest.uid)}</span></> : 'Waiting for opponent…'}</dd></div></dl>
         {connected === false && <p className="notice" role="status">Unable to connect. Check your connection and try again.</p>}

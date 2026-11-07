@@ -1,3 +1,7 @@
+import { approvalRoundId } from './round-readiness.ts'
+import { parseMatchStart } from './match-start.ts'
+import type { MatchStart } from './match-start.ts'
+import { startPath } from './start-repository.ts'
 import type { LiveOptions } from './live-options.ts'
 import MatchStartPanel from './MatchStartPanel.tsx'
 import type { Connections } from './match-start.ts'
@@ -14,6 +18,8 @@ import { MultiplayerError, playerFacingError } from './errors.ts'
 
 export default function MatchSettingsPanel({ options, database, joined, connected, hostConnected, messages, connections, localConnection, locked, onLocked }: { options: LiveOptions; database: Database; joined: JoinedRoom; connected: boolean; hostConnected: boolean; messages: WaitingMessages; connections: Connections | null; localConnection: string | null; locked: boolean; onLocked: (value: boolean) => void }) {
   const [settings, setSettings] = useState(DEFAULT_MATCH_SETTINGS)
+  const [round, setRound] = useState<MatchStart | null>(null)
+  const [roundLoaded, setRoundLoaded] = useState(false)
   const [approval, setApproval] = useState<Approval | null>(null)
   const [draft, setDraft] = useState<MatchSettings | null>(null)
   const [editors, setEditors] = useState<Record<string, Record<string, { roleRevision?: number }>>>({})
@@ -21,16 +27,20 @@ export default function MatchSettingsPanel({ options, database, joined, connecte
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const host = joined.uid === joined.room.hostUid
+  const roundPath = startPath(joined)
   const base = `matchSettings/${joined.code}/${joined.room.epoch}`
   useEffect(() => {
+    const stopRound = onValue(ref(database, roundPath), snapshot => {
+      try { setRound(parseMatchStart(snapshot.val())); setRoundLoaded(true) } catch (reason) { setError(playerFacingError(reason).message) }
+    }, reason => setError(playerFacingError(reason).message))
     const stopConfig = onValue(ref(database, `${base}/config`), snapshot => {
       try { setSettings(parseSettings(snapshot.val())); setLoaded(true) }
       catch (reason) { setError(playerFacingError(reason).message) }
     }, reason => setError(playerFacingError(reason).message))
     const stopApproval = onValue(ref(database, `${base}/approval`), snapshot => setApproval(snapshot.val()), reason => setError(playerFacingError(reason).message))
     const stopEditors = onValue(ref(database, `${base}/editors`), snapshot => setEditors(snapshot.val() ?? {}), reason => setError(playerFacingError(reason).message))
-    return () => { stopConfig(); stopApproval(); stopEditors() }
-  }, [database, base])
+    return () => { stopRound(); stopConfig(); stopApproval(); stopEditors() }
+  }, [database, base, roundPath])
   const editing = draft !== null
   useEffect(() => {
     if (!editing || !host || !connected || locked) return
@@ -61,11 +71,11 @@ export default function MatchSettingsPanel({ options, database, joined, connecte
     setBusy(true); setError('')
     try {
       if (!joined.room.players.guest || joined.room.players.guest.uid !== joined.uid) throw new MultiplayerError('permission')
-      await set(ref(database, `${base}/approval`), { roleRevision: joined.room.roleRevision ?? 0, revision: settings.revision, hostUid: joined.room.hostUid, guestUid: joined.uid })
+      await set(ref(database, `${base}/approval`), { roleRevision: joined.room.roleRevision ?? 0, revision: settings.revision, hostUid: joined.room.hostUid, guestUid: joined.uid, roundId: approvalRoundId(round) })
     } catch (reason) { setError(playerFacingError(reason).message) }
     finally { setBusy(false) }
   }
-  const approved = isApproved(settings, approval, joined.room.hostUid, joined.room.players.guest?.uid, joined.room.roleRevision ?? 0)
+  const approved = roundLoaded && isApproved(settings, approval, joined.room.hostUid, joined.room.players.guest?.uid, joined.room.roleRevision ?? 0, approvalRoundId(round))
   const waiting = !host && connected && hostConnected && Object.values(editors[joined.room.hostUid] ?? {}).some(value => value?.roleRevision === (joined.room.roleRevision ?? 0))
   if (waiting && !locked) return <HostWaiting messages={messages} />
   return <section aria-label="Match settings">
@@ -73,7 +83,7 @@ export default function MatchSettingsPanel({ options, database, joined, connecte
     {!loaded ? <p role="status">Loading match settings…</p> : <>
       <dl className="room-players"><div><dt>Match mode</dt><dd>{settings.mode === 'battle' ? 'Battle' : 'Score Duel'}</dd></div><div><dt>Start level</dt><dd>{String(settings.startLevel).padStart(2, '0')}</dd></div><div><dt>Hold</dt><dd>{settings.hold ? 'On' : 'Off'}</dd></div><div><dt>Require approval</dt><dd>{settings.requireApproval ? 'On' : 'Off'}</dd></div></dl>
       {settings.requireApproval && <p role="status">{!joined.room.players.guest ? 'Waiting for opponent…' : approved ? 'Settings approved.' : 'Waiting for opponent approval.'}</p>}
-      {!host && settings.requireApproval && <button className="back-button" disabled={!connected || busy || approved || locked} onClick={() => void approve()}>👍 Approve settings</button>}
+      {!host && settings.requireApproval && <button className="back-button" disabled={!connected || busy || approved || locked || !roundLoaded} onClick={() => void approve()}>👍 Approve settings</button>}
       {host && !draft && <button className="back-button" disabled={!connected || busy || locked} onClick={() => setDraft({ ...settings })}>Edit Match Settings</button>}
       {host && draft && !locked && <form className="match-settings-editor" aria-label="Edit match settings" onSubmit={event => { event.preventDefault(); void save() }}>
         <label className="setting-select-row">Match mode<select aria-label="Match mode" value={draft.mode} disabled={busy} onChange={event => setDraft({ ...draft, mode: event.target.value as MatchSettings['mode'] })}><option value="score-duel">Score Duel</option><option value="battle">Battle</option></select></label>

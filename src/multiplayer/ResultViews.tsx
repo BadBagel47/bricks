@@ -53,6 +53,6 @@ export function MatchResults({ result, uid, saving, saveError, actionError, busy
     {saveError && <div role="alert"><p>{saveError}</p><button className="back-button" onClick={onRetrySave}>Retry saving</button></div>}
     <MultiplayerHighscores mode={result.mode} />
     {actionError && <p role="alert">{actionError}</p>}
-    <div className="result-actions"><button className="back-button" disabled={busy} onClick={onLobby}>Return to lobby</button><button className="back-button" disabled={busy} onClick={onMenu}>Main Menu</button></div>
+    <div className="result-actions"><button className="back-button" disabled={busy} onClick={onLobby}>Rematch</button><button className="back-button" disabled={busy} onClick={onMenu}>Main Menu</button></div>
   </main>, document.body)
 }

@@ -13,6 +13,7 @@ export interface LiveOptions {
   preferences: MultiplayerPreferences
   audio: BricksAudio
   completedId: string | null
+  lastCompletedId: string | null
   onCompleted: (result: MatchResult, uid: string) => void
   onPlaying: (playing: boolean) => void
 }

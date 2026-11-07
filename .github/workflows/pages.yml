@@ -2,7 +2,7 @@ name: Deploy Bricks to GitHub Pages
 
 on:
   push:
-    branches: [main, milestone-3.3, milestone-3.4, milestone-3.5, milestone-3.6, milestone-3.7, milestone-3.9]
+    branches: [main, milestone-3.3, milestone-3.4, milestone-3.5, milestone-3.6, milestone-3.7, milestone-3.9, milestone-3.11]
   workflow_dispatch:
 
 permissions:
