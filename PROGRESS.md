@@ -2,10 +2,11 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.11 — Coordinated rematches
-- **Status:** Owner confirmed the 3.11 rules published. Main deployment of checked source is pending.
+- **Status:** 3.11 published from `da4009e`; full main CI and Pages deployment passed: https://github.com/BadBagel47/bricks/actions/runs/42403753502. Owner confirmed rules published.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.11
+- Owner confirmed rules published. Main `da4009e` passed full CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42403753502. App code matches tested `0ddf8c4`.
 - Owner authorized rematches with consolidated manual review. Results now offer Rematch, returning to the same lobby/settings; both participants must enter that lobby before the current host can start the next countdown. A player reviewing results cannot be silently pulled into a new game.
 - Added two bounded role slots for round readiness, tied to UID, exact live connection, role revision and previous match ID. Ready intent is idempotent and event-driven; results withdraw this connection's intent. Superseded async intent operations are aborted so old cleanup cannot delete a newer explicit consent.
 - Fresh guest approval is bound to the previous match ID in addition to settings and role generations. Starting/cancelling an attempt consumes approval; host transfer also invalidates it. Active countdown approval remains bound to its frozen previous ID.

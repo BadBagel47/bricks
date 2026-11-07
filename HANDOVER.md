@@ -7,10 +7,10 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 ## Current checkpoint — 2026-11-07
 
 - **Phase 3, milestone 3.11:** Coordinated rematches (authorized).
-- **Live:** https://badbagel47.github.io/bricks/?v=5744540 (3.10).
-- **Status:** 3.11 complete on milestone-3.11, source `0ddf8c4`. Full branch CI passed: https://github.com/BadBagel47/bricks/actions/runs/42402648129 . Local lint/build, 130 unit tests and 15 single-player browser checks passed. Owner confirmed the checked rules published; main deployment is pending; no Firebase administrator identity is attached.
+- **Live:** https://badbagel47.github.io/bricks/?v=da4009e (3.11).
+- **Status:** 3.11 published from `da4009e`; full main CI and Pages passed: https://github.com/BadBagel47/bricks/actions/runs/42403753502. Owner confirmed rules published; app source matches tested `0ddf8c4`.
 - **Workflow:** Owner wants manual tests consolidated. Finish automated two-session/security verification before the one necessary external action: checked rule publication. Later milestones still need authorization.
-- **Next:** Verify main CI and Pages deployment of the tested client. Rematch reuses room/settings but requires both live connection-bound consents and fresh optional guest approval; only the current host starts. New IDs/seeds reset game/Battle/Hold state and preserve local histories. Coordinated recovery remains 3.12.
+- **Next:** 3.11 is published. Begin 3.12 only when authorized. Rematch reuses room/settings but requires both live connection-bound consents and fresh optional guest approval; only the current host starts. New IDs/seeds reset game/Battle/Hold state and preserve local histories. Coordinated recovery remains 3.12.
 - **Next model:** Consider GPT-6.1 Terra alongside Sol and Luna; GPT-6.1 Terra High is recommended for 3.12 reconnection and recovery, after 3.11 checkpoint.
 
 ## Product direction and durable constraints
