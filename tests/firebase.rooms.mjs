@@ -352,7 +352,7 @@ test('countdown freezes approved settings, produces identical starts despite clo
   } finally { for (const context of contexts) await context.close() }
 })
 
-test('two sessions play independently, mirror compact boards and scores, contain focus and stop on disconnect', { timeout: 60000 }, async () => {
+test('two sessions play independently, pause on disconnect and abandon without a result', { timeout: 100000 }, async () => {
   const contexts = await Promise.all([browser.newContext(), browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true })])
   try {
     const [host, guest] = await Promise.all(contexts.map(context => context.newPage()))
@@ -433,7 +433,12 @@ test('two sessions play independently, mirror compact boards and scores, contain
     await host.waitForTimeout(1100)
     assert.equal((await data()).snapshots[hu].seq, finalSequence)
     await guest.evaluate(async () => (await import('/tests/fixtures/firebase-browser.ts')).disconnectDatabase())
-    await host.getByText('Match interrupted. Return to the lobby to try again.', { exact: true }).waitFor()
+    await host.getByText('Match paused. Waiting for reconnection…', { exact: true }).waitFor()
+    const pausedSnapshot = (await data()).snapshots[hu]
+    await host.keyboard.press('ArrowLeft')
+    await host.waitForTimeout(700)
+    assert.deepEqual((await data()).snapshots[hu], pausedSnapshot)
+    await host.getByText('Match interrupted. Return to the lobby to try again.', { exact: true }).waitFor({ timeout: 40000 })
     assert.equal(await host.getByRole('main', { name: 'Multiplayer game', exact: true }).count(), 0)
     assert.equal(await host.evaluate(() => localStorage.getItem('bricks.highscores.v1')), null)
     assert.equal(await host.evaluate(() => localStorage.getItem('bricks.multiplayer-results.v1')), null)

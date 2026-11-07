@@ -2,7 +2,7 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.12 — Reconnection and recovery
-- **Status:** 3.12 authorized and started. A standalone 30-second recovery transition model and tests exist locally; integration, synchronized pause, checkpoints, leases and server rules remain unfinished. Live remains 3.11.
+- **Status:** 3.12 is in progress. Checkpoints and control leases have passed CI; the shared pause and abandonment implementation is awaiting CI. Actual reconnection and restoration remain unfinished. Live remains 3.11.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.11
@@ -201,3 +201,5 @@
 - 3.12 is in progress, unpublished: the client captures a compact immutable checkpoint in the same atomic update as each display snapshot. Candidate rules restrict its size, owner and session; recovery candidates are checked against snapshot identity/content and Battle stream counters. Local lint, build, 143 unit tests and 15 browser tests passed. Full Firebase emulator and two-session checks passed for checkpoint commit `ce7ce0f`: https://github.com/BadBagel47/bricks/actions/runs/42424178579 . Local rules upload was cancelled. The atomic snapshot/checkpoint test does not establish that server rules require all clients to pair writes; restores must still validate pairing. A newer pausable Battle clock is integrated but not yet connected to interruption handling. Coordinated pause, durable handoff/leases, actual restoration and two-session recovery tests are unfinished.
 
 - 3.12 control-lease candidate: the selected initial connection acquires a participant-owned lease, and candidate rules allow takeover only once the previous connection's presence is absent. Gameplay write rules reject an old connection when a same-match lease exists, with legacy fallback for matches with no lease. These rules and concurrent-takeover tests need Firebase CI. The actual game still uses frozen start connections and cancels on interruption; this does not implement reconnection. Local lint, build and 144 unit tests passed.
+
+- 3.12 pause candidate: CI passed for the control-lease rules and integration at `68eac6f`: https://github.com/BadBagel47/bricks/actions/runs/42425943315 . New, not yet CI-verified work creates a server-timed shared pause on a missing selected connection, freezes local input/timing and gameplay writes, and abandons after 30 seconds without recording a result. The selected game cannot resume yet: connection handoff, checkpoint restoration and resume authorization remain outstanding. Local lint, build and 145 unit tests passed.

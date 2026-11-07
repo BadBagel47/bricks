@@ -3,13 +3,14 @@ import { captureBattleCheckpoint } from './battle-checkpoint.ts'
 import { publishCheckpoint } from './checkpoint-repository.ts'
 import { MatchClock } from './match-clock.ts'
 import { claimControlLease } from './control-lease.ts'
+import { parseRecoverySession, recoverySessionPath } from './recovery-session.ts'
 import { BattleGame, battleOutcome } from '../engine/battle.ts'
 import { battlePath, parseAttackStream, parseBattleFinish, publishBattleFinish, sendAttacks } from './battle-repository.ts'
 import type { BattleFinish } from './battle-repository.ts'
 import { scoreDuelOutcome } from './score-duel.ts'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { onValue, ref } from 'firebase/database'
+import { get, onValue, ref } from 'firebase/database'
 import type { Database } from 'firebase/database'
 import { advanceGame, createGame, dispatch } from '../engine/index.ts'
 import type { GameAction, Transition } from '../engine/index.ts'
@@ -25,7 +26,7 @@ import type { MatchStart } from './match-start.ts'
 import type { LiveOptions } from './live-options.ts'
 import './live-game.css'
 
-export default function LiveGame({ database, joined, start, options, serverTimeOffset, onLeave }: { database: Database; joined: JoinedRoom; start: MatchStart; options: LiveOptions; serverTimeOffset: number; onLeave: () => Promise<void> }) {
+export default function LiveGame({ database, joined, start, options, serverTimeOffset, paused, onLeave }: { database: Database; joined: JoinedRoom; start: MatchStart; options: LiveOptions; serverTimeOffset: number; paused: boolean; onLeave: () => Promise<void> }) {
   const { preferences: { personal, bindings, gamepadBindings }, audio, onPlaying } = options
   const [game, setGame] = useState(() => createGame({ seed: start.seed, startLevel: start.settings.startLevel, holdEnabled: start.settings.hold, hardDropEnabled: personal.hardDropEnabled }))
   const [collector] = useState(() => new ResultCollector(start, joined, result => options.onCompleted(result, joined.uid)))
@@ -33,7 +34,11 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
   const current = useRef(game)
   const battle = start.settings.mode === 'battle'
   const [battleGame] = useState(() => battle ? new BattleGame(game, start.seed, joined.uid === start.hostUid ? 'guest' : 'host') : null)
-  const [clock] = useState(() => new MatchClock(Date.now() + serverTimeOffset - start.countdownAt - 5000, performance.now()))
+  const [clock] = useState(() => {
+    const value = new MatchClock(Date.now() + serverTimeOffset - start.countdownAt - 5000, performance.now())
+    if (paused) value.pause(performance.now())
+    return value
+  })
   const battleFrame = useCallback(() => clock.frame(performance.now()), [clock])
   const [otherFinish, setOtherFinish] = useState<BattleFinish | null>(null)
   const [ownFinishFrame, setOwnFinishFrame] = useState<number | null>(null)
@@ -50,7 +55,15 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
   const dialog = useRef<HTMLDivElement>(null)
   const held = useRef(new HeldInputs())
   const controlsBlocked = useRef(false)
-  useLayoutEffect(() => { controlsBlocked.current = confirm || Boolean(error) }, [confirm, error])
+  const pausedRef = useRef(paused)
+  useLayoutEffect(() => {
+    controlsBlocked.current = paused || confirm || Boolean(error)
+    if (paused !== pausedRef.current) {
+      if (paused) { clock.pause(performance.now()); held.current.clear(); audio.pauseGame() }
+      else { clock.resume(performance.now()); audio.resumeGame() }
+      pausedRef.current = paused
+    }
+  }, [paused, confirm, error, clock, audio])
   const localHost = joined.uid === start.hostUid
   const opponentUid = localHost ? start.guestUid : start.hostUid
   const connection = localHost ? start.hostConnection : start.guestConnection
@@ -79,7 +92,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
   const commitRef = useRef(commit)
   useLayoutEffect(() => { applyRef.current = apply; commitRef.current = commit })
 
-  useEffect(() => { onPlaying(true); audio.beginGame(personal); return () => { onPlaying(false); audio.leaveGame() } }, [audio, onPlaying, personal])
+  useEffect(() => { onPlaying(true); audio.beginGame(personal); if (pausedRef.current) audio.pauseGame(); return () => { onPlaying(false); audio.leaveGame() } }, [audio, onPlaying, personal])
   useEffect(() => {
     let alive = true
     let previousSequence = 0
@@ -111,6 +124,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     let timer: ReturnType<typeof setTimeout>
     async function publish() {
       if (!alive) return
+      if (pausedRef.current) { timer = setTimeout(() => void publish(), 500); return }
       const next = gate.next(current.current, performance.now())
       const produced = battleGame?.produced ?? 0
       // Capture before awaiting network I/O: game input continues while writes are in flight.
@@ -139,7 +153,12 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
           if (alive && next.status === 'gameOver') setPublishedFinal({ status: next.status, score: next.score })
         }
       } catch {
-        if (alive) setError('Unable to synchronize. Return to the lobby.')
+        let interrupted: boolean = pausedRef.current
+        if (alive && !interrupted) {
+          try { interrupted = parseRecoverySession((await get(ref(database, recoverySessionPath(joined)))).val())?.matchId === start.id } catch { /* Report the original synchronization failure. */ }
+        }
+        if (alive && interrupted) timer = setTimeout(() => void publish(), 500)
+        else if (alive) setError('Unable to synchronize. Return to the lobby.')
         return
       }
       if (next?.status === 'gameOver') return
@@ -188,6 +207,11 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     function keyup(event: KeyboardEvent) { held.current.release(event.code) }
     function clear() { held.current.clear(); previousPad.clear() }
     function tick(now: number) {
+      if (pausedRef.current) {
+        previous = null; previousPad.clear(); held.current.clear()
+        frame = requestAnimationFrame(tick)
+        return
+      }
       let pad: Gamepad | undefined
       try { pad = Array.from(navigator.getGamepads?.() ?? []).find((value): value is Gamepad => Boolean(value?.connected)) } catch { /* Keyboard/touch remain available. */ }
       setController(Boolean(pad))
@@ -228,13 +252,14 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
   return createPortal(<>
     <main ref={screen} className="multiplayer-game" inert={confirm} aria-label="Multiplayer game">
       <header className="multiplayer-hud"><strong>{start.settings.mode === 'battle' ? 'Battle' : 'Score Duel'}</strong><span aria-label="Score difference">{difference > 0 ? '+' : ''}{difference.toLocaleString()}</span>{!outcome && <button tabIndex={-1} className="back-button" onClick={() => setConfirm(true)}>Leave match</button>}</header>
+      {paused && <p role="status">Match paused. Waiting for reconnection…</p>}
       <div className="duel-boards">
         <section aria-label="Your game"><h2>{ownName}</h2><dl className="live-stats"><div><dt>Score</dt><dd>{game.score.toLocaleString()}</dd></div><div><dt>Level</dt><dd>{game.level}</dd></div><div><dt>Lines</dt><dd>{game.lines}</dd></div></dl><Playfield game={game} swipeMode={personal.mobileControlMethod === 'swipe' && !finished} onSwipe={(from, to) => actionsForSwipe(from, to).forEach(action => apply(action))} /><div className="live-previews"><div><span>Next</span><PiecePreview type={game.next} level={game.level} /></div>{game.holdEnabled && <div><span>Hold</span>{game.held && <PiecePreview type={game.held} level={game.level} />}</div>}</div><p role="status">{finished ? 'Game over' : 'Playing'}</p></section>
         <section aria-label="Opponent game"><h2>{otherName}</h2><dl className="live-stats"><div><dt>Score</dt><dd>{opponent?.score.toLocaleString() ?? '0'}</dd></div><div><dt>Level</dt><dd>{opponent?.level ?? start.settings.startLevel}</dd></div><div><dt>Lines</dt><dd>{opponent?.lines ?? 0}</dd></div></dl><Playfield game={{ board: decodeBoard(opponent?.board ?? '0'.repeat(200)), active: null, level: opponent?.level ?? start.settings.startLevel }} swipeMode={false} onSwipe={() => {}} /><p role="status">{opponent ? opponent.status === 'gameOver' ? 'Game over' : 'Connected' : 'Synchronizing…'}</p></section>
       </div>
       {battleGame && <p className="battle-stats" aria-label="Battle attacks">Pending: {battleGame.pending} · Sent: {sentRows} · Applied: {battleGame.applied} · Cancelled: {battleGame.cancelled}</p>}
       {(duel || battle) && !error && duelStatus && <section className="duel-status" aria-label={battle ? "Battle status" : "Score Duel status"} role="status">{outcome ? <><h2>{outcomeTitle}</h2><p>{ownName}: {game.score.toLocaleString()} · {otherName}: {opponent!.score.toLocaleString()}</p><p>{battle ? `Survival: ${(ownFinishFrame! / 60).toFixed(2)} s · ${(otherFinish!.frame / 60).toFixed(2)} s` : `Score difference: ${Math.abs(outcome.difference).toLocaleString()}`}</p></> : <p>{duelStatus}</p>}</section>}
-      {!finished && !(controller && personal.hideTouchControlsWhenController) && <TouchControls method={personal.mobileControlMethod} buttonSize={personal.touchButtonSize} leftHanded={personal.leftHandedControls} holdEnabled={game.holdEnabled} hardDropEnabled={game.hardDropEnabled} enabled={!finished && !error && !confirm} apply={apply} />}
+      {!finished && !(controller && personal.hideTouchControlsWhenController) && <TouchControls method={personal.mobileControlMethod} buttonSize={personal.touchButtonSize} leftHanded={personal.leftHandedControls} holdEnabled={game.holdEnabled} hardDropEnabled={game.hardDropEnabled} enabled={!finished && !error && !confirm && !paused} apply={apply} />}
       <p className="control-hint">Esc / {bindings.pause.replace('Key', '')}: leave match · Multiplayer keeps running while this menu is open.</p>
       <p className="visually-hidden" role="status">{announcement}</p>
       {error && <p role="alert">{error}</p>}

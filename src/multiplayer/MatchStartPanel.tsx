@@ -12,10 +12,14 @@ import { countdownSeconds, parseMatchStart, startStillValid } from './match-star
 import type { Connections, MatchStart } from './match-start.ts'
 import { createMatchStart, startPath, transitionMatchStart } from './start-repository.ts'
 import { playerFacingError } from './errors.ts'
+import { abandonRecovery, beginRecovery, parseRecoverySession, recoverySessionPath } from './recovery-session.ts'
+import type { RecoverySession } from './recovery-session.ts'
+import { RECOVERY_GRACE_MS } from './recovery.ts'
 
 export default function MatchStartPanel({ options, database, joined, settings, approved, editing, otherEditors, connected, connections, localConnection, onLocked }: { options: LiveOptions; database: Database; joined: JoinedRoom; settings: MatchSettings; approved: boolean; editing: boolean; otherEditors: boolean; connected: boolean; connections: Connections | null; localConnection: string | null; onLocked: (value: boolean) => void }) {
   const [start, setStart] = useState<MatchStart | null>(null)
   const [readiness, setReadiness] = useState<RoundReadiness | null>(null)
+  const [recovery, setRecovery] = useState<RecoverySession | null>(null)
   const [loaded, setLoaded] = useState(false)
   const [offset, setOffset] = useState<number | null>(null)
   const [now, setNow] = useState(Date.now)
@@ -23,9 +27,13 @@ export default function MatchStartPanel({ options, database, joined, settings, a
   const [error, setError] = useState('')
   const interrupted = useRef(new Set<string>())
   const playedMatches = useRef(new Set<string>())
+  const ownedMatches = useRef(new Set<string>())
   const host = joined.uid === joined.room.hostUid
   const path = startPath(joined)
   const readyPath = readinessPath(joined)
+  const recoveryPath = recoverySessionPath(joined)
+  const joinedRef = useRef(joined)
+  joinedRef.current = joined
   const active = start !== null && start.status !== 'cancelled'
   useEffect(() => {
     if (start?.status === 'ready') playedMatches.current.add(start.id)
@@ -38,12 +46,15 @@ export default function MatchStartPanel({ options, database, joined, settings, a
     const stopReadiness = onValue(ref(database, readyPath), snapshot => {
       try { setReadiness(parseReadiness(snapshot.val())) } catch (reason) { setError(playerFacingError(reason).message) }
     }, reason => setError(playerFacingError(reason).message))
+    const stopRecovery = onValue(ref(database, recoveryPath), snapshot => {
+      try { setRecovery(parseRecoverySession(snapshot.val())) } catch (reason) { setError(playerFacingError(reason).message) }
+    }, reason => setError(playerFacingError(reason).message))
     const stopClock = onValue(ref(database, '.info/serverTimeOffset'), snapshot => {
       const value = snapshot.val()
       if (typeof value === 'number' && Number.isFinite(value)) setOffset(value)
     })
-    return () => { stopStart(); stopReadiness(); stopClock() }
-  }, [database, path, readyPath])
+    return () => { stopStart(); stopReadiness(); stopRecovery(); stopClock() }
+  }, [database, path, readyPath, recoveryPath])
   useEffect(() => {
     if (!loaded || !connected || !localConnection) return
     let current = true
@@ -65,13 +76,32 @@ export default function MatchStartPanel({ options, database, joined, settings, a
   }, [active, connected, start])
   const needsReadiness = start?.roundVersion === 1 && start.status === 'countdown'
   const valid = start && connections !== null && (!needsReadiness || readiness !== null) ? startStillValid(start, joined.room, settings, connections) && (!needsReadiness || bothReady(start, readiness!, connections)) : null
+  const selected = start && localConnection === (host ? start.hostConnection : start.guestConnection)
+  useEffect(() => { if (start?.status === 'ready' && selected) ownedMatches.current.add(start.id) }, [start?.id, start?.status, selected])
   useEffect(() => {
     if (!start || !active || !connected || connections === null || valid === null) return
     if (valid && !interrupted.current.has(start.id)) return
-    void transitionMatchStart(database, joined, start.id, 'cancelled').catch(reason => setError(playerFacingError(reason).message))
+    const identities = { [start.hostUid]: { [start.hostConnection]: true }, [start.guestUid]: { [start.guestConnection]: true } }
+    if (start.status === 'ready' && startStillValid(start, joined.room, settings, identities) && !valid) {
+      void beginRecovery(database, joined, start.id).catch(() => { /* Presence may have recovered before the server checks it. */ })
+      return
+    }
+    if (start.status === 'countdown' || !startStillValid(start, joined.room, settings, identities)) void transitionMatchStart(database, joined, start.id, 'cancelled').catch(reason => setError(playerFacingError(reason).message))
     // Freeze cancellation to session/validity changes, not the local countdown clock.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [start?.id, active, connected, valid, connections === null])
+  useEffect(() => {
+    if (!start || start.status !== 'ready' || recovery?.matchId !== start.id || !connected) return
+    if (recovery.phase === 'abandoned') {
+      void transitionMatchStart(database, joinedRef.current, start.id, 'cancelled').catch(reason => setError(playerFacingError(reason).message))
+      return
+    }
+    if (offset === null) return
+    const timer = setTimeout(() => void abandonRecovery(database, joinedRef.current, start.id).catch(reason => setError(playerFacingError(reason).message)), Math.max(0, recovery.interruptedAt + RECOVERY_GRACE_MS - (Date.now() + offset)) + 250)
+    return () => clearTimeout(timer)
+  // A new room object must not restart the fixed deadline.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [database, path, start?.id, start?.status, recovery, connected, offset])
   useEffect(() => {
     if (!start || start.status !== 'countdown' || !host || !connected || !valid || offset === null || localConnection !== start.hostConnection || interrupted.current.has(start.id)) return
     const timer = setTimeout(() => {
@@ -96,8 +126,8 @@ export default function MatchStartPanel({ options, database, joined, settings, a
     finally { setBusy(false) }
   }
   const ready = start?.status === 'ready' && valid && connected
-  const selected = start && localConnection === (host ? start.hostConnection : start.guestConnection)
-  if (ready && selected && (start.settings.mode !== 'battle' || start.battleVersion === 1)) return <LiveGame key={start.id} database={database} joined={joined} start={start} options={options} serverTimeOffset={offset ?? 0} onLeave={() => transitionMatchStart(database, joined, start.id, 'cancelled')} />
+  const paused = Boolean(start && start.status === 'ready' && (!connected || valid === false || recovery?.matchId === start.id))
+  if (start?.status === 'ready' && (selected || ownedMatches.current.has(start.id)) && (start.settings.mode !== 'battle' || start.battleVersion === 1)) return <LiveGame key={start.id} database={database} joined={joined} start={start} options={options} serverTimeOffset={offset ?? 0} paused={paused} onLeave={() => transitionMatchStart(database, joined, start.id, 'cancelled')} />
   const bothConnected = Boolean(connections && localConnection && connections[joined.room.hostUid]?.[localConnection] && joined.room.players.guest && Object.keys(connections[joined.room.players.guest.uid] ?? {}).length)
   const roundId = previousRoundId(start)
   const consent = Boolean(readiness && connections && readyForRound(readiness.host, joined.room.hostUid, roundId, joined.room.roleRevision ?? 0, connections, host ? localConnection : null) && readyForRound(readiness.guest, joined.room.players.guest?.uid, roundId, joined.room.roleRevision ?? 0, connections))
@@ -110,6 +140,7 @@ export default function MatchStartPanel({ options, database, joined, settings, a
       {start.status === 'countdown' && <p role="status" aria-label="Countdown">{offset === null ? 'Synchronizing…' : countdownSeconds(start, now + offset) || 'Starting…'}</p>}
       {active && start.settings.mode === 'battle' && start.battleVersion !== 1 && <p role="status">Battle has been updated. Return to the lobby and start a new match.</p>}
       {ready && !selected && <p role="status">This match is controlled by another tab.</p>}
+      {paused && <p role="status">Match paused. Waiting for reconnection…</p>}
       {!connected && <p role="status">Start interrupted. Reconnecting…</p>}
       <button className="back-button" disabled={!connected || busy} onClick={() => void cancel()}>{start.status === 'ready' ? 'Return to lobby' : 'Cancel start'}</button>
     </> : <>

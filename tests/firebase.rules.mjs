@@ -334,6 +334,37 @@ test('live snapshots are bounded, participant-owned, current-match-bound, rate-l
   await assertSucceeds(set(location, { ...payload, matchId: 'e'.repeat(32) }))
 })
 
+test('recovery pause uses a fixed server deadline and only expires after thirty seconds', async () => {
+  const hc = 'b'.repeat(32), gc = 'c'.repeat(32), mid = 'a'.repeat(32)
+  const room = await ownedRoom()
+  await set(ref(db('guest'), `rooms/${code}`), { ...room, players: { ...room.players, guest: { uid: 'guest', name: 'Guest' } } })
+  const ready = { id: mid, status: 'ready', seed: 47, countdownAt: Date.now() - 6000, settings: { revision: 0, mode: 'score-duel', startLevel: 0, hold: false, requireApproval: false }, roleRevision: 0, hostUid: 'host', guestUid: 'guest', hostConnection: hc, guestConnection: gc }
+  await environment.withSecurityRulesDisabled(async context => {
+    await set(ref(context.database(), `matchStarts/${code}/1`), ready)
+    await set(ref(context.database(), `presence/${code}/1`), { host: { [hc]: true }, guest: { [gc]: true } })
+  })
+  const path = `recoverySessions/${code}/1`
+  const paused = { matchId: mid, phase: 'paused', interruptedAt: serverTimestamp() }
+  await assertFails(set(ref(db('host'), path), paused))
+  await assertFails(set(ref(db('third'), path), paused))
+  await remove(ref(db('guest'), `presence/${code}/1/guest/${gc}`))
+  await assertFails(set(ref(db('host'), path), { ...paused, interruptedAt: 1 }))
+  await assertFails(set(ref(db('host'), path), { ...paused, extra: true }))
+  await assertSucceeds(set(ref(db('host'), path), paused))
+  const current = (await get(ref(db('host'), path))).val()
+  const snapshot = { matchId: mid, connection: hc, seq: 1, board: '0'.repeat(200), next: 'T', held: '-', status: 'playing', score: 0, level: 0, lines: 0, updatedAt: serverTimestamp() }
+  await assertFails(set(ref(db('host'), `gameSnapshots/${code}/1/host`), snapshot))
+  await assertFails(set(ref(db('host'), `recoveryCheckpoints/${code}/1/host`), { matchId: mid, connection: hc, seq: 1, payload: '{}', updatedAt: serverTimestamp() }))
+  await assertFails(set(ref(db('host'), path), paused))
+  await assertFails(set(ref(db('host'), path), { ...current, phase: 'abandoned' }))
+  await assertFails(remove(ref(db('host'), path)))
+  await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), path), { ...current, interruptedAt: Date.now() - 31000 }) })
+  const expired = (await get(ref(db('host'), path))).val()
+  await assertSucceeds(set(ref(db('host'), path), { ...expired, phase: 'abandoned' }))
+  await assertFails(set(ref(db('host'), path), paused))
+  await assertFails(set(ref(db('host'), path), { ...expired, phase: 'paused' }))
+})
+
 test('a control lease is participant-owned and can move only after the previous connection disappears', async () => {
   const hc = 'b'.repeat(32), gc = 'c'.repeat(32), next = 'd'.repeat(32), competing = 'e'.repeat(32), mid = 'a'.repeat(32)
   const room = await ownedRoom()
