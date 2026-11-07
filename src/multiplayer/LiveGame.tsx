@@ -1,6 +1,7 @@
 import { ResultCollector } from './results.ts'
 import { captureBattleCheckpoint } from './battle-checkpoint.ts'
 import { publishCheckpoint } from './checkpoint-repository.ts'
+import { MatchClock } from './match-clock.ts'
 import { BattleGame, battleOutcome } from '../engine/battle.ts'
 import { battlePath, parseAttackStream, parseBattleFinish, publishBattleFinish, sendAttacks } from './battle-repository.ts'
 import type { BattleFinish } from './battle-repository.ts'
@@ -31,8 +32,8 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
   const current = useRef(game)
   const battle = start.settings.mode === 'battle'
   const [battleGame] = useState(() => battle ? new BattleGame(game, start.seed, joined.uid === start.hostUid ? 'guest' : 'host') : null)
-  const [clock] = useState(() => ({ at: performance.now(), elapsed: Date.now() + serverTimeOffset - start.countdownAt - 5000 }))
-  const battleFrame = useCallback(() => Math.max(0, Math.floor((clock.elapsed + performance.now() - clock.at) * 60 / 1000)), [clock])
+  const [clock] = useState(() => new MatchClock(Date.now() + serverTimeOffset - start.countdownAt - 5000, performance.now()))
+  const battleFrame = useCallback(() => clock.frame(performance.now()), [clock])
   const [otherFinish, setOtherFinish] = useState<BattleFinish | null>(null)
   const [ownFinishFrame, setOwnFinishFrame] = useState<number | null>(null)
   const [sentRows, setSentRows] = useState(0)

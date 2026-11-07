@@ -140,3 +140,17 @@ one participant-scoped readiness listener, with no polling/heartbeats. Existing
 start/approval path listeners are shared by the Firebase client. Gameplay snapshot
 and Battle update budgets are unchanged. Old room epochs still need future
 retention/cleanup policy.
+
+### 3.12 checkpoint candidate (not deployed)
+
+The experimental client writes the latest checkpoint and visible snapshot in
+one atomic update, at the existing changed-snapshot rate. The checkpoint uses a
+200-character board and does not duplicate it for Battle. Initial examples are
+556 bytes for Score Duel and 801 bytes for Battle before record and transport
+overhead. At a sustained two updates per second for both players, that is roughly
+8 MB/hour and 11.5 MB/hour respectively of additional checkpoint payload sent;
+actual states and UID lengths vary. This is not a billed-download estimate.
+There are at most two checkpoint records per room epoch, with no heartbeat or
+per-match history. Recovery reads, retries, transport overhead and the eventual
+production quota effect remain unmeasured. Old epochs still need a retention
+policy, and recovery itself is not implemented yet.
