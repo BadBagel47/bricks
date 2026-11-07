@@ -2,10 +2,11 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.9 — Battle penalties
-- **Status:** 3.9 complete and fully validated on milestone-3.9 (`8a90d27`): https://github.com/BadBagel47/bricks/actions/runs/42310387560 . Production stays on 3.8 until the owner publishes the checked new rules; manual playtesting can wait.
+- **Status:** Owner confirmed the checked 3.9 rules published. The tested Battle client is being deployed to main; full main CI/Pages verification pending.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.9
+- Owner confirmed publication of the checked Battle rules on 2026-11-07. Proceeding with deployment of the unchanged tested client; no manual game review is required now.
 - Owner authorized Battle penalties while retaining consolidated manual playtesting. Multi-clears generate 0/1/2/4 rows for 1/2/3/4 lines. Outgoing rows cancel the oldest queued incoming rows, then remaining incoming rows rise at the lock/clear boundary. No combo/T-spin/drop bonuses.
 - Added pure Battle adapter over the existing engine: cumulative incoming-prefix deduplication, bounded numeric queues, overflow/collision Game Over, grey garbage with one independently seeded hole per row, and no piece-stream consumption. Inputs and gravity use a shared server-clock-anchored 60 Hz timeline; catch-up records the exact simulated elimination frame.
 - Added bounded per-player attack prefixes and immutable finishes. Each row's unique identity is (match ID, sender UID, ordinal); overwritten cumulative prefixes recover skipped/coalesced updates without duplicate application or growing history. Attacks stop at the server once either participant is eliminated. Race with an opponent's final snapshot suppresses unsent rows rather than failing board synchronization.
@@ -165,7 +166,7 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Owner installs checked 3.9 rules from `8a90d27`, then deploy the verified client from main. No manual game review is required now.
+- Verify main CI and Pages publication of the checked 3.9 client. No manual game review is required now.
 - Next milestone 3.10 is match results and highscores; recommend GPT-6.1 Sol Medium.
 
 ## Git checkpoints

@@ -4,13 +4,13 @@ Read this first when starting a new work session. It is an index and current
 checkpoint, not a replacement for owner instructions or the product specification.
 Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 
-## Current checkpoint — 2026-11-06
+## Current checkpoint — 2026-11-07
 
 - **Phase 3, milestone 3.9:** Battle penalties (authorized).
 - **Live:** https://badbagel47.github.io/bricks/?v=a3db2c0 (3.8).
-- **Status:** 3.9 complete on milestone-3.9, source `8a90d27`. Full branch CI passed: https://github.com/BadBagel47/bricks/actions/runs/42310387560 . Local lint/build, 119 unit tests and 15 single-player Chromium checks passed. Install checked rules before main activation; no Firebase administrator identity is attached.
+- **Status:** 3.9 complete on milestone-3.9, source `8a90d27`. Full branch CI passed: https://github.com/BadBagel47/bricks/actions/runs/42310387560 . Local lint/build, 119 unit tests and 15 single-player Chromium checks passed. Owner confirmed the checked rules published; main deployment is pending; no Firebase administrator identity is attached.
 - **Workflow:** Owner wants manual playtesting consolidated into larger playable checkpoints. Finish automated tests before the one required owner action: new Firebase rule publication. Later milestones still need authorization.
-- **Next:** Owner installs the checked 3.9 rules from `8a90d27`, then deploy the tested client. Battle has independent penalty-hole RNG, 0/1/2/4 attacks, incoming cancellation, exactly-once prefix processing, garbage at lock boundaries and confirmed survival outcomes. Full results/highscores/recovery remain later work.
+- **Next:** Verify main CI and Pages publication of the checked 3.9 client. Battle has independent penalty-hole RNG, 0/1/2/4 attacks, incoming cancellation, exactly-once prefix processing, garbage at lock boundaries and confirmed survival outcomes. Full results/highscores/recovery remain later work.
 - **Next model:** GPT-6.1 Sol Medium for 3.10 match results and highscores, after 3.9 checkpoint.
 
 ## Product direction and durable constraints
