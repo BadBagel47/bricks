@@ -438,6 +438,12 @@ test('two sessions play independently, pause on disconnect and abandon without a
     await host.keyboard.press('ArrowLeft')
     await host.waitForTimeout(700)
     assert.deepEqual((await data()).snapshots[hu], pausedSnapshot)
+    await guest.evaluate(async () => (await import('/tests/fixtures/firebase-browser.ts')).reconnectDatabase())
+    await host.waitForFunction(async ({ code, hu, gu }) => {
+      const state = await (await import('/tests/fixtures/firebase-browser.ts')).recoveryData(code)
+      return Boolean(state.ready?.[hu] && state.ready?.[gu])
+    }, { code, hu, gu }, { timeout: 12000 })
+    assert.equal((await data()).snapshots[hu].seq, pausedSnapshot.seq)
     await host.getByText('Match interrupted. Return to the lobby to try again.', { exact: true }).waitFor({ timeout: 40000 })
     assert.equal(await host.getByRole('main', { name: 'Multiplayer game', exact: true }).count(), 0)
     assert.equal(await host.evaluate(() => localStorage.getItem('bricks.highscores.v1')), null)

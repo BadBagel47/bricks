@@ -229,6 +229,23 @@
         }
       }
     },
+    "recoveryReadiness": {
+      "$code": {
+        "$epoch": {
+          ".read": "auth != null && root.child('rooms').child($code).child('epoch').val() + '' === $epoch && (root.child('rooms').child($code).child('players/host/uid').val() === auth.uid || root.child('rooms').child($code).child('players/guest/uid').val() === auth.uid)",
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && root.child('rooms').child($code).child('epoch').val() + '' === $epoch && (root.child('rooms').child($code).child('players/host/uid').val() === auth.uid || root.child('rooms').child($code).child('players/guest/uid').val() === auth.uid) && newData.exists() && root.child('matchStarts').child($code).child($epoch).child('status').val() === 'ready' && newData.child('matchId').val() === root.child('matchStarts').child($code).child($epoch).child('id').val() && root.child('recoverySessions').child($code).child($epoch).child('matchId').val() === newData.child('matchId').val() && root.child('recoverySessions').child($code).child($epoch).child('phase').val() === 'paused' && now < root.child('recoverySessions').child($code).child($epoch).child('interruptedAt').val() + 30000 && root.child('controlLeases').child($code).child($epoch).child($uid).child('matchId').val() === newData.child('matchId').val() && root.child('controlLeases').child($code).child($epoch).child($uid).child('connection').val() === newData.child('connection').val() && root.child('controlLeases').child($code).child($epoch).child($uid).child('revision').val() === newData.child('leaseRevision').val() && root.child('presence').child($code).child($epoch).child($uid).child(newData.child('connection').val()).val() === true && root.child('recoveryCheckpoints').child($code).child($epoch).child($uid).child('matchId').val() === newData.child('matchId').val() && root.child('recoveryCheckpoints').child($code).child($epoch).child($uid).child('seq').val() === newData.child('checkpointSeq').val() && root.child('gameSnapshots').child($code).child($epoch).child($uid).child('matchId').val() === newData.child('matchId').val() && root.child('gameSnapshots').child($code).child($epoch).child($uid).child('seq').val() === newData.child('checkpointSeq').val() && root.child('gameSnapshots').child($code).child($epoch).child($uid).child('updatedAt').val() === root.child('recoveryCheckpoints').child($code).child($epoch).child($uid).child('updatedAt').val() && (!data.exists() || data.child('matchId').val() !== newData.child('matchId').val() || data.child('leaseRevision').val() < newData.child('leaseRevision').val())",
+            ".validate": "newData.hasChildren(['matchId', 'connection', 'leaseRevision', 'checkpointSeq', 'battleFrame'])",
+            "matchId": { ".validate": "newData.isString() && newData.val().matches(/^[a-f0-9]{32}$/)" },
+            "connection": { ".validate": "newData.isString() && newData.val().matches(/^[a-f0-9]{32}$/)" },
+            "leaseRevision": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 1000000000" },
+            "checkpointSeq": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 1000000000" },
+            "battleFrame": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 1000000000 && (root.child('matchStarts').child($code).child($epoch).child('settings/mode').val() === 'battle' || newData.val() === 0)" },
+            "$other": { ".validate": false }
+          }
+        }
+      }
+    },
     "recoverySessions": {
       "$code": {
         "$epoch": {

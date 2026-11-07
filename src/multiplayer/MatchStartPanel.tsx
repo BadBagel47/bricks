@@ -15,6 +15,7 @@ import { playerFacingError } from './errors.ts'
 import { abandonRecovery, beginRecovery, parseRecoverySession, recoverySessionPath } from './recovery-session.ts'
 import type { RecoverySession } from './recovery-session.ts'
 import { RECOVERY_GRACE_MS } from './recovery.ts'
+import { prepareRecovery } from './recovery-readiness.ts'
 
 export default function MatchStartPanel({ options, database, joined, settings, approved, editing, otherEditors, connected, connections, localConnection, onLocked }: { options: LiveOptions; database: Database; joined: JoinedRoom; settings: MatchSettings; approved: boolean; editing: boolean; otherEditors: boolean; connected: boolean; connections: Connections | null; localConnection: string | null; onLocked: (value: boolean) => void }) {
   const [start, setStart] = useState<MatchStart | null>(null)
@@ -103,6 +104,14 @@ export default function MatchStartPanel({ options, database, joined, settings, a
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [database, path, start?.id, start?.status, recovery, connected, offset])
   useEffect(() => {
+    if (!start || start.status !== 'ready' || recovery?.matchId !== start.id || recovery.phase !== 'paused' || !connected || !localConnection) return
+    // An absent/corrupt checkpoint or a still-live old controller cannot be resumed.
+    // Presence changes retry the claim without polling or additional heartbeats.
+    void prepareRecovery(database, joinedRef.current, start, localConnection).catch(() => {})
+    // Only connection/session changes should initiate a recovery attempt.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [database, path, start?.id, start?.status, recovery, connected, localConnection, connections])
+  useEffect(() => {
     if (!start || start.status !== 'countdown' || !host || !connected || !valid || offset === null || localConnection !== start.hostConnection || interrupted.current.has(start.id)) return
     const timer = setTimeout(() => {
       void transitionMatchStart(database, joined, start.id, 'ready').catch(reason => setError(playerFacingError(reason).message))
@@ -126,7 +135,7 @@ export default function MatchStartPanel({ options, database, joined, settings, a
     finally { setBusy(false) }
   }
   const ready = start?.status === 'ready' && valid && connected
-  const paused = Boolean(start && start.status === 'ready' && (!connected || valid === false || recovery?.matchId === start.id))
+  const paused = Boolean(start && start.status === 'ready' && (!connected || valid === false || interrupted.current.has(start.id) || recovery?.matchId === start.id))
   if (start?.status === 'ready' && (selected || ownedMatches.current.has(start.id)) && (start.settings.mode !== 'battle' || start.battleVersion === 1)) return <LiveGame key={start.id} database={database} joined={joined} start={start} options={options} serverTimeOffset={offset ?? 0} paused={paused} onLeave={() => transitionMatchStart(database, joined, start.id, 'cancelled')} />
   const bothConnected = Boolean(connections && localConnection && connections[joined.room.hostUid]?.[localConnection] && joined.room.players.guest && Object.keys(connections[joined.room.players.guest.uid] ?? {}).length)
   const roundId = previousRoundId(start)

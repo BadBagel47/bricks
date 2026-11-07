@@ -45,6 +45,12 @@ export async function matchData(code: string) {
   return { start: (await get(ref(client.database, `matchStarts/${base}`))).val(), snapshots: (await get(ref(client.database, `gameSnapshots/${base}`))).val() }
 }
 
+export async function recoveryData(code: string) {
+  const epoch = (await get(ref(client.database, `rooms/${code}/epoch`))).val()
+  const base = `${code}/${epoch}`
+  return { session: (await get(ref(client.database, `recoverySessions/${base}`))).val(), ready: (await get(ref(client.database, `recoveryReadiness/${base}`))).val() }
+}
+
 /** Real inputs planned with the standalone engine, never injected application state. */
 export async function lineClearPlan(code: string, minimumRows = 1) {
   const { planInputs } = await import('./plan-inputs.ts')
