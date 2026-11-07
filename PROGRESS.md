@@ -1,8 +1,8 @@
 # Bricks progress
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
-- **Milestone:** 3.11 — Coordinated rematches
-- **Status:** 3.11 published from `da4009e`; full main CI and Pages deployment passed: https://github.com/BadBagel47/bricks/actions/runs/42403753502. Owner confirmed rules published.
+- **Milestone:** 3.12 — Reconnection and recovery
+- **Status:** 3.12 authorized and started. A standalone 30-second recovery transition model and tests exist locally; integration, synchronized pause, checkpoints, leases and server rules remain unfinished. Live remains 3.11.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.11
@@ -197,3 +197,5 @@
 - `a2e20db`: Milestone 1.5 original Web Audio soundtrack and effects.
 - `0a67fac`: Milestone 1.6 touch and gamepad controls.
 - The Milestone 1.7 checkpoint contains integration fixes, Chromium tests, CI gate and the Phase 1 review report.
+
+- 3.12 is in progress, unpublished: the client captures a compact immutable checkpoint in the same atomic update as each display snapshot. Candidate rules restrict its size, owner and session; recovery candidates are checked against snapshot identity/content and Battle stream counters. Local lint, build and 141 unit tests passed. Full Firebase emulator checks need CI because local rules upload is cancelled. The atomic snapshot/checkpoint test does not establish that server rules require all clients to pair writes; restores must still validate pairing. Coordinated pause, durable handoff/leases, actual restoration and two-session recovery tests are unfinished.

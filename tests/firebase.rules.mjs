@@ -334,6 +334,32 @@ test('live snapshots are bounded, participant-owned, current-match-bound, rate-l
   await assertSucceeds(set(location, { ...payload, matchId: 'e'.repeat(32) }))
 })
 
+test('recovery checkpoints are bounded and owned, and commit atomically with the display snapshot', async () => {
+  const hc = 'b'.repeat(32), gc = 'c'.repeat(32), mid = 'a'.repeat(32)
+  const room = await ownedRoom()
+  await set(ref(db('guest'), `rooms/${code}`), { ...room, players: { ...room.players, guest: { uid: 'guest', name: 'Guest' } } })
+  const ready = { id: mid, status: 'ready', seed: 47, countdownAt: Date.now() - 6000, settings: { revision: 0, mode: 'score-duel', startLevel: 0, hold: false, requireApproval: false }, roleRevision: 0, hostUid: 'host', guestUid: 'guest', hostConnection: hc, guestConnection: gc }
+  await environment.withSecurityRulesDisabled(async context => {
+    await set(ref(context.database(), `matchStarts/${code}/1`), ready)
+    await set(ref(context.database(), `presence/${code}/1`), { host: { [hc]: true }, guest: { [gc]: true } })
+  })
+  const checkpointPath = `recoveryCheckpoints/${code}/1/host`
+  const snapshotPath = `gameSnapshots/${code}/1/host`
+  const checkpoint = { matchId: mid, connection: hc, seq: 1, payload: '{"version":1}', updatedAt: serverTimestamp() }
+  const snapshot = { matchId: mid, connection: hc, seq: 1, board: '0'.repeat(200), next: 'T', held: '-', status: 'playing', score: 0, level: 0, lines: 0, updatedAt: serverTimestamp() }
+  await assertFails(set(ref(db('guest'), checkpointPath), checkpoint))
+  await assertFails(set(ref(db('host'), checkpointPath), { ...checkpoint, payload: 'x'.repeat(8193) }))
+  await assertFails(update(ref(db('host')), { [checkpointPath]: checkpoint, [snapshotPath]: { ...snapshot, board: 'bad' } }))
+  assert.equal((await get(ref(db('host'), checkpointPath))).val(), null)
+  await assertSucceeds(update(ref(db('host')), { [checkpointPath]: checkpoint, [snapshotPath]: snapshot }))
+  await assertFails(get(ref(db('guest'), checkpointPath)))
+  await assertFails(get(ref(db('host'), `recoveryCheckpoints/${code}/1`)))
+  await assertFails(remove(ref(db('host'), checkpointPath)))
+  await assertFails(set(ref(db('host'), checkpointPath), { ...checkpoint, seq: 2 }))
+  await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), `matchStarts/${code}/1`), { ...ready, status: 'cancelled' }) })
+  await assertFails(set(ref(db('host'), checkpointPath), { ...checkpoint, seq: 2 }))
+})
+
 test('Battle start requires the new frozen protocol marker; old clients cannot start penalty-free Battle', async () => {
   const room = await ownedRoom()
   await set(ref(db('guest'), `rooms/${code}`), { ...room, players: { ...room.players, guest: { uid: 'guest', name: 'Guest' } } })

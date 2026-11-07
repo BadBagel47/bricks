@@ -22,10 +22,14 @@ export default function MatchStartPanel({ options, database, joined, settings, a
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const interrupted = useRef(new Set<string>())
+  const playedMatches = useRef(new Set<string>())
   const host = joined.uid === joined.room.hostUid
   const path = startPath(joined)
   const readyPath = readinessPath(joined)
   const active = start !== null && start.status !== 'cancelled'
+  useEffect(() => {
+    if (start?.status === 'ready') playedMatches.current.add(start.id)
+  }, [start?.id, start?.status])
   useEffect(() => {
     const stopStart = onValue(ref(database, path), snapshot => {
       try { setStart(parseMatchStart(snapshot.val())); setNow(Date.now()); setLoaded(true) }
@@ -109,7 +113,7 @@ export default function MatchStartPanel({ options, database, joined, settings, a
       {!connected && <p role="status">Start interrupted. Reconnecting…</p>}
       <button className="back-button" disabled={!connected || busy} onClick={() => void cancel()}>{start.status === 'ready' ? 'Return to lobby' : 'Cancel start'}</button>
     </> : <>
-      {start?.status === 'cancelled' && start.id !== options.lastCompletedId && <p role="status">Start cancelled. Return to the lobby to try again.</p>}
+      {start?.status === 'cancelled' && start.id !== options.lastCompletedId && <p role="status">{playedMatches.current.has(start.id) ? 'Match interrupted. Return to the lobby to try again.' : 'Start cancelled. Return to the lobby to try again.'}</p>}
       {joined.room.players.guest && !consent && <p role="status">Waiting for both players to be ready.</p>}
       {host && <button className="button button-primary" disabled={!canStart || busy} onClick={() => void begin()}>Start Match</button>}
     </>}

@@ -1,11 +1,13 @@
 import { ResultCollector } from './results.ts'
+import { captureBattleCheckpoint } from './battle-checkpoint.ts'
+import { publishCheckpoint } from './checkpoint-repository.ts'
 import { BattleGame, battleOutcome } from '../engine/battle.ts'
 import { battlePath, parseAttackStream, parseBattleFinish, publishBattleFinish, sendAttacks } from './battle-repository.ts'
 import type { BattleFinish } from './battle-repository.ts'
 import { scoreDuelOutcome } from './score-duel.ts'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { onValue, ref, serverTimestamp, set } from 'firebase/database'
+import { onValue, ref } from 'firebase/database'
 import type { Database } from 'firebase/database'
 import { advanceGame, createGame, dispatch } from '../engine/index.ts'
 import type { GameAction, Transition } from '../engine/index.ts'
@@ -108,6 +110,9 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
       if (!alive) return
       const next = gate.next(current.current, performance.now())
       const produced = battleGame?.produced ?? 0
+      // Capture before awaiting network I/O: game input continues while writes are in flight.
+      const savedGame = next ? structuredClone(current.current) : null
+      const savedBattle = next && battleGame ? captureBattleCheckpoint(battleGame, { matchId: start.id, uid: joined.uid, epoch: joined.room.epoch }, { acknowledgedProduced, committedSent }) : null
       const finishStats = battleGame?.endedFrame !== null && battleGame ? { frame: battleGame.endedFrame!, received: battleGame.received, applied: battleGame.applied, cancelled: battleGame.cancelled } : null
       try {
         if (battleGame && produced > acknowledgedProduced) {
@@ -116,7 +121,8 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
           if (alive) setSentRows(committedSent)
         }
         if (next) {
-          await set(ref(database, `${base}/${joined.uid}`), { ...next, matchId: start.id, connection, updatedAt: serverTimestamp() })
+          const checkpoint = savedBattle ? { ...savedBattle, acknowledgedProduced, committedSent } : null
+          await publishCheckpoint(database, joined, { ...next, matchId: start.id, connection }, savedGame!, checkpoint)
           if (next.status === 'gameOver' && finishStats) {
             await publishBattleFinish(database, joined, start, { ...finishStats, sent: committedSent })
             if (alive) setOwnFinishFrame(finishStats.frame)

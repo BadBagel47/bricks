@@ -229,6 +229,23 @@
         }
       }
     },
+    "recoveryCheckpoints": {
+      "$code": {
+        "$epoch": {
+          "$uid": {
+            ".read": "auth != null && auth.uid === $uid && root.child('rooms').child($code).child('epoch').val() + '' === $epoch && (root.child('rooms').child($code).child('players/host/uid').val() === auth.uid || root.child('rooms').child($code).child('players/guest/uid').val() === auth.uid)",
+            ".write": "auth != null && auth.uid === $uid && root.child('rooms').child($code).child('epoch').val() + '' === $epoch && (root.child('rooms').child($code).child('players/host/uid').val() === auth.uid || root.child('rooms').child($code).child('players/guest/uid').val() === auth.uid) && newData.exists() && root.child('matchStarts').child($code).child($epoch).child('status').val() === 'ready' && newData.child('matchId').val() === root.child('matchStarts').child($code).child($epoch).child('id').val() && ((auth.uid === root.child('matchStarts').child($code).child($epoch).child('hostUid').val() && newData.child('connection').val() === root.child('matchStarts').child($code).child($epoch).child('hostConnection').val()) || (auth.uid === root.child('matchStarts').child($code).child($epoch).child('guestUid').val() && newData.child('connection').val() === root.child('matchStarts').child($code).child($epoch).child('guestConnection').val())) && root.child('presence').child($code).child($epoch).child($uid).child(newData.child('connection').val()).val() === true && ((!data.exists() || data.child('matchId').val() !== newData.child('matchId').val()) ? newData.child('seq').val() === 1 : (newData.child('seq').val() === data.child('seq').val() + 1 && newData.child('connection').val() === data.child('connection').val() && newData.child('updatedAt').val() >= data.child('updatedAt').val() + 500))",
+            ".validate": "newData.hasChildren(['matchId', 'connection', 'seq', 'payload', 'updatedAt'])",
+            "matchId": { ".validate": "newData.isString() && newData.val().matches(/^[a-f0-9]{32}$/)" },
+            "connection": { ".validate": "newData.isString() && newData.val().matches(/^[a-f0-9]{32}$/)" },
+            "seq": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 1000000000" },
+            "payload": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 8192" },
+            "updatedAt": { ".validate": "newData.isNumber() && newData.val() === now" },
+            "$other": { ".validate": false }
+          }
+        }
+      }
+    },
     "gameSnapshots": {
       "$code": {
         "$epoch": {
