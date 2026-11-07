@@ -7,10 +7,10 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 ## Current checkpoint — 2026-11-07
 
 - **Phase 3, milestone 3.10:** Match results and local highscores (authorized).
-- **Live:** https://badbagel47.github.io/bricks/?v=1eaa086 (3.9).
-- **Status:** 3.10 implemented; local lint/build, 126 unit tests and 15 single-player browser checks passed. Full two-session CI/publication pending. No Firebase rule changes.
+- **Live:** https://badbagel47.github.io/bricks/?v=5744540 (3.10).
+- **Status:** 3.10 published from `5744540`. Full main CI and Pages deployment succeeded: https://github.com/BadBagel47/bricks/actions/runs/42327837605 . Local lint/build, 126 unit tests and 15 single-player browser checks passed. Firebase rules are unchanged.
 - **Workflow:** Owner wants manual testing consolidated into larger playable checkpoints; automatically verify and publish checked 3.10. Later milestones still require authorization.
-- **Next:** Verify 3.10 CI/Pages. Results freeze both participants' confirmed terminal data; both device archives store both historical names/UIDs and outcomes once. Local rankings remain separate by mode. Dedicated rematch/readiness and fresh approval remain 3.11; full recovery remains 3.12.
+- **Next:** 3.10 is complete and published. Begin 3.11 only when authorized. Results freeze both participants' confirmed terminal data; both device archives store both historical names/UIDs and outcomes once. Local rankings remain separate by mode. Dedicated rematch/readiness and fresh approval remain 3.11; full recovery remains 3.12.
 - **Next model:** GPT-6.1 Sol Medium for 3.11 rematches, after 3.10 checkpoint.
 
 ## Product direction and durable constraints

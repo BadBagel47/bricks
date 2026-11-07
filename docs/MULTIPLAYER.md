@@ -625,3 +625,13 @@ completed games including draws), total points, then UID. It shows wins, games,
 percentage, points, lines and sent rows. The aggregate label uses the latest match
 name; every historical record retains its own original name. Solo storage/ranking
 is unchanged. The main High Scores page exposes all three mode-specific lists.
+
+3.10 validation/publication: main `5744540` passed full CI and deployed Pages
+(https://github.com/BadBagel47/bricks/actions/runs/42327837605). Real two-session tests checked identical both-player archives on both
+devices, saving retry after a simulated quota failure, completed results retained
+after peer exit, draw histories, reload and historical-name preservation after a
+profile rename, contained result focus, narrow/landscape width, and Battle
+statistics/ranking. All earlier server/security/gameplay suites also passed.
+Local lint/build, 126 unit tests and 15 single-player production Chromium checks
+passed. No production rules or administrator actions were needed. Manual review
+remains consolidated into a later playable checkpoint.
