@@ -685,3 +685,38 @@ intent restrictions, fresh approvals, seed difference, host-only start, countdow
 withdrawal and legacy rematch rejection. All prior suites passed. Local lint/build,
 130 unit tests and 15 single-player production Chromium tests passed. Pages was
 skipped; owner rule publication is required before activating the staged client.
+## 3.12 recovery work in progress
+
+The `milestone-3.12` test branch is not a deployable recovery release. During a
+match the candidate client stores a compact engine checkpoint atomically with
+each changed display snapshot. A participant-owned control lease is bound to the
+match and connection; the server only permits a new connection to claim it once
+the old connection is absent. Legacy matches with no lease retain their existing
+write rules. A lease is not itself a recovery authorization.
+
+When an original match connection disappears, either connected participant can
+create the server-timestamped pause. Both clients freeze input and simulation;
+the server refuses subsequent gameplay/checkpoint/attack writes for that match.
+The fixed deadline cannot be reset. After 30 seconds a connected participant can
+mark the interruption abandoned and cancel the session without an incomplete
+competitive result. There is no background worker: if nobody is connected,
+expiration is processed when a participant returns. A transient connection can
+be detected later than the physical interruption by Firebase presence.
+
+The recovery readiness candidate claims a lease and compares the player's saved
+engine with its acknowledged display snapshot and, for Battle, the authoritative
+attack-stream prefixes. Its bounded record is tied to the match, current lease,
+checkpoint sequence and deadline. This is a consistency check, not proof that a
+client played honestly. The two-session reconnect/readiness test passed in CI
+for `5b83ee2`: https://github.com/BadBagel47/bricks/actions/runs/42426765152 .
+The published client has none of this behavior.
+
+**Missing:** No protocol yet resumes the match after readiness. In particular,
+the active data plane still requires the original frozen connection IDs, and a
+reconstructed publisher must continue snapshot/attack sequence numbers and
+confirmed Battle counters. A safe resume must coordinate both players and a
+common Battle frame, authorize the new connections, account for paused time,
+handle repeated interruptions and in-flight writes, and preserve legitimate
+completed results. If any required checkpoint or stream is inconsistent, abandon
+without recording a competitive result. Do not publish the candidate rules or
+client as complete recovery before the full security and two-session tests pass.

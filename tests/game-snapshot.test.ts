@@ -35,3 +35,14 @@ test('bounded display payload rejects malformed data and stays under 600 bytes',
   assert.ok(Buffer.byteLength(JSON.stringify(payload)) < 600)
   for (const bad of [{ ...payload, extra: true }, { ...payload, status: 'paused' }, { ...payload, seq: 0 }, { ...payload, score: -1 }, { ...payload, board: [] }, { ...payload, next: 'X' }, { ...payload, held: null }, { ...payload, level: 1.5 }]) assert.throws(() => parseGameSnapshot(bad))
 })
+
+test('a restored publisher continues after its acknowledged sequence and keeps the rate limit', () => {
+  const game = createGame({ seed: 47 })
+  const previous = { ...snapshotContent(game), matchId: 'a'.repeat(32), connection: 'b'.repeat(32), seq: 8, updatedAt: 1234 }
+  const gate = new SnapshotGate(previous, 1000)
+  assert.equal(gate.next(game, 1500), null)
+  const moved = dispatch(game, 'moveLeft').state
+  assert.equal(gate.next(moved, 1499), null)
+  assert.equal(gate.next(moved, 1500)?.seq, 9)
+  assert.throws(() => new SnapshotGate({ ...previous, seq: 0 }, 0))
+})

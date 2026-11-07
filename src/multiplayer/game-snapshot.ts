@@ -46,6 +46,16 @@ export class SnapshotGate {
   private previous = ''
   private sentAt = -Infinity
   private sequence = 0
+  constructor(snapshot?: GameSnapshot, now = 0) {
+    if (snapshot) {
+      if (!Number.isFinite(now)) throw new RangeError('Invalid snapshot clock')
+      parseGameSnapshot(snapshot)
+      const { board, next, held, status, score, level, lines } = snapshot
+      this.previous = JSON.stringify({ board, next, held, status, score, level, lines })
+      this.sentAt = now
+      this.sequence = snapshot.seq
+    }
+  }
   next(game: GameState, now: number) {
     const content = snapshotContent(game)
     const fingerprint = JSON.stringify(content)

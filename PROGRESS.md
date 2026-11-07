@@ -2,7 +2,7 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.12 — Reconnection and recovery
-- **Status:** 3.12 is in progress. Checkpoints and control leases have passed CI; the shared pause and abandonment implementation is awaiting CI. Actual reconnection and restoration remain unfinished. Live remains 3.11.
+- **Status:** 3.12 is in progress. Checkpoints, control leases, shared pause, abandonment and reconnect readiness passed CI. Actual match resumption and restoration remain unfinished. Live remains 3.11.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.11
@@ -185,8 +185,8 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Owner installs checked readiness/approval rules from `0ddf8c4`, then deploy the verified client from main. No manual game review is required now.
-- Next milestone 3.12 is reconnection and recovery; recommend GPT-6.1 Sol Medium.
+- Finish 3.12 match resumption and restore both game states from validated checkpoints. Coordinate the new connections, Battle frame and clock, snapshot/attack sequences, repeated interruptions and terminal results. Complete Firebase security and two-session tests before requesting checked rule publication.
+- Recommended model: GPT-6.1 Terra High for this remaining multiplayer integration; consolidate manual playtesting.
 
 ## Git checkpoints
 - `fea6aa4`: initial foundation and Pages deployment.
@@ -205,3 +205,5 @@
 - 3.12 pause candidate: CI passed for the control-lease rules and integration at `68eac6f`: https://github.com/BadBagel47/bricks/actions/runs/42425943315 . New, not yet CI-verified work creates a server-timed shared pause on a missing selected connection, freezes local input/timing and gameplay writes, and abandons after 30 seconds without recording a result. The selected game cannot resume yet: connection handoff, checkpoint restoration and resume authorization remain outstanding. Local lint, build and 145 unit tests passed.
 
 - 3.12 pause/abandon passed Firebase rules, two-session and complete CI at `03131f6`: https://github.com/BadBagel47/bricks/actions/runs/42426380149 . New readiness logic acquires a connection lease and validates the saved state, displayed snapshot and Battle stream prefixes before writing an identity-bound confirmation; rules bound it to the paused match and server deadline. The latest readiness and two-session reconnect changes still require CI. No automatic resume exists yet.
+
+- Recovery readiness and two-browser reconnect/confirmation passed full CI at `5b83ee2`: https://github.com/BadBagel47/bricks/actions/runs/42426765152 . A publisher can now be initialized from a validated prior snapshot to continue its sequence while respecting the interval; this helper passes locally with 146 unit tests, lint and build but is not connected to actual resume. Match resumption remains unfinished and all 3.12 work stays on the test branch.
