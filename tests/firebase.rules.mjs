@@ -334,6 +334,44 @@ test('live snapshots are bounded, participant-owned, current-match-bound, rate-l
   await assertSucceeds(set(location, { ...payload, matchId: 'e'.repeat(32) }))
 })
 
+test('a control lease is participant-owned and can move only after the previous connection disappears', async () => {
+  const hc = 'b'.repeat(32), gc = 'c'.repeat(32), next = 'd'.repeat(32), competing = 'e'.repeat(32), mid = 'a'.repeat(32)
+  const room = await ownedRoom()
+  await set(ref(db('guest'), `rooms/${code}`), { ...room, players: { ...room.players, guest: { uid: 'guest', name: 'Guest' } } })
+  const ready = { id: mid, status: 'ready', seed: 47, countdownAt: Date.now() - 6000, settings: { revision: 0, mode: 'score-duel', startLevel: 0, hold: false, requireApproval: false }, roleRevision: 0, hostUid: 'host', guestUid: 'guest', hostConnection: hc, guestConnection: gc }
+  await environment.withSecurityRulesDisabled(async context => {
+    await set(ref(context.database(), `matchStarts/${code}/1`), ready)
+    await set(ref(context.database(), `presence/${code}/1`), { host: { [hc]: true, [next]: true, [competing]: true }, guest: { [gc]: true } })
+  })
+  const path = `controlLeases/${code}/1/host`
+  const initial = { matchId: mid, connection: hc, revision: 1 }
+  await assertFails(set(ref(db('guest'), path), initial))
+  await assertFails(set(ref(db('host'), path), { ...initial, connection: next }))
+  await assertFails(set(ref(db('host'), path), { ...initial, extra: true }))
+  await assertSucceeds(set(ref(db('host'), path), initial))
+  await assertFails(get(ref(db('guest'), path)))
+  await assertFails(remove(ref(db('host'), path)))
+  await assertFails(set(ref(db('host'), path), { ...initial, connection: next, revision: 2 }))
+  await environment.withSecurityRulesDisabled(async context => { await remove(ref(context.database(), `presence/${code}/1/host/${hc}`)) })
+  const outcomes = await Promise.allSettled([next, competing].map(async connection => {
+    const location = ref(db('host'), path)
+    await get(location)
+    return runTransaction(location, value => ({ ...(value ?? initial), connection, revision: (value ?? initial).revision + 1 }), { applyLocally: false })
+  }))
+  assert.equal(outcomes.filter(result => result.status === 'fulfilled' && result.value.committed).length, 1)
+  const lease = (await get(ref(db('host'), path))).val()
+  assert.equal(lease.revision, 2)
+  assert.ok([next, competing].includes(lease.connection))
+  await assertFails(set(ref(db('host'), path), { matchId: mid, connection: hc, revision: 3 }))
+  // Even if stale presence reappears, the prior controller cannot publish gameplay.
+  await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), `presence/${code}/1/host/${hc}`), true) })
+  const staleSnapshot = { matchId: mid, connection: hc, seq: 1, board: '0'.repeat(200), next: 'T', held: '-', status: 'playing', score: 0, level: 0, lines: 0, updatedAt: serverTimestamp() }
+  await assertFails(set(ref(db('host'), `gameSnapshots/${code}/1/host`), staleSnapshot))
+  await assertFails(set(ref(db('host'), `recoveryCheckpoints/${code}/1/host`), { matchId: mid, connection: hc, seq: 1, payload: '{}', updatedAt: serverTimestamp() }))
+  await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), `matchStarts/${code}/1`), { ...ready, status: 'cancelled' }) })
+  await assertFails(set(ref(db('host'), path), { matchId: mid, connection: competing, revision: 3 }))
+})
+
 test('recovery checkpoints are bounded and owned, and commit atomically with the display snapshot', async () => {
   const hc = 'b'.repeat(32), gc = 'c'.repeat(32), mid = 'a'.repeat(32)
   const room = await ownedRoom()

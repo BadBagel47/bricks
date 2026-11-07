@@ -2,6 +2,7 @@ import { ResultCollector } from './results.ts'
 import { captureBattleCheckpoint } from './battle-checkpoint.ts'
 import { publishCheckpoint } from './checkpoint-repository.ts'
 import { MatchClock } from './match-clock.ts'
+import { claimControlLease } from './control-lease.ts'
 import { BattleGame, battleOutcome } from '../engine/battle.ts'
 import { battlePath, parseAttackStream, parseBattleFinish, publishBattleFinish, sendAttacks } from './battle-repository.ts'
 import type { BattleFinish } from './battle-repository.ts'
@@ -105,6 +106,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     }, () => setError('Unable to synchronize results. Return to the lobby.')) : () => {}
     let acknowledgedProduced = 0
     let committedSent = 0
+    let leaseAcquired = false
     const gate = new SnapshotGate()
     let timer: ReturnType<typeof setTimeout>
     async function publish() {
@@ -116,6 +118,11 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
       const savedBattle = next && battleGame ? captureBattleCheckpoint(battleGame, { matchId: start.id, uid: joined.uid, epoch: joined.room.epoch }, { acknowledgedProduced, committedSent }) : null
       const finishStats = battleGame?.endedFrame !== null && battleGame ? { frame: battleGame.endedFrame!, received: battleGame.received, applied: battleGame.applied, cancelled: battleGame.cancelled } : null
       try {
+        if (!leaseAcquired) {
+          await claimControlLease(database, joined, start, connection)
+          leaseAcquired = true
+          if (!alive) return
+        }
         if (battleGame && produced > acknowledgedProduced) {
           committedSent = await sendAttacks(database, joined, start, produced - acknowledgedProduced)
           acknowledgedProduced = produced
