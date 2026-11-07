@@ -674,3 +674,14 @@ rematch after any previous start. New clients parse both generations for safe
 cancellation. Install checked rules before activating the new client and reload
 both clients. No paid backend or result-history writes were added. Active-control
 leases and coordinated interruption recovery remain milestone 3.12.
+
+3.11 validation: source `0ddf8c4` passed full branch CI (https://github.com/BadBagel47/bricks/actions/runs/42402648129). The two real
+browser sessions completed Battle with an actual attack/Hold, blocked a new
+start while one participant reviewed results, required a fresh approval, transferred
+host between rounds and invalidated that approval again, then started from reused
+settings with a new ID/seed and zeroed board/score/Hold/penalty state. Saved history
+remained unchanged. Server tests enforced stale/forged/role/connection/previous-ID
+intent restrictions, fresh approvals, seed difference, host-only start, countdown
+withdrawal and legacy rematch rejection. All prior suites passed. Local lint/build,
+130 unit tests and 15 single-player production Chromium tests passed. Pages was
+skipped; owner rule publication is required before activating the staged client.

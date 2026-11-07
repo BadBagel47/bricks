@@ -8,9 +8,9 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 
 - **Phase 3, milestone 3.11:** Coordinated rematches (authorized).
 - **Live:** https://badbagel47.github.io/bricks/?v=5744540 (3.10).
-- **Status:** 3.11 implemented; local lint/build, 130 unit tests and 15 single-player browser checks passed. Full branch CI pending. New rules must be published before client activation; no Firebase administrator identity is attached.
+- **Status:** 3.11 complete on milestone-3.11, source `0ddf8c4`. Full branch CI passed: https://github.com/BadBagel47/bricks/actions/runs/42402648129 . Local lint/build, 130 unit tests and 15 single-player browser checks passed. Install checked rules before client activation; no Firebase administrator identity is attached.
 - **Workflow:** Owner wants manual tests consolidated. Finish automated two-session/security verification before the one necessary external action: checked rule publication. Later milestones still need authorization.
-- **Next:** Verify 3.11 on milestone-3.11, install checked rules, then deploy main. Rematch reuses room/settings but requires both live connection-bound consents and fresh optional guest approval; only the current host starts. New IDs/seeds reset game/Battle/Hold state and preserve local histories. Coordinated recovery remains 3.12.
+- **Next:** Owner installs the checked 3.11 rules from `0ddf8c4`, then deploy the tested client to main. Rematch reuses room/settings but requires both live connection-bound consents and fresh optional guest approval; only the current host starts. New IDs/seeds reset game/Battle/Hold state and preserve local histories. Coordinated recovery remains 3.12.
 - **Next model:** GPT-6.1 Sol Medium for 3.12 reconnection and recovery, after 3.11 checkpoint.
 
 ## Product direction and durable constraints
