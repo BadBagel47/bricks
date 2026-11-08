@@ -157,3 +157,22 @@ test('worker serves admin assets with a strict policy and fails closed without p
   assert.ok((await page.text()).includes('Public single player'))
   assert.equal((await worker.fetch(new Request('https://admin.example.invalid/api/access'), env, context)).status, 503)
 })
+
+test('Worker game entry avoids Static Assets index redirects and preserves invitation queries', async () => {
+  const origin = 'https://admin.example.invalid', seen: string[] = []
+  const env = { ADMIN_ORIGIN: origin, ASSETS: { async fetch(request: Request) {
+    const url = new URL(request.url); seen.push(url.pathname + url.search)
+    return url.pathname === '/index.html' ? new Response(null, { status: 307, headers: { Location: '/' } }) : new Response('game')
+  } } } as OperatingEnvironment
+  const context = { waitUntil() {} }
+  for (const path of ['/play/', '/play/index.html']) {
+    const response = await worker.fetch(new Request(`${origin}${path}?room=ABCD`), env, context)
+    assert.equal(response.status, 200)
+    assert.equal(response.headers.get('Cache-Control'), 'no-store')
+    assert.equal(await response.text(), 'game')
+  }
+  assert.deepEqual(seen, ['/?room=ABCD', '/?room=ABCD'])
+  const legacy = await worker.fetch(new Request(`${origin}/?room=ABCD`), env, context)
+  assert.equal(legacy.status, 302)
+  assert.equal(legacy.headers.get('Location'), '/play/?room=ABCD')
+})

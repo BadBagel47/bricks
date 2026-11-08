@@ -44,6 +44,11 @@ export default {
     const url = new URL(request.url)
     const security = { 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer', 'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'" }
     if (url.origin !== env.ADMIN_ORIGIN) return new Response('Not found', { status: 404, headers: security })
+    if (url.pathname === '/' && ['GET', 'HEAD'].includes(request.method)) {
+      // Preserve old invitation query strings. Browsers inherit the original
+      // fragment across this redirect without exposing its key to the server.
+      return new Response(null, { status: 302, headers: { ...security, Location: `/play/${url.search}` } })
+    }
     if (request.method === 'GET' && ['/admin/', '/admin/app.js', '/admin/style.css'].includes(url.pathname)) {
       if (url.search) return new Response('Invalid request', { status: 400, headers: security })
       const content = url.pathname.endsWith('.js') ? [adminJS, 'text/javascript'] : url.pathname.endsWith('.css') ? [adminCSS, 'text/css'] : [adminHTML, 'text/html']
@@ -56,12 +61,14 @@ export default {
     }
     if (url.pathname.startsWith('/play/') && ['GET', 'HEAD'].includes(request.method)) {
       const asset = new URL(request.url); asset.pathname = url.pathname.slice('/play'.length)
-      if (asset.pathname === '/') asset.pathname = '/index.html'
+      // Static Assets canonicalizes /index.html to /. Request / directly so its
+      // redirect cannot strip the external /play/ prefix from invitations.
+      if (asset.pathname === '/index.html') asset.pathname = '/'
       const response = await env.ASSETS.fetch(new Request(asset, request))
       // Keep fragment-bearing invitations out of referrers even before JS loads.
       const result = new Response(response.body, response)
       result.headers.set('Referrer-Policy', 'no-referrer')
-      if (asset.pathname === '/index.html') result.headers.set('Cache-Control', 'no-store')
+      if (asset.pathname === '/') result.headers.set('Cache-Control', 'no-store')
       return result
     }
     return new Response('Not found', { status: 404, headers: security })
