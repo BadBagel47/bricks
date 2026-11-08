@@ -5,6 +5,18 @@ phase docs. Owner instructions and `BRICKS_SPEC.md` take precedence.
 
 ## Current checkpoint — 2026-11-08
 
+- **Firebase publisher blocker:** Owner created the `bricks-operating` service
+  account and reports granting Firebase Realtime Database Admin. The Google
+  organization enforces `iam.disableServiceAccountKeyCreation`; no private key
+  could be created. Do not instruct weakening this policy as a default. Existing
+  Worker publisher uses a service-account key and is not ready for deployment.
+  Google documents Workload Identity Federation with an external OIDC provider,
+  but a suitable automatic Cloudflare Worker identity and this Firebase REST
+  combination have not been verified. An alternative dedicated Firebase Auth
+  publisher account with a Worker-held credential and UID-scoped rules requires
+  changing/testing publisher, bootstrap, allowlist CLI and rules; enabling the
+  provider and signup/quota implications also need review. Neither is implemented
+  or proven in the real account. Preserve the public game and existing policy.
 - Owner's Cloudflare screenshot confirms the Worker's D1 binding `DB` points
   to the configured database. Owner reports `MAILJET_API_KEY` and
   `MAILJET_SECRET_KEY` saved as Production secrets and `MAIL_FROM` set to
