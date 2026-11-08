@@ -23,7 +23,7 @@ export function serviceAccountToken(serialized: string, fetcher = fetch, clock =
       try { signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, new TextEncoder().encode(unsigned)) }
       catch { throw new Error('Publisher signing failed') }
       let response: Response
-      try { response = await fetcher('https://oauth2.googleapis.com/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion: `${unsigned}.${base64url(new Uint8Array(signature))}` }), redirect: 'error', signal: AbortSignal.timeout(8000) }) }
+      try { response = await fetcher('https://oauth2.googleapis.com/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion: `${unsigned}.${base64url(new Uint8Array(signature))}` }), redirect: 'manual', signal: AbortSignal.timeout(8000) }) }
       catch { throw new Error('Publisher connection failed') }
       if (!response.ok) throw new Error('Publisher authentication failed')
       const result = await response.json() as { access_token?: string; expires_in?: number }
@@ -40,7 +40,7 @@ export function firebaseIdentity(project: string, apiKey: string, fetcher = fetc
   return async token => {
     if (typeof token !== 'string' || token.length > 8192) throw new Error('Invalid player identity')
     const response = await fetcher(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(apiKey)}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idToken: token }), redirect: 'error', signal: AbortSignal.timeout(8000),
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idToken: token }), redirect: 'manual', signal: AbortSignal.timeout(8000),
     })
     if (!response.ok) throw new Error('Invalid player identity')
     const result = await response.json() as { users?: { localId: string; disabled?: boolean }[] }

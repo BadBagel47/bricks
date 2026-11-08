@@ -16,7 +16,7 @@ export class MailjetMailer implements LinkMailer {
       const response = await this.fetcher('https://api.mailjet.com/v3.1/send', {
         method: 'POST', headers: { Authorization: `Basic ${btoa(`${this.key}:${this.secret}`)}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ Messages: [{ From: { Email: this.from }, To: [{ Email: email }], Subject: 'Sign in to Bricks administration', TextPart: `Open this link, then choose Continue sign-in:\n${url.href}\n\nThis link expires in 1 hour and can be used once.`, TrackOpens: 'disabled', TrackClicks: 'disabled' }] }),
-        redirect: 'error', signal: AbortSignal.timeout(8000),
+        redirect: 'manual', signal: AbortSignal.timeout(8000),
       })
       if (!response.ok) throw new Error()
       const result = await response.json() as { Messages?: { Status?: string }[] }
