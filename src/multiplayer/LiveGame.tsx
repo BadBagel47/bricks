@@ -4,6 +4,7 @@ import { publishCheckpoint } from './checkpoint-repository.ts'
 import { MatchClock } from './match-clock.ts'
 import { claimControlLease } from './control-lease.ts'
 import { parseRecoverySession, recoverySessionPath } from './recovery-session.ts'
+import type { prepareRecovery } from './recovery-readiness.ts'
 import { BattleGame, battleOutcome } from '../engine/battle.ts'
 import { battlePath, parseAttackStream, parseBattleFinish, publishBattleFinish, sendAttacks } from './battle-repository.ts'
 import type { BattleFinish } from './battle-repository.ts'
@@ -26,23 +27,28 @@ import type { MatchStart } from './match-start.ts'
 import type { LiveOptions } from './live-options.ts'
 import './live-game.css'
 
-export default function LiveGame({ database, joined, start, options, serverTimeOffset, paused, onLeave }: { database: Database; joined: JoinedRoom; start: MatchStart; options: LiveOptions; serverTimeOffset: number; paused: boolean; onLeave: () => Promise<void> }) {
+export default function LiveGame({ database, joined, start, options, serverTimeOffset, paused, onLeave, restored, resumedAt, previousOpponentConnection }: { database: Database; joined: JoinedRoom; start: MatchStart; options: LiveOptions; serverTimeOffset: number; paused: boolean; onLeave: () => Promise<void>; restored?: Awaited<ReturnType<typeof prepareRecovery>>; resumedAt?: number; previousOpponentConnection?: string }) {
   const { preferences: { personal, bindings, gamepadBindings }, audio, onPlaying } = options
-  const [game, setGame] = useState(() => createGame({ seed: start.seed, startLevel: start.settings.startLevel, holdEnabled: start.settings.hold, hardDropEnabled: personal.hardDropEnabled }))
+  const [game, setGame] = useState(() => {
+    if (!restored) return createGame({ seed: start.seed, startLevel: start.settings.startLevel, holdEnabled: start.settings.hold, hardDropEnabled: personal.hardDropEnabled })
+    const elapsed = Math.max(0, Date.now() + serverTimeOffset - (resumedAt ?? Date.now() + serverTimeOffset))
+    return restored.battle ? restored.game : advanceGame(restored.game, elapsed).state
+  })
   const [collector] = useState(() => new ResultCollector(start, joined, result => options.onCompleted(result, joined.uid)))
   const resultsVisible = options.completedId !== null
   const current = useRef(game)
   const battle = start.settings.mode === 'battle'
-  const [battleGame] = useState(() => battle ? new BattleGame(game, start.seed, joined.uid === start.hostUid ? 'guest' : 'host') : null)
+  const [battleGame] = useState(() => battle ? restored?.battle?.battle ?? new BattleGame(game, start.seed, joined.uid === start.hostUid ? 'guest' : 'host') : null)
   const [clock] = useState(() => {
-    const value = new MatchClock(Date.now() + serverTimeOffset - start.countdownAt - 5000, performance.now())
+    const elapsed = restored?.battle && resumedAt !== undefined ? restored.battle.battle.frame * 1000 / 60 + Math.max(0, Date.now() + serverTimeOffset - resumedAt) + 0.0001 : Date.now() + serverTimeOffset - start.countdownAt - 5000
+    const value = new MatchClock(elapsed, performance.now())
     if (paused) value.pause(performance.now())
     return value
   })
   const battleFrame = useCallback(() => clock.frame(performance.now()), [clock])
   const [otherFinish, setOtherFinish] = useState<BattleFinish | null>(null)
   const [ownFinishFrame, setOwnFinishFrame] = useState<number | null>(null)
-  const [sentRows, setSentRows] = useState(0)
+  const [sentRows, setSentRows] = useState(restored?.battle?.committedSent ?? 0)
   const [, refreshBattle] = useState(0)
   const [opponent, setOpponent] = useState<GameSnapshot | null>(null)
   const [error, setError] = useState('')
@@ -99,7 +105,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     const stop = onValue(ref(database, `${base}/${opponentUid}`), snapshot => {
       try {
         const next = parseGameSnapshot(snapshot.val())
-        if (next?.matchId === start.id && next.connection === otherConnection && next.seq > previousSequence) {
+        if (next?.matchId === start.id && (next.connection === otherConnection || next.connection === previousOpponentConnection) && next.seq > previousSequence) {
           if (battleGame && next.status === 'gameOver') battleGame.opponentEnded = true
           previousSequence = next.seq
           collector.opponent(next)
@@ -110,17 +116,17 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     const stopAttacks = battleGame ? onValue(ref(database, battlePath('battleAttacks', joined, opponentUid)), snapshot => {
       try {
         const stream = parseAttackStream(snapshot.val())
-        if (stream?.matchId === start.id && stream.connection === otherConnection) { battleGame.receive(stream.total); refreshBattle(value => value + 1) }
+        if (stream?.matchId === start.id && (stream.connection === otherConnection || stream.connection === previousOpponentConnection)) { battleGame.receive(stream.total); refreshBattle(value => value + 1) }
       } catch { setError('Opponent attacks are invalid. Return to the lobby.') }
     }, () => setError('Unable to synchronize attacks. Return to the lobby.')) : () => {}
     const stopFinish = battleGame ? onValue(ref(database, battlePath('battleFinishes', joined, opponentUid)), snapshot => {
       try { const final = parseBattleFinish(snapshot.val()); if (final?.matchId === start.id && final.connection === otherConnection) { collector.opponentFinish(final); setOtherFinish(final) } }
       catch { setError('Opponent result is invalid. Return to the lobby.') }
     }, () => setError('Unable to synchronize results. Return to the lobby.')) : () => {}
-    let acknowledgedProduced = 0
-    let committedSent = 0
+    let acknowledgedProduced = restored?.battle?.acknowledgedProduced ?? 0
+    let committedSent = restored?.battle?.committedSent ?? 0
     let leaseAcquired = false
-    const gate = new SnapshotGate()
+    const gate = new SnapshotGate(restored?.snapshot, performance.now())
     let timer: ReturnType<typeof setTimeout>
     async function publish() {
       if (!alive) return
@@ -167,7 +173,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     }
     timer = setTimeout(() => void publish(), 0)
     return () => { alive = false; clearTimeout(timer); stop(); stopAttacks(); stopFinish() }
-  }, [database, base, joined.uid, opponentUid, start.id, connection, otherConnection, battleGame, joined, start, collector])
+  }, [database, base, joined.uid, opponentUid, start.id, connection, otherConnection, previousOpponentConnection, battleGame, joined, start, collector, restored])
 
   useLayoutEffect(() => {
     if (resultsVisible) return

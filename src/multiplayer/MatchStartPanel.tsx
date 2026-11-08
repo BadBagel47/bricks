@@ -3,7 +3,7 @@ import type { RoundReadiness } from './round-readiness.ts'
 import { publishReadiness, withdrawReadiness } from './readiness-repository.ts'
 import LiveGame from './LiveGame.tsx'
 import type { LiveOptions } from './live-options.ts'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { onValue, ref } from 'firebase/database'
 import type { Database } from 'firebase/database'
 import type { JoinedRoom } from './room-model.ts'
@@ -12,15 +12,18 @@ import { countdownSeconds, parseMatchStart, startStillValid } from './match-star
 import type { Connections, MatchStart } from './match-start.ts'
 import { createMatchStart, startPath, transitionMatchStart } from './start-repository.ts'
 import { playerFacingError } from './errors.ts'
-import { abandonRecovery, beginRecovery, parseRecoverySession, recoverySessionPath } from './recovery-session.ts'
+import { abandonRecovery, beginRecovery, parseRecoverySession, recoverySessionPath, resumeRecovery } from './recovery-session.ts'
 import type { RecoverySession } from './recovery-session.ts'
 import { RECOVERY_GRACE_MS } from './recovery.ts'
-import { prepareRecovery } from './recovery-readiness.ts'
+import { parseRecoveryReadiness, prepareRecovery, recoveryReadinessPath } from './recovery-readiness.ts'
+import type { RecoveryReadiness } from './recovery-readiness.ts'
 
 export default function MatchStartPanel({ options, database, joined, settings, approved, editing, otherEditors, connected, connections, localConnection, onLocked }: { options: LiveOptions; database: Database; joined: JoinedRoom; settings: MatchSettings; approved: boolean; editing: boolean; otherEditors: boolean; connected: boolean; connections: Connections | null; localConnection: string | null; onLocked: (value: boolean) => void }) {
   const [start, setStart] = useState<MatchStart | null>(null)
   const [readiness, setReadiness] = useState<RoundReadiness | null>(null)
   const [recovery, setRecovery] = useState<RecoverySession | null>(null)
+  const [recoveryReady, setRecoveryReady] = useState<Record<string, RecoveryReadiness>>({})
+  const [candidate, setCandidate] = useState<Awaited<ReturnType<typeof prepareRecovery>> | null>(null)
   const [loaded, setLoaded] = useState(false)
   const [offset, setOffset] = useState<number | null>(null)
   const [now, setNow] = useState(Date.now)
@@ -33,8 +36,11 @@ export default function MatchStartPanel({ options, database, joined, settings, a
   const path = startPath(joined)
   const readyPath = readinessPath(joined)
   const recoveryPath = recoverySessionPath(joined)
+  const recoveryReadyPath = recoveryReadinessPath(joined, joined.uid).replace(/\/[^/]+$/, '')
   const joinedRef = useRef(joined)
   joinedRef.current = joined
+  const recoveryContext = useRef({ matchId: start?.id, connection: localConnection })
+  recoveryContext.current = { matchId: start?.id, connection: localConnection }
   const active = start !== null && start.status !== 'cancelled'
   useEffect(() => {
     if (start?.status === 'ready') playedMatches.current.add(start.id)
@@ -50,12 +56,19 @@ export default function MatchStartPanel({ options, database, joined, settings, a
     const stopRecovery = onValue(ref(database, recoveryPath), snapshot => {
       try { setRecovery(parseRecoverySession(snapshot.val())) } catch (reason) { setError(playerFacingError(reason).message) }
     }, reason => setError(playerFacingError(reason).message))
+    const stopRecoveryReady = onValue(ref(database, recoveryReadyPath), snapshot => {
+      try {
+        const values: Record<string, RecoveryReadiness> = {}
+        snapshot.forEach(child => { const value = parseRecoveryReadiness(child.val()); if (value && child.key) values[child.key] = value })
+        setRecoveryReady(values)
+      } catch (reason) { setError(playerFacingError(reason).message) }
+    }, reason => setError(playerFacingError(reason).message))
     const stopClock = onValue(ref(database, '.info/serverTimeOffset'), snapshot => {
       const value = snapshot.val()
       if (typeof value === 'number' && Number.isFinite(value)) setOffset(value)
     })
-    return () => { stopStart(); stopReadiness(); stopRecovery(); stopClock() }
-  }, [database, path, readyPath, recoveryPath])
+    return () => { stopStart(); stopReadiness(); stopRecovery(); stopRecoveryReady(); stopClock() }
+  }, [database, path, readyPath, recoveryPath, recoveryReadyPath])
   useEffect(() => {
     if (!loaded || !connected || !localConnection) return
     let current = true
@@ -76,11 +89,20 @@ export default function MatchStartPanel({ options, database, joined, settings, a
     if (active && !connected && start) interrupted.current.add(start.id)
   }, [active, connected, start])
   const needsReadiness = start?.roundVersion === 1 && start.status === 'countdown'
-  const valid = start && connections !== null && (!needsReadiness || readiness !== null) ? startStillValid(start, joined.room, settings, connections) && (!needsReadiness || bothReady(start, readiness!, connections)) : null
-  const selected = start && localConnection === (host ? start.hostConnection : start.guestConnection)
+  const resumed = recovery?.phase === 'resumed' && recovery.matchId === start?.id ? recovery : null
+  const effectiveStart = useMemo(() => start && resumed ? { ...start, hostConnection: resumed.hostConnection, guestConnection: resumed.guestConnection } : start, [start, resumed])
+  const valid = effectiveStart && connections !== null && (!needsReadiness || readiness !== null) ? startStillValid(effectiveStart, joined.room, settings, connections) && (!needsReadiness || bothReady(effectiveStart, readiness!, connections)) : null
+  const selected = effectiveStart && localConnection === (host ? effectiveStart.hostConnection : effectiveStart.guestConnection)
   useEffect(() => { if (start?.status === 'ready' && selected) ownedMatches.current.add(start.id) }, [start?.id, start?.status, selected])
   useEffect(() => {
     if (!start || !active || !connected || connections === null || valid === null) return
+    if (resumed) {
+      if (!valid) {
+        const timer = setTimeout(() => void transitionMatchStart(database, joinedRef.current, start.id, 'cancelled').catch(reason => setError(playerFacingError(reason).message)), 1500)
+        return () => clearTimeout(timer)
+      }
+      return
+    }
     if (valid && !interrupted.current.has(start.id)) return
     const identities = { [start.hostUid]: { [start.hostConnection]: true }, [start.guestUid]: { [start.guestConnection]: true } }
     if (start.status === 'ready' && startStillValid(start, joined.room, settings, identities) && !valid) {
@@ -90,9 +112,10 @@ export default function MatchStartPanel({ options, database, joined, settings, a
     if (start.status === 'countdown' || !startStillValid(start, joined.room, settings, identities)) void transitionMatchStart(database, joined, start.id, 'cancelled').catch(reason => setError(playerFacingError(reason).message))
     // Freeze cancellation to session/validity changes, not the local countdown clock.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [start?.id, active, connected, valid, connections === null])
+  }, [start?.id, active, connected, valid, connections === null, resumed])
   useEffect(() => {
     if (!start || start.status !== 'ready' || recovery?.matchId !== start.id || !connected) return
+    if (recovery.phase === 'resumed') return
     if (recovery.phase === 'abandoned') {
       void transitionMatchStart(database, joinedRef.current, start.id, 'cancelled').catch(reason => setError(playerFacingError(reason).message))
       return
@@ -107,10 +130,22 @@ export default function MatchStartPanel({ options, database, joined, settings, a
     if (!start || start.status !== 'ready' || recovery?.matchId !== start.id || recovery.phase !== 'paused' || !connected || !localConnection) return
     // An absent/corrupt checkpoint or a still-live old controller cannot be resumed.
     // Presence changes retry the claim without polling or additional heartbeats.
-    void prepareRecovery(database, joinedRef.current, start, localConnection).catch(() => {})
+    // The server can resume just before this acknowledgement resolves; retain
+    // the candidate and check its match/connection again before rendering it.
+    void prepareRecovery(database, joinedRef.current, start, localConnection).then(value => {
+      if (recoveryContext.current.matchId === value.readiness.matchId && recoveryContext.current.connection === value.readiness.connection) setCandidate(value)
+    }).catch(() => {})
     // Only connection/session changes should initiate a recovery attempt.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [database, path, start?.id, start?.status, recovery, connected, localConnection, connections])
+  useEffect(() => {
+    if (!start || start.status !== 'ready' || recovery?.phase !== 'paused' || recovery.matchId !== start.id || !candidate || candidate.readiness.matchId !== start.id || candidate.readiness.connection !== localConnection || !connected) return
+    const one = recoveryReady[start.hostUid], two = recoveryReady[start.guestUid]
+    if (!one || !two || one.matchId !== start.id || two.matchId !== start.id || one.battleFrame !== two.battleFrame) return
+    void resumeRecovery(database, joinedRef.current, start.id, one.connection, two.connection, one.battleFrame).catch(() => { /* The server rejects stale readiness or missing presence. */ })
+    // A server transaction decides the race between resuming and expiration.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [database, path, start?.id, start?.status, recovery, recoveryReady, candidate, localConnection, connected])
   useEffect(() => {
     if (!start || start.status !== 'countdown' || !host || !connected || !valid || offset === null || localConnection !== start.hostConnection || interrupted.current.has(start.id)) return
     const timer = setTimeout(() => {
@@ -135,8 +170,9 @@ export default function MatchStartPanel({ options, database, joined, settings, a
     finally { setBusy(false) }
   }
   const ready = start?.status === 'ready' && valid && connected
-  const paused = Boolean(start && start.status === 'ready' && (!connected || valid === false || interrupted.current.has(start.id) || recovery?.matchId === start.id))
-  if (start?.status === 'ready' && (selected || ownedMatches.current.has(start.id)) && (start.settings.mode !== 'battle' || start.battleVersion === 1)) return <LiveGame key={start.id} database={database} joined={joined} start={start} options={options} serverTimeOffset={offset ?? 0} paused={paused} onLeave={() => transitionMatchStart(database, joined, start.id, 'cancelled')} />
+  const paused = Boolean(start && start.status === 'ready' && (!connected || valid === false || (!resumed && interrupted.current.has(start.id)) || (recovery?.matchId === start.id && recovery.phase !== 'resumed')))
+  const restored = resumed && candidate && candidate.readiness.matchId === start?.id && candidate.readiness.connection === localConnection ? candidate : undefined
+  if (start?.status === 'ready' && effectiveStart && (selected || (!resumed && ownedMatches.current.has(start.id))) && (!resumed || restored) && (start.settings.mode !== 'battle' || start.battleVersion === 1)) return <LiveGame key={`${start.id}:${resumed?.resumedAt ?? 'initial'}`} database={database} joined={joined} start={effectiveStart} options={options} serverTimeOffset={offset ?? 0} paused={paused} restored={restored} resumedAt={resumed?.resumedAt} previousOpponentConnection={resumed ? (host ? start.guestConnection : start.hostConnection) : undefined} onLeave={() => transitionMatchStart(database, joined, start.id, 'cancelled')} />
   const bothConnected = Boolean(connections && localConnection && connections[joined.room.hostUid]?.[localConnection] && joined.room.players.guest && Object.keys(connections[joined.room.players.guest.uid] ?? {}).length)
   const roundId = previousRoundId(start)
   const consent = Boolean(readiness && connections && readyForRound(readiness.host, joined.room.hostUid, roundId, joined.room.roleRevision ?? 0, connections, host ? localConnection : null) && readyForRound(readiness.guest, joined.room.players.guest?.uid, roundId, joined.room.roleRevision ?? 0, connections))

@@ -334,6 +334,39 @@ test('live snapshots are bounded, participant-owned, current-match-bound, rate-l
   await assertSucceeds(set(location, { ...payload, matchId: 'e'.repeat(32) }))
 })
 
+test('resumption requires both current leases, checkpoints, live connections and an unexpired pause', async () => {
+  const hc = 'b'.repeat(32), gc = 'c'.repeat(32), hn = 'd'.repeat(32), gn = 'e'.repeat(32), mid = 'a'.repeat(32), now = Date.now()
+  const room = await ownedRoom()
+  await set(ref(db('guest'), `rooms/${code}`), { ...room, players: { ...room.players, guest: { uid: 'guest', name: 'Guest' } } })
+  const match = { id: mid, status: 'ready', seed: 47, countdownAt: now - 6000, settings: { revision: 0, mode: 'score-duel', startLevel: 0, hold: false, requireApproval: false }, roleRevision: 0, hostUid: 'host', guestUid: 'guest', hostConnection: hc, guestConnection: gc }
+  const snapshot = (connection, seq = 3) => ({ matchId: mid, connection, seq, board: '0'.repeat(200), next: 'T', held: '-', status: 'playing', score: 0, level: 0, lines: 0, updatedAt: now - 1000 })
+  const checkpoint = connection => ({ matchId: mid, connection, seq: 3, payload: '{}', updatedAt: now - 1000 })
+  const ack = connection => ({ matchId: mid, connection, leaseRevision: 2, checkpointSeq: 3, battleFrame: 0 })
+  await environment.withSecurityRulesDisabled(async context => {
+    const root = context.database()
+    await set(ref(root, `matchStarts/${code}/1`), match)
+    await set(ref(root, `presence/${code}/1`), { host: { [hn]: true }, guest: { [gn]: true } })
+    await set(ref(root, `recoverySessions/${code}/1`), { matchId: mid, phase: 'paused', interruptedAt: now })
+    await set(ref(root, `controlLeases/${code}/1`), { host: { matchId: mid, connection: hn, revision: 2 }, guest: { matchId: mid, connection: gn, revision: 2 } })
+    await set(ref(root, `gameSnapshots/${code}/1`), { host: snapshot(hc), guest: snapshot(gc) })
+    await set(ref(root, `recoveryCheckpoints/${code}/1`), { host: checkpoint(hc), guest: checkpoint(gc) })
+    await set(ref(root, `recoveryReadiness/${code}/1/host`), ack(hn))
+  })
+  const path = `recoverySessions/${code}/1`
+  const resume = { matchId: mid, phase: 'resumed', interruptedAt: now, resumedAt: serverTimestamp(), hostConnection: hn, guestConnection: gn, battleFrame: 0 }
+  await assertFails(set(ref(db('host'), path), resume))
+  await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), `recoveryReadiness/${code}/1/guest`), ack(gn)) })
+  await assertFails(set(ref(db('host'), path), { ...resume, hostConnection: hc }))
+  await assertFails(set(ref(db('host'), path), { ...resume, battleFrame: 1 }))
+  await assertSucceeds(set(ref(db('host'), path), resume))
+  const newSnapshot = { ...snapshot(hn, 4), updatedAt: serverTimestamp() }
+  const newCheckpoint = { ...checkpoint(hn), seq: 4, updatedAt: serverTimestamp() }
+  await assertSucceeds(update(ref(db('host')), { [`gameSnapshots/${code}/1/host`]: newSnapshot, [`recoveryCheckpoints/${code}/1/host`]: newCheckpoint }))
+  await assertFails(set(ref(db('host'), `gameSnapshots/${code}/1/host`), { ...newSnapshot, connection: hc, seq: 5 }))
+  await environment.withSecurityRulesDisabled(async context => { await remove(ref(context.database(), `presence/${code}/1/guest/${gn}`)) })
+  await assertFails(set(ref(db('host'), `gameSnapshots/${code}/1/host`), { ...newSnapshot, seq: 5 }))
+})
+
 test('recovery readiness requires the current lease and matching acknowledged checkpoint', async () => {
   const hc = 'b'.repeat(32), gc = 'c'.repeat(32), mid = 'a'.repeat(32), now = Date.now()
   const room = await ownedRoom()
