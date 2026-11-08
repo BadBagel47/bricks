@@ -5,6 +5,14 @@ phase docs. Owner instructions and `BRICKS_SPEC.md` take precedence.
 
 ## Current checkpoint — 2026-11-08
 
+- **Worker application deployed:** `afcfb8e` passed the complete CI pipeline and
+  the `Publish operating preview` job succeeded with the owner-supplied GitHub
+  Cloudflare Actions secret: https://github.com/BadBagel47/bricks/actions/runs/42520439790 .
+  Preview origin: https://bricks-operating.l8p1.workers.dev ; `/admin/`, `/play/`.
+  This is separate from public Pages, which remains unchanged. This runtime's
+  proxy blocks workers.dev, so live HTTP verification still requires owner readback.
+  Next: owner checks `/api/access` config and admin UI, then privately provision
+  the allowlist using the setup CLI and test actual Mailjet receipt/session.
 - Owner reports publishing the checked operating-aware Firebase rules after
   confirming both modes On. No live API/rules readback performed here yet.
   Prepared optional GitHub Worker deployment job: only feature pushes whose
@@ -41,11 +49,11 @@ phase docs. Owner instructions and `BRICKS_SPEC.md` take precedence.
   `MAILJET_SECRET_KEY` saved as Production secrets and `MAIL_FROM` set to
   `system@trythis.one`, each deployed through the dashboard. Values have not
   been shared here or independently verified. Worker still serves its placeholder;
-  application deployment, Firebase publisher credentials and live mail tests remain.
+  Firebase publisher behavior and live mail tests remain unverified.
 - Owner created the placeholder Worker at `https://bricks-operating.l8p1.workers.dev/`.
   Wrangler now uses that origin and its `/play/` URL for the private preview stage.
-  The application code has not been deployed. Next: privately install and verify
-  the Firebase publisher credential and remaining secrets, then follow
+  Application deployment has now succeeded in GitHub. Next: verify
+  the Firebase publisher and privately provision the allowlist, then follow
   the bootstrap/rules/preview sequence in `docs/OPERATING_SETUP.md`.
 - Owner created Cloudflare D1 `bricks-operating` in EU jurisdiction and supplied
   database ID `665b9d70-e43f-47f3-a15b-875abfb256a5`; Wrangler binding updated.
@@ -79,8 +87,8 @@ phase docs. Owner instructions and `BRICKS_SPEC.md` take precedence.
   passed. The complete Firebase suite passed 51 tests, including REST override enforcement and a real two-identity private-game check. Worker deploy dry-run passed; no external publication occurred. Browser checks passed both without and with a configured operating-origin build.
 - **Still external:** The owner has a Mailjet transactional account and reports verified DNS for
   `system@trythis.one` through Cloudflare, plus a production D1, placeholder
-  Worker and downloaded service-account key. No real email test or application
-  Worker deployment has been performed. Managed runtime status reports no secrets or outbound identities. Do not
+  Worker and downloaded service-account key. Application Worker deployment
+  succeeded through GitHub; no real email test has been performed. Managed runtime status reports no secrets or outbound identities. Do not
   request credential values or real allowlist emails in chat. `trythis.one` supersedes tentative `l8p.one`; the owner performed DNS setup.
 - **Review/CI checkpoint:** The focused review found no additional access/quota
   issue. CI initially exposed horizontal overflow in the mobile admin layout;
