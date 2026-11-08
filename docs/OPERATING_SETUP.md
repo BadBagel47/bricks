@@ -177,6 +177,14 @@ replacing fetch with a permissive JS mock) and reproduces the old failure.
 With both corrections, Bricks' live read-only admin/access check passed in
 GitHub run 42525336450. Re-test these adapters in the target project's runtime.
 
+Static Assets lesson: requesting `/index.html` from an ASSETS binding can cause
+a canonical redirect to `/`. When the public game path is `/play/`, this strips
+the mount prefix and breaks invitation entry. Request the internal `/` instead
+and serve its response on the original `/play/` URL. The Worker also redirects
+legacy root links to `/play/` with the query preserved; the browser inherits the
+fragment without exposing it to the server. The live deployment check now
+requires `/play/?room=ABCD` to return the game HTML without following redirects.
+
 For this repository, `.github/workflows/pages.yml` includes an optional preview
 Worker deployment job. Store a dedicated Cloudflare token as GitHub repository
 **Actions secret** `CLOUDFLARE_API_TOKEN`, limited to the intended account, with

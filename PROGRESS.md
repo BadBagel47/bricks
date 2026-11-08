@@ -7,6 +7,7 @@
 
 ## Reusable operating controls — Worker preview deployed, public rollout pending
 
+- **2026-11-09, invitation entry repaired:** First owner private link hit Worker root and Not found after Static Assets redirected internal index.html. `498c293` serves the game through internal `/`, adds a legacy-root redirect preserving invitation query/fragment behavior, and expands live checking to `/play/?room=ABCD` without following redirects. All CI, deployment and live checks passed: https://github.com/BadBagel47/bricks/actions/runs/42533876102 . Local 181 tests/lint/build pass. Owner two-player private invitation retry is next.
 - **2026-11-09, real login confirmed:** Owner completed local browser-only subject generation, D1 allowlist insertion and Firebase subject mirror. Actual Mailjet link login reaches settings. No private inputs were shared here. Live private invitations, two-player play, closure/draining and session/revocation checks remain pending before Pages rollout.
 
 - **Live access repaired:** `0e84d3b` passed full CI, Worker deployment and actual read-only admin/access checks: https://github.com/BadBagel47/bricks/actions/runs/42525336450 . In addition to unsupported redirect:error, native fetch was invoked with a class receiver; a real workerd regression test reproduced the failure and passes with a local unbound function. 180 local tests, lint and build passed. Firebase policy reads now succeed. Private allowlist provisioning and actual Mailjet delivery remain pending.

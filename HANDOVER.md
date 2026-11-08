@@ -5,6 +5,14 @@ phase docs. Owner instructions and `BRICKS_SPEC.md` take precedence.
 
 ## Current checkpoint — 2026-11-09
 
+- **Private invite entry repair:** Owner's first private invite landed at Worker
+  root and showed Not found. Worker requested internal `/index.html`, triggering
+  Static Assets canonical redirect to root. `498c293` now requests internal `/`
+  for game HTML and redirects legacy root links to `/play/`, preserving queries
+  and browser-inherited fragments. Full CI, deployment and new live game-entry
+  check pass: https://github.com/BadBagel47/bricks/actions/runs/42533876102 .
+  Local 181 unit/runtime tests, lint/build passed. Next: owner retries invitation
+  in two browsers; actual private multiplayer smoke check remains pending.
 - **First real administrator login confirmed by owner:** browser-only helper
   generated a subject locally; owner ran its D1 SQL and added the same subject
   as boolean true directly under Firebase adminAllowlist. Owner requested a
