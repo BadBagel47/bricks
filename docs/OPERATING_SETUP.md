@@ -2,12 +2,12 @@
 
 This is a staged implementation, not an already provisioned service. Keep the
 existing Pages deployment running while completing these steps. No billing
-upgrade or paid plan is authorized. Domain selection remains open; `l8p.one` is
-only a tentative sender domain.
+upgrade or paid plan is authorized. The owner selected `system@trythis.one` and reports Mailjet DNS verification
+complete through Cloudflare; actual delivery still requires a live test.
 
 ## Accounts and configuration
 
-Use Cloudflare Workers Free with one D1 database and a Resend sending account.
+Use Cloudflare Workers Free with one D1 database and a Mailjet transactional sending account.
 Confirm the current allowance in each account before deployment; do not enable
 an automatic paid upgrade. Use a separate D1 database, HMAC secret and provider
 key for each project. If provider accounts are shared, ensure the **sum** of all
@@ -38,9 +38,9 @@ not require moving the public game or domain DNS to Cloudflare.
    npx wrangler d1 execute bricks-operating --config wrangler.operating.jsonc --remote --file modules/access-control/schema.sql
    ```
 
-2. Select a sender domain/subdomain in Resend and use the **actual records it
-   generates** to verify it. A subdomain such as `spel.l8p.one` is an example,
-   not an instruction to edit that domain now. Preserve existing apex MX/SPF;
+2. Use the verified `trythis.one` sender domain in Mailjet and use the **actual records it
+   generates** to verify it. The owner reports the DNS records are already verified; do not repeat or
+   replace existing records unnecessarily. Preserve existing apex MX/SPF;
    do not add conflicting SPF records. Correct DNS does not guarantee inbox
    placement. Use a sending-only key restricted to this sender where available.
 
@@ -65,7 +65,8 @@ not require moving the public game or domain DNS to Cloudflare.
    npx wrangler secret put SUBJECT_SECRET --config wrangler.operating.jsonc
    npx wrangler secret put FIREBASE_SERVICE_ACCOUNT --config wrangler.operating.jsonc
    npx wrangler secret put FIREBASE_API_KEY --config wrangler.operating.jsonc
-   npx wrangler secret put RESEND_API_KEY --config wrangler.operating.jsonc
+   npx wrangler secret put MAILJET_API_KEY --config wrangler.operating.jsonc
+   npx wrangler secret put MAILJET_SECRET_KEY --config wrangler.operating.jsonc
    npx wrangler secret put MAIL_FROM --config wrangler.operating.jsonc
    ```
 
@@ -73,8 +74,13 @@ not require moving the public game or domain DNS to Cloudflare.
    the same value for this project's private setup CLI. `FIREBASE_SERVICE_ACCOUNT`
    is the complete private JSON credential. `FIREBASE_API_KEY` is the existing
    public Web App API key, used to verify anonymous player tokens in this project.
-   `MAIL_FROM` is the verified sender, not an administrator allowlist entry.
-   Keep `DAILY_MAIL_LIMIT` at 20 or reduce it to fit the verified provider budget.
+   `MAIL_FROM` must be `system@trythis.one` (plain email address). Store both Mailjet
+   keys using the private Worker secrets interface; never send them in chat.
+   Authentication links last 1 hour; administrator sessions last 8 hours.
+   The owner reports Mailjet Free at 200/day and 6,000/month. Set
+   `DAILY_MAIL_LIMIT` to 90 (or lower): at most 2,790 attempts in a 31-day
+   month from this project. Account sharing requires summing all projects'
+   limits and other mail traffic; do not infer separate budgets per API key.
 
 ## Private setup CLI
 

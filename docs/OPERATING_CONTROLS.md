@@ -12,10 +12,10 @@ GitHub Pages remains the public game. A Cloudflare Worker serves the admin UI,
 its first-party `/play/` game and small APIs; D1 stores HMAC administrator subjects,
 hashed one-use email links, short sessions and hashed private invitation keys.
 No allowlist email or credential belongs in Git, Vite code or public responses.
-Resend is the isolated mail adapter; provider/domain configuration is still needed.
+Mailjet is the isolated mail adapter; provider/domain configuration is still needed.
 
-- Admin email links last 15 minutes and are consumed by an explicit confirmation
-  POST, never GET. Sessions last 30 minutes, use Secure/HttpOnly/SameSite cookies,
+- Admin email links last 1 hour and are consumed by an explicit confirmation
+  POST, never GET. Sessions last 8 hours, use Secure/HttpOnly/SameSite cookies,
   and check the private allowlist on every privileged API call. Logout mirrors
   revocation before clearing the session; forged cookies create no mirror records.
 - Public policy lives in `operating/config`, with separate single/multi policies
@@ -89,7 +89,7 @@ Solo uses one small backend/policy check per new round. Actual quota use still
 requires measurement in the provider consoles.
 
 Login limits are durable: source 10 and recipient 3 per 15 minutes, and at most
-20 mail attempts/project/UTC day, configurable downwards. Failed attempts consume
+90 mail attempts/project/UTC day, configurable downwards. Failed attempts consume
 budget. Private invite creation is limited to 100 active/pending records, with
 at most 30 days until closure and a bounded recent list. Shared provider accounts
 need aggregate budgeting across projects.
@@ -129,12 +129,13 @@ not measurements or a promise that every workload fits:
 - https://raw.githubusercontent.com/cloudflare/cloudflare-docs/production/src/content/partials/workers/d1-pricing.mdx
 - https://raw.githubusercontent.com/cloudflare/cloudflare-docs/production/src/content/docs/workers/configuration/secrets.mdx
 
-Resend's official SDK README confirms own-domain verification and the sending
-fields; its source confirms the API host. Current free allowance remains to be
-confirmed in the selected account before activation:
+Earlier research covered Resend; the owner subsequently chose Mailjet. Mailjet's
+official documentation describes transactional Send API v3.1. The owner reports the selected account allows 200/day and 6,000/month; the
+project cap is 90/day, shared across administrators:
 
-- https://raw.githubusercontent.com/resend/resend-node/main/readme.md
-- https://raw.githubusercontent.com/resend/resend-node/main/src/resend.ts
+- https://github.com/mailjet/api-documentation
+- https://github.com/mailjet/mailjet-apiv3-nodejs
 
-Direct provider documentation sites remain proxy-blocked. No DNS edits, live mail,
-remote D1 provisioning, real IAM grant or backend deployment have been performed.
+Direct provider documentation sites remain proxy-blocked. The owner reports
+Mailjet DNS verification complete for `system@trythis.one`. No live mail test,
+remote D1 provisioning, real IAM grant or backend deployment has been performed here.

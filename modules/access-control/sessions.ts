@@ -37,7 +37,7 @@ export class AdminSessions {
   async issue(subject: string, now: number): Promise<string> {
     if (!Number.isSafeInteger(now) || now < 0 || !subject) throw new Error('Invalid session')
     const token = [...crypto.getRandomValues(new Uint8Array(32))].map(x => x.toString(16).padStart(2, '0')).join('')
-    await this.store.putSession(await this.digest(token), { subject, expiresAt: now + 30 * 60_000 })
+    await this.store.putSession(await this.digest(token), { subject, expiresAt: now + 8 * 60 * 60_000 })
     return token
   }
   async authenticate(token: string, now: number): Promise<SessionRecord | null> {

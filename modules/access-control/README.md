@@ -4,13 +4,13 @@ Independent of React, Firebase, Cloudflare and the mail provider. Staged on
 `feature/operating-controls`; production setup and review remain outstanding.
 
 - `magic-links.ts`: private project-scoped HMAC subjects, allowlist lookup,
-  256-bit one-use tokens and 15-minute expiry.
-- `sessions.ts`: hashed opaque 30-minute sessions, current allowlist checks,
+  256-bit one-use tokens and 1-hour expiry.
+- `sessions.ts`: hashed opaque 8-hour sessions, current allowlist checks,
   revocation and D1-compatible storage.
 - `http.ts`: same-origin JSON/CSRF checks, bounded bodies, generic background
   login responses and secure host-only cookies. GET never redeems an email link.
 - `d1-store.ts` / `schema.sql`: atomic redemption and durable source/recipient/
-  aggregate mail limits. Default cap: 20 attempts/project/day, reducible.
+  aggregate mail limits. Default cap: 90 attempts/project/day, reducible.
 - `operating.ts`: separately controlled public modes, explicitly open initial
   configuration, exact server-time deadlines and private membership checks.
 - `policy.ts`: admission/draining primitives; application rules must enforce

@@ -5,6 +5,14 @@ phase docs. Owner instructions and `BRICKS_SPEC.md` take precedence.
 
 ## Current checkpoint — 2026-11-08
 
+- **Mailjet follow-up:** Mail adapter now uses Send API v3.1 with separate private
+  `MAILJET_API_KEY`/`MAILJET_SECRET_KEY`, plain `MAIL_FROM=system@trythis.one`,
+  no click/open tracking and per-message success validation. Magic links last
+  1 hour; sessions and cookies last 8 hours. Local 177 unit/adapter tests,
+  2 HTTPS admin browser tests, lint and build passed. Actual Mailjet delivery
+  remains untested. Owner reports Mailjet allows 200/day and 6,000/month;
+  project cap is 90/day (2,790 attempts at most in 31 days). Account-wide usage
+  from any other projects must also fit those provider limits.
 - **Published:** Phase 3.12 recovery. Live URL:
   https://badbagel47.github.io/bricks/?v=09a7cb6 . The owner confirmed its checked
   rules published; main CI/Pages passed:
@@ -19,11 +27,10 @@ phase docs. Owner instructions and `BRICKS_SPEC.md` take precedence.
   D1, OAuth signatures, mail contract and authentication/authorization. The 15
   existing gameplay browser tests and 2 new real-HTTPS admin/solo browser tests
   passed. The complete Firebase suite passed 51 tests, including REST override enforcement and a real two-identity private-game check. Worker deploy dry-run passed; no external publication occurred. Browser checks passed both without and with a configured operating-origin build.
-- **Still external:** No Cloudflare/Resend account, production D1, sender DNS,
-  real service-account key, real email or Worker deployment has been configured
-  here. Managed runtime status reports no secrets or outbound identities. Do not
-  request credential values or real allowlist emails in chat. `l8p.one` is only
-  a tentative sender domain; no DNS edits were made.
+- **Still external:** The owner has a Mailjet transactional account and reports verified DNS for
+  `system@trythis.one` through Cloudflare. No production D1, real service-account
+  key, real email test or Worker deployment has been configured here. Managed runtime status reports no secrets or outbound identities. Do not
+  request credential values or real allowlist emails in chat. `trythis.one` supersedes tentative `l8p.one`; the owner performed DNS setup.
 - **Review/CI checkpoint:** The focused review found no additional access/quota
   issue. CI initially exposed horizontal overflow in the mobile admin layout;
   `7fa6133` constrains fieldset/input minimum widths and allows heading wrapping.

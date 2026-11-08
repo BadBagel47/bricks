@@ -69,7 +69,7 @@ test('links are single-use under simultaneous redemption, expire and respect rev
   const results = await Promise.all([service.redeem(sent[0].token, 200), service.redeem(sent[0].token, 200)])
   assert.equal(results.filter(value => value === subject).length, 1)
   await service.request('admin@example.invalid', 'source', 1000)
-  assert.equal(await service.redeem(sent[1].token, 1000 + 15 * 60000), null)
+  assert.equal(await service.redeem(sent[1].token, 1000 + 60 * 60000), null)
   await service.request('admin@example.invalid', 'source', 2000)
   store.allowed.clear()
   assert.equal(await service.redeem(sent[2].token, 2100), null)

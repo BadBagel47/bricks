@@ -34,8 +34,8 @@ test('durable recipient and source limits reset at the exact window boundary', a
 test('project-wide daily mail budget is atomic, shared and resets at midnight UTC', async () => {
   const { store, database } = setup()
   try {
-    const outcomes = await Promise.all(Array.from({ length: 25 }, () => store.permitMail(100)))
-    assert.equal(outcomes.filter(Boolean).length, 20)
+    const outcomes = await Promise.all(Array.from({ length: 95 }, () => store.permitMail(100)))
+    assert.equal(outcomes.filter(Boolean).length, 90)
     assert.equal(await store.permitMail(86_400_000 - 1), false)
     assert.equal(await store.permitMail(86_400_000), true)
   } finally { database.close() }
@@ -51,7 +51,7 @@ test('sessions store only hashes, are project isolated, expire and respect allow
     assert.equal(JSON.stringify(database.prepare('SELECT * FROM admin_sessions').all()).includes(token), false)
     assert.equal((await service.authenticate(token, 100))?.subject, 'subject')
     assert.equal(await new AdminSessions('other', store).authenticate(token, 100), null)
-    assert.equal(await service.authenticate(token, 100 + 30 * 60_000), null)
+    assert.equal(await service.authenticate(token, 100 + 8 * 60 * 60_000), null)
     database.prepare('UPDATE admins SET enabled = 0').run()
     assert.equal(await service.authenticate(token, 101), null)
     await store.prune(101)

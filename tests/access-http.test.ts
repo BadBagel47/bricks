@@ -45,15 +45,15 @@ test('redeem issues private scoped cookie, supports logout, expiry and revoked a
     const response = await f.send('redeem', { token: f.sent[0].token })
     const setCookie = response.headers.get('set-cookie')!
     assert.match(setCookie, /^__Host-admin-bricks=[a-f0-9]{64}; Path=\//)
-    for (const required of ['HttpOnly', 'Secure', 'SameSite=Strict', 'Max-Age=1800']) assert.ok(setCookie.includes(required))
+    for (const required of ['HttpOnly', 'Secure', 'SameSite=Strict', 'Max-Age=28800']) assert.ok(setCookie.includes(required))
     const cookie = setCookie.split(';')[0]
     const check = () => f.api.handle(new Request(`${origin}/api/admin/session`, { headers: { Cookie: cookie } }), f.context)
     const status = await check()
-    assert.deepEqual(await status.json(), { authenticated: true, expiresAt: 100 + 30 * 60_000 })
+    assert.deepEqual(await status.json(), { authenticated: true, expiresAt: 100 + 8 * 60 * 60_000 })
     f.database.prepare('UPDATE admins SET enabled = 0').run()
     assert.equal((await check()).status, 401)
     f.database.prepare('UPDATE admins SET enabled = 1').run()
-    f.setTime(100 + 30 * 60_000)
+    f.setTime(100 + 8 * 60 * 60_000)
     assert.equal((await check()).status, 401)
     f.setTime(200)
     const logout = await f.send('logout', {}, { Cookie: cookie })

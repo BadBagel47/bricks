@@ -11,8 +11,8 @@ export interface SqlDatabase { prepare(sql: string): SqlStatement }
 export class D1LinkStore implements LinkStore {
   readonly database: SqlDatabase
   readonly dailyMailLimit: number
-  constructor(database: SqlDatabase, dailyMailLimit = 20) {
-    if (!Number.isSafeInteger(dailyMailLimit) || dailyMailLimit < 1 || dailyMailLimit > 20) throw new Error('Invalid mail budget')
+  constructor(database: SqlDatabase, dailyMailLimit = 90) {
+    if (!Number.isSafeInteger(dailyMailLimit) || dailyMailLimit < 1 || dailyMailLimit > 90) throw new Error('Invalid mail budget')
     this.database = database; this.dailyMailLimit = dailyMailLimit
   }
   async isAllowed(subject: string): Promise<boolean> {

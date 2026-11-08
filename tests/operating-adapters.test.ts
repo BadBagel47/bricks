@@ -7,7 +7,7 @@ import { D1LinkStore } from '../modules/access-control/d1-store.ts'
 import { D1SessionStore } from '../modules/access-control/sessions.ts'
 import { OperatingControls } from '../server/operating/controls.ts'
 import { MemoryPublisher } from './fixtures/operating-publisher.ts'
-import { ResendMailer } from '../server/operating/mail.ts'
+import { MailjetMailer } from '../server/operating/mail.ts'
 
 test('local workerd D1 runs the actual schema and concurrent one-time consumption SQL', { timeout: 60000 }, async () => {
   const runtime = new Miniflare(convertV4MiniflareOptions({ modules: true, script: 'export default { fetch() { return new Response("ok") } }', compatibilityDate: '2026-11-08', d1Databases: ['DB'] }))
@@ -71,16 +71,26 @@ test('identity adapter requires a verified, enabled anonymous user in the config
 
 test('mail adapter fixes the sign-in origin, uses fragment tokens and sanitizes provider failures', async () => {
   let count = 0
-  const mailer = new ResendMailer('fake-provider-key', 'Bricks <admin@example.invalid>', 'https://admin.example.invalid', (async (input, init) => {
-    assert.equal(input, 'https://api.resend.com/emails')
-    assert.equal(new Headers(init!.headers).get('Authorization'), 'Bearer fake-provider-key')
+  const mailer = new MailjetMailer('fake-provider-key', 'fake-secret', 'system@trythis.one', 'https://admin.example.invalid', (async (input, init) => {
+    assert.equal(input, 'https://api.mailjet.com/v3.1/send')
+    assert.equal(new Headers(init!.headers).get('Authorization'), `Basic ${btoa('fake-provider-key:fake-secret')}`)
     const body = JSON.parse(String(init!.body))
-    assert.deepEqual(body.to, ['recipient@example.invalid'])
-    assert.ok(body.text.includes(`https://admin.example.invalid/admin/#token=${'a'.repeat(64)}`))
-    assert.equal(body.text.includes('?token='), false)
+    assert.deepEqual(body.Messages[0].To, [{ Email: 'recipient@example.invalid' }])
+    assert.deepEqual(body.Messages[0].From, { Email: 'system@trythis.one' })
+    assert.equal(body.Messages[0].TrackClicks, 'disabled')
+    assert.equal(body.Messages[0].TrackOpens, 'disabled')
+    assert.ok(body.Messages[0].TextPart.includes('1 hour'))
+    assert.ok(body.Messages[0].TextPart.includes(`https://admin.example.invalid/admin/#token=${'a'.repeat(64)}`))
+    assert.equal(body.Messages[0].TextPart.includes('?token='), false)
     count++
-    return count === 1 ? Response.json({ id: 'test' }) : Response.json({ message: 'private provider detail' }, { status: 429 })
+    return count === 1 ? Response.json({ Messages: [{ Status: 'success' }] }) : Response.json({ message: 'private provider detail' }, { status: 429 })
   }) as typeof fetch)
   await mailer.send('recipient@example.invalid', 'a'.repeat(64))
   await assert.rejects(mailer.send('recipient@example.invalid', 'a'.repeat(64)), { message: 'Mail delivery failed' })
+  for (const providerResponse of [{ Messages: [{ Status: 'error', Errors: [{ ErrorMessage: 'private details' }] }] }, {}, { Messages: [] }]) {
+    const rejected = new MailjetMailer('key', 'secret', 'system@trythis.one', 'https://admin.example.invalid', (async () => Response.json(providerResponse)) as typeof fetch)
+    await assert.rejects(rejected.send('recipient@example.invalid', 'a'.repeat(64)), { message: 'Mail delivery failed' })
+  }
+  const unavailable = new MailjetMailer('key', 'secret', 'system@trythis.one', 'https://admin.example.invalid', (async () => { throw new Error('private transport details') }) as typeof fetch)
+  await assert.rejects(unavailable.send('recipient@example.invalid', 'a'.repeat(64)), { message: 'Mail delivery failed' })
 })

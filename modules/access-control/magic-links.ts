@@ -39,7 +39,7 @@ export class MagicLinks {
     if (!await this.store.permitRequest(subject, sourceKey, now) || !await this.store.isAllowed(subject) || !await this.store.permitMail(now)) return
     const token = hex(crypto.getRandomValues(new Uint8Array(32)))
     const digest = await linkDigest(this.project, token)
-    await this.store.put({ digest, subject, expiresAt: now + 15 * 60_000 })
+    await this.store.put({ digest, subject, expiresAt: now + 60 * 60_000 })
     try { await this.mailer.send(normalized, token) }
     catch { await this.store.consume(digest, now); /* HTTP response still must not reveal allowlist membership. */ }
   }

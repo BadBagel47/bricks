@@ -125,7 +125,7 @@ test('closed single player rejects visitors, admits administrator and lets the r
     await game.goto(`${origin}/play/`); await name(game, 'Administrator')
     await game.getByRole('button', { name: '1 Player', exact: true }).click()
     await game.getByRole('img', { name: 'Game board, 10 columns by 20 rows' }).waitFor()
-    now += 31 * 60_000
+    now += (8 * 60 + 1) * 60_000
     await management.getByRole('button', { name: 'Refresh', exact: true }).click()
     await management.getByRole('button', { name: 'Send sign-in link', exact: true }).waitFor()
     assert.equal(await game.getByRole('img', { name: 'Game board, 10 columns by 20 rows' }).isVisible(), true)

@@ -91,7 +91,7 @@ export class AdminHttp {
         const token = await this.sessions.issue(subject, this.clock())
         // Rotate the browser's old session on successful sign-in.
         await this.revoke(this.cookie(request))
-        return json({ authenticated: true }, 200, { 'Set-Cookie': this.setCookie(token, 30 * 60) })
+        return json({ authenticated: true }, 200, { 'Set-Cookie': this.setCookie(token, 8 * 60 * 60) })
       }
       if (Object.keys(input).length !== 0) return json({ error: 'Invalid request' }, 400)
       await this.revoke(this.cookie(request))

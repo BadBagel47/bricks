@@ -8,7 +8,7 @@ import { OperatingApi } from './api.ts'
 import { FirebasePublisher } from './publisher.ts'
 import { firebaseIdentity, serviceAccountToken } from './credentials.ts'
 import { adminCSS, adminHTML, adminJS } from './admin-page.ts'
-import { ResendMailer } from './mail.ts'
+import { MailjetMailer } from './mail.ts'
 
 export interface OperatingEnvironment {
   DB: SqlDatabase
@@ -21,7 +21,8 @@ export interface OperatingEnvironment {
   FIREBASE_API_KEY: string
   SUBJECT_SECRET: string
   FIREBASE_SERVICE_ACCOUNT: string
-  RESEND_API_KEY: string
+  MAILJET_API_KEY: string
+  MAILJET_SECRET_KEY: string
   MAIL_FROM: string
   DAILY_MAIL_LIMIT?: string
 }
@@ -30,8 +31,8 @@ let cached: { env: OperatingEnvironment; api: OperatingApi; links: D1LinkStore; 
 function services(env: OperatingEnvironment) {
   if (cached?.env === env) return cached
   if (!/^[a-z0-9-]{1,64}$/.test(env.PROJECT) || typeof env.SUBJECT_SECRET !== 'string' || env.SUBJECT_SECRET.length < 32) throw new Error('Private configuration unavailable')
-  const links = new D1LinkStore(env.DB, Number(env.DAILY_MAIL_LIMIT ?? 20)), sessions = new D1SessionStore(env.DB)
-  const magic = new MagicLinks(env.PROJECT, env.SUBJECT_SECRET, links, new ResendMailer(env.RESEND_API_KEY, env.MAIL_FROM, env.ADMIN_ORIGIN))
+  const links = new D1LinkStore(env.DB, Number(env.DAILY_MAIL_LIMIT ?? 90)), sessions = new D1SessionStore(env.DB)
+  const magic = new MagicLinks(env.PROJECT, env.SUBJECT_SECRET, links, new MailjetMailer(env.MAILJET_API_KEY, env.MAILJET_SECRET_KEY, env.MAIL_FROM, env.ADMIN_ORIGIN))
   const auth = new AdminHttp(env.ADMIN_ORIGIN, magic, new AdminSessions(env.PROJECT, sessions))
   const publisher = new FirebasePublisher(env.FIREBASE_DATABASE_ORIGIN, serviceAccountToken(env.FIREBASE_SERVICE_ACCOUNT))
   const controls = new OperatingControls(publisher, env.DB, env.PROJECT, env.GAME_URL)
