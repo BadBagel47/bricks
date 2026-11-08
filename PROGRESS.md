@@ -5,6 +5,12 @@
 - **Status:** Owner authorized review. Engineering findings and limits are in `docs/PHASE3_REVIEW.md`; 148 unit, 15 browser and 42 Firebase emulator tests passed locally. Production Firebase behavior and configuration remain independently unverified. Live: https://badbagel47.github.io/bricks/?v=09a7cb6 .
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
+## Reusable operating controls — authorized, in progress
+
+- Owner prioritizes casual friend play and Firebase quota efficiency over advanced anti-cheat. Approved passwordless email-link administration with a private allowlist, off/on/timed-on/timed-room modes, and reuse of research/core/tests in another project.
+- Added server-independent policy/link primitives and a D1-compatible SQL adapter. Six new tests cover deadlines, one-time redemption races, project isolation, private stored identifiers, revocation and durable rate windows. Total unit tests: 154 passed. No game integration, real mail sending, HTTP/session adapter, external credentials or production deployment yet.
+- Official Workers limits and secrets documentation were fetched from Cloudflare's GitHub sources; mail-provider and D1 numeric pricing verification remains outstanding. See `docs/OPERATING_CONTROLS.md` and `modules/access-control/README.md` for concrete limitations and required next work. Owner questions about sender domain and timer semantics are pending.
+
 ## Milestone 3.11
 - Owner confirmed rules published. Main `da4009e` passed full CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42403753502. App code matches tested `0ddf8c4`.
 - Owner authorized rematches with consolidated manual review. Results now offer Rematch, returning to the same lobby/settings; both participants must enter that lobby before the current host can start the next countdown. A player reviewing results cannot be silently pulled into a new game.

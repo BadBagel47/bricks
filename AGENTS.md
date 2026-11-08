@@ -15,3 +15,4 @@
 - Keep interface copy direct and functional. Retain the approved “Make room for one more.” headline; avoid decorative subheadings, slogans, menu descriptions, and footers. Keep necessary instructions, validation, and availability status.
 
 - Owner preference: include GPT-6.1 Terra alongside Sol and Luna when recommending a model and reasoning level at each checkpoint.
+- Owner direction 2026-11-08: Bricks is a hobby game for casual play with friends. Prioritize Firebase Spark quota efficiency and simple operation; advanced anti-cheat/server-authoritative competition is not a project priority. Keep normal identity and database authorization protections.

@@ -10,14 +10,19 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 - **Live:** https://badbagel47.github.io/bricks/?v=09a7cb6 (3.12).
 - **Status:** Owner confirmed the checked Firebase rules published. Main `09a7cb6` passed all tests and Pages deployment: https://github.com/BadBagel47/bricks/actions/runs/42434535645 . App and rules match tested `03d97ed`. Direct live-site requests from this environment are blocked by the proxy (403); no live Firebase playtest is claimed.
 - **Workflow:** Owner wants manual tests consolidated. Finish automated two-session/security verification before the one necessary external action: checked rule publication. Later milestones still need authorization.
-- **Next:** Owner authorized 3.13. The engineering review and automated verification are recorded in `docs/PHASE3_REVIEW.md`. Public competitive trust, abuse resistance and retention remain product/architecture decisions; do not represent them as solved. Phase 4 requires owner authorization.
-- **Next model:** GPT-6.1 Sol Medium for a focused quota/abuse mitigation plan; consider Terra High for server-authoritative competitive architecture and Luna for routine UI changes.
+- **Next:** Owner authorized work on reusable operating controls: private email-link admin access, off/on/timed access and timed rooms, prioritizing hobby use and quota efficiency. The server-independent core and SQL adapter are in `modules/access-control`; not integrated or deployed. See its README and `docs/OPERATING_CONTROLS.md` for verified research and missing HTTP/session/mail/Firebase adapters. Sender-domain availability and timer cutoff semantics are awaiting owner answers. Never put real allowlist addresses or secrets in Git or frontend code. Phase 4 remains separately authorized.
+- **Next model:** GPT-6.1 Sol Medium for implementation; owner accepted an eventual GPT-6.1 Terra High review before publication. No review or production readiness is claimed yet.
 
 ## Product direction and durable constraints
 
 - Build Bricks as a browser Tetris-inspired game. The long-term goal is a secure,
   playable two-person multiplayer game with settings, approval, seeded play,
   Score Duel/Battle, results, rematch and honest reconnection/recovery behavior.
+- Owner clarified on 2026-11-08: casual hobby play with friends, prioritize quota
+  efficiency over advanced anti-cheat. Owner asks for an access on/off setting;
+  whole-game versus multiplayer-only scope is being clarified. Recommend a
+  small owner-managed operating flag with rules enforcement for multiplayer,
+  not a new administration application.
 - Engine rules stay separate from React, rendering, input, audio, persistence and
   Firebase. The game is NES-inspired, not a cycle-accurate emulator.
 - Current multiplayer has room creation, join/invite/reopen, two-player lobby,
