@@ -5,11 +5,14 @@ phase docs. Owner instructions and `BRICKS_SPEC.md` take precedence.
 
 ## Current checkpoint — 2026-11-08
 
+- Owner's Firebase Console screenshot confirms persisted `operating/config`:
+  numeric version/revision 1 and both single/multi mode `on`. Manual bootstrap
+  is complete (null expiresAt fields are correctly omitted by RTDB). Next: checked
+  rules publication, then application Worker deployment and private allowlist setup.
 - Owner reports adding `FIREBASE_SERVICE_ACCOUNT` and `FIREBASE_API_KEY` as
   Worker secrets, creating a random `SUBJECT_SECRET`, saving it privately and
   adding it as a Worker secret. Values and effective deployment remain unverified.
-  Existing published Firebase rules must not be replaced until `operating/config`
-  is initialized and read back with both public modes On. The local setup CLI
+  The initial open policy has now been confirmed in the owner's screenshot. The local setup CLI
   requires private credentials and this runtime has no Cloudflare identity.
 - **Firebase publisher setup:** Owner created the `bricks-operating` service
   account and reports granting Firebase Realtime Database Admin. The legacy
