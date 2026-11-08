@@ -144,6 +144,15 @@ revoking existing access; it is not an ordinary key rotation with seamless login
 
 ## Checked rollout order
 
+Runtime lesson from the first live check: Cloudflare Workers does not implement
+Fetch `redirect: 'error'`. It throws before sending the request. All Worker-side
+Google, Firebase and Mailjet requests must use `redirect: 'manual'` and reject
+non-success status codes (including 3xx), never follow credentials to a redirected
+host. Node-only adapter tests did not expose this incompatibility; the regression
+test in `tests/operating-runtime.test.ts` bundles the actual adapters and exercises
+all four in workerd, including redirect refusals. Source:
+https://raw.githubusercontent.com/cloudflare/cloudflare-docs/production/src/content/docs/workers/runtime-apis/request.mdx
+
 For this repository, `.github/workflows/pages.yml` includes an optional preview
 Worker deployment job. Store a dedicated Cloudflare token as GitHub repository
 **Actions secret** `CLOUDFLARE_API_TOKEN`, limited to the intended account, with

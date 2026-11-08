@@ -3,6 +3,32 @@ import { test } from 'node:test'
 import { build } from 'esbuild'
 import { Miniflare, convertV4MiniflareOptions } from 'miniflare'
 
+test('adapters invoke native workerd fetch without an incompatible class receiver', { timeout: 60000 }, async () => {
+  const compiled = await build({ bundle: true, write: false, format: 'esm', platform: 'browser', stdin: { resolveDir: process.cwd(), loader: 'ts', contents: `
+    import { FirebasePublisher } from './server/operating/publisher.ts';
+    import { MailjetMailer } from './server/operating/mail.ts';
+    export default { async fetch() {
+      const database = new FirebasePublisher('https://demo.firebaseio.com', async () => 'fake-token');
+      const value = await database.read('operating/config');
+      await new MailjetMailer('key','secret','admin@example.invalid','https://admin.example.invalid').send('user@example.invalid','a'.repeat(64));
+      return Response.json(value.value);
+    }};
+  ` } })
+  let calls = 0
+  const runtime = new Miniflare(convertV4MiniflareOptions({ modules: true, script: compiled.outputFiles[0].text, compatibilityDate: '2026-11-08',
+    outboundService: async request => {
+      calls++
+      return request.url.startsWith('https://api.mailjet.') ? Response.json({ Messages: [{ Status: 'success' }] }) : Response.json({ version: 1 }, { headers: { ETag: 'test' } })
+    },
+  }))
+  try {
+    const response = await runtime.dispatchFetch('https://test.invalid')
+    assert.equal(response.status, 200)
+    assert.deepEqual(await response.json(), { version: 1 })
+    assert.equal(calls, 2)
+  } finally { await runtime.dispose() }
+})
+
 test('real workerd accepts all server adapter requests and refuses redirects', { timeout: 60000 }, async () => {
   const compiled = await build({ bundle: true, write: false, format: 'esm', platform: 'browser', stdin: { resolveDir: process.cwd(), loader: 'ts', contents: `
     import { serviceAccountToken, firebaseIdentity } from './server/operating/credentials.ts';
