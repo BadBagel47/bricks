@@ -18,4 +18,3 @@ export function accessDatabase() {
   const store = new D1LinkStore(sql)
   return { store, database, sql }
 }
-
