@@ -5,6 +5,11 @@ phase docs. Owner instructions and `BRICKS_SPEC.md` take precedence.
 
 ## Current checkpoint — 2026-11-08
 
+- Owner created Cloudflare D1 `bricks-operating` in EU jurisdiction and supplied
+  database ID `665b9d70-e43f-47f3-a15b-875abfb256a5`; Wrangler binding updated.
+  Account ID from its dashboard URL is `ba62b17cf838a334c50450438732f225`.
+  These are resource identifiers, not credentials. Schema installation, Worker
+  provisioning and live access remain unverified; runtime has no Cloudflare identity.
 - **Mailjet follow-up:** Mail adapter now uses Send API v3.1 with separate private
   `MAILJET_API_KEY`/`MAILJET_SECRET_KEY`, plain `MAIL_FROM=system@trythis.one`,
   no click/open tracking and per-message success validation. Magic links last
