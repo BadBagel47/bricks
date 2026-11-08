@@ -5,6 +5,11 @@ phase docs. Owner instructions and `BRICKS_SPEC.md` take precedence.
 
 ## Current checkpoint — 2026-11-08
 
+- Owner created the placeholder Worker at `https://bricks-operating.l8p1.workers.dev/`.
+  Wrangler now uses that origin and its `/play/` URL for the private preview stage.
+  The application code/secrets have not been deployed. Next: bind D1 as `DB`,
+  arrange private deployment credentials and Firebase publisher setup, then follow
+  the bootstrap/rules/preview sequence in `docs/OPERATING_SETUP.md`.
 - Owner created Cloudflare D1 `bricks-operating` in EU jurisdiction and supplied
   database ID `665b9d70-e43f-47f3-a15b-875abfb256a5`; Wrangler binding updated.
   Account ID from its dashboard URL is `ba62b17cf838a334c50450438732f225`.
