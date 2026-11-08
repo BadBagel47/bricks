@@ -1,8 +1,8 @@
 # Bricks progress
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
-- **Milestone:** 3.12 — Reconnection and recovery
-- **Status:** 3.12 published. Owner confirmed Firebase rules installed; main `09a7cb6` passed full CI and Pages deployment: https://github.com/BadBagel47/bricks/actions/runs/42434535645 . Live: https://badbagel47.github.io/bricks/?v=09a7cb6 .
+- **Milestone:** 3.13 — Integration and security review
+- **Status:** Owner authorized review. Engineering findings and limits are in `docs/PHASE3_REVIEW.md`; 148 unit, 15 browser and 42 Firebase emulator tests passed locally. Production Firebase behavior and configuration remain independently unverified. Live: https://badbagel47.github.io/bricks/?v=09a7cb6 .
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.11
@@ -185,8 +185,8 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Owner authorization for 3.13 integration and security review. Continue consolidated manual playtesting.
-- Recommended model: GPT-6.1 Terra High for that review.
+- Review the findings in `docs/PHASE3_REVIEW.md` and decide the intended level of public access, abuse resistance and trusted competition before Phase 4. Continue consolidated manual playtesting.
+- Recommended model: GPT-6.1 Sol Medium for focused quota and abuse mitigation planning; GPT-6.1 Terra High for server-authoritative competitive architecture.
 
 ## Git checkpoints
 - `fea6aa4`: initial foundation and Pages deployment.
