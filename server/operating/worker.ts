@@ -52,7 +52,7 @@ export default {
     if (url.pathname.startsWith('/api/')) {
       try {
         return await services(env).api.handle(request, { source: request.headers.get('CF-Connecting-IP') ?? '', waitUntil: task => execution.waitUntil(task) })
-      } catch { return new Response(JSON.stringify({ error: 'Service temporarily unavailable' }), { status: 503, headers: { ...security, 'Content-Type': 'application/json' } }) }
+      } catch { return new Response(JSON.stringify({ error: 'Service temporarily unavailable', ...(url.pathname === '/api/access' ? { code: 'WORKER_CONFIGURATION_INVALID' } : {}) }), { status: 503, headers: { ...security, 'Content-Type': 'application/json' } }) }
     }
     if (url.pathname.startsWith('/play/') && ['GET', 'HEAD'].includes(request.method)) {
       const asset = new URL(request.url); asset.pathname = url.pathname.slice('/play'.length)

@@ -88,6 +88,8 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ba62b17cf838a334c50450438732f225
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           WRANGLER_SEND_METRICS: 'false'
+      - name: Verify live operating preview
+        run: node scripts/check-operating-preview.mjs
 
   deploy:
     if: github.ref == 'refs/heads/main'

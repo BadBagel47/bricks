@@ -24,6 +24,7 @@ export class FirebasePublisher implements Publisher {
     url.searchParams.set('auth_variable_override', JSON.stringify({ uid: 'bricks-operating-publisher', token: { operatingPublisher: true } }))
     // Bearer credentials stay out of URLs and application logs.
     const response = await this.fetcher(url, { ...init, headers: { ...init.headers, Authorization: `Bearer ${await this.token()}` }, redirect: 'error', signal: AbortSignal.timeout(8000) })
+    if (response.status === 401 || response.status === 403) throw new Error('Database authorization failed')
     if (!response.ok && response.status !== 412) throw new Error('Database publication failed')
     return response
   }

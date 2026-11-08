@@ -2,6 +2,7 @@ import { AdminHttp } from '../../modules/access-control/http.ts'
 import type { AdminHttpContext } from '../../modules/access-control/http.ts'
 import { linkDigest } from '../../modules/access-control/magic-links.ts'
 import { ControlError, OperatingControls } from './controls.ts'
+import { accessFailureCode } from './diagnostics.ts'
 
 const security = { 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer', 'X-Content-Type-Options': 'nosniff' }
 export class OperatingApi {
@@ -80,6 +81,7 @@ export class OperatingApi {
       }
       return reply({ error: 'Invalid request' }, 400)
     } catch (error) {
+      if (request.method === 'GET' && url.pathname === '/api/access') return reply({ error: 'Service temporarily unavailable', code: accessFailureCode(error) }, 503)
       return error instanceof ControlError ? reply({ error: error.message }, error.status) : reply({ error: 'Service temporarily unavailable' }, 503)
     }
   }
