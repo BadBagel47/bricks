@@ -720,8 +720,8 @@ leads to abandonment without a competitive result. Inputs after the last
 acknowledged snapshot can be lost, and Firebase presence may detect a disconnect
 after it actually happens. Recovery is not guaranteed.
 
-Full branch CI passed for `3253fc4`, including repeat recovery, queued Battle
-attacks and finished-player results: https://github.com/BadBagel47/bricks/actions/runs/42432663844 .
-Later reload, clock and frame-bound refinements are under test. Do not publish
-those refinements until full security and two-session checks pass. The published
-client has none of this recovery behavior.
+Final branch CI passed for `03d97ed`, including host/guest reconnect, repeated
+recovery and reload, queued Battle attacks, finished-player results, abandonment
+and server authorization: https://github.com/BadBagel47/bricks/actions/runs/42433827743 .
+The owner must publish the checked Firebase rules before main deployment. The
+currently published client has none of this recovery behavior.

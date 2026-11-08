@@ -4,14 +4,14 @@ Read this first when starting a new work session. It is an index and current
 checkpoint, not a replacement for owner instructions or the product specification.
 Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 
-## Current checkpoint — 2026-11-07
+## Current checkpoint — 2026-11-08
 
 - **Phase 3, milestone 3.12:** Reconnection and recovery (authorized, in progress).
 - **Live:** https://badbagel47.github.io/bricks/?v=da4009e (3.11).
-- **Status:** 3.12 is in progress. Full CI passed for `ac4787f`, including repeat recovery, reload, Battle and terminal states: https://github.com/BadBagel47/bricks/actions/runs/42433459138 . Subsequent changes pause a reconnecting tab until it holds the active connection and add host-reconnect/deadline tests; targeted local Firebase tests passed and final full CI remains. The local Firebase emulator works with proxy variables unset (JAR already cached). Live remains 3.11.
+- **Status:** 3.12 implementation passed complete CI for `03d97ed`: https://github.com/BadBagel47/bricks/actions/runs/42433827743 . It is staged and awaiting owner publication of the exact checked Firebase rules: https://raw.githubusercontent.com/BadBagel47/bricks/03d97ed/firebase/database.rules.json . Live remains 3.11. Local emulator testing works with proxy variables unset (JAR already cached).
 - **Workflow:** Owner wants manual tests consolidated. Finish automated two-session/security verification before the one necessary external action: checked rule publication. Later milestones still need authorization.
-- **Next:** Finish 3.12: coordinated pause, secure checkpoints/leases, recovery, abandonment and two-session/security tests. Rematch reuses room/settings but requires both live connection-bound consents and fresh optional guest approval; only the current host starts. New IDs/seeds reset game/Battle/Hold state and preserve local histories. Coordinated recovery remains 3.12.
-- **Next model:** Consider GPT-6.1 Terra alongside Sol and Luna; GPT-6.1 Terra High is recommended for 3.12 reconnection and recovery, after 3.11 checkpoint.
+- **Next:** After the owner reports rules published, make a non-`[skip ci]` deployment commit, push the staged code to `main`, and verify the Pages workflow. No manual playtest is required at this checkpoint. The current handover-only commit uses `[skip ci]`, so a fresh deployment commit is required to trigger Actions. Do not start 3.13 without the owner's authorization.
+- **Next model:** GPT-6.1 Sol Medium for deployment and verification; consider GPT-6.1 Terra High for the subsequent 3.13 integration/security review.
 
 ## Product direction and durable constraints
 
