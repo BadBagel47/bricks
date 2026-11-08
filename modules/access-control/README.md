@@ -1,59 +1,87 @@
 # Reusable operating controls — implementation in progress
 
-This package is independent of React, Bricks, Firebase and the email provider.
-It is not connected to production and is not a complete authentication service.
+Independent of React, Bricks, Firebase and the email provider. This is staged on
+`feature/operating-controls`, not integrated with the live game or deployed.
 
-- `policy.ts`: off, on, global deadline, timed-room-only access. Exact deadlines
-  use trusted server time; an expired room is denied even when global access is on.
-- `magic-links.ts`: server-only private allowlist lookup, 256-bit random tokens,
-  15-minute expiry, hashed token storage and project-scoped HMAC admin subjects.
-- `d1-store.ts` / `schema.sql`: durable one-time token consumption using SQL
-  DELETE RETURNING, allowlist revocation and recipient/source request limits.
-- Tests in `tests/access-control.test.ts` and `tests/access-store.test.ts` run with
-  `npm test`. SQL tests use Node SQLite; deployed D1 must also be integration-tested.
+## Implemented and locally tested
 
-## Private configuration
+- `policy.ts`: admission checks for off/on/global deadline/timed-room-only access.
+  A timed room's deadline also bounds new starts when global mode is on. Already
+  admitted matches may finish after closure; a rematch needs a new admission.
+- `magic-links.ts`: private allowlist lookup, 256-bit random tokens, 15-minute
+  expiry, hashed token storage and project-scoped HMAC administrator subjects.
+- `d1-store.ts` / `schema.sql`: SQL DELETE RETURNING for atomic one-time
+  redemption; per-source 10 and per-recipient 3 requests per 15 minutes; shared
+  maximum 20 outbound attempts per UTC day, configurable downwards. Failed sends
+  consume budget. This is an application cap, not a verified provider allowance.
+- `sessions.ts`: 30-minute opaque sessions; hashed storage, allowlist check on
+  authentication, expiry, logout, rotation and pruning of expired/disabled sessions.
+- `http.ts`: bounded JSON POSTs, fixed HTTPS origin and CSRF header, generic
+  request-link response with background work, sanitized failures, secure HttpOnly
+  SameSite=Strict host-only cookies, no-store/no-referrer and no CORS grants.
+  GET never redeems a link. The API never returns administrator email/subject.
 
-Use separate databases, signing secrets and provider credentials per project.
+`npm test` runs the core, SQL and HTTP tests. SQL tests use Node SQLite, not a
+Cloudflare deployment; real D1 concurrency and platform behavior still need tests.
+No existing gameplay traffic or production rules have changed.
+
+## Private configuration and adapter contract
+
+Use separate databases, HMAC secrets and provider credentials per project.
 Allowlisted addresses are transformed with `privateSubject` by trusted server
-code; only the resulting subject and enabled flag need to be stored. Do not put
-addresses, keys, tokens or allowlist exports in Git, Vite variables, URLs or logs.
-Email necessarily goes to the selected mail provider and recipient mailbox;
-protect those accounts too. Losing/changing the HMAC key requires reprovisioning
-allowlist subjects and invalidates the subject mapping.
+code; store only the resulting subject and enabled flag. Do not put addresses,
+keys, cookies, tokens or allowlist exports in Git, frontend variables or logs.
+A magic-link token must be in the email link's fragment only, never query/path;
+remove the fragment immediately on loading the private sign-in page. The email
+provider and recipient mailbox necessarily see the email and link.
+Losing/changing the HMAC secret requires reprovisioning administrator subjects.
 
-## Required HTTP adapter before deployment
+The platform adapter must:
 
-1. Validate request size and same-origin POSTs. Derive rate-limit source from a
-   trusted platform header, never from a submitted IP address.
-2. Return the same generic 202 response for all syntactically accepted requests.
-   Dispatch request processing in a background task to avoid an obvious
-   allowlist-dependent HTTP response time. Suppress identifying error logs.
-3. Construct email links using a fixed configured origin, not a Host header or
-   caller-supplied redirect. Put the token in the URL fragment; avoid third-party
-   resources and use Referrer-Policy: no-referrer and Cache-Control: no-store.
-4. Require an explicit POST to redeem a link; a mail scanner's GET must not consume
-   it. Never grant control just because a page contains a token.
-5. Exchange a redeemed token for a short-lived opaque server session. Store only
-   session-token hashes; use Secure, HttpOnly, SameSite cookies. Check allowlist
-   membership and session expiry on every control action, and enforce CSRF/origin
-   protection. Session support and the HTTP adapter are not implemented yet.
-6. Add an overall outbound-mail budget below the selected provider's allowance;
-   the current per-source and recipient limits are not a global service quota.
-7. Add bounded retention/pruning and tests for provider failures, scanners, CORS,
-   CSRF, session revocation, real D1 concurrency and deployment secrets.
+1. Serve the admin UI and API from the same configured HTTPS origin. It is
+   separate from the GitHub Pages game, avoiding cross-site session cookies.
+2. Construct links from that origin, never a Host header or caller redirect.
+   Render a confirmation button which explicitly POSTs the fragment token;
+   scanners following a GET must not log in or consume the token. No third-party
+   assets, analytics or automatic redemption on page load.
+3. Pass a platform-authenticated source address to `AdminHttp.handle`, never an
+   arbitrary inbound header outside the platform's trust boundary, and wire
+   `waitUntil` to the platform lifecycle. Missing source sends no mail.
+4. Authenticate the cookie through `AdminSessions` on **every** control action;
+   login alone must not grant unauthenticated access to later policy writes.
+   Preserve strict origin/header/JSON checks on those writes too.
+5. Wire the real mail adapter, fixed sender, deployment secrets, and scheduled
+   pruning. Verify the chosen provider's current quota before setting the cap.
+   Do not share one provider account budget across projects without an aggregate
+   cap. Failed sends may have been accepted remotely; do not blindly retry.
+
+No admin UI, platform entry point, live provider, control mutation API or scheduled
+pruning runner exists yet. Session/link revocation in the tests is local only.
 
 ## Firebase/application adapter still required
 
-Mirror only non-private operating policy into a narrowly scoped Firebase record.
-No admin email or link token belongs in that record. Keep anonymous gameplay
-identity separate from administrator identity. Apply operating conditions to the
-existing per-path grants, preserving authorized disconnect cleanup; never grant
-root access when enabled. Stop active network traffic on explicit closure and
-avoid persistent Firebase connections for single-player solely to watch a flag.
-Firestore/RTDB rules cannot call an arbitrary external Worker: a trusted adapter
-must publish the policy into Firebase and its credentials need explicit setup.
+Mirror only the non-private policy into a narrowly scoped Firebase record.
+No email, session, allowlist or magic token belongs there. Anonymous gameplay
+identity stays separate from administrator identity. RTDB rules cannot call a
+Worker: a trusted publication adapter and private credentials require setup.
 
-The backend and each application's data rules are separate adapters. Reusing the
-core does not prove that a second project's enforcement is correct. Run its
-integration tests for expiry, lobby/game/recovery shutdown, cleanup and re-enable.
+Enforce the `admitMatch` condition with trusted time/policy/grants atomically
+when transitioning to actual gameplay. RTDB rules must express and validate this
+condition themselves; they cannot execute the TypeScript helper. A client write
+is acceptable only if rules validate admission immutably against server time and
+the current policy. Do not trust a client-supplied admission or add an extra
+Worker request per gameplay snapshot. `mayFinishMatch` is a drain-policy helper,
+not a replacement for participant, control-lease, recovery-deadline or schema
+checks. Archive admission when done; new matches/rematches need new IDs. Do not
+admit a countdown merely because it was scheduled before expiry. Reconnection
+may finish the admitted match under the existing recovery limits.
+
+Apply policy checks to existing per-path Firebase grants, preserving authorized
+presence cleanup and access needed to finish admitted matches. Never add a
+permissive root rule. No heartbeat or repeated polling: multiplayer should use
+its existing connection, while solo admission can use a small initial read.
+An already downloaded/offline solo client cannot be reliably revoked remotely.
+
+Reusing the core does not prove the second application's enforcement. Test its
+real adapter for expiry, lobby/countdown, ongoing games, recovery, cleanup,
+rematches and re-enable before publishing it.

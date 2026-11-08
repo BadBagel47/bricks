@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { accessAllowed } from '../modules/access-control/policy.ts'
+import { accessAllowed, admitMatch, mayFinishMatch } from '../modules/access-control/policy.ts'
 import { linkDigest, MagicLinks, privateSubject } from '../modules/access-control/magic-links.ts'
 import type { LinkRecord, LinkStore } from '../modules/access-control/magic-links.ts'
 
@@ -16,12 +16,26 @@ test('access modes enforce global override, exact deadlines and room-only access
   assert.equal(accessAllowed({ mode: 'on', expiresAt: null }, null, NaN), false)
 })
 
+test('closure denies new matches and rematches while an already admitted match may finish', () => {
+  const policy = { mode: 'until', expiresAt: 200 } as const
+  const admission = admitMatch(policy, null, 'match-1', 199)
+  assert.ok(admission)
+  assert.equal(admitMatch(policy, null, 'match-2', 200), null)
+  assert.equal(mayFinishMatch(admission, 'match-1', 300), true)
+  assert.equal(mayFinishMatch(admission, 'match-2', 300), false)
+  assert.equal(mayFinishMatch(null, 'match-1', 300), false)
+  assert.equal(mayFinishMatch(admission, 'match-1', 198), false)
+  assert.equal(admitMatch({ mode: 'off', expiresAt: null }, null, 'match-3', 300), null)
+  assert.equal(admitMatch({ mode: 'rooms', expiresAt: null }, { expiresAt: 200 }, 'match-4', 200), null)
+})
+
 class MemoryStore implements LinkStore {
   allowed = new Set<string>()
   records = new Map<string, LinkRecord>()
   limited = false
   async isAllowed(subject: string) { return this.allowed.has(subject) }
   async permitRequest() { return !this.limited }
+  async permitMail() { return !this.limited }
   async put(record: LinkRecord) { this.records.set(record.digest, record) }
   async consume(digest: string, now: number) {
     const record = this.records.get(digest)

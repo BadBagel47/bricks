@@ -3,6 +3,8 @@ export interface LinkStore {
   isAllowed(subject: string): Promise<boolean>
   /** Durable, atomic rate limit for both keys. */
   permitRequest(subject: string, source: string, now: number): Promise<boolean>
+  /** Atomically reserve an outbound attempt within the project-wide daily budget. */
+  permitMail(now: number): Promise<boolean>
   put(record: LinkRecord): Promise<void>
   /** Atomically delete/consume only an unused, unexpired link. */
   consume(digest: string, now: number): Promise<LinkRecord | null>
@@ -34,7 +36,7 @@ export class MagicLinks {
     const normalized = email.trim().toLowerCase()
     const subject = await privateSubject(this.project, normalized, this.secret)
     const sourceKey = await privateSubject(this.project, `source:${source}`, this.secret)
-    if (!await this.store.permitRequest(subject, sourceKey, now) || !await this.store.isAllowed(subject)) return
+    if (!await this.store.permitRequest(subject, sourceKey, now) || !await this.store.isAllowed(subject) || !await this.store.permitMail(now)) return
     const token = hex(crypto.getRandomValues(new Uint8Array(32)))
     const digest = await linkDigest(this.project, token)
     await this.store.put({ digest, subject, expiresAt: now + 15 * 60_000 })

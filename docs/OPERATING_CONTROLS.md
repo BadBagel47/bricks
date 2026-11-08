@@ -1,56 +1,77 @@
-# Operating controls proposal
+# Operating controls
 
-Owner direction, 2026-11-08: casual play with friends; Firebase Spark efficiency
-and simple operation take priority over advanced anti-cheat. Preserve existing
-participant authorization and input validation.
+Owner direction, 2026-11-08: casual games with friends; prioritize Firebase Spark
+quota efficiency and simple operation over advanced anti-cheat. Keep ordinary
+identity, participant authorization and input validation.
 
-## Access switch
+## Approved behavior
 
-Proposed control: a small public-readable, client-write-denied operating record
-in Realtime Database. The owner changes its enabled boolean in Firebase Console;
-no custom admin login or backend is required. Whole-game versus multiplayer-only
-scope is pending clarification. This is a proposal, not implemented behavior.
+Private administrators enter their email and get a temporary personal sign-in
+link only when allowlisted. No password or Google account is required for the
+administrator. The allowlist must not appear in GitHub, frontend code or public
+API responses. Email service and mailbox access still require private accounts.
 
-The multiplayer client observes the operating record over its existing connection.
-When disabled it stops gameplay, detaches listeners and disconnects, and the
-server rules reject ordinary room/game reads and writes. Authorized presence and
-intent cleanup must remain possible so onDisconnect does not leave stale state.
-Administrative interruption must not produce a competitive result.
+Controls: Off, On, On with a timer, and timed room grants in Rooms-only mode.
+Off takes precedence over room grants for new admissions. A room timer bounds
+new matches in that room; expiry is computed from trusted server time, without a
+write every second or a scheduled database update to close it.
 
-Apply the operating condition to individual existing read/write grants. Never
-add a permissive root write/read rule: ancestor grants bypass child restrictions.
-The operating record itself remains readable while disabled and cannot be
-changed by anonymous game clients; console administrators bypass client rules.
+Owner confirmed that ongoing games should finish. Use draining closure: expired
+access/Off denies new admissions and rematches, while already admitted matches
+retain their participant-scoped gameplay/result/recovery access until completion.
+Lobby presence alone is not an admission. A countdown that would reach gameplay
+after the cutoff must not create a fresh active match. Existing recovery deadlines
+still apply; closure does not give an unlimited recovery window. These are the
+integration requirements, not behavior already present in the live game.
 
-If whole-game gating is chosen, use a small initial REST read rather than opening
-a persistent Firebase socket for single-player. It consumes some database
-bandwidth per check. An already loaded/offline static single-player client cannot
-be reliably revoked; an immediate stop of all online clients requires additional
-checks/connections. Agree the desired semantics before implementation.
+The owned sender domain is undecided; `l8p.one` is a tentative candidate only.
+Do not assume approval to edit its DNS or migrate the game to that domain.
+A separate sender subdomain such as `spel.l8p.one` can isolate provider DNS records
+from existing mail. Use the selected provider's actual DKIM/SPF/return-path
+instructions; preserve existing apex MX/SPF and do not create conflicting SPF
+records. No DNS record values have been generated or published. Correct DNS
+configuration improves delivery but cannot guarantee inbox placement.
+
+## Architecture and implementation state
+
+Keep GitHub Pages for the game. Host the administrator UI and API together on a
+small trusted backend. The reusable core is in `modules/access-control`; its
+README lists implemented/tested primitives and remaining adapters explicitly.
+No production email, backend provisioning or Firebase policy integration exists.
+The previous console-only proposal is superseded by the approved delegated
+email-link access, timers and cross-project reuse.
+
+Mirror non-private operating policy into RTDB using a trusted narrow publisher.
+Do not expose credentials/allowlists there, and never grant permissive root
+read/write access: ancestor grants bypass child restrictions. Ordinary anonymous
+game identities cannot modify policy or fabricate admission. Preserve disconnect
+cleanup and the paths required to finish already admitted matches.
+
+No routine polling or heartbeat writes. Multiplayer should observe the tiny
+policy on its existing connection; solo can use a small initial REST admission
+read. An already downloaded/offline static solo game cannot be reliably revoked.
 
 ## Quota priorities
 
-1. Keep changed-only compact snapshots and the existing two-per-second ceiling;
+1. Preserve changed-only compact snapshots and the two-per-second ceiling;
    measure before reducing smoothness or recovery reliability.
-2. Measure actual Firebase downloads, storage and connection counts for a defined
-   two-player session. JSON byte estimates alone do not establish billed traffic.
-3. Evaluate redundant Battle preflight reads and obsolete-epoch payload cleanup.
-   Preserve attack deduplication, recovery consistency and owned room-code links.
-4. Keep the access control event-driven for multiplayer; do not introduce routine
-   polling, heartbeat writes, paid functions or a separate administration site.
+2. Measure actual Firebase downloads, storage and connections in a defined
+   two-player session. JSON byte estimates alone are not billed-traffic evidence.
+3. Evaluate redundant Battle preflight reads and obsolete-epoch cleanup without
+   breaking attack deduplication, recovery or owned room-code links.
+4. Bound login mail with durable source/recipient limits and an aggregate daily
+   cap. Current default is 20 attempts/day/project, configurable downwards; verify
+   the provider allowance and other projects' shared usage before deployment.
+5. Keep scheduled pruning and connection lifecycle bounded. No paid services or
+   billing upgrades without the owner's explicit approval.
 
-Tests should cover disabling during lobby/countdown/game/recovery, denied new
-sessions, allowed owner cleanup, reconnect/re-enable, and protection of the
-operating record against anonymous client writes. No production rules change is
-requested until an implementation has passed those tests.
+Tests before publication must cover closed/new admission, exact timer boundaries,
+lobby/countdown, ongoing-match completion, recovery, rematch denial, cleanup,
+re-enable, admin revocation and anonymous policy-write denial. Complete the HTTP
+and mail-provider deployment tests before packaging the reuse guide for another
+project. A focused Terra High review remains planned before publication.
 
-## Updated owner requirements and research checkpoint — 2026-11-08
-
-The owner subsequently chose passwordless email links for administrators, a
-private allowlist, global off/on/timed-on and timed rooms, and reuse in another
-project. The initial console-only proposal above is superseded by these needs.
-The implementation foundation is in `modules/access-control/README.md`.
-It is not integrated with Bricks and sends no production email.
+## Research checkpoint — 2026-11-08
 
 Cloudflare Workers/D1 is a candidate for the trusted server and private storage.
 The official Workers limits source was fetched successfully on 2026-11-08:
@@ -68,7 +89,3 @@ proxy's 403. Attempts to find an assumed Resend docs-repository path returned 40
 No current Firebase email-link quota, Resend allowance or domain requirement is
 claimed as verified. Select/verify the mail provider and domain arrangement before
 provisioning. Existing app Firebase traffic remains unchanged by this foundation.
-
-Open inputs: whether a timer hard-stops a running match or only new starts, and
-whether an owned sender domain is available. Do not request real addresses or
-secrets in public issue bodies, commits or chat; provision through private tools.

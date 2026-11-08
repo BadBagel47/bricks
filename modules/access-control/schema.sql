@@ -15,3 +15,9 @@ CREATE TABLE IF NOT EXISTS rate_windows (
   resets_at INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS rate_window_expiry ON rate_windows(resets_at);
+CREATE TABLE IF NOT EXISTS admin_sessions (
+  digest TEXT PRIMARY KEY,
+  subject TEXT NOT NULL,
+  expires_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS admin_session_expiry ON admin_sessions(expires_at);
