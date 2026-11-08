@@ -153,6 +153,14 @@ test in `tests/operating-runtime.test.ts` bundles the actual adapters and exerci
 all four in workerd, including redirect refusals. Source:
 https://raw.githubusercontent.com/cloudflare/cloudflare-docs/production/src/content/docs/workers/runtime-apis/request.mdx
 
+Another runtime trap: assigning native fetch to a class field and calling
+`this.fetcher(...)` supplies an incompatible receiver in Workers. Copy the
+reference to a local variable and call it as a function instead. The native
+workerd test intercepts outbound requests at the runtime boundary (not by
+replacing fetch with a permissive JS mock) and reproduces the old failure.
+With both corrections, Bricks' live read-only admin/access check passed in
+GitHub run 42525336450. Re-test these adapters in the target project's runtime.
+
 For this repository, `.github/workflows/pages.yml` includes an optional preview
 Worker deployment job. Store a dedicated Cloudflare token as GitHub repository
 **Actions secret** `CLOUDFLARE_API_TOKEN`, limited to the intended account, with

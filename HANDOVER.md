@@ -5,13 +5,23 @@ phase docs. Owner instructions and `BRICKS_SPEC.md` take precedence.
 
 ## Current checkpoint — 2026-11-08
 
+- **Live access repaired:** `0e84d3b` passed all checks, deployed and passed
+  actual read-only `/admin/` and `/api/access` checks from GitHub:
+  https://github.com/BadBagel47/bricks/actions/runs/42525336450 . Node mocks had
+  missed unsupported redirect:error and native fetch invoked with a class receiver.
+  Adapters now use manual redirects (rejecting 3xx) and a local unbound fetch.
+  Actual workerd tests cover all four adapters and native fetch with intercepted
+  outbound traffic. Regression confirmed failing with the old receiver pattern.
+  180 local tests/lint/build passed. Owner corrected the Worker key name to
+  FIREBASE_API_KEY, leaving the VITE name in GitHub. Next: private administrator
+  provisioning and actual Mailjet receipt/session checks. Public Pages unchanged.
 - **Worker application deployed:** `afcfb8e` passed the complete CI pipeline and
   the `Publish operating preview` job succeeded with the owner-supplied GitHub
   Cloudflare Actions secret: https://github.com/BadBagel47/bricks/actions/runs/42520439790 .
   Preview origin: https://bricks-operating.l8p1.workers.dev ; `/admin/`, `/play/`.
   This is separate from public Pages, which remains unchanged. This runtime's
-  proxy blocks workers.dev, so live HTTP verification still requires owner readback.
-  Next: owner checks `/api/access` config and admin UI, then privately provision
+  proxy blocks workers.dev; live readback now uses GitHub's checked deployment.
+  Next: privately provision
   the allowlist using the setup CLI and test actual Mailjet receipt/session.
 - Owner reports publishing the checked operating-aware Firebase rules after
   confirming both modes On. No live API/rules readback performed here yet.
