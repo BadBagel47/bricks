@@ -153,4 +153,5 @@ actual states and UID lengths vary. This is not a billed-download estimate.
 There are at most two checkpoint records per room epoch, with no heartbeat or
 per-match history. Recovery reads, retries, transport overhead and the eventual
 production quota effect remain unmeasured. Old epochs still need a retention
-policy, and recovery itself is not implemented yet.
+policy. Resumption adds bounded, event-driven session, lease and readiness
+records and reads; actual production quota impact remains unmeasured.

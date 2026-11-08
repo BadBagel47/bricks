@@ -703,20 +703,25 @@ competitive result. There is no background worker: if nobody is connected,
 expiration is processed when a participant returns. A transient connection can
 be detected later than the physical interruption by Firebase presence.
 
-The recovery readiness candidate claims a lease and compares the player's saved
+The recovery readiness process claims a lease and compares the player's saved
 engine with its acknowledged display snapshot and, for Battle, the authoritative
 attack-stream prefixes. Its bounded record is tied to the match, current lease,
-checkpoint sequence and deadline. This is a consistency check, not proof that a
-client played honestly. The two-session reconnect/readiness test passed in CI
-for `5b83ee2`: https://github.com/BadBagel47/bricks/actions/runs/42426765152 .
-The published client has none of this behavior.
+checkpoint sequence, interruption cycle and deadline. This is a consistency
+check, not proof that a client played honestly. Once both players confirm, a
+server transaction authorizes the current connections and the publishers resume
+from their confirmed sequences. Each subsequent interruption starts a distinct
+cycle so old confirmations cannot authorize a new resume.
 
-**Missing:** No protocol yet resumes the match after readiness. In particular,
-the active data plane still requires the original frozen connection IDs, and a
-reconstructed publisher must continue snapshot/attack sequence numbers and
-confirmed Battle counters. A safe resume must coordinate both players and a
-common Battle frame, authorize the new connections, account for paused time,
-handle repeated interruptions and in-flight writes, and preserve legitimate
-completed results. If any required checkpoint or stream is inconsistent, abandon
-without recording a competitive result. Do not publish the candidate rules or
-client as complete recovery before the full security and two-session tests pass.
+For Battle, recovery advances each saved game to the later checkpoint frame
+before delivering attack prefixes received after that checkpoint. If an active
+board would need more than 120 frames of catch-up, recovery is refused. Finished
+boards require their confirmed final record; inconsistent or unavailable state
+leads to abandonment without a competitive result. Inputs after the last
+acknowledged snapshot can be lost, and Firebase presence may detect a disconnect
+after it actually happens. Recovery is not guaranteed.
+
+Full branch CI passed for `3253fc4`, including repeat recovery, queued Battle
+attacks and finished-player results: https://github.com/BadBagel47/bricks/actions/runs/42432663844 .
+Later reload, clock and frame-bound refinements are under test. Do not publish
+those refinements until full security and two-session checks pass. The published
+client has none of this recovery behavior.

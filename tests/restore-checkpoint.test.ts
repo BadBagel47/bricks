@@ -20,6 +20,8 @@ test('only a matching acknowledged snapshot and checkpoint can restore the game'
   assert.deepEqual(restoreCheckpoint(record, snapshot, start, joined, streams).game, game)
   for (const bad of [{ ...record, seq: 2 }, { ...record, updatedAt: 101 }, { ...record, matchId: 'd'.repeat(32) }, { ...record, connection: start.guestConnection }, { ...record, payload: '{' }, { ...record, payload: encodeCheckpoint({ ...game, score: 100 }, null) }]) assert.throws(() => restoreCheckpoint(bad, snapshot, start, joined, streams))
   assert.throws(() => restoreCheckpoint(record, { ...snapshot, score: 20 }, start, joined, streams))
+  const laterStart = { ...start, hostConnection: 'e'.repeat(32) }
+  assert.deepEqual(restoreCheckpoint(record, snapshot, laterStart, joined, streams).game, game, 'an unchanged server snapshot may use an earlier authorized connection')
 })
 
 test('Battle recovery checks the saved game and confirmed attack prefixes', () => {

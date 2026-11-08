@@ -2,7 +2,7 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.12 — Reconnection and recovery
-- **Status:** 3.12 is in progress. Checkpoints, control leases, shared pause, abandonment and reconnect readiness passed CI. Actual match resumption and restoration remain unfinished. Live remains 3.11.
+- **Status:** 3.12 is in progress. Resumption, repeated interruptions, Battle and finished-player recovery passed branch CI; subsequent refinements and reload testing are running locally. Production rules and client have not been published. Live remains 3.11.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.11
@@ -213,3 +213,5 @@
 - First Score Duel resumption passed full CI at `547fc90`: https://github.com/BadBagel47/bricks/actions/runs/42431654868 . Later candidate work supports finished-player snapshots/finishes and brings Battle checkpoints up to the later saved frame before delivering newer attack prefixes, with server-enforced maximum skew for two active boards. Tests for Battle and terminal recovery await CI. A second interruption still cancels and must be addressed before publication. Local lint, build and 148 unit tests passed.
 
 - CI for terminal/Battle candidate `22b1557` failed a post-resume movement assertion: https://github.com/BadBagel47/bricks/actions/runs/42432133401 . The test could interact before the paused view changed; a later candidate waits for both clients. It also supports repeated interruption cycles with fresh readiness records and server deadlines. These changes, Battle recovery and terminal results require full Firebase/browser CI; no publication yet.
+
+- Repeat recovery, Battle queued attacks and finished-player results passed full CI at `3253fc4`: https://github.com/BadBagel47/bricks/actions/runs/42432663844 . Subsequent candidate changes improve recovery-clock startup with delayed local presence, bound Battle catch-up for active players, and test reload and guest controls during a second interruption. The local Firebase suite passed 41 tests; targeted two-browser reload/control and Battle terminal-recovery tests passed. With the emulator JAR cached, `env -u HTTP_PROXY -u HTTPS_PROXY -u http_proxy -u https_proxy -u ALL_PROXY -u all_proxy npm run test:firebase` avoids this environment's loopback proxy cancellation. Final CI still needs verification. Do not publish until the latest changes pass full CI.

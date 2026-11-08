@@ -41,7 +41,7 @@ export default function MatchStartPanel({ options, database, joined, settings, a
   joinedRef.current = joined
   const recoveryContext = useRef({ matchId: start?.id, connection: localConnection, cycle: recovery?.cycle })
   recoveryContext.current = { matchId: start?.id, connection: localConnection, cycle: recovery?.cycle }
-  const retainedCandidate = useRef<{ resumedAt: number; value: Awaited<ReturnType<typeof prepareRecovery>> } | null>(null)
+  const retainedCandidate = useRef<{ resumedAt: number; cycle: number; value: Awaited<ReturnType<typeof prepareRecovery>> } | null>(null)
   const active = start !== null && start.status !== 'cancelled'
   useEffect(() => {
     if (start?.status === 'ready') playedMatches.current.add(start.id)
@@ -138,13 +138,13 @@ export default function MatchStartPanel({ options, database, joined, settings, a
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [database, path, start?.id, start?.status, recovery, connected, localConnection, connections])
   useEffect(() => {
-    if (!start || start.status !== 'ready' || recovery?.phase !== 'paused' || recovery.matchId !== start.id || !candidate || candidate.readiness.matchId !== start.id || candidate.readiness.connection !== localConnection || !connected) return
+    if (!start || start.status !== 'ready' || recovery?.phase !== 'paused' || recovery.matchId !== start.id || !candidate || candidate.readiness.matchId !== start.id || candidate.readiness.connection !== localConnection || !connected || offset === null) return
     const one = recoveryReady[start.hostUid], two = recoveryReady[start.guestUid]
     if (!one || !two || one.matchId !== start.id || two.matchId !== start.id || one.cycle !== recovery.cycle || two.cycle !== recovery.cycle || candidate.readiness.cycle !== recovery.cycle) return
     void resumeRecovery(database, joinedRef.current, start.id, recovery.cycle, one.connection, two.connection, Math.max(one.battleFrame, two.battleFrame)).catch(() => { /* The server rejects stale readiness or missing presence. */ })
     // A server transaction decides the race between resuming and expiration.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [database, path, start?.id, start?.status, recovery, recoveryReady, candidate, localConnection, connected])
+  }, [database, path, start?.id, start?.status, recovery, recoveryReady, candidate, localConnection, connected, offset])
   useEffect(() => {
     if (!start || start.status !== 'countdown' || !host || !connected || !valid || offset === null || localConnection !== start.hostConnection || interrupted.current.has(start.id)) return
     const timer = setTimeout(() => {
@@ -170,11 +170,14 @@ export default function MatchStartPanel({ options, database, joined, settings, a
   }
   const ready = start?.status === 'ready' && valid && connected
   const paused = Boolean(start && start.status === 'ready' && (!connected || valid === false || (!resumed && interrupted.current.has(start.id)) || (recovery?.matchId === start.id && recovery.phase !== 'resumed')))
-  const freshCandidate = resumed && candidate && candidate.readiness.matchId === start?.id && candidate.readiness.connection === localConnection && candidate.readiness.cycle === resumed.cycle ? candidate : undefined
-  if (resumed && freshCandidate) retainedCandidate.current = { resumedAt: resumed.resumedAt, value: freshCandidate }
+  // Wait for the local presence view before mounting a newly resumed game. Its
+  // clock then starts from the shared server timestamp without local skew.
+  const freshCandidate = resumed && connected && valid && offset !== null && candidate && candidate.readiness.matchId === start?.id && candidate.readiness.connection === localConnection && candidate.readiness.cycle === resumed.cycle ? candidate : undefined
+  if (resumed && freshCandidate) retainedCandidate.current = { resumedAt: resumed.resumedAt, cycle: resumed.cycle, value: freshCandidate }
   const generation = resumed?.resumedAt ?? session?.lastResumedAt ?? 0
-  const restored = freshCandidate ?? (generation && start && ownedMatches.current.has(start.id) && retainedCandidate.current?.resumedAt === generation ? retainedCandidate.current.value : undefined)
-  if (start?.status === 'ready' && effectiveStart && (selected || ownedMatches.current.has(start.id)) && (!generation || restored) && (start.settings.mode !== 'battle' || start.battleVersion === 1)) return <LiveGame key={`${start.id}:${generation || 'initial'}`} database={database} joined={joined} start={effectiveStart} options={options} serverTimeOffset={offset ?? 0} paused={paused} restored={restored || undefined} resumedAt={generation || undefined} resumedFrame={resumed?.battleFrame} previousOpponentConnection={session && generation ? (host ? session.previousGuestConnection : session.previousHostConnection) : undefined} onLeave={() => transitionMatchStart(database, joined, start.id, 'cancelled')} />
+  const generationCycle = resumed?.cycle ?? (session?.lastResumedAt ? session.cycle - 1 : 0)
+  const restored = freshCandidate ?? (generation && start && ownedMatches.current.has(start.id) && retainedCandidate.current?.resumedAt === generation && retainedCandidate.current.cycle === generationCycle ? retainedCandidate.current.value : undefined)
+  if (start?.status === 'ready' && effectiveStart && (selected || ownedMatches.current.has(start.id)) && (!generation || restored) && (start.settings.mode !== 'battle' || start.battleVersion === 1)) return <LiveGame key={`${start.id}:${generationCycle}`} database={database} joined={joined} start={effectiveStart} options={options} serverTimeOffset={offset ?? 0} paused={paused} restored={restored || undefined} resumedAt={generation || undefined} resumedFrame={resumed?.battleFrame} previousOpponentConnection={session && generation ? (host ? session.previousGuestConnection : session.previousHostConnection) : undefined} onLeave={() => transitionMatchStart(database, joined, start.id, 'cancelled')} />
   const bothConnected = Boolean(connections && localConnection && connections[joined.room.hostUid]?.[localConnection] && joined.room.players.guest && Object.keys(connections[joined.room.players.guest.uid] ?? {}).length)
   const roundId = previousRoundId(start)
   const consent = Boolean(readiness && connections && readyForRound(readiness.host, joined.room.hostUid, roundId, joined.room.roleRevision ?? 0, connections, host ? localConnection : null) && readyForRound(readiness.guest, joined.room.players.guest?.uid, roundId, joined.room.roleRevision ?? 0, connections))
