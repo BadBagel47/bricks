@@ -1,6 +1,6 @@
 // Read-only checks. Do not print response bodies or provider credentials.
 const origin = 'https://bricks-operating.l8p1.workers.dev'
-const known = new Set(['GOOGLE_AUTH_FAILED', 'DATABASE_ACCESS_DENIED', 'DATABASE_REQUEST_FAILED', 'DATABASE_VERSION_UNAVAILABLE', 'OPERATING_CONFIG_INVALID', 'UPSTREAM_UNAVAILABLE', 'WORKER_CONFIGURATION_INVALID'])
+const known = new Set(['PUBLISHER_KEY_INVALID', 'PUBLISHER_SIGNING_FAILED', 'GOOGLE_CONNECTION_FAILED', 'DATABASE_CONNECTION_FAILED', 'GOOGLE_AUTH_FAILED', 'DATABASE_ACCESS_DENIED', 'DATABASE_REQUEST_FAILED', 'DATABASE_VERSION_UNAVAILABLE', 'OPERATING_CONFIG_INVALID', 'UPSTREAM_UNAVAILABLE', 'WORKER_CONFIGURATION_INVALID'])
 try {
   const page = await fetch(`${origin}/admin/`, { redirect: 'error', signal: AbortSignal.timeout(18000) })
   if (!page.ok || !(await page.text()).includes('Bricks administration')) throw new Error('ADMIN_PAGE_UNAVAILABLE')
