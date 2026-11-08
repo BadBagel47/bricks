@@ -34,3 +34,15 @@ test('captured checkpoint remains unchanged when the live game continues', () =>
   assert.equal(saved.game.board.flat().filter(Boolean).length, 0)
   assert.equal(battle.applied, 3)
 })
+
+test('catch-up to the shared recovery frame precedes delivery of newer attack prefixes', () => {
+  const c = checkpoint()
+  const restored = restoreBattleCheckpoint(c, { ...expected, opponentStreamTotal: 5 }).battle
+  restored.advanceTo(40)
+  assert.equal(restored.frame, 40)
+  assert.equal(restored.received, 3)
+  restored.receive(5)
+  assert.equal(restored.pending, 5)
+  restored.receive(5)
+  assert.equal(restored.pending, 5)
+})

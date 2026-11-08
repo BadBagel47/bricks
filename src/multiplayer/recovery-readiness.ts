@@ -1,6 +1,6 @@
 import { get, ref, set } from 'firebase/database'
 import type { Database } from 'firebase/database'
-import { battlePath, parseAttackStream } from './battle-repository.ts'
+import { battlePath, parseAttackStream, parseBattleFinish } from './battle-repository.ts'
 import { claimControlLease } from './control-lease.ts'
 import { parseGameSnapshot } from './game-snapshot.ts'
 import type { MatchStart } from './match-start.ts'
@@ -32,10 +32,14 @@ export async function prepareRecovery(database: Database, joined: JoinedRoom, st
   if (!snapshot) throw new Error('No acknowledged game snapshot')
   const own = parseAttackStream(ownAttack?.val() ?? null), other = parseAttackStream(otherAttack?.val() ?? null)
   const restored = restoreCheckpoint(saved.val(), snapshot, start, joined, { own: own?.matchId === start.id ? own.total : 0, opponent: other?.matchId === start.id ? other.total : 0 })
-  if (restored.battle && other?.matchId === start.id) restored.battle.battle.receive(other.total)
+  const ownFinish = restored.battle && snapshot.status === 'gameOver' ? parseBattleFinish((await get(ref(database, battlePath('battleFinishes', joined, joined.uid)))).val()) : null
+  if (restored.battle && snapshot.status === 'gameOver') {
+    const game = restored.battle.battle
+    if (!ownFinish || ownFinish.matchId !== start.id || ownFinish.connection !== snapshot.connection || ownFinish.frame !== game.endedFrame || ownFinish.sent !== restored.battle.committedSent || ownFinish.received !== game.received || ownFinish.applied !== game.applied || ownFinish.cancelled !== game.cancelled) throw new Error('No acknowledged Battle finish')
+  }
   const readiness: RecoveryReadiness = { matchId: start.id, connection, leaseRevision: lease.revision, checkpointSeq: snapshot.seq, battleFrame: restored.battle?.battle.frame ?? 0 }
   const location = ref(database, recoveryReadinessPath(joined, joined.uid))
   const current = (await get(location)).val()
   if (!current || Object.entries(readiness).some(([key, value]) => current[key] !== value)) await set(location, readiness)
-  return { readiness, snapshot, ...restored }
+  return { readiness, snapshot, ownFinish, opponentTotal: other?.matchId === start.id ? other.total : 0, ...restored }
 }

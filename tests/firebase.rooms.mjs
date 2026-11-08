@@ -474,7 +474,7 @@ test('a disconnected player who does not return leads to abandonment without a r
   } finally { for (const context of contexts) await context.close() }
 })
 
-test('Score Duel waits for both final scores, lets the survivor continue, settles by points and supports a zero draw', { timeout: 60000 }, async () => {
+test('Score Duel retains a finished player through reconnect, settles by points and supports a zero draw', { timeout: 80000 }, async () => {
   const contexts = await Promise.all([browser.newContext(), browser.newContext()])
   try {
     const [host, guest] = await Promise.all(contexts.map(context => context.newPage()))
@@ -509,6 +509,11 @@ test('Score Duel waits for both final scores, lets the survivor continue, settle
     await host.waitForFunction(score => document.querySelector('[aria-label="Your game"] .live-stats dd')?.textContent === score.toLocaleString(), plan.score)
     await finish(host)
     await duel(host).getByText('Waiting for opponent to finish.', { exact: true }).waitFor()
+    await duel(guest).getByText('Opponent finished. Keep playing.', { exact: true }).waitFor()
+    await guest.evaluate(async () => (await import('/tests/fixtures/firebase-browser.ts')).disconnectDatabase())
+    await host.getByText('Match paused. Waiting for reconnection…', { exact: true }).waitFor()
+    await guest.evaluate(async () => (await import('/tests/fixtures/firebase-browser.ts')).reconnectDatabase())
+    await host.waitForFunction(async code => (await (await import('/tests/fixtures/firebase-browser.ts')).recoveryData(code)).session?.phase === 'resumed', code, { timeout: 12000 })
     await duel(guest).getByText('Opponent finished. Keep playing.', { exact: true }).waitFor()
     assert.equal(await host.getByRole('heading', { name: 'You win', exact: true }).count(), 0)
     assert.equal(await guest.getByRole('heading', { name: 'You lose', exact: true }).count(), 0)
@@ -582,7 +587,7 @@ test('Score Duel waits for both final scores, lets the survivor continue, settle
   } finally { for (const context of contexts) await context.close() }
 })
 
-test('Battle sends real multi-clear attacks, queues/deduplicates rows, applies at lock and settles by shared survival', { timeout: 60000 }, async () => {
+test('Battle restores queued attacks after reconnect, applies them once and settles by shared survival', { timeout: 80000 }, async () => {
   const contexts = await Promise.all([browser.newContext(), browser.newContext()])
   try {
     const [host, guest] = await Promise.all(contexts.map(context => context.newPage()))
@@ -609,6 +614,13 @@ test('Battle sends real multi-clear attacks, queues/deduplicates rows, applies a
     const keyFor = { rotateClockwise: 'KeyX', moveLeft: 'ArrowLeft', moveRight: 'ArrowRight', hardDrop: 'Space' }
     for (const action of plan.actions) await host.keyboard.press(keyFor[action])
     const rows = [0, 0, 1, 2, 4][plan.lines]
+    await guest.getByLabel('Battle attacks', { exact: true }).filter({ hasText: `Pending: ${rows}` }).waitFor()
+    await host.waitForTimeout(800)
+    await guest.evaluate(async () => (await import('/tests/fixtures/firebase-browser.ts')).disconnectDatabase())
+    await host.getByText('Match paused. Waiting for reconnection…', { exact: true }).waitFor()
+    await guest.evaluate(async () => (await import('/tests/fixtures/firebase-browser.ts')).reconnectDatabase())
+    await host.waitForFunction(async code => (await (await import('/tests/fixtures/firebase-browser.ts')).recoveryData(code)).session?.phase === 'resumed', code, { timeout: 12000 })
+    await guest.getByText('Match paused. Waiting for reconnection…', { exact: true }).waitFor({ state: 'hidden' })
     await guest.getByLabel('Battle attacks', { exact: true }).filter({ hasText: `Pending: ${rows}` }).waitFor()
     const grey = () => guest.getByLabel('Your game', { exact: true }).locator('.board-cell.filled').evaluateAll(nodes => nodes.filter(node => node.style.getPropertyValue('--cell-color').toLowerCase() === '#8c9487').length)
     assert.equal(await grey(), 0)

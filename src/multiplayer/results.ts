@@ -33,25 +33,25 @@ export class ResultCollector {
   private otherBattle: ResultPlayer['battle'] | null = null
   private emitted = false
   private opponentSequence = 0
-  private readonly context: { start: MatchStart; roomCode: string; epoch: number; own: { uid: string; name: string }; other: { uid: string; name: string }; host: boolean }
+  private readonly context: { start: MatchStart; roomCode: string; epoch: number; own: { uid: string; name: string }; other: { uid: string; name: string }; host: boolean; previousOpponentConnection?: string }
   private readonly completed: (result: MatchResult) => void
-  constructor(start: MatchStart, joined: JoinedRoom, completed: (result: MatchResult) => void) {
+  constructor(start: MatchStart, joined: JoinedRoom, completed: (result: MatchResult) => void, previousOpponentConnection?: string) {
     const host = joined.uid === start.hostUid
     const players = joined.room.players
-    this.context = { start, roomCode: joined.code, epoch: joined.room.epoch, own: { ...(host ? players.host : players.guest!) }, other: { ...(host ? players.guest! : players.host) }, host }
+    this.context = { start, roomCode: joined.code, epoch: joined.room.epoch, own: { ...(host ? players.host : players.guest!) }, other: { ...(host ? players.guest! : players.host) }, host, previousOpponentConnection }
     this.completed = completed
   }
   opponent(snapshot: GameSnapshot) {
-    const { start, host } = this.context
-    if (snapshot.matchId !== start.id || snapshot.connection !== (host ? start.guestConnection : start.hostConnection)) return
+    const { start, host, previousOpponentConnection } = this.context
+    if (snapshot.matchId !== start.id || (snapshot.connection !== (host ? start.guestConnection : start.hostConnection) && snapshot.connection !== previousOpponentConnection)) return
     if (snapshot.seq <= this.opponentSequence || this.other?.status === 'gameOver') return
     this.opponentSequence = snapshot.seq
     this.other = { status: snapshot.status, score: snapshot.score, level: snapshot.level, lines: snapshot.lines }
     this.tryComplete()
   }
   opponentFinish(finish: BattleFinish) {
-    const { start, host } = this.context
-    if (finish.matchId !== start.id || finish.connection !== (host ? start.guestConnection : start.hostConnection)) return
+    const { start, host, previousOpponentConnection } = this.context
+    if (finish.matchId !== start.id || (finish.connection !== (host ? start.guestConnection : start.hostConnection) && finish.connection !== previousOpponentConnection)) return
     this.otherBattle = { frame: finish.frame, sent: finish.sent, received: finish.received, applied: finish.applied, cancelled: finish.cancelled }
     this.tryComplete()
   }

@@ -55,6 +55,14 @@ test('late final acknowledgement completes after the view leaves; names and both
   assert.equal(results[0].playedAt, '1970-01-01T00:00:15.000Z')
   assert.equal(validResult(results[0]), true)
 })
+test('recovered matches accept the opponent’s acknowledged final from the prior connection', () => {
+  const results: MatchResult[] = []
+  const resumed = { ...start, guestConnection: 'd'.repeat(32) }
+  const collector = new ResultCollector(resumed, joined, value => results.push(value), start.guestConnection)
+  collector.opponent(other); collector.acknowledgeOwn(own)
+  assert.equal(results.length, 1)
+  assert.equal(results[0].players[1].score, other.score)
+})
 test('Battle waits for both confirmed frames and uses survival, including a draw despite unequal scores', () => {
   const results: MatchResult[] = []
   const c = new ResultCollector({ ...start, battleVersion: 1, settings: { ...start.settings, mode: 'battle', revision: 1 } }, joined, result => results.push(result))

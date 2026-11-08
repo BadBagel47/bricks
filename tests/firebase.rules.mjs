@@ -367,6 +367,31 @@ test('resumption requires both current leases, checkpoints, live connections and
   await assertFails(set(ref(db('host'), `gameSnapshots/${code}/1/host`), { ...newSnapshot, seq: 5 }))
 })
 
+test('Battle recovery uses the later frame and requires acknowledged finished-player data', async () => {
+  const hc = 'b'.repeat(32), gc = 'c'.repeat(32), hn = 'd'.repeat(32), gn = 'e'.repeat(32), mid = 'a'.repeat(32), now = Date.now()
+  const room = await ownedRoom()
+  await set(ref(db('guest'), `rooms/${code}`), { ...room, players: { ...room.players, guest: { uid: 'guest', name: 'Guest' } } })
+  const match = { id: mid, battleVersion: 1, status: 'ready', seed: 47, countdownAt: now - 6000, settings: { revision: 1, mode: 'battle', startLevel: 0, hold: false, requireApproval: false }, roleRevision: 0, hostUid: 'host', guestUid: 'guest', hostConnection: hc, guestConnection: gc }
+  await environment.withSecurityRulesDisabled(async context => {
+    const root = context.database()
+    await set(ref(root, `matchStarts/${code}/1`), match)
+    await set(ref(root, `presence/${code}/1`), { host: { [hn]: true }, guest: { [gn]: true } })
+    await set(ref(root, `recoverySessions/${code}/1`), { matchId: mid, phase: 'paused', interruptedAt: now })
+    await set(ref(root, `controlLeases/${code}/1`), { host: { matchId: mid, connection: hn, revision: 2 }, guest: { matchId: mid, connection: gn, revision: 2 } })
+    await set(ref(root, `gameSnapshots/${code}/1`), { host: { matchId: mid, connection: hc, seq: 3, status: 'gameOver' }, guest: { matchId: mid, connection: gc, seq: 3, status: 'playing' } })
+    await set(ref(root, `recoveryReadiness/${code}/1`), { host: { matchId: mid, connection: hn, leaseRevision: 2, checkpointSeq: 3, battleFrame: 10 }, guest: { matchId: mid, connection: gn, leaseRevision: 2, checkpointSeq: 3, battleFrame: 20 } })
+  })
+  const path = `recoverySessions/${code}/1`
+  const resume = { matchId: mid, phase: 'resumed', interruptedAt: now, resumedAt: serverTimestamp(), hostConnection: hn, guestConnection: gn, battleFrame: 20 }
+  await assertFails(set(ref(db('host'), path), resume))
+  await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), `battleFinishes/${code}/1/host`), { matchId: mid, connection: hc }) })
+  await assertFails(set(ref(db('host'), path), { ...resume, battleFrame: 10 }))
+  await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), `gameSnapshots/${code}/1/host/status`), 'playing'); await set(ref(context.database(), `recoveryReadiness/${code}/1/guest/battleFrame`), 500) })
+  await assertFails(set(ref(db('host'), path), { ...resume, battleFrame: 500 }))
+  await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), `gameSnapshots/${code}/1/host/status`), 'gameOver'); await set(ref(context.database(), `recoveryReadiness/${code}/1/guest/battleFrame`), 20) })
+  await assertSucceeds(set(ref(db('host'), path), resume))
+})
+
 test('recovery readiness requires the current lease and matching acknowledged checkpoint', async () => {
   const hc = 'b'.repeat(32), gc = 'c'.repeat(32), mid = 'a'.repeat(32), now = Date.now()
   const room = await ownedRoom()

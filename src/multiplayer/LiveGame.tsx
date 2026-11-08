@@ -27,32 +27,43 @@ import type { MatchStart } from './match-start.ts'
 import type { LiveOptions } from './live-options.ts'
 import './live-game.css'
 
-export default function LiveGame({ database, joined, start, options, serverTimeOffset, paused, onLeave, restored, resumedAt, previousOpponentConnection }: { database: Database; joined: JoinedRoom; start: MatchStart; options: LiveOptions; serverTimeOffset: number; paused: boolean; onLeave: () => Promise<void>; restored?: Awaited<ReturnType<typeof prepareRecovery>>; resumedAt?: number; previousOpponentConnection?: string }) {
+export default function LiveGame({ database, joined, start, options, serverTimeOffset, paused, onLeave, restored, resumedAt, resumedFrame, previousOpponentConnection }: { database: Database; joined: JoinedRoom; start: MatchStart; options: LiveOptions; serverTimeOffset: number; paused: boolean; onLeave: () => Promise<void>; restored?: Awaited<ReturnType<typeof prepareRecovery>>; resumedAt?: number; resumedFrame?: number; previousOpponentConnection?: string }) {
   const { preferences: { personal, bindings, gamepadBindings }, audio, onPlaying } = options
-  const [game, setGame] = useState(() => {
-    if (!restored) return createGame({ seed: start.seed, startLevel: start.settings.startLevel, holdEnabled: start.settings.hold, hardDropEnabled: personal.hardDropEnabled })
+  const battle = start.settings.mode === 'battle'
+  const [initial] = useState(() => {
+    if (restored?.battle) {
+      const instance = restored.battle.battle
+      instance.advanceTo(resumedFrame ?? instance.frame)
+      // Prefixes received after the checkpoint are delivered after catch-up.
+      instance.receive(restored.opponentTotal)
+      return { game: instance.game, battleGame: instance }
+    }
+    if (!restored) {
+      const game = createGame({ seed: start.seed, startLevel: start.settings.startLevel, holdEnabled: start.settings.hold, hardDropEnabled: personal.hardDropEnabled })
+      return { game, battleGame: battle ? new BattleGame(game, start.seed, joined.uid === start.hostUid ? 'guest' : 'host') : null }
+    }
     const elapsed = Math.max(0, Date.now() + serverTimeOffset - (resumedAt ?? Date.now() + serverTimeOffset))
-    return restored.battle ? restored.game : advanceGame(restored.game, elapsed).state
+    return { game: advanceGame(restored.game, elapsed).state, battleGame: null }
   })
-  const [collector] = useState(() => new ResultCollector(start, joined, result => options.onCompleted(result, joined.uid)))
+  const [game, setGame] = useState(initial.game)
+  const [collector] = useState(() => new ResultCollector(start, joined, result => options.onCompleted(result, joined.uid), previousOpponentConnection))
   const resultsVisible = options.completedId !== null
   const current = useRef(game)
-  const battle = start.settings.mode === 'battle'
-  const [battleGame] = useState(() => battle ? restored?.battle?.battle ?? new BattleGame(game, start.seed, joined.uid === start.hostUid ? 'guest' : 'host') : null)
+  const [battleGame] = useState(initial.battleGame)
   const [clock] = useState(() => {
-    const elapsed = restored?.battle && resumedAt !== undefined ? restored.battle.battle.frame * 1000 / 60 + Math.max(0, Date.now() + serverTimeOffset - resumedAt) + 0.0001 : Date.now() + serverTimeOffset - start.countdownAt - 5000
+    const elapsed = restored?.battle && resumedAt !== undefined ? (resumedFrame ?? restored.battle.battle.frame) * 1000 / 60 + Math.max(0, Date.now() + serverTimeOffset - resumedAt) + 0.0001 : Date.now() + serverTimeOffset - start.countdownAt - 5000
     const value = new MatchClock(elapsed, performance.now())
     if (paused) value.pause(performance.now())
     return value
   })
   const battleFrame = useCallback(() => clock.frame(performance.now()), [clock])
   const [otherFinish, setOtherFinish] = useState<BattleFinish | null>(null)
-  const [ownFinishFrame, setOwnFinishFrame] = useState<number | null>(null)
+  const [ownFinishFrame, setOwnFinishFrame] = useState<number | null>(restored?.ownFinish?.frame ?? null)
   const [sentRows, setSentRows] = useState(restored?.battle?.committedSent ?? 0)
   const [, refreshBattle] = useState(0)
   const [opponent, setOpponent] = useState<GameSnapshot | null>(null)
   const [error, setError] = useState('')
-  const [publishedFinal, setPublishedFinal] = useState<Pick<GameSnapshot, 'status' | 'score'> | null>(null)
+  const [publishedFinal, setPublishedFinal] = useState<Pick<GameSnapshot, 'status' | 'score'> | null>(restored?.snapshot.status === 'gameOver' ? restored.snapshot : null)
   const [leaving, setLeaving] = useState(false)
   const [confirm, setConfirm] = useState(false)
   const [controller, setController] = useState(false)
@@ -98,7 +109,12 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
   const commitRef = useRef(commit)
   useLayoutEffect(() => { applyRef.current = apply; commitRef.current = commit })
 
-  useEffect(() => { onPlaying(true); audio.beginGame(personal); if (pausedRef.current) audio.pauseGame(); return () => { onPlaying(false); audio.leaveGame() } }, [audio, onPlaying, personal])
+  useEffect(() => { onPlaying(true); audio.beginGame(personal); if (pausedRef.current || current.current.status === 'gameOver') audio.pauseGame(); return () => { onPlaying(false); audio.leaveGame() } }, [audio, onPlaying, personal])
+  useEffect(() => {
+    if (restored?.snapshot.status !== 'gameOver') return
+    const finish = restored.ownFinish
+    collector.acknowledgeOwn(restored.snapshot, finish ? { frame: finish.frame, sent: finish.sent, received: finish.received, applied: finish.applied, cancelled: finish.cancelled } : null)
+  }, [collector, restored])
   useEffect(() => {
     let alive = true
     let previousSequence = 0
@@ -120,7 +136,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
       } catch { setError('Opponent attacks are invalid. Return to the lobby.') }
     }, () => setError('Unable to synchronize attacks. Return to the lobby.')) : () => {}
     const stopFinish = battleGame ? onValue(ref(database, battlePath('battleFinishes', joined, opponentUid)), snapshot => {
-      try { const final = parseBattleFinish(snapshot.val()); if (final?.matchId === start.id && final.connection === otherConnection) { collector.opponentFinish(final); setOtherFinish(final) } }
+      try { const final = parseBattleFinish(snapshot.val()); if (final?.matchId === start.id && (final.connection === otherConnection || final.connection === previousOpponentConnection)) { collector.opponentFinish(final); setOtherFinish(final) } }
       catch { setError('Opponent result is invalid. Return to the lobby.') }
     }, () => setError('Unable to synchronize results. Return to the lobby.')) : () => {}
     let acknowledgedProduced = restored?.battle?.acknowledgedProduced ?? 0
@@ -130,6 +146,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     let timer: ReturnType<typeof setTimeout>
     async function publish() {
       if (!alive) return
+      if (restored?.snapshot.status === 'gameOver') return
       if (pausedRef.current) { timer = setTimeout(() => void publish(), 500); return }
       const next = gate.next(current.current, performance.now())
       const produced = battleGame?.produced ?? 0
