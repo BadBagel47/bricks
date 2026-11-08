@@ -16,6 +16,10 @@ import type { JoinedRoom } from './room-model.ts'
 import { observePresence } from './presence.ts'
 import type { RoomPresence } from './presence.ts'
 import type { Rooms } from './rooms.ts'
+import { invitationToken, operatingOrigin, publicOperating } from '../access/client.ts'
+import { publicAccess, parseOperating } from '../../modules/access-control/operating.ts'
+import type { OperatingConfig } from '../../modules/access-control/operating.ts'
+import { onValue, ref } from 'firebase/database'
 
 function configured() { try { return readFirebaseConfig(import.meta.env) !== null } catch { return false } }
 function setInvite(code: string | null) {
@@ -45,6 +49,8 @@ export default function MultiplayerScreen({ username, branding, onBack, preferen
   const [localConnection, setLocalConnection] = useState<string | null>(null)
   const [starting, setStarting] = useState(false)
   const [notice, setNotice] = useState('')
+  const [operating, setOperating] = useState<OperatingConfig | null>(null)
+  const [accessNotice, setAccessNotice] = useState('')
   const [copyFallback, setCopyFallback] = useState<string | null>(null)
   const [connected, setConnected] = useState<boolean | null>(null)
   const currentRoom = useRef(joined)
@@ -60,9 +66,33 @@ export default function MultiplayerScreen({ username, branding, onBack, preferen
   const waitingMessages = useRef<{ key: string; messages: WaitingMessages } | null>(null)
   const lobbyKey = joined ? `${joined.code}:${joined.room.epoch}` : ''
   const database = admitted?.key === lobbyKey ? admitted.database : null
+  const privateToken = joined ? invitationToken(joined.code) : undefined
+  const sharingURL = joined && (!joined.private || privateToken) ? inviteURL(joined.code, location.href, privateToken) : null
   if (waitingMessages.current?.key !== lobbyKey) waitingMessages.current = { key: lobbyKey, messages: new WaitingMessages() }
 
   useLayoutEffect(() => { heading.current?.focus() }, [joined?.code])
+  useEffect(() => {
+    if (!operatingOrigin()) return
+    let alive = true
+    void publicOperating().then(value => { if (alive) setOperating(value) }).catch(() => { if (alive) setAccessNotice('Unable to check public access. Try again before starting a new match.') })
+    return () => { alive = false }
+  }, [])
+  useEffect(() => {
+    if (!database || !operatingOrigin()) return
+    const stop = onValue(ref(database, 'operating/config'), snapshot => {
+        try { setOperating(parseOperating(snapshot.val())); setAccessNotice('') }
+        catch { setAccessNotice('Unable to check public access. New matches may be unavailable.') }
+      }, () => setAccessNotice('Unable to check public access. New matches may be unavailable.'))
+    return stop
+  }, [database])
+  useEffect(() => {
+    if (!operating) return
+    const refresh = () => setAccessNotice(publicAccess(operating, 'multi', Date.now()) ? '' : 'Public multiplayer is closed. Private invitations and administrator access may still be used.')
+    refresh()
+    const remaining = operating.multi.mode === 'until' ? operating.multi.expiresAt - Date.now() : 0
+    const timer = remaining > 0 ? setTimeout(refresh, Math.min(remaining + 10, 2_147_483_647)) : undefined
+    return () => clearTimeout(timer)
+  }, [operating])
   useEffect(() => { alive.current = true; return () => { alive.current = false; void service.current?.then(repository => { if (!alive.current) repository.suspend() }) } }, [])
 
   const onCompleted = useCallback((result: MatchResult, uid: string) => {
@@ -193,6 +223,7 @@ export default function MultiplayerScreen({ username, branding, onBack, preferen
     <section className="settings-card multiplayer-card" aria-busy={busy}>
       <h1 ref={heading} tabIndex={-1}>{joined ? `Room ${joined.code}` : '2 Players'}</h1>
       {!available && <p className="notice" role="status">Multiplayer is not connected yet.</p>}
+      {accessNotice && <p className="notice" role="status">{accessNotice}</p>}
       {error && <div role="alert"><p className="notice">{error.message}</p><div className="room-actions">
         {retry.current && <button className="back-button" disabled={busy} onClick={() => void run(retry.current!)}>Retry</button>}
         {!joined && <button className="back-button" onClick={() => { setError(null); input.current?.focus() }}>Edit code</button>}
@@ -207,9 +238,9 @@ export default function MultiplayerScreen({ username, branding, onBack, preferen
         {connected === false && <p className="notice" role="status">Unable to connect. Check your connection and try again.</p>}
         <div className="room-actions">
           <button className="back-button" onClick={() => void copy(joined.code, 'Code copied.')}>Copy Code</button>
-          <button className="back-button" onClick={() => void copy(inviteURL(joined.code, location.href), 'Invite link copied.')}>Copy Invite Link</button>
+          {sharingURL && <button className="back-button" onClick={() => void copy(sharingURL, 'Invite link copied.')}>Copy Invite Link</button>}
         </div>
-        <label className="invite-field">Invite link<input readOnly value={inviteURL(joined.code, location.href)} onFocus={event => event.currentTarget.select()} /></label>
+        {sharingURL ? <label className="invite-field">Invite link<input readOnly value={sharingURL} onFocus={event => event.currentTarget.select()} /></label> : <p className="notice">Share the original private invitation link. The room code alone does not grant access.</p>}
         <div className="room-actions">
           {isHost && joined.room.players.guest && <button className="back-button" disabled={busy || starting || connected !== true || !presence[joined.room.players.guest.uid]} onClick={() => void run(async () => (await rooms()).transfer(joined))}>Transfer Host</button>}
           <button className="back-button" disabled={busy} onClick={() => void back()}>Leave Lobby</button>

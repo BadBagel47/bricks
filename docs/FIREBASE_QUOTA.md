@@ -155,3 +155,10 @@ per-match history. Recovery reads, retries, transport overhead and the eventual
 production quota effect remain unmeasured. Old epochs still need a retention
 policy. Resumption adds bounded, event-driven session, lease and readiness
 records and reads; actual production quota impact remains unmeasured.
+
+
+## Future option: WebRTC/P2P hybrid
+
+Owner requested a future evaluation only if measured Firebase quota consumption justifies it. Keep Firebase for rooms/signaling and consider WebRTC for live game data, accounting for TURN relay costs, fallback and recovery complexity. No P2P implementation or migration is currently authorized by this backlog item.
+
+Operating controls add small admission/policy reads, not per-frame server traffic. Public solo makes one check per new round and opens no Firebase socket or anonymous-auth session. Multiplayer uses its existing socket for policy updates. New private/operator metadata is described in `OPERATING_CONTROLS.md`; measure its retained storage and actual downloads rather than promising a specific free-player capacity.

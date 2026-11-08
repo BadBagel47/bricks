@@ -4,6 +4,7 @@ import type { FirebaseClient } from './firebase-client.ts'
 import { MultiplayerError, playerFacingError } from './errors.ts'
 import { claimGuest, leaveRoom, transferHost, normalizeRoomCode, parseRoom, randomRoomCode, roomPlayer, PREVIOUS_ROOM_KEY } from './room-model.ts'
 import type { JoinedRoom, Room } from './room-model.ts'
+import { checkOperator, operatingOrigin, redeemInvitation } from '../access/client.ts'
 
 function remember(code: string) { try { localStorage.setItem(PREVIOUS_ROOM_KEY, code) } catch { /* Ownership is authenticated, not stored in this hint. */ } }
 
@@ -11,9 +12,14 @@ export class Rooms {
   private readonly client: FirebaseClient
   constructor(client: FirebaseClient) { this.client = client }
 
+  private async isPrivate(code: string, uid: string): Promise<boolean> {
+    return operatingOrigin() ? (await get(ref(this.client.database, `roomAccess/${code}/${uid}`))).exists() : false
+  }
+
   private async identity() {
     goOnline(this.client.database)
     const uid = (await this.client.getPlayer()).uid
+    await checkOperator(() => this.client.getToken())
     await new Promise<void>((resolve, reject) => {
       let stop: Unsubscribe | undefined
       let settled = false
@@ -99,7 +105,9 @@ export class Rooms {
       const code = normalizeRoomCode(input)
       const uid = await this.identity()
       const who = roomPlayer(uid, name)
-      return { code, uid, room: await this.transact(code, room => claimGuest(room, who)) }
+      await redeemInvitation(code, who.name, uid, () => this.client.getToken())
+      const room = await this.transact(code, room => claimGuest(room, who))
+      return { code, uid, room, private: await this.isPrivate(code, uid) }
     } catch (error) { throw playerFacingError(error) }
   }
 
@@ -118,7 +126,7 @@ export class Rooms {
         return current.status === 'waiting' ? current : { ...current, roleRevision: (current.roleRevision ?? 0) + (current.hostUid === uid ? 0 : 1), epoch: current.epoch + 1, status: 'waiting', players: { host } }
       })
       remember(code)
-      return { code, room, uid }
+      return { code, room, uid, private: await this.isPrivate(code, uid) }
     } catch (error) { throw playerFacingError(error) }
   }
 

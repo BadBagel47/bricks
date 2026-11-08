@@ -9,6 +9,7 @@ export interface AnonymousPlayer { readonly uid: string }
 export interface FirebaseClient {
   readonly database: Database
   getPlayer(): Promise<AnonymousPlayer>
+  getToken(): Promise<string>
 }
 
 let active: { signature: string; client: FirebaseClient } | undefined
@@ -32,6 +33,10 @@ export function getFirebaseClient(config: FirebaseConfig | null): FirebaseClient
   let pending: Promise<AnonymousPlayer> | undefined
   const client: FirebaseClient = {
     database,
+    async getToken() {
+      await client.getPlayer()
+      return auth.currentUser!.getIdToken()
+    },
     getPlayer() {
       if (pending) return pending
       pending = (async () => {

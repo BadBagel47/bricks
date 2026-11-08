@@ -11,7 +11,7 @@ export interface Room {
   readonly createdAt: number
   readonly players: { readonly host: RoomPlayer; readonly guest?: RoomPlayer }
 }
-export interface JoinedRoom { readonly code: string; readonly room: Room; readonly uid: string }
+export interface JoinedRoom { readonly code: string; readonly room: Room; readonly uid: string; readonly private?: boolean }
 export const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 export const PREVIOUS_ROOM_KEY = 'bricks.previous-room.v1'
 
@@ -31,10 +31,10 @@ export function randomRoomCode(): string {
   return [...bytes].map(value => CODE_ALPHABET[value % CODE_ALPHABET.length]).join('')
 }
 
-export function inviteURL(code: string, currentURL: string): string {
+export function inviteURL(code: string, currentURL: string, token?: string): string {
   const url = new URL(currentURL)
   url.searchParams.set('room', normalizeRoomCode(code))
-  url.hash = ''
+  url.hash = token && /^[a-f0-9]{64}$/.test(token) ? `invite=${token}` : ''
   return url.href
 }
 

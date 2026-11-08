@@ -16,3 +16,5 @@
 
 - Owner preference: include GPT-6.1 Terra alongside Sol and Luna when recommending a model and reasoning level at each checkpoint.
 - Owner direction 2026-11-08: Bricks is a hobby game for casual play with friends. Prioritize Firebase Spark quota efficiency and simple operation; advanced anti-cheat/server-authoritative competition is not a project priority. Keep normal identity and database authorization protections.
+
+- Owner approved operating controls: separate public singleplayer/multiplayer on/off/timers, administrator play while closed, and shared private room invitations that bypass public closure but remain private when public play is on. Initialize both public modes On. Existing games finish; deny new starts/rematches after closure. Stage and test the server, rules and client before a focused Terra High review and private external setup; no paid service or billing upgrade is authorized.

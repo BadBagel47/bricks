@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { after, before, beforeEach, test } from 'node:test'
 import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebase/rules-unit-testing'
 import { get, ref, remove, runTransaction, serverTimestamp, set, update } from 'firebase/database'
+import { openOperating } from './fixtures/seed-operating.mjs'
 
 let environment
 const code = 'BRK724'
@@ -17,7 +18,10 @@ before(async () => {
     database: { host: '127.0.0.1', port: 9000, rules: await readFile(new URL('../firebase/database.rules.json', import.meta.url), 'utf8') },
   })
 })
-beforeEach(async () => { await environment.clearDatabase() })
+beforeEach(async () => {
+  await environment.clearDatabase()
+  await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), 'operating/config'), openOperating) })
+})
 after(async () => { await environment?.cleanup() })
 
 test('unauthenticated users cannot read or reserve a room code', async () => {

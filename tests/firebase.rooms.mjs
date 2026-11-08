@@ -3,13 +3,15 @@ import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { after, before, test } from 'node:test'
 import { chromium } from 'playwright-core'
+import { seedOperating } from './fixtures/seed-operating.mjs'
 
 let server
 let browser
 const baseURL = 'http://127.0.0.1:4241'
 before(async () => {
   assert.ok(process.env.FIREBASE_DATABASE_EMULATOR_HOST && process.env.FIREBASE_AUTH_EMULATOR_HOST)
-  const env = { ...process.env, VITE_FIREBASE_USE_EMULATORS: 'true' }
+  await seedOperating()
+  const env = { ...process.env, VITE_FIREBASE_USE_EMULATORS: 'true', VITE_OPERATING_ORIGIN: '' }
   for (const key of ['API_KEY', 'AUTH_DOMAIN', 'DATABASE_URL', 'PROJECT_ID', 'APP_ID']) env[`VITE_FIREBASE_${key}`] = ''
   server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', '4241', '--strictPort'], { stdio: 'pipe', env })
   let startup = ''

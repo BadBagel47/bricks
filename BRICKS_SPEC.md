@@ -2001,3 +2001,10 @@ Remember that I have limited ChatGPT Plus usage and several other projects.
 **BEGIN PHASE 1, MILESTONE 1.1 ONLY.**
 
 **END OF BRICKS MASTER DEVELOPMENT SPECIFICATION — VERSION 1.2**
+
+
+## Owner-approved operating controls — 2026-11-08
+
+This enhancement is authorized separately from later gameplay phases. Public singleplayer and multiplayer start On, with independent on/off/timer controls. Approved administrators use private allowlisted email links, without passwords or Google accounts, and can play while public access is closed. They may create timed private two-person rooms and share bearer invitation links; the short room code alone grants no private access. Private rooms remain private when public multiplayer is On. Closing/expiry stops new starts and rematches; admitted games and bounded recovery can finish.
+
+Prioritize quota efficiency and reusable provider-independent core/adapters. No routine polling, heartbeat or advanced anti-cheat system is required. The existing static singleplayer cannot be securely revoked offline. Never publish real allowlist emails or credentials. A focused Terra High review and private service setup precede publication. See `docs/OPERATING_CONTROLS.md` and `docs/OPERATING_SETUP.md`.

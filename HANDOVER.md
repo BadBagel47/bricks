@@ -1,94 +1,112 @@
 # Bricks handover
 
-Read this first when starting a new work session. It is an index and current
-checkpoint, not a replacement for owner instructions or the product specification.
-Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
+Read this first, then verify current facts in `PROGRESS.md`, Git and the linked
+phase docs. Owner instructions and `BRICKS_SPEC.md` take precedence.
 
 ## Current checkpoint — 2026-11-08
 
-- **Phase 3, milestone 3.12:** Reconnection and recovery (published).
-- **Live:** https://badbagel47.github.io/bricks/?v=09a7cb6 (3.12).
-- **Status:** Owner confirmed the checked Firebase rules published. Main `09a7cb6` passed all tests and Pages deployment: https://github.com/BadBagel47/bricks/actions/runs/42434535645 . App and rules match tested `03d97ed`. Direct live-site requests from this environment are blocked by the proxy (403); no live Firebase playtest is claimed.
-- **Workflow:** Owner wants manual tests consolidated. Finish automated two-session/security verification before the one necessary external action: checked rule publication. Later milestones still need authorization.
-- **Next:** Owner authorized work on reusable operating controls: private email-link admin access, off/on/timed access and timed rooms, prioritizing hobby use and quota efficiency. The independent core, D1-compatible link/session stores and authentication HTTP adapter are in `modules/access-control`, on remote `feature/operating-controls`; not integrated or deployed. Owner chose to let ongoing games finish after closure; deny new admissions/rematches. `l8p.one` is only a tentative sender domain; no DNS edits are authorized by naming it. See the module README and `docs/OPERATING_CONTROLS.md` for remaining admin UI/platform/mail/Firebase adapters. Never put real allowlist addresses or secrets in Git or frontend code. Phase 4 remains separately authorized.
-- **Next model:** GPT-6.1 Sol Medium for implementation; owner accepted an eventual GPT-6.1 Terra High review before publication. No review or production readiness is claimed yet.
+- **Published:** Phase 3.12 recovery. Live URL:
+  https://badbagel47.github.io/bricks/?v=09a7cb6 . The owner confirmed its checked
+  rules published; main CI/Pages passed:
+  https://github.com/BadBagel47/bricks/actions/runs/42434535645 . No newer
+  production deployment is claimed.
+- **Staged:** `feature/operating-controls` now contains the approved admin UI,
+  Worker/D1/mail/publication adapters, separate public mode controls, private
+  invitations and game/rules integration. Both public modes initialize On.
+  See `docs/OPERATING_CONTROLS.md` and the concrete private setup/rollout guide
+  `docs/OPERATING_SETUP.md`. Do not publish this by simply pushing main.
+- **Local checks:** 177 unit/adapter tests passed, including actual local workerd
+  D1, OAuth signatures, mail contract and authentication/authorization. The 15
+  existing gameplay browser tests and 2 new real-HTTPS admin/solo browser tests
+  passed. The complete Firebase suite passed 51 tests, including REST override enforcement and a real two-identity private-game check. Worker deploy dry-run passed; no external publication occurred. Browser checks passed both without and with a configured operating-origin build.
+- **Still external:** No Cloudflare/Resend account, production D1, sender DNS,
+  real service-account key, real email or Worker deployment has been configured
+  here. Managed runtime status reports no secrets or outbound identities. Do not
+  request credential values or real allowlist emails in chat. `l8p.one` is only
+  a tentative sender domain; no DNS edits were made.
+- **Next model:** GPT-6.1 Terra High for the agreed focused review of admin/session
+  revocation, private invitations, Firebase draining rules and rollout. Sol Medium
+  remains suitable for implementation fixes and setup guidance. Luna is suitable
+  for later routine copy/UI-only work. Do not claim a model switch occurred.
 
-## Product direction and durable constraints
+## Durable product direction
 
-- Build Bricks as a browser Tetris-inspired game. The long-term goal is a secure,
-  playable two-person multiplayer game with settings, approval, seeded play,
-  Score Duel/Battle, results, rematch and honest reconnection/recovery behavior.
-- Owner clarified on 2026-11-08: casual hobby play with friends, prioritize quota
-  efficiency over advanced anti-cheat. Owner asks for an access on/off setting;
-  whole-game versus multiplayer-only scope is being clarified. Recommend a
-  small trusted backend for private delegated email-link controls, with rules
-  enforcement for multiplayer; the original console-only proposal is superseded.
-- Engine rules stay separate from React, rendering, input, audio, persistence and
-  Firebase. The game is NES-inspired, not a cycle-accurate emulator.
-- Current multiplayer has room creation, join/invite/reopen, two-player lobby,
-  host handover and connection presence. Published 3.9 has the countdown, live controls, compact opponent snapshots, Score Duel outcomes, Battle penalties/cancellation and survival outcomes. 3.10 adds full results and local mode-specific rankings. 3.11 adds coordinated rematch readiness; full recovery remains later work. An offline player may retain a slot; coordinated recovery
-  and active-tab leases belong to later work.
-- Stay on Firebase Spark. No paid backend/functions or billing upgrade without
-  explicit owner approval. Keep application heartbeat writes out; planned game
-  snapshots are implemented at at most two compact updates/second/player; automated tests verify the payload/rate budget. Actual billed traffic still needs production monitoring. Retain small room-code reservations to preserve ownership
-  and saved links; no automatic reservation expiry is implemented.
-- Only the owner can authorize entering a new milestone or changing a product
-  rule. Stop at milestone checkpoints unless the owner waived the relevant manual review.
+- Browser Tetris-inspired game, NES-inspired mechanics rather than cycle-accurate
+  emulation. Engine remains independent of React/rendering/input/audio/networking.
+- Owner's hobby/friends use case prioritizes Firebase Spark quota efficiency and
+  simple operation over advanced anti-cheat. Preserve ordinary authorization.
+- Operating controls: independent public singleplayer/multiplayer On/Off/timers;
+  administrators can play while closed. Shared private room links need no player
+  email login, allow two simultaneous players, work while public access is Off,
+  and remain private when public access is On. Codes alone do not authorize them.
+- Closing/expiry prevents new starts/rematches; ready matches and their bounded
+  recovery/results can finish. A countdown is not an admitted game. Offline solo
+  code cannot be reliably revoked remotely. Never silently reset policy to On.
+- Keep existing 2/player/second changed-only snapshots, no heartbeat/polling,
+  no paid plan/billing upgrade without owner approval. Small retained code/private
+  markers and UID grants consume storage; measure real traffic and retention.
+- Future WebRTC/P2P is a backlog evaluation only if measured quota usage warrants
+  it, not an approved migration. See `docs/FIREBASE_QUOTA.md`.
 
-## Working method and communication
+## Workflow
 
-- Read `AGENTS.md`, this handover, `PROGRESS.md`, and the relevant section of
-  `BRICKS_SPEC.md` before changes. Phase-specific architecture and limits live in
-  `docs/MULTIPLAYER.md`, `docs/FIREBASE_QUOTA.md` and `docs/FIREBASE_ACCESS.md`.
-- Work in `/workspace/bricks`, on the existing checkout; no worktrees. Preserve
-  user changes. Do not use parallel agents unless the owner or repo instructions
-  explicitly requests them.
-- Communicate in Swedish; keep player-facing UI in English, direct and useful.
-  Preserve “Make room for one more.” Avoid decorative subheads and filler.
-- Recommend the economical suitable model before every new milestone and at
-  each stop. The owner prefers GPT-6.1 Sol Medium for difficult multiplayer
-  architecture. Luna is suitable for routine UI-only work.
-- Run checks appropriate to a meaningful change and report only results observed.
-  At checkpoints update `PROGRESS.md`, this file, and the relevant design docs.
-- GitHub Pages deploys from pushes to `main`. A source update is not live until
-  its Pages workflow succeeds. Do not infer production behavior from emulator CI.
+- Work in `/workspace/bricks`, existing checkout, no worktrees or parallel agents
+  unless explicitly requested. Preserve user changes.
+- Communicate in Swedish; player/admin UI text stays English and functional.
+  Preserve “Make room for one more.”; no decorative copy or footer filler.
+- Recommend an economical suitable model before new phases and at each stop,
+  considering Sol, Terra and Luna. Manual playtests should be consolidated;
+  automate multiple-session and rules checks between larger checkpoints.
+- Keep handover/progress and durable requirements current. A later phase still
+  needs authorization; operating controls are authorized separately from Phase 4.
+- Feature-branch CI tests the new rules without deploying Pages. Main pushes
+  deploy Pages after checks; there is no automatic Worker or Firebase rules deploy.
+  Current owner authorization does not supply missing credentials or live setup.
 
-## Firebase, quota and access state
+## Important implementation boundaries
 
-- Project `bricks-8f56b` uses Anonymous Auth and Realtime Database in
-  `europe-west1`. Public web config is in GitHub Actions repository variables;
-  never copy values into docs/source or expose admin credentials. The owner
-  corrected an initially invalid API key; 3.2 room creation was then confirmed.
-- The owner reported publishing the 3.3 rules before its main deployment. The
-  runtime has no attached Google outbound identity, no Firebase admin access and
-  no tool to provision an identity. Future rules deployment could use a dedicated
-  GitHub Actions service account through Google Workload Identity Federation;
-  bootstrap and permission caveats are in `docs/FIREBASE_ACCESS.md`.
-- Current quota assumptions, retention constraints and operational thresholds
-  are in `docs/FIREBASE_QUOTA.md`. Firebase's exact current pricing was not
-  fetched live because the cloud proxy blocks Google docs; treat listed limits as
-  planning baselines and check the console before public scale-up.
+- `modules/access-control` is reusable server-independent logic; `server/operating`
+  contains the Bricks Worker/admin/mail/Firebase adapters. RTDB is the only policy
+  source of truth; ETags prevent lost updates. D1 holds private subjects/tokens.
+- Normal publication requests use a restricted RTDB auth override and a bounded
+  path list; the underlying OAuth credential remains privileged. The local setup
+  CLI's `init` is a deliberate fixed-path bootstrap before new rules are installed.
+- Admin game runs at Worker `/play/` beside its API to avoid third-party cookies;
+  Pages stays public. Setting `VITE_OPERATING_ORIGIN` activates controls on Pages.
+  Missing policy after activation fails closed; an unset build variable retains
+  the existing unconfigured development/legacy flow until controlled rollout.
+- Provision the open policy **before** checked admission rules. Provision private
+  allowlist subjects in both D1 and the private RTDB mirror with the provided CLI.
+  Follow the entire setup guide, including real provider tests and review.
+- Do not roll back to pre-control rules while private rooms exist: that removes
+  their enforcement. Retain private room markers and policy on failures.
 
-## Useful checks
+## Checks and environment notes
 
 ```sh
 npm run lint
-npm run build
 npm test
+npm run build
 npm run test:browser
+npm run test:operating
 npm run test:firebase
 ```
 
-The latest rotation correction passed lint/build, 99 unit tests and 15 Chromium
-browser tests locally, then the full GitHub Actions gate and Pages deployment.
-The local Database Emulator JAR downloaded, but local rule upload was cancelled
-at the loopback endpoint; use CI's full emulator suite as the observed rules
-verification and do not claim a local full emulator pass.
+Local Firebase works with the cached JAR when proxies are unset **only for the
+loopback emulator test command**:
 
-## Source of truth
+```sh
+env -u HTTP_PROXY -u HTTPS_PROXY -u http_proxy -u https_proxy -u ALL_PROXY -u all_proxy npm run test:firebase
+```
 
-1. Owner's latest instructions and approved decisions.
-2. `BRICKS_SPEC.md` and `AGENTS.md` for product requirements and workflow.
-3. `PROGRESS.md` for milestone state, validations, blockers and next checkpoint.
-4. This file for a quick handover and pointers to detailed phase documents.
+For local Wrangler commands in this managed sandbox use scoped
+`XDG_CONFIG_HOME=/tmp/bricks-wrangler-config WRANGLER_SEND_METRICS=false`.
+No real credentials are needed for `deploy --dry-run` or local D1 checks. The test
+emulator seed explicitly opens and isolates test data; it never initializes a
+production policy. Local D1/emulator/browser checks do not prove live IAM,
+remote D1 concurrency, mail delivery or real billed quota.
 
+References: `docs/MULTIPLAYER.md`, `docs/FIREBASE_QUOTA.md`,
+`docs/FIREBASE_ACCESS.md`, `docs/PHASE3_REVIEW.md`, `docs/OPERATING_CONTROLS.md`,
+`docs/OPERATING_SETUP.md`. The 3.13 review identifies limits; production behavior
+has not been independently audited here.

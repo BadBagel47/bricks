@@ -35,6 +35,12 @@ after(async () => { await browser?.close(); server?.kill('SIGTERM') })
 async function open({ viewport = { width: 1280, height: 800 }, personal = {}, singlePlayer = {} } = {}) {
   const context = await browser.newContext({ viewport, hasTouch: true })
   contexts.push(context)
+  // Gameplay regression tests use an explicitly open admission response when
+  // the production build has an operating origin. Access behavior has its own
+  // real HTTP/browser suite; never contact a live backend from these checks.
+  const admissionHeaders = { 'Access-Control-Allow-Origin': baseURL, 'Access-Control-Allow-Methods': 'GET, POST', 'Access-Control-Allow-Headers': 'Content-Type, X-Admin-Request', 'Content-Type': 'application/json' }
+  await context.route('**/api/play/solo', route => route.fulfill({ status: 200, headers: admissionHeaders, body: '{"allowed":true}' }))
+  await context.route('**/api/access', route => route.fulfill({ status: 200, headers: admissionHeaders, body: JSON.stringify({ config: { version: 1, revision: 1, single: { mode: 'on', expiresAt: null }, multi: { mode: 'on', expiresAt: null } }, serverTime: Date.now() }) }))
   await context.addInitScript(({ personal, singlePlayer }) => {
     // Deterministic piece stream, simulated controller hardware, and real Web Audio instrumentation.
     const nativeRandom = crypto.getRandomValues.bind(crypto)
@@ -163,6 +169,7 @@ test('desktop flow: all preview cells, movement, hold, pause/blur, results, rena
   }
   assert.equal(await page.locator('.result-card tbody tr').count(), 1)
   await page.getByRole('button', { name: 'Play Again', exact: true }).click()
+  await page.getByRole('dialog', { name: 'Game over', exact: true }).waitFor({ state: 'hidden' })
   assert.equal((await cells(page)).length, 4)
   assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('bricks.highscores.v1')).records.length), 1)
   await mainMenu(page)

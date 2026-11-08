@@ -15,6 +15,7 @@ import { addHighscore, DEFAULT_PERSONAL_SETTINGS, DEFAULT_SINGLE_PLAYER_SETTINGS
 import type { HighscoreRecord, PersonalSettings, SinglePlayerSettings } from './persistence.ts'
 import { BricksAudio } from './audio/synth.ts'
 import './App.css'
+import { checkSolo } from './access/client.ts'
 
 const USERNAME_KEY = 'bricks.username'
 const CONTROLS_KEY = 'bricks.controls.v1'
@@ -86,6 +87,7 @@ function App() {
   const usernameRef = useRef(username)
   const runIdRef = useRef('')
   const audioRef = useRef<BricksAudio | null>(null)
+  const checkingAccess = useRef(false)
 
   useLayoutEffect(() => {
     const viewChanged = previousViewRef.current !== view
@@ -137,11 +139,21 @@ function App() {
     setNotice(saveFailed ? 'Your browser could not save this name. You can still continue.' : '')
   }
 
-  function beginGame() {
-    setGameAnnouncement('')
-    const fresh = createGame({ startLevel: singlePlayer.startLevel, hardDropEnabled: personal.hardDropEnabled, holdEnabled: singlePlayer.holdEnabled })
+  async function beginGame() {
+    if (checkingAccess.current) return
+    checkingAccess.current = true
+    const requestedFrom = view
     const audio = audioRef.current ?? new BricksAudio(personal)
     audioRef.current = audio
+    // Unlock silently within the user gesture; admission may take long enough
+    // for the browser's autoplay permission to expire.
+    audio.unlock()
+    try { await checkSolo() }
+    catch (error) { if (previousViewRef.current === requestedFrom) setNotice(error instanceof Error ? error.message : 'Unable to check access. Try again.'); return }
+    finally { checkingAccess.current = false }
+    if (previousViewRef.current !== requestedFrom) return
+    setGameAnnouncement('')
+    const fresh = createGame({ startLevel: singlePlayer.startLevel, hardDropEnabled: personal.hardDropEnabled, holdEnabled: singlePlayer.holdEnabled })
     audio.beginGame(personal)
     audio.setDanger(fresh.board)
     runIdRef.current = makeRunId()

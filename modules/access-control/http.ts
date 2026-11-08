@@ -45,15 +45,22 @@ export class AdminHttp {
   readonly sessions: AdminSessions
   readonly clock: () => number
   readonly cookieName: string
+  onRevoke: ((token: string) => Promise<void>) | null = null
   constructor(origin: string, links: MagicLinks, sessions: AdminSessions, clock = Date.now) {
     const url = new URL(origin)
     if (url.protocol !== 'https:' || url.origin !== origin || !/^[a-z0-9-]{1,64}$/.test(links.project) || sessions.project !== links.project) throw new Error('Invalid server configuration')
     this.origin = origin; this.links = links; this.sessions = sessions; this.clock = clock
     this.cookieName = `__Host-admin-${links.project}`
   }
-  private cookie(request: Request): string {
+  cookie(request: Request): string {
     const matches = (request.headers.get('cookie') ?? '').split(';').map(x => x.trim()).filter(x => x.startsWith(`${this.cookieName}=`))
     return matches.length === 1 ? matches[0].slice(this.cookieName.length + 1) : ''
+  }
+  async session(request: Request) { return this.sessions.authenticate(this.cookie(request), this.clock()) }
+  private async revoke(token: string) {
+    // Never create a Firebase tombstone for an arbitrary caller-supplied cookie.
+    if (await this.sessions.authenticate(token, this.clock())) await this.onRevoke?.(token)
+    await this.sessions.revoke(token)
   }
   private setCookie(token: string, maxAge: number): string {
     return `${this.cookieName}=${token}; Path=/; Max-Age=${maxAge}; Secure; HttpOnly; SameSite=Strict`
@@ -83,11 +90,11 @@ export class AdminHttp {
         if (!subject) return json({ error: 'Link is invalid or expired' }, 401)
         const token = await this.sessions.issue(subject, this.clock())
         // Rotate the browser's old session on successful sign-in.
-        await this.sessions.revoke(this.cookie(request))
+        await this.revoke(this.cookie(request))
         return json({ authenticated: true }, 200, { 'Set-Cookie': this.setCookie(token, 30 * 60) })
       }
       if (Object.keys(input).length !== 0) return json({ error: 'Invalid request' }, 400)
-      await this.sessions.revoke(this.cookie(request))
+      await this.revoke(this.cookie(request))
       return json({ authenticated: false }, 200, { 'Set-Cookie': this.setCookie('', 0) })
     } catch {
       // Do not expose provider errors, email addresses, cookies or request bodies.

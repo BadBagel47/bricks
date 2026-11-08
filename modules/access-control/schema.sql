@@ -21,3 +21,20 @@ CREATE TABLE IF NOT EXISTS admin_sessions (
   expires_at INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS admin_session_expiry ON admin_sessions(expires_at);
+CREATE TABLE IF NOT EXISTS private_invites (
+  id TEXT PRIMARY KEY,
+  digest TEXT NOT NULL UNIQUE,
+  code TEXT NOT NULL UNIQUE,
+  expires_at INTEGER NOT NULL,
+  state TEXT NOT NULL CHECK (state IN ('pending', 'active', 'revoked')),
+  owner_uid TEXT,
+  owner_name TEXT,
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS private_invite_expiry ON private_invites(expires_at);
+CREATE TABLE IF NOT EXISTS operator_mirrors (
+  digest TEXT PRIMARY KEY,
+  subject TEXT NOT NULL,
+  delete_after INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS operator_mirror_expiry ON operator_mirrors(delete_after);
