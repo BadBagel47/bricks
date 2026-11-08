@@ -5,6 +5,12 @@ phase docs. Owner instructions and `BRICKS_SPEC.md` take precedence.
 
 ## Current checkpoint — 2026-11-08
 
+- Owner's Cloudflare screenshot confirms the Worker's D1 binding `DB` points
+  to the configured database. Owner reports `MAILJET_API_KEY` and
+  `MAILJET_SECRET_KEY` saved as Production secrets and `MAIL_FROM` set to
+  `system@trythis.one`, each deployed through the dashboard. Values have not
+  been shared here or independently verified. Worker still serves its placeholder;
+  application deployment, Firebase publisher credentials and live mail tests remain.
 - Owner created the placeholder Worker at `https://bricks-operating.l8p1.workers.dev/`.
   Wrangler now uses that origin and its `/play/` URL for the private preview stage.
   The application code/secrets have not been deployed. Next: bind D1 as `DB`,
