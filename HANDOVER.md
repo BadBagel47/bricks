@@ -6,12 +6,12 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 
 ## Current checkpoint — 2026-11-08
 
-- **Phase 3, milestone 3.12:** Reconnection and recovery (authorized, in progress).
-- **Live:** https://badbagel47.github.io/bricks/?v=da4009e (3.11).
-- **Status:** 3.12 implementation passed complete CI for `03d97ed`: https://github.com/BadBagel47/bricks/actions/runs/42433827743 . It is staged and awaiting owner publication of the exact checked Firebase rules: https://raw.githubusercontent.com/BadBagel47/bricks/03d97ed/firebase/database.rules.json . Live remains 3.11. Local emulator testing works with proxy variables unset (JAR already cached).
+- **Phase 3, milestone 3.12:** Reconnection and recovery (published).
+- **Live:** https://badbagel47.github.io/bricks/?v=09a7cb6 (3.12).
+- **Status:** Owner confirmed the checked Firebase rules published. Main `09a7cb6` passed all tests and Pages deployment: https://github.com/BadBagel47/bricks/actions/runs/42434535645 . App and rules match tested `03d97ed`. Direct live-site requests from this environment are blocked by the proxy (403); no live Firebase playtest is claimed.
 - **Workflow:** Owner wants manual tests consolidated. Finish automated two-session/security verification before the one necessary external action: checked rule publication. Later milestones still need authorization.
-- **Next:** After the owner reports rules published, make a non-`[skip ci]` deployment commit, push the staged code to `main`, and verify the Pages workflow. No manual playtest is required at this checkpoint. The current handover-only commit uses `[skip ci]`, so a fresh deployment commit is required to trigger Actions. Do not start 3.13 without the owner's authorization.
-- **Next model:** GPT-6.1 Sol Medium for deployment and verification; consider GPT-6.1 Terra High for the subsequent 3.13 integration/security review.
+- **Next:** Milestone 3.13 integration and security review requires owner authorization. Keep manual playtesting consolidated; the deployed 3.12 passed automated two-session tests.
+- **Next model:** GPT-6.1 Terra High for 3.13 integration/security review; consider Sol and Luna for narrower routine follow-ups.
 
 ## Product direction and durable constraints
 

@@ -723,5 +723,7 @@ after it actually happens. Recovery is not guaranteed.
 Final branch CI passed for `03d97ed`, including host/guest reconnect, repeated
 recovery and reload, queued Battle attacks, finished-player results, abandonment
 and server authorization: https://github.com/BadBagel47/bricks/actions/runs/42433827743 .
-The owner must publish the checked Firebase rules before main deployment. The
-currently published client has none of this recovery behavior.
+The owner confirmed the checked Firebase rules published. Main `09a7cb6` passed
+complete CI and Pages deployment: https://github.com/BadBagel47/bricks/actions/runs/42434535645 .
+Direct live-site access is blocked in the cloud environment; production Firebase
+gameplay has not been independently verified here.

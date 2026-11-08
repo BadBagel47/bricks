@@ -2,7 +2,7 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.12 — Reconnection and recovery
-- **Status:** 3.12 implementation passed final branch CI for `03d97ed`: https://github.com/BadBagel47/bricks/actions/runs/42433827743 . Awaiting owner publication of the checked Firebase rules; the 3.12 client has not been deployed. Live remains 3.11.
+- **Status:** 3.12 published. Owner confirmed Firebase rules installed; main `09a7cb6` passed full CI and Pages deployment: https://github.com/BadBagel47/bricks/actions/runs/42434535645 . Live: https://badbagel47.github.io/bricks/?v=09a7cb6 .
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.11
@@ -185,8 +185,8 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
-- Owner publishes the exact checked rules from `03d97ed`, then push a non-`[skip ci]` deployment commit to `main` and verify Pages. No manual game review is needed yet. A handover-only `[skip ci]` commit must not be used as the deploy trigger.
-- Recommended model: GPT-6.1 Sol Medium for deployment/verification; GPT-6.1 Terra High for the later 3.13 integration and security review.
+- Owner authorization for 3.13 integration and security review. Continue consolidated manual playtesting.
+- Recommended model: GPT-6.1 Terra High for that review.
 
 ## Git checkpoints
 - `fea6aa4`: initial foundation and Pages deployment.
@@ -221,3 +221,5 @@
 - Full CI passed for `ac4787f`: https://github.com/BadBagel47/bricks/actions/runs/42433459138 . A subsequent guard keeps a reconnecting tab paused until its selected connection is current; targeted host, guest/reload and Battle tests passed locally. A server test also confirms that resume after the deadline is denied. Final full CI for these changes is required before the owner publishes rules.
 
 - Final 3.12 branch CI passed for `03d97ed`: https://github.com/BadBagel47/bricks/actions/runs/42433827743 . It covers two-session host/guest recovery, repeated interruptions and reload, Battle queued attacks, finished-player results, 30-second abandonment, stale control/consent, deadlines, and the previous automated suites. Owner must publish `firebase/database.rules.json` from that commit before main deployment. Checkpoints restore the latest acknowledged state; recent actions can be lost and inconsistent or unavailable state abandons without a result. No heartbeat or paid backend was added.
+
+- Owner confirmed checked recovery rules published. Main `09a7cb6` passed complete CI and Pages deployment: https://github.com/BadBagel47/bricks/actions/runs/42434535645 . Source matches tested `03d97ed`. Direct live HTTP access is blocked by the environment proxy (403), so no live Firebase gameplay verification is claimed.
