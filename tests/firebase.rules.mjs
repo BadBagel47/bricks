@@ -8,6 +8,7 @@ let environment
 const code = 'BRK724'
 const reservation = uid => ({ version: 1, ownerUid: uid, createdAt: serverTimestamp() })
 const db = uid => uid ? environment.authenticatedContext(uid).database() : environment.unauthenticatedContext().database()
+const recoveryPaused = (matchId, hostConnection, guestConnection, interruptedAt) => ({ matchId, phase: 'paused', interruptedAt, cycle: 1, hostConnection, guestConnection, previousHostConnection: hostConnection, previousGuestConnection: guestConnection, lastResumedAt: 0 })
 
 before(async () => {
   assert.ok(process.env.FIREBASE_DATABASE_EMULATOR_HOST, 'Run with npm run test:firebase, never against a production database')
@@ -341,19 +342,19 @@ test('resumption requires both current leases, checkpoints, live connections and
   const match = { id: mid, status: 'ready', seed: 47, countdownAt: now - 6000, settings: { revision: 0, mode: 'score-duel', startLevel: 0, hold: false, requireApproval: false }, roleRevision: 0, hostUid: 'host', guestUid: 'guest', hostConnection: hc, guestConnection: gc }
   const snapshot = (connection, seq = 3) => ({ matchId: mid, connection, seq, board: '0'.repeat(200), next: 'T', held: '-', status: 'playing', score: 0, level: 0, lines: 0, updatedAt: now - 1000 })
   const checkpoint = connection => ({ matchId: mid, connection, seq: 3, payload: '{}', updatedAt: now - 1000 })
-  const ack = connection => ({ matchId: mid, connection, leaseRevision: 2, checkpointSeq: 3, battleFrame: 0 })
+  const ack = connection => ({ matchId: mid, connection, cycle: 1, leaseRevision: 2, checkpointSeq: 3, battleFrame: 0 })
   await environment.withSecurityRulesDisabled(async context => {
     const root = context.database()
     await set(ref(root, `matchStarts/${code}/1`), match)
     await set(ref(root, `presence/${code}/1`), { host: { [hn]: true }, guest: { [gn]: true } })
-    await set(ref(root, `recoverySessions/${code}/1`), { matchId: mid, phase: 'paused', interruptedAt: now })
+    await set(ref(root, `recoverySessions/${code}/1`), recoveryPaused(mid, hc, gc, now))
     await set(ref(root, `controlLeases/${code}/1`), { host: { matchId: mid, connection: hn, revision: 2 }, guest: { matchId: mid, connection: gn, revision: 2 } })
     await set(ref(root, `gameSnapshots/${code}/1`), { host: snapshot(hc), guest: snapshot(gc) })
     await set(ref(root, `recoveryCheckpoints/${code}/1`), { host: checkpoint(hc), guest: checkpoint(gc) })
     await set(ref(root, `recoveryReadiness/${code}/1/host`), ack(hn))
   })
   const path = `recoverySessions/${code}/1`
-  const resume = { matchId: mid, phase: 'resumed', interruptedAt: now, resumedAt: serverTimestamp(), hostConnection: hn, guestConnection: gn, battleFrame: 0 }
+  const resume = { ...recoveryPaused(mid, hc, gc, now), phase: 'resumed', resumedAt: serverTimestamp(), hostConnection: hn, guestConnection: gn, battleFrame: 0 }
   await assertFails(set(ref(db('host'), path), resume))
   await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), `recoveryReadiness/${code}/1/guest`), ack(gn)) })
   await assertFails(set(ref(db('host'), path), { ...resume, hostConnection: hc }))
@@ -365,6 +366,18 @@ test('resumption requires both current leases, checkpoints, live connections and
   await assertFails(set(ref(db('host'), `gameSnapshots/${code}/1/host`), { ...newSnapshot, connection: hc, seq: 5 }))
   await environment.withSecurityRulesDisabled(async context => { await remove(ref(context.database(), `presence/${code}/1/guest/${gn}`)) })
   await assertFails(set(ref(db('host'), `gameSnapshots/${code}/1/host`), { ...newSnapshot, seq: 5 }))
+  const first = (await get(ref(db('host'), path))).val()
+  const secondPause = { matchId: mid, phase: 'paused', interruptedAt: serverTimestamp(), cycle: 2, hostConnection: hn, guestConnection: gn, previousHostConnection: hc, previousGuestConnection: gc, lastResumedAt: first.resumedAt }
+  await assertFails(set(ref(db('host'), path), { ...secondPause, cycle: 1 }))
+  await assertSucceeds(set(ref(db('host'), path), secondPause))
+  const second = (await get(ref(db('host'), path))).val(), g2 = 'f'.repeat(32)
+  await set(ref(db('guest'), `presence/${code}/1/guest/${g2}`), true)
+  await assertSucceeds(set(ref(db('guest'), `controlLeases/${code}/1/guest`), { matchId: mid, connection: g2, revision: 3 }))
+  const resumeAgain = { ...second, phase: 'resumed', resumedAt: serverTimestamp(), previousHostConnection: hn, previousGuestConnection: gn, hostConnection: hn, guestConnection: g2, battleFrame: 0 }
+  await assertFails(set(ref(db('host'), path), resumeAgain))
+  await assertSucceeds(set(ref(db('host'), `recoveryReadiness/${code}/1/host`), { ...ack(hn), cycle: 2, checkpointSeq: 4 }))
+  await assertSucceeds(set(ref(db('guest'), `recoveryReadiness/${code}/1/guest`), { ...ack(g2), cycle: 2, leaseRevision: 3 }))
+  await assertSucceeds(set(ref(db('host'), path), resumeAgain))
 })
 
 test('Battle recovery uses the later frame and requires acknowledged finished-player data', async () => {
@@ -376,13 +389,13 @@ test('Battle recovery uses the later frame and requires acknowledged finished-pl
     const root = context.database()
     await set(ref(root, `matchStarts/${code}/1`), match)
     await set(ref(root, `presence/${code}/1`), { host: { [hn]: true }, guest: { [gn]: true } })
-    await set(ref(root, `recoverySessions/${code}/1`), { matchId: mid, phase: 'paused', interruptedAt: now })
+    await set(ref(root, `recoverySessions/${code}/1`), recoveryPaused(mid, hc, gc, now))
     await set(ref(root, `controlLeases/${code}/1`), { host: { matchId: mid, connection: hn, revision: 2 }, guest: { matchId: mid, connection: gn, revision: 2 } })
     await set(ref(root, `gameSnapshots/${code}/1`), { host: { matchId: mid, connection: hc, seq: 3, status: 'gameOver' }, guest: { matchId: mid, connection: gc, seq: 3, status: 'playing' } })
-    await set(ref(root, `recoveryReadiness/${code}/1`), { host: { matchId: mid, connection: hn, leaseRevision: 2, checkpointSeq: 3, battleFrame: 10 }, guest: { matchId: mid, connection: gn, leaseRevision: 2, checkpointSeq: 3, battleFrame: 20 } })
+    await set(ref(root, `recoveryReadiness/${code}/1`), { host: { matchId: mid, connection: hn, cycle: 1, leaseRevision: 2, checkpointSeq: 3, battleFrame: 10 }, guest: { matchId: mid, connection: gn, cycle: 1, leaseRevision: 2, checkpointSeq: 3, battleFrame: 20 } })
   })
   const path = `recoverySessions/${code}/1`
-  const resume = { matchId: mid, phase: 'resumed', interruptedAt: now, resumedAt: serverTimestamp(), hostConnection: hn, guestConnection: gn, battleFrame: 20 }
+  const resume = { ...recoveryPaused(mid, hc, gc, now), phase: 'resumed', resumedAt: serverTimestamp(), hostConnection: hn, guestConnection: gn, battleFrame: 20 }
   await assertFails(set(ref(db('host'), path), resume))
   await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), `battleFinishes/${code}/1/host`), { matchId: mid, connection: hc }) })
   await assertFails(set(ref(db('host'), path), { ...resume, battleFrame: 10 }))
@@ -401,13 +414,13 @@ test('recovery readiness requires the current lease and matching acknowledged ch
     const root = context.database()
     await set(ref(root, `matchStarts/${code}/1`), ready)
     await set(ref(root, `presence/${code}/1`), { host: { [hc]: true }, guest: { [gc]: true } })
-    await set(ref(root, `recoverySessions/${code}/1`), { matchId: mid, phase: 'paused', interruptedAt: now })
+    await set(ref(root, `recoverySessions/${code}/1`), recoveryPaused(mid, hc, gc, now))
     await set(ref(root, `controlLeases/${code}/1/host`), { matchId: mid, connection: hc, revision: 1 })
     await set(ref(root, `recoveryCheckpoints/${code}/1/host`), { matchId: mid, connection: hc, seq: 3, payload: '{}', updatedAt: now })
     await set(ref(root, `gameSnapshots/${code}/1/host`), { matchId: mid, connection: hc, seq: 3, updatedAt: now })
   })
   const path = `recoveryReadiness/${code}/1/host`
-  const payload = { matchId: mid, connection: hc, leaseRevision: 1, checkpointSeq: 3, battleFrame: 0 }
+  const payload = { matchId: mid, connection: hc, cycle: 1, leaseRevision: 1, checkpointSeq: 3, battleFrame: 0 }
   await assertFails(set(ref(db('guest'), path), payload))
   await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), `gameSnapshots/${code}/1/host/updatedAt`), now + 1) })
   await assertFails(set(ref(db('host'), path), payload))
@@ -428,7 +441,7 @@ test('recovery pause uses a fixed server deadline and only expires after thirty 
     await set(ref(context.database(), `presence/${code}/1`), { host: { [hc]: true }, guest: { [gc]: true } })
   })
   const path = `recoverySessions/${code}/1`
-  const paused = { matchId: mid, phase: 'paused', interruptedAt: serverTimestamp() }
+  const paused = recoveryPaused(mid, hc, gc, serverTimestamp())
   await assertFails(set(ref(db('host'), path), paused))
   await assertFails(set(ref(db('third'), path), paused))
   await remove(ref(db('guest'), `presence/${code}/1/guest/${gc}`))

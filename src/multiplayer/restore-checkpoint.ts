@@ -10,8 +10,10 @@ import type { JoinedRoom } from './room-model.ts'
 export function restoreCheckpoint(value: unknown, snapshot: GameSnapshot, start: MatchStart, joined: JoinedRoom, streams: { own: number; opponent: number }) {
   const fail = (): never => { throw new Error('Invalid recovery checkpoint') }
   const record = value as { matchId: string; connection: string; seq: number; payload: string; updatedAt: number }
-  const connection = joined.uid === start.hostUid ? start.hostConnection : joined.uid === start.guestUid ? start.guestConnection : null
-  if (!record || typeof record !== 'object' || Object.keys(record).length !== 5 || !connection || record.matchId !== start.id || record.matchId !== snapshot.matchId || record.connection !== connection || record.connection !== snapshot.connection || record.seq !== snapshot.seq || record.updatedAt !== snapshot.updatedAt || typeof record.payload !== 'string' || record.payload.length === 0 || record.payload.length > 8192) return fail()
+  const participant = joined.uid === start.hostUid || joined.uid === start.guestUid
+  // A final or unchanged snapshot may predate several connection handoffs. The
+  // server restricts each participant path to authorized match connections.
+  if (!record || typeof record !== 'object' || Object.keys(record).length !== 5 || !participant || record.matchId !== start.id || record.matchId !== snapshot.matchId || !/^[a-f0-9]{32}$/.test(record.connection) || record.connection !== snapshot.connection || record.seq !== snapshot.seq || record.updatedAt !== snapshot.updatedAt || typeof record.payload !== 'string' || record.payload.length === 0 || record.payload.length > 8192) return fail()
   let payload: { version: number; game: unknown; battle: unknown }
   try { payload = JSON.parse(record.payload) } catch { return fail() }
   if (!payload || typeof payload !== 'object' || Object.keys(payload).length !== 3 || payload.version !== 1) return fail()

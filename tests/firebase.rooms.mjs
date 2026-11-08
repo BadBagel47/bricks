@@ -352,7 +352,7 @@ test('countdown freezes approved settings, produces identical starts despite clo
   } finally { for (const context of contexts) await context.close() }
 })
 
-test('two sessions pause, reconnect and resume from confirmed snapshots', { timeout: 100000 }, async () => {
+test('two sessions recover twice from confirmed snapshots without a false result', { timeout: 100000 }, async () => {
   const contexts = await Promise.all([browser.newContext(), browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true })])
   try {
     const [host, guest] = await Promise.all(contexts.map(context => context.newPage()))
@@ -447,8 +447,11 @@ test('two sessions pause, reconnect and resume from confirmed snapshots', { time
     }, { code, hu, seq: pausedSnapshot.seq }, { timeout: 12000 })
     assert.ok((await data()).snapshots[hu].score >= pausedSnapshot.score)
     await guest.evaluate(async () => (await import('/tests/fixtures/firebase-browser.ts')).disconnectDatabase())
-    await host.getByText('Match interrupted. Return to the lobby to try again.', { exact: true }).waitFor({ timeout: 12000 })
-    assert.equal(await host.getByRole('main', { name: 'Multiplayer game', exact: true }).count(), 0)
+    await host.getByText('Match paused. Waiting for reconnection…', { exact: true }).waitFor()
+    await guest.evaluate(async () => (await import('/tests/fixtures/firebase-browser.ts')).reconnectDatabase())
+    await host.waitForFunction(async code => { const state = await (await import('/tests/fixtures/firebase-browser.ts')).recoveryData(code); return state.session?.phase === 'resumed' && state.session?.cycle === 2 }, code, { timeout: 12000 })
+    await host.getByText('Match paused. Waiting for reconnection…', { exact: true }).waitFor({ state: 'hidden' })
+    assert.equal(await host.getByRole('main', { name: 'Multiplayer game', exact: true }).count(), 1)
     assert.equal(await host.evaluate(() => localStorage.getItem('bricks.highscores.v1')), null)
     assert.equal(await host.evaluate(() => localStorage.getItem('bricks.multiplayer-results.v1')), null)
   } finally { for (const context of contexts) await context.close() }
@@ -514,6 +517,7 @@ test('Score Duel retains a finished player through reconnect, settles by points 
     await host.getByText('Match paused. Waiting for reconnection…', { exact: true }).waitFor()
     await guest.evaluate(async () => (await import('/tests/fixtures/firebase-browser.ts')).reconnectDatabase())
     await host.waitForFunction(async code => (await (await import('/tests/fixtures/firebase-browser.ts')).recoveryData(code)).session?.phase === 'resumed', code, { timeout: 12000 })
+    for (const page of [host, guest]) await page.getByText('Match paused. Waiting for reconnection…', { exact: true }).waitFor({ state: 'hidden' })
     await duel(guest).getByText('Opponent finished. Keep playing.', { exact: true }).waitFor()
     assert.equal(await host.getByRole('heading', { name: 'You win', exact: true }).count(), 0)
     assert.equal(await guest.getByRole('heading', { name: 'You lose', exact: true }).count(), 0)

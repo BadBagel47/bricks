@@ -121,7 +121,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     const stop = onValue(ref(database, `${base}/${opponentUid}`), snapshot => {
       try {
         const next = parseGameSnapshot(snapshot.val())
-        if (next?.matchId === start.id && (next.connection === otherConnection || next.connection === previousOpponentConnection) && next.seq > previousSequence) {
+        if (next?.matchId === start.id && (next.connection === otherConnection || Boolean(previousOpponentConnection)) && next.seq > previousSequence) {
           if (battleGame && next.status === 'gameOver') battleGame.opponentEnded = true
           previousSequence = next.seq
           collector.opponent(next)
@@ -132,11 +132,11 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     const stopAttacks = battleGame ? onValue(ref(database, battlePath('battleAttacks', joined, opponentUid)), snapshot => {
       try {
         const stream = parseAttackStream(snapshot.val())
-        if (stream?.matchId === start.id && (stream.connection === otherConnection || stream.connection === previousOpponentConnection)) { battleGame.receive(stream.total); refreshBattle(value => value + 1) }
+        if (stream?.matchId === start.id && (stream.connection === otherConnection || Boolean(previousOpponentConnection))) { battleGame.receive(stream.total); refreshBattle(value => value + 1) }
       } catch { setError('Opponent attacks are invalid. Return to the lobby.') }
     }, () => setError('Unable to synchronize attacks. Return to the lobby.')) : () => {}
     const stopFinish = battleGame ? onValue(ref(database, battlePath('battleFinishes', joined, opponentUid)), snapshot => {
-      try { const final = parseBattleFinish(snapshot.val()); if (final?.matchId === start.id && (final.connection === otherConnection || final.connection === previousOpponentConnection)) { collector.opponentFinish(final); setOtherFinish(final) } }
+      try { const final = parseBattleFinish(snapshot.val()); if (final?.matchId === start.id && (final.connection === otherConnection || Boolean(previousOpponentConnection))) { collector.opponentFinish(final); setOtherFinish(final) } }
       catch { setError('Opponent result is invalid. Return to the lobby.') }
     }, () => setError('Unable to synchronize results. Return to the lobby.')) : () => {}
     let acknowledgedProduced = restored?.battle?.acknowledgedProduced ?? 0
