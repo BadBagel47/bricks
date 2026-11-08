@@ -461,6 +461,34 @@ test('two sessions recover twice from confirmed snapshots without a false result
   } finally { for (const context of contexts) await context.close() }
 })
 
+test('the host can reconnect while the guest coordinates recovery', { timeout: 50000 }, async () => {
+  const contexts = await Promise.all([browser.newContext(), browser.newContext()])
+  try {
+    const [host, guest] = await Promise.all(contexts.map(context => context.newPage()))
+    for (const page of [host, guest]) page.setDefaultTimeout(12000)
+    await host.goto(baseURL); await name(host, 'Reconnect Host')
+    await host.getByRole('button', { name: '2 Players', exact: true }).click()
+    await host.getByRole('button', { name: 'Host Game', exact: true }).click()
+    await roomHeading(host, /^Room /)
+    const invite = await host.getByLabel('Invite link', { exact: true }).inputValue()
+    const code = new URL(invite).searchParams.get('room')
+    await guest.goto(invite); await name(guest, 'Reconnect Guest'); await roomHeading(guest, /^Room /)
+    await host.getByRole('button', { name: 'Start Match', exact: true }).click()
+    for (const page of [host, guest]) await page.getByRole('main', { name: 'Multiplayer game', exact: true }).waitFor()
+    await guest.waitForFunction(async code => Object.keys((await (await import('/tests/fixtures/firebase-browser.ts')).matchData(code)).snapshots ?? {}).length === 2, code)
+    await host.evaluate(async () => (await import('/tests/fixtures/firebase-browser.ts')).disconnectDatabase())
+    await guest.getByText('Match paused. Waiting for reconnection…', { exact: true }).waitFor()
+    await host.evaluate(async () => (await import('/tests/fixtures/firebase-browser.ts')).reconnectDatabase())
+    await guest.waitForFunction(async code => (await (await import('/tests/fixtures/firebase-browser.ts')).recoveryData(code)).session?.phase === 'resumed', code, { timeout: 12000 })
+    for (const page of [host, guest]) await page.getByText('Match paused. Waiting for reconnection…', { exact: true }).waitFor({ state: 'hidden' })
+    const before = await guest.evaluate(async code => (await import('/tests/fixtures/firebase-browser.ts')).matchData(code), code)
+    const guestUid = before.start.guestUid
+    await guest.keyboard.press('ArrowRight')
+    await guest.waitForFunction(async ({ code, guestUid, seq }) => (await (await import('/tests/fixtures/firebase-browser.ts')).matchData(code)).snapshots?.[guestUid]?.seq > seq, { code, guestUid, seq: before.snapshots[guestUid].seq })
+    for (const page of [host, guest]) assert.equal(await page.evaluate(() => localStorage.getItem('bricks.multiplayer-results.v1')), null)
+  } finally { for (const context of contexts) await context.close() }
+})
+
 test('a disconnected player who does not return leads to abandonment without a result', { timeout: 65000 }, async () => {
   const contexts = await Promise.all([browser.newContext(), browser.newContext()])
   try {

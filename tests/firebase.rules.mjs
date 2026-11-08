@@ -359,6 +359,9 @@ test('resumption requires both current leases, checkpoints, live connections and
   await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), `recoveryReadiness/${code}/1/guest`), ack(gn)) })
   await assertFails(set(ref(db('host'), path), { ...resume, hostConnection: hc }))
   await assertFails(set(ref(db('host'), path), { ...resume, battleFrame: 1 }))
+  await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), `${path}/interruptedAt`), now - 31000) })
+  await assertFails(set(ref(db('host'), path), { ...resume, interruptedAt: now - 31000 }))
+  await environment.withSecurityRulesDisabled(async context => { await set(ref(context.database(), `${path}/interruptedAt`), now) })
   await assertSucceeds(set(ref(db('host'), path), resume))
   const newSnapshot = { ...snapshot(hn, 4), updatedAt: serverTimestamp() }
   const newCheckpoint = { ...checkpoint(hn), seq: 4, updatedAt: serverTimestamp() }

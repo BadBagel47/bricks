@@ -169,7 +169,7 @@ export default function MatchStartPanel({ options, database, joined, settings, a
     finally { setBusy(false) }
   }
   const ready = start?.status === 'ready' && valid && connected
-  const paused = Boolean(start && start.status === 'ready' && (!connected || valid === false || (!resumed && interrupted.current.has(start.id)) || (recovery?.matchId === start.id && recovery.phase !== 'resumed')))
+  const paused = Boolean(start && start.status === 'ready' && (!connected || !selected || valid === false || (!resumed && interrupted.current.has(start.id)) || (recovery?.matchId === start.id && recovery.phase !== 'resumed')))
   // Wait for the local presence view before mounting a newly resumed game. Its
   // clock then starts from the shared server timestamp without local skew.
   const freshCandidate = resumed && connected && valid && offset !== null && candidate && candidate.readiness.matchId === start?.id && candidate.readiness.connection === localConnection && candidate.readiness.cycle === resumed.cycle ? candidate : undefined
