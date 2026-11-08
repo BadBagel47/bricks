@@ -3,7 +3,16 @@
 Read this first, then verify current facts in `PROGRESS.md`, Git and the linked
 phase docs. Owner instructions and `BRICKS_SPEC.md` take precedence.
 
-## Current checkpoint — 2026-11-08
+## Current checkpoint — 2026-11-09
+
+- **First real administrator login confirmed by owner:** browser-only helper
+  generated a subject locally; owner ran its D1 SQL and added the same subject
+  as boolean true directly under Firebase adminAllowlist. Owner requested a
+  Mailjet email, followed the one-use sign-in flow and reached the settings page.
+  No real email/secret/subject was collected here. Next: live private-room invite
+  and two distinct-player smoke check, then closure/draining/session controls
+  before public Pages rollout. Keep both public modes On during initial checks.
+  Reusable setup guide must retain these observed results and remaining limits.
 
 - Owner has no local Node and explicitly chose a browser-only first-admin setup.
   Added `docs/admin-subject-local.html`: download/open locally, private email and
