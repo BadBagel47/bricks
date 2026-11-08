@@ -5,6 +5,14 @@ phase docs. Owner instructions and `BRICKS_SPEC.md` take precedence.
 
 ## Current checkpoint — 2026-11-08
 
+- Owner has no local Node and explicitly chose a browser-only first-admin setup.
+  Added `docs/admin-subject-local.html`: download/open locally, private email and
+  SUBJECT_SECRET input, HMAC compatible with the server, no requests/storage,
+  input clearing and first-time D1 SQL. Next guide owner through generated SQL
+  and Firebase adminAllowlist boolean entry, without collecting their input/hash.
+  Three local admin/browser checks and lint pass. File opening on the owner's
+  machine remains unverified (managed Chromium tests use loopback). Node/CLI
+  remains an optional route for later full revocation and reprovisioning.
 - **Live access repaired:** `0e84d3b` passed all checks, deployed and passed
   actual read-only `/admin/` and `/api/access` checks from GitHub:
   https://github.com/BadBagel47/bricks/actions/runs/42525336450 . Node mocks had

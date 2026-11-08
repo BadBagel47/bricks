@@ -107,6 +107,22 @@ not require moving the public game or domain DNS to Cloudflare.
 
 ## Private setup CLI
 
+For first-time administrator provisioning without Node installation, download
+`docs/admin-subject-local.html` and open the saved file locally in a browser.
+Enter the project, administrator email and the existing Worker SUBJECT_SECRET
+privately. It derives the same HMAC identifier as the server, performs no
+networking/storage, clears sensitive inputs and shows parameter-free SQL using
+only the generated hex subject. Do not use a remotely hosted copy; the tool
+refuses generation except on file URLs or loopback. Execute its SQL in D1 Console
+and add `adminAllowlist/<subject> = true` (boolean) through Firebase Console.
+This is for a new administrator only; SQL does not re-enable an existing row.
+For revocation/re-enabling, use the CLI below to revoke existing sessions safely.
+Never share helper input screenshots, secret values or allowlist identifiers.
+The automated browser test validates the helper and exact server HMAC against
+fake inputs on the permitted local HTTPS fixture, with no requests during
+generation and cleared fields on reload. Managed Chromium blocks direct file
+navigation here; the file URL opening itself still needs the owner's local check.
+
 Use Node 24 and a local file named `.operating.local`, which is ignored by Git.
 Restrict its permissions to your user. Supply these fields privately:
 

@@ -39,7 +39,8 @@ before(async () => {
       if (url.pathname.startsWith('/api/')) {
         const request = new Request(url, { method: incoming.method, headers: incoming.headers, ...(incoming.method === 'POST' ? { body: Buffer.concat(chunks) } : {}) })
         response = await api.handle(request, { source: 'browser-test', waitUntil(task) { void task } })
-      } else if (url.pathname === '/admin/') response = new Response(adminHTML, { headers: { 'Content-Type': 'text/html', 'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; frame-ancestors 'none'" } })
+      } else if (url.pathname === '/local-setup/') response = new Response(await readFile(new URL('../docs/admin-subject-local.html', import.meta.url)), { headers: { 'Content-Type': 'text/html' } })
+      else if (url.pathname === '/admin/') response = new Response(adminHTML, { headers: { 'Content-Type': 'text/html', 'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; frame-ancestors 'none'" } })
       else if (url.pathname === '/admin/app.js') response = new Response(adminJS, { headers: { 'Content-Type': 'text/javascript' } })
       else if (url.pathname === '/admin/style.css') response = new Response(adminCSS, { headers: { 'Content-Type': 'text/css' } })
       else if (url.pathname.startsWith('/play/')) {
@@ -73,6 +74,33 @@ async function name(page, value) {
   await page.getByLabel('Player name', { exact: true }).fill(value)
   await page.getByRole('button', { name: 'Continue', exact: true }).click()
 }
+
+test('local setup file derives the server subject without networking or stored input', async () => {
+  const context = await browser.newContext({ ignoreHTTPSErrors: true })
+  try {
+    const page = await context.newPage(), requests = []
+    page.on('request', request => { if (/^https?:/.test(request.url())) requests.push(request.url()) })
+    // Managed Chromium blocks file navigation here; exercise the same unmodified
+    // HTML through the permitted loopback fixture without relaxing browser policy.
+    await page.goto(`${origin}/local-setup/`)
+    await page.waitForLoadState('networkidle')
+    requests.length = 0
+    await page.getByLabel('Administrator email', { exact: true }).fill(' Admin@Example.Invalid ')
+    await page.getByLabel('SUBJECT_SECRET', { exact: true }).fill('test-only-secret-'.repeat(4))
+    await page.getByRole('button', { name: 'Generate identifier', exact: true }).click()
+    await page.getByRole('status').filter({ hasText: 'Identifier generated locally.' }).waitFor()
+    const subject = await privateSubject('bricks', 'admin@example.invalid', 'test-only-secret-'.repeat(4))
+    assert.equal(await page.getByLabel('Identifier', { exact: true }).inputValue(), subject)
+    assert.equal(await page.getByLabel('D1 SQL for first-time administrator setup', { exact: true }).inputValue(), `INSERT INTO admins (subject, enabled) VALUES ('${subject}', 1) ON CONFLICT(subject) DO NOTHING;`)
+    assert.equal(await page.getByLabel('Administrator email', { exact: true }).inputValue(), '')
+    assert.equal(await page.getByLabel('SUBJECT_SECRET', { exact: true }).inputValue(), '')
+    assert.deepEqual(requests, [])
+    await page.reload()
+    assert.equal(await page.getByLabel('Identifier', { exact: true }).inputValue(), '')
+    assert.equal(await page.getByLabel('Administrator email', { exact: true }).inputValue(), '')
+    assert.equal(await page.getByLabel('SUBJECT_SECRET', { exact: true }).inputValue(), '')
+  } finally { await context.close() }
+})
 
 test('admin signs in explicitly, changes public access, creates/revokes invitations and signs out on mobile', { timeout: 60000 }, async () => {
   const context = await browser.newContext({ ignoreHTTPSErrors: true, viewport: { width: 390, height: 844 } })

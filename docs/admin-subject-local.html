@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<title>Local administrator setup</title>
+<style>body{font:17px system-ui;max-width:42rem;margin:2rem auto;padding:0 1rem}label{display:block;margin-top:1rem}input,button,textarea{box-sizing:border-box;font:inherit;padding:.6rem;max-width:100%}input,textarea{width:100%}button{margin:1rem 0}textarea{min-height:6rem}code{overflow-wrap:anywhere}[hidden]{display:none}</style>
+<h1>Local administrator setup</h1>
+<p>Open this file locally on your computer. No network requests or storage are used. Enter the same project and SUBJECT_SECRET used by your Worker.</p>
+<label for="project">Project</label><input id="project" value="bricks" autocomplete="off" spellcheck="false">
+<label for="email">Administrator email</label><input id="email" type="email" autocomplete="off" spellcheck="false">
+<label for="secret">SUBJECT_SECRET</label><input id="secret" type="password" autocomplete="off">
+<button id="generate" type="button">Generate identifier</button>
+<p id="status" role="status"></p>
+<section id="result" hidden>
+<label for="subject">Identifier</label><textarea id="subject" readonly></textarea>
+<label for="sql">D1 SQL for first-time administrator setup</label><textarea id="sql" readonly></textarea>
+<p>For a new administrator only: run this SQL in the private D1 Console. Then add the identifier as a child of <code>adminAllowlist</code> in Firebase, with the boolean value <code>true</code>. This identifier is not a login token. Keep it private to avoid exposing allowlist information.</p>
+<p>For removal or re-enabling an existing administrator, use the private setup CLI: existing sessions must also be revoked.</p>
+</section>
+<script>
+const el = id => document.getElementById(id);
+el('generate').addEventListener('click', async () => {
+  el('result').hidden = true; el('subject').value = ''; el('sql').value = '';
+  const project = el('project').value, email = el('email').value.trim().toLowerCase(), secret = el('secret').value;
+  if (location.protocol !== 'file:' && !['127.0.0.1','localhost','[::1]'].includes(location.hostname)) { el('status').textContent = 'Download this HTML file and open the local copy first.'; return; }
+  if (!/^[a-z0-9-]{1,64}$/.test(project) || secret.length < 32 || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { el('status').textContent = 'Check the project, email and secret (at least 32 characters).'; return; }
+  el('generate').disabled = true;
+  try {
+    const bytes = value => new TextEncoder().encode(value);
+    const key = await crypto.subtle.importKey('raw', bytes(secret), {name:'HMAC',hash:'SHA-256'}, false, ['sign']);
+    const signature = await crypto.subtle.sign('HMAC', key, bytes(JSON.stringify([project,email])));
+    const subject = [...new Uint8Array(signature)].map(x=>x.toString(16).padStart(2,'0')).join('');
+    el('email').value = ''; el('secret').value = '';
+    el('subject').value = subject;
+    el('sql').value = "INSERT INTO admins (subject, enabled) VALUES ('" + subject + "', 1) ON CONFLICT(subject) DO NOTHING;";
+    el('result').hidden = false;
+    el('status').textContent = 'Identifier generated locally. Email and secret fields cleared.';
+  } catch { el('status').textContent = 'Unable to generate. Use a browser that supports local Web Crypto.'; }
+  finally { el('generate').disabled = false; }
+});
+</script>
+</html>
