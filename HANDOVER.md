@@ -5,6 +5,14 @@ phase docs. Owner instructions and `BRICKS_SPEC.md` take precedence.
 
 ## Current checkpoint — 2026-11-08
 
+- Owner reports publishing the checked operating-aware Firebase rules after
+  confirming both modes On. No live API/rules readback performed here yet.
+  Prepared optional GitHub Worker deployment job: only feature pushes whose
+  commit message contains `[deploy operating]`, after the entire build/test job,
+  deploy the exact checked Pages asset artifact to the preview Worker. Requires
+  private repository secret `CLOUDFLARE_API_TOKEN`. No trigger-marker push or
+  Worker application deployment has occurred yet. MAIL_FROM is in Wrangler vars
+  to preserve the owner-selected plain-text sender during deployment.
 - Owner's Firebase Console screenshot confirms persisted `operating/config`:
   numeric version/revision 1 and both single/multi mode `on`. Manual bootstrap
   is complete (null expiresAt fields are correctly omitted by RTDB). Next: checked

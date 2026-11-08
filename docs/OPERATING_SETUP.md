@@ -144,6 +144,19 @@ revoking existing access; it is not an ordinary key rotation with seamless login
 
 ## Checked rollout order
 
+For this repository, `.github/workflows/pages.yml` includes an optional preview
+Worker deployment job. Store a dedicated Cloudflare token as GitHub repository
+**Actions secret** `CLOUDFLARE_API_TOKEN`, limited to the intended account, with
+Workers Scripts Edit and D1 Edit for deployment. Any additional account-read
+permission must be justified by an actual API denial. It is not a frontend/Vite
+variable and must never enter chat. A push on `feature/operating-controls` whose
+message contains `[deploy operating]` triggers deployment only after all checks
+pass; it extracts the checked `github-pages` artifact instead of rebuilding with
+different Firebase values. Normal feature pushes do not deploy the Worker.
+This does not initialize Firebase or provision administrators. Keep those steps
+in the order below. Worker secrets already entered through the dashboard remain
+server-side; ordinary variables (including MAIL_FROM) are declared in Wrangler.
+
 1. Complete local checks and the focused Terra High review. Build the Worker
    game assets with the **same five public Firebase Web App values** used by
    GitHub Pages; otherwise `/play/` cannot connect to multiplayer. No private

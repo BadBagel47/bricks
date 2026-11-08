@@ -62,6 +62,33 @@ jobs:
         with:
           path: dist
 
+  deploy-operating-preview:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/feature/operating-controls' && contains(github.event.head_commit.message, '[deploy operating]')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: operating-artifact
+      - name: Restore checked game assets
+        run: |
+          mkdir -p dist
+          tar -xf operating-artifact/artifact.tar -C dist
+          test -f dist/index.html
+      - name: Publish operating preview
+        run: npx wrangler deploy --config wrangler.operating.jsonc
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ba62b17cf838a334c50450438732f225
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          WRANGLER_SEND_METRICS: 'false'
+
   deploy:
     if: github.ref == 'refs/heads/main'
     needs: build
