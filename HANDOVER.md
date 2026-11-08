@@ -24,10 +24,16 @@ phase docs. Owner instructions and `BRICKS_SPEC.md` take precedence.
   here. Managed runtime status reports no secrets or outbound identities. Do not
   request credential values or real allowlist emails in chat. `l8p.one` is only
   a tentative sender domain; no DNS edits were made.
-- **Next model:** GPT-6.1 Terra High for the agreed focused review of admin/session
-  revocation, private invitations, Firebase draining rules and rollout. Sol Medium
-  remains suitable for implementation fixes and setup guidance. Luna is suitable
-  for later routine copy/UI-only work. Do not claim a model switch occurred.
+- **Review/CI checkpoint:** The focused review found no additional access/quota
+  issue. CI initially exposed horizontal overflow in the mobile admin layout;
+  `7fa6133` constrains fieldset/input minimum widths and allows heading wrapping.
+  All feature CI checks now pass, including the previously failing admin browser
+  test: https://github.com/BadBagel47/bricks/actions/runs/42482035336 . This is a
+  feature-branch verification, not a production deployment.
+- **Next model:** GPT-6.1 Sol Medium for private setup and live provider checks
+  following `docs/OPERATING_SETUP.md`. Terra High is appropriate if those checks
+  expose a difficult authorization issue; Luna suits routine copy/UI-only work.
+  Do not claim a model switch occurred.
 
 ## Durable product direction
 
