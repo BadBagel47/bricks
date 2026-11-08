@@ -49,8 +49,9 @@ not require moving the public game or domain DNS to Cloudflare.
    A database administrator role includes more than the operating paths: IAM
    does not provide the path isolation used by RTDB rules here. Test the actual
    principal's permissions before rollout. If organization policy forbids keys,
-   stop this setup and configure a supported credential broker instead; do not
-   weaken organization policy.
+   first consider a supported keyless credential broker. A policy change is an
+   owner decision; use a project-scoped exception only when explicitly authorized,
+   and restore the inherited restriction after creating the necessary key.
 
    The Worker uses a privately stored service-account key to obtain short-lived
    OAuth tokens. Every normal REST request includes a restricted publisher
@@ -58,6 +59,28 @@ not require moving the public game or domain DNS to Cloudflare.
    the operating records and specified room/reservation paths. The **underlying
    credential remains powerful** and must be protected. Never place it in Pages,
    frontend code, repository variables or an administrator's browser.
+
+   **Observed Bricks setup, for reuse:** Google blocked key creation with the
+   legacy constraint `iam.disableServiceAccountKeyCreation`. The distinct managed
+   constraint `iam.managed.disableServiceAccountKeyCreation` was not enforced;
+   checking it alone did not explain the legacy block. The project owner account
+   could see the legacy policy through the service-account key creation error's
+   **View policy** link, but could not edit it. The organization admin needed
+   access to the project and Organization Policy Administrator privileges; the
+   owner chose a temporary exception for project `bricks` only. On the legacy
+   policy page, **Manage policy → Override parent's policy → Add a rule →
+   Enforcement Off → Done → Set policy** permitted the owner to create a JSON
+   key. The owner then reports restoring **Inherit parent's policy**. Verify the
+   effective legacy status is Enforced afterward; re-enforcing blocks future key
+   creation, not existing keys. Never use or copy Bricks' service-account key,
+   HMAC secret, allowlist or database for another project. Evaluate keyless
+   federation independently; it was not validated for this Worker.
+
+   Cloudflare D1 Console's long mobile paste was truncated in this setup. If
+   using the dashboard, execute the schema in smaller complete statements and
+   verify all six tables **and indexes**; six table names alone do not prove the
+   full schema. Keep the selected data jurisdiction in mind. A separate account
+   or browser profile can help when Google silently switches logged-in users.
 
 4. Set Worker secrets interactively, without placing values in command arguments:
 

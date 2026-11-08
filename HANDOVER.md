@@ -5,11 +5,13 @@ phase docs. Owner instructions and `BRICKS_SPEC.md` take precedence.
 
 ## Current checkpoint — 2026-11-08
 
-- **Firebase publisher blocker:** Owner created the `bricks-operating` service
-  account and reports granting Firebase Realtime Database Admin. The Google
-  organization enforces `iam.disableServiceAccountKeyCreation`; no private key
-  could be created. Do not instruct weakening this policy as a default. Existing
-  Worker publisher uses a service-account key and is not ready for deployment.
+- **Firebase publisher setup:** Owner created the `bricks-operating` service
+  account and reports granting Firebase Realtime Database Admin. The legacy
+  organization constraint blocked key creation. Owner temporarily overrode it
+  for the Bricks project, reports creating a JSON key and then restoring the
+  inherited policy. Effective status and key validity have not been independently
+  checked. The key has not been shared here or installed in Cloudflare. Existing
+  Worker publisher is not ready for deployment.
   Google documents Workload Identity Federation with an external OIDC provider,
   but a suitable automatic Cloudflare Worker identity and this Firebase REST
   combination have not been verified. An alternative dedicated Firebase Auth
@@ -25,8 +27,8 @@ phase docs. Owner instructions and `BRICKS_SPEC.md` take precedence.
   application deployment, Firebase publisher credentials and live mail tests remain.
 - Owner created the placeholder Worker at `https://bricks-operating.l8p1.workers.dev/`.
   Wrangler now uses that origin and its `/play/` URL for the private preview stage.
-  The application code/secrets have not been deployed. Next: bind D1 as `DB`,
-  arrange private deployment credentials and Firebase publisher setup, then follow
+  The application code has not been deployed. Next: privately install and verify
+  the Firebase publisher credential and remaining secrets, then follow
   the bootstrap/rules/preview sequence in `docs/OPERATING_SETUP.md`.
 - Owner created Cloudflare D1 `bricks-operating` in EU jurisdiction and supplied
   database ID `665b9d70-e43f-47f3-a15b-875abfb256a5`; Wrangler binding updated.
@@ -59,8 +61,9 @@ phase docs. Owner instructions and `BRICKS_SPEC.md` take precedence.
   existing gameplay browser tests and 2 new real-HTTPS admin/solo browser tests
   passed. The complete Firebase suite passed 51 tests, including REST override enforcement and a real two-identity private-game check. Worker deploy dry-run passed; no external publication occurred. Browser checks passed both without and with a configured operating-origin build.
 - **Still external:** The owner has a Mailjet transactional account and reports verified DNS for
-  `system@trythis.one` through Cloudflare. No production D1, real service-account
-  key, real email test or Worker deployment has been configured here. Managed runtime status reports no secrets or outbound identities. Do not
+  `system@trythis.one` through Cloudflare, plus a production D1, placeholder
+  Worker and downloaded service-account key. No real email test or application
+  Worker deployment has been performed. Managed runtime status reports no secrets or outbound identities. Do not
   request credential values or real allowlist emails in chat. `trythis.one` supersedes tentative `l8p.one`; the owner performed DNS setup.
 - **Review/CI checkpoint:** The focused review found no additional access/quota
   issue. CI initially exposed horizontal overflow in the mobile admin layout;
