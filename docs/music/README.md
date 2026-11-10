@@ -1,10 +1,22 @@
-# Proposed music: "Troika" (owner-provided, not integrated)
+# Proposed music (owner-provided, not integrated)
 
 Added 2026-11-10 at the owner's request as a candidate replacement/extension for
 the current music loop in `src/audio/`. **Not wired into the game.** Integration
 is a separate task that needs owner authorization like any other milestone work.
 
-## Files
+## Stackline (recommended main theme)
+
+- `stackline.js` / `stackline-preview.html` — original NES-style puzzle theme in
+  C major, 16 bars, base 132 BPM. API: `createStackline({ volume })` →
+  `start()`, `stop()`, `toggle()`, `setDanger(bool)`, `setVolume(v)`, `bpm`.
+- Built for spec §12.1: `setDanger(true)` raises tempo ×1.4 and switches to
+  driving eighth-note bass, denser hats and constant arpeggios; it can switch
+  mid-bar. No per-loop or per-level acceleration. Music never affects gameplay.
+- Integration: port note data to a small testable module, play it through
+  `BricksAudio` (`src/audio/synth.ts`) using existing music gain, settings,
+  lifecycle and unlock, and drive `setDanger` from `isDangerStack`.
+
+## Troika (alternative, Russian folk style)
 
 - `troika.js` — self-contained Web Audio player (plain JS, no dependencies).
   Exposes `createTroika({ bpm, volume })` → `start()`, `stop()`, `toggle()`,
