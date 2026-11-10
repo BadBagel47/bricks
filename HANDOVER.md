@@ -11,7 +11,7 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 - **Status:** Owner confirmed the checked Firebase rules published. Main `09a7cb6` passed all tests and Pages deployment: https://github.com/BadBagel47/bricks/actions/runs/42434535645 . App and rules match tested `03d97ed`. Direct live-site requests from this environment are blocked by the proxy (403); no live Firebase playtest is claimed.
 - **Workflow:** Owner wants manual tests consolidated. Finish automated two-session/security verification before the one necessary external action: checked rule publication. Later milestones still need authorization.
 - **Next:** Owner authorized 3.13. The engineering review and automated verification are recorded in `docs/PHASE3_REVIEW.md`. Public competitive trust, abuse resistance and retention remain product/architecture decisions; do not represent them as solved. Phase 4 requires owner authorization.
-- **Owner-provided music proposal (2026-11-10):** `docs/music/` holds two original theme proposals: "Stackline" (recommended, has danger mode) and "Troika" (Russian folk style). Not integrated; see `docs/music/README.md` before working on audio.
+- **Owner-provided music proposal (2026-11-10):** `docs/music/` holds original theme proposals sorted by the owner into groups A (Night Shift), B (Stackline) and C (Troika). New music must keep a stable BPM (owner rule 2026-11-11). Not integrated; see `docs/music/README.md` before working on audio.
 - **Next model:** GPT-6.1 Sol Medium for a focused quota/abuse mitigation plan; consider Terra High for server-authoritative competitive architecture and Luna for routine UI changes.
 
 ## Product direction and durable constraints

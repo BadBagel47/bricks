@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Night Shift – Bricks music preview</title>
+<style>
+  body { margin:0; min-height:100vh; display:grid; place-items:center; background:#0d1220; color:#e8f0ff;
+         font-family:"Courier New", monospace; }
+  .box { border:4px solid #b388ff; padding:28px 32px; max-width:360px; width:90%; background:#16203a;
+         box-shadow:8px 8px 0 #4a2a7a; text-align:center; }
+  h1 { margin:0 0 20px; font-size:28px; letter-spacing:4px; color:#ffd54f; }
+  button { font:inherit; font-size:18px; padding:12px 22px; border:0; cursor:pointer; margin:4px; color:#0d1220; }
+  #play { background:#b388ff; box-shadow:4px 4px 0 #ffd54f; }
+  #danger { background:#555; color:#fff; box-shadow:4px 4px 0 #222; }
+  #danger.on { background:#ef5350; box-shadow:4px 4px 0 #ffd54f; }
+  button:active { transform:translate(2px,2px); }
+  label { display:block; margin-top:18px; font-size:14px; text-align:left; }
+  input[type=range] { width:100%; accent-color:#ffd54f; }
+  .bpm { margin-top:16px; font-size:14px; color:#ffd54f; }
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>NIGHT SHIFT</h1>
+  <button id="play">▶ Play</button>
+  <button id="danger">Danger: off</button>
+  <label>Volume<input id="vol" type="range" min="0" max="1" step="0.05" value="0.5"></label>
+  <div class="bpm">Tempo: <span id="bpm">120</span> BPM</div>
+</div>
+<script>
+/*
+ * Night Shift – original chiptune theme for Bricks (group A).
+ * Plain Web Audio, no files. D minor, syncopated groove bass, square lead with
+ * dotted-eighth echo, noise drums. FIXED TEMPO: 120 BPM, never changes.
+ * setDanger(true) raises intensity only (pumping bass, denser drums, arpeggios).
+ *
+ *   const music = createNightShift({ volume: 0.5 })
+ *   music.start()            // call from a user gesture (autoplay policy)
+ *   music.setDanger(true)    // when the stack reaches the danger rows
+ *   music.setVolume(0.7)     // 0–1
+ *   music.stop()
+ */
+(function (global) {
+  const BPM = 120;
+  // [note, length in eighths] – 16 bars, "r" = rest.
+  const MELODY = [
+    // A section
+    ['D5',1],['r',1],['F5',1],['A5',1],['r',1],['G5',1],['F5',1],['E5',1],
+    ['D5',2],['A4',1],['C5',1],['D5',4],
+    ['F5',1],['r',1],['D5',1],['F5',1],['Bb5',2],['A5',1],['G5',1],
+    ['E5',3],['C5',1],['G5',4],
+    ['D5',1],['r',1],['F5',1],['A5',1],['r',1],['C6',1],['A5',1],['G5',1],
+    ['A5',2],['G5',1],['F5',1],['E5',1],['F5',1],['D5',2],
+    ['D5',1],['F5',1],['Bb5',1],['D6',1],['C6',2],['Bb5',1],['A5',1],
+    ['A5',3],['E5',1],['C#5',1],['E5',1],['A4',2],
+    // B section
+    ['C6',2],['A5',1],['F5',1],['r',1],['A5',1],['C6',1],['A5',1],
+    ['G5',2],['E5',1],['C5',1],['r',1],['E5',1],['G5',1],['E5',1],
+    ['D5',1],['G5',1],['B5',1],['D6',1],['B5',1],['G5',1],['D5',2],
+    ['F5',2],['E5',1],['D5',1],['A4',4],
+    ['Bb4',1],['D5',1],['F5',1],['Bb5',1],['A5',1],['F5',1],['D5',2],
+    ['C5',1],['E5',1],['G5',1],['C6',1],['Bb5',1],['G5',1],['E5',2],
+    ['A5',2],['G5',1],['F5',1],['E5',2],['C#5',2],
+    ['E5',1],['F5',1],['E5',1],['C#5',1],['A4',4],
+  ];
+  const CHORDS = ['Dm','Dm','Bb','C','Dm','Dm','Bb','A','F','C','G','Dm','Bb','C','A','A'];
+  const CH = {
+    Dm: { root: 'D2', top: 'A2', oct: 'D3', triad: ['D5','F5','A5'] },
+    Bb: { root: 'Bb1', top: 'F2', oct: 'Bb2', triad: ['Bb4','D5','F5'] },
+    C:  { root: 'C2', top: 'G2', oct: 'C3', triad: ['C5','E5','G5'] },
+    A:  { root: 'A1', top: 'E2', oct: 'A2', triad: ['A4','C#5','E5'] },
+    F:  { root: 'F2', top: 'C3', oct: 'F3', triad: ['F4','A4','C5'] },
+    G:  { root: 'G2', top: 'D3', oct: 'G3', triad: ['G4','B4','D5'] },
+  };
+
+  const SEMI = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
+  function midi(n) {
+    const m = /^([A-G])([#b]?)(-?\d)$/.exec(n);
+    return SEMI[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0) + (+m[3] + 1) * 12;
+  }
+  const freq = (n) => 440 * Math.pow(2, (midi(n) - 69) / 12);
+
+  const LENGTH = CHORDS.length * 16; // 16th-note steps
+  const LEAD = Array.from({ length: LENGTH }, () => null);
+  let melodySteps = 0;
+  for (const [n, len] of MELODY) {
+    if (n !== 'r') LEAD[melodySteps] = { len: len * 2, f: freq(n) };
+    melodySteps += len * 2;
+  }
+
+  // Generated per step so danger can switch mid-bar. Tempo is never touched.
+  function stepVoices(step, danger) {
+    const bar = Math.floor(step / 16), s = step % 16, ch = CH[CHORDS[bar]];
+    const out = [];
+    if (danger) {
+      if (s % 2 === 0) out.push(['bass', { len: 1.5, f: freq(s % 4 === 0 ? ch.root : ch.oct) }]);
+    } else {
+      const pat = { 0: [ch.root, 2], 3: [ch.root, 1], 6: [ch.oct, 1], 8: [ch.top, 2], 11: [ch.root, 1], 14: [ch.oct, 1] };
+      if (pat[s]) out.push(['bass', { len: pat[s][1], f: freq(pat[s][0]) }]);
+    }
+    if (danger || bar >= 8) out.push(['arp', { f: freq(ch.triad[[0, 1, 2, 1][s % 4]]) }]);
+    const kick = danger ? [0, 3, 7, 10, 14] : [0, 7, 10];
+    if (kick.includes(s)) out.push(['drum', { type: 'k' }]);
+    if (s === 4 || s === 12 || (danger && s === 15) || (bar === 15 && s >= 13)) out.push(['drum', { type: 's' }]);
+    if (danger || s % 2 === 0) out.push(['drum', { type: 'h' }]);
+    return out;
+  }
+
+  function createNightShift(opts = {}) {
+    let ctx, master, echoIn, pulse12, noiseBuf, timer = null;
+    let step = 0, nextTime = 0, playing = false, danger = false;
+    let volume = opts.volume ?? 0.5;
+    const sixteenth = 60 / BPM / 4;
+
+    function pulseWave(d) {
+      const N = 64, re = new Float32Array(N), im = new Float32Array(N);
+      for (let n = 1; n < N; n++) re[n] = 4 / (n * Math.PI) * Math.sin(Math.PI * n * d);
+      return ctx.createPeriodicWave(re, im);
+    }
+
+    function init() {
+      if (ctx) return;
+      ctx = new (global.AudioContext || global.webkitAudioContext)();
+      const comp = ctx.createDynamicsCompressor();
+      master = ctx.createGain();
+      master.gain.value = volume;
+      master.connect(comp); comp.connect(ctx.destination);
+      // dotted-eighth echo for the lead
+      echoIn = ctx.createGain(); echoIn.gain.value = 0.3;
+      const delay = ctx.createDelay(1); delay.delayTime.value = sixteenth * 3;
+      const fb = ctx.createGain(); fb.gain.value = 0.35;
+      const tone = ctx.createBiquadFilter(); tone.type = 'lowpass'; tone.frequency.value = 2500;
+      echoIn.connect(delay); delay.connect(tone); tone.connect(fb); fb.connect(delay); tone.connect(master);
+      pulse12 = pulseWave(0.125);
+      noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+
+    function tone(t, dur, f, { wave, type, vol, echo }) {
+      const o = ctx.createOscillator();
+      if (wave) o.setPeriodicWave(wave); else o.type = type;
+      o.frequency.value = f;
+      const g = ctx.createGain(), end = t + dur * 0.85;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(vol, t + 0.004);
+      g.gain.setTargetAtTime(vol * 0.65, t + 0.01, 0.07);
+      g.gain.setTargetAtTime(0, end, 0.012);
+      o.connect(g); g.connect(master);
+      if (echo) g.connect(echoIn);
+      o.start(t); o.stop(end + 0.1);
+    }
+
+    function drum(t, type) {
+      const s = ctx.createBufferSource(); s.buffer = noiseBuf;
+      const f = ctx.createBiquadFilter(), g = ctx.createGain();
+      let vol, dec;
+      if (type === 'k') {
+        f.type = 'lowpass'; f.frequency.value = 180; vol = 0.8; dec = 0.09;
+        const o = ctx.createOscillator(); o.type = 'triangle';
+        o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(40, t + 0.1);
+        const og = ctx.createGain();
+        og.gain.setValueAtTime(0.65, t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+        o.connect(og); og.connect(master); o.start(t); o.stop(t + 0.13);
+      } else if (type === 's') { f.type = 'bandpass'; f.frequency.value = 1600; vol = 0.32; dec = 0.09; }
+      else { f.type = 'highpass'; f.frequency.value = 8000; vol = 0.08; dec = 0.025; }
+      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dec);
+      s.connect(f); f.connect(g); g.connect(master);
+      s.start(t, Math.random() * 0.5); s.stop(t + dec + 0.02);
+    }
+
+    function tick() {
+      while (nextTime < ctx.currentTime + 0.12) {
+        const lead = LEAD[step];
+        if (lead) tone(nextTime, lead.len * sixteenth, lead.f, { type: 'square', vol: 0.15, echo: true });
+        for (const [k, e] of stepVoices(step, danger)) {
+          if (k === 'bass') tone(nextTime, e.len * sixteenth, e.f, { type: 'triangle', vol: 0.55 });
+          else if (k === 'arp') tone(nextTime, sixteenth, e.f, { wave: pulse12, vol: danger ? 0.08 : 0.05 });
+          else drum(nextTime, e.type);
+        }
+        nextTime += sixteenth;
+        step = (step + 1) % LENGTH;
+      }
+    }
+
+    return {
+      start() {
+        init(); ctx.resume();
+        if (playing) return;
+        playing = true; step = 0;
+        nextTime = ctx.currentTime + 0.05;
+        timer = setInterval(tick, 25);
+      },
+      stop() { playing = false; clearInterval(timer); timer = null; },
+      toggle() { playing ? this.stop() : this.start(); return playing; },
+      setDanger(on) { danger = !!on; },
+      setVolume(v) { volume = v; if (master) master.gain.setTargetAtTime(v, ctx.currentTime, 0.02); },
+      get playing() { return playing; },
+      get danger() { return danger; },
+      get bpm() { return BPM; },
+      _info: { length: LENGTH, melodySteps },
+    };
+  }
+
+  global.createNightShift = createNightShift;
+  if (typeof module !== 'undefined') module.exports = { createNightShift };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+const music = createNightShift();
+const play = document.getElementById('play'), dz = document.getElementById('danger');
+play.onclick = () => { play.textContent = music.toggle() ? '■ Stop' : '▶ Play'; };
+dz.onclick = () => { music.setDanger(!music.danger); dz.classList.toggle('on', music.danger); dz.textContent = 'Danger: ' + (music.danger ? 'on' : 'off'); };
+document.getElementById('vol').oninput = e => music.setVolume(+e.target.value);
+setInterval(() => document.getElementById('bpm').textContent = music.bpm, 200);
+</script>
+</body>
+</html>
