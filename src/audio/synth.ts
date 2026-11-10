@@ -178,6 +178,8 @@ export class BricksAudio {
   private startMusic() {
     this.stopMusic()
     if (!this.playing || !musicAudible(this.settings) || !this.ensureContext() || !this.context) return
+    // Resume from the start of the current beat, which always carries a bass note.
+    this.step -= this.step % 4
     this.nextStepTime = this.context.currentTime + 0.05
     this.scheduleAhead()
   }

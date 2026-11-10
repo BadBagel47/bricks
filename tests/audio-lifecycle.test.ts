@@ -71,8 +71,7 @@ test('music schedules continuously; pause silences everything and schedules noth
   tick(1000)
   assert.equal(sources.length, stoppedCount)
   audio.resumeGame()
-  tick(200)
-  assert.ok(sources.length > stoppedCount)
+  assert.ok(sources.length > stoppedCount, 'resume starts a note immediately, even if the audio clock is coarse')
 })
 
 test('replay and leaving cancel the Game Over effect and leftover music', (t) => {
