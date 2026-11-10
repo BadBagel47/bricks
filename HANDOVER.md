@@ -28,6 +28,10 @@ before editing; preserve user changes. Operating controls are not merged to main
   Do not mistake local/emulator success or owner setup reports for independently
   verified production behavior.
 
+## Visual and audio refresh (2026-11-10)
+
+Built on `feature/visual-refresh` and merged into `feature/operating-controls` for the Worker preview once CI passed. Details and backlog in `PROGRESS.md`; design rules in spec section 5.0; audio in `docs/AUDIO.md`.
+
 ## Next session: finish the playable preview
 
 1. Create a **fresh** private invitation and open its complete link in two

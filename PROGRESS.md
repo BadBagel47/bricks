@@ -5,6 +5,18 @@
 - **Status:** Phase 3.13 review is documented in `docs/PHASE3_REVIEW.md`. Public gameplay remains at `09a7cb6`; the separately approved operating controls are live in a Worker preview on `feature/operating-controls`. See current checkpoint below and `HANDOVER.md` for verified setup and remaining live checks.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
+## Visual and audio refresh — 2026-11-10
+
+Owner approved ("Kör") a refresh based on the Claude design sketch and sound test page. Built on `feature/visual-refresh` (from `feature/operating-controls`):
+
+- New audio from scratch: original four-channel theme (pulse lead, pulse arpeggio, triangle bass, noise drums), look-ahead scheduling, danger tempo with hysteresis, 22 named effects. See `docs/AUDIO.md`.
+- New visual design (spec section 5.0): navy theme, tile logo, five-button touch row, tappable Hold box, restyled menus, settings, lobby, match and results.
+- New Personal Settings: Block colors (Change by level / Classic) and Ghost piece (off by default). Two-color NES-style level palettes.
+- Admin page restyled with unchanged element IDs and behavior.
+- Local checks with the available toolchain: unit tests, the 15 single-player Chromium tests and the 3 operating browser tests passed against a local build. Full CI (lint, build, Firebase emulator and two-session tests) runs on GitHub.
+
+Backlog: multiplayer-only effects (victory, defeat, garbage sent/incoming/rise, countdown) exist in `effects.ts` but are not yet wired to match events. The owner plans more music tracks later.
+
 ## Reusable operating controls — current checkpoint, 2026-11-10
 
 The authoritative current setup, resources, failure diagnoses, next steps and
