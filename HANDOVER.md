@@ -64,7 +64,7 @@ Details in `PROGRESS.md` and `CHANGELOG.md`; design rules in spec section 5.0
 and ADR 0005; audio in `docs/AUDIO.md`. The owner then approved reworking admin,
 lobby, settings and match screens to the sketch's behavior (backlog F-001 to
 F-005, B-001). Runs 1 and 2 are done (see `PROGRESS.md`). B-002 (match start
-timing) is proposed and deferred by the owner.
+timing) is fixed.
 
 ## Next session: finish the playable preview
 

@@ -23,6 +23,7 @@ import { HoldBox, PiecePreview, Playfield, TouchControls } from '../ui/GameViews
 import { decodeBoard, parseGameSnapshot, SnapshotGate } from './game-snapshot.ts'
 import type { GameSnapshot } from './game-snapshot.ts'
 import type { JoinedRoom } from './room-model.ts'
+import { startCatchUp } from './match-start.ts'
 import type { MatchStart } from './match-start.ts'
 import type { LiveOptions } from './live-options.ts'
 import './live-game.css'
@@ -40,7 +41,9 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     }
     if (!restored) {
       const game = createGame({ seed: start.seed, startLevel: start.settings.startLevel, holdEnabled: start.settings.hold, hardDropEnabled: personal.hardDropEnabled })
-      return { game, battleGame: battle ? new BattleGame(game, start.seed, joined.uid === start.hostUid ? 'guest' : 'host') : null }
+      // Battle catches up through its shared frame clock; Score Duel catches up here.
+      if (battle) return { game, battleGame: new BattleGame(game, start.seed, joined.uid === start.hostUid ? 'guest' : 'host') }
+      return { game: advanceGame(game, startCatchUp(start, Date.now() + serverTimeOffset)).state, battleGame: null }
     }
     const elapsed = Math.max(0, Date.now() + serverTimeOffset - (resumedAt ?? Date.now() + serverTimeOffset))
     return { game: advanceGame(restored.game, elapsed).state, battleGame: null }

@@ -32,6 +32,17 @@ export function parseMatchStart(value: unknown): MatchStart | null {
 export function startStillValid(start: MatchStart, room: Room, settings: MatchSettings, connections: Connections): boolean {
   return room.status === 'waiting' && room.hostUid === start.hostUid && room.players.guest?.uid === start.guestUid && (room.roleRevision ?? 0) === start.roleRevision && settings.revision === start.settings.revision && sameSettings(settings, start.settings) && connections[start.hostUid]?.[start.hostConnection] === true && connections[start.guestUid]?.[start.guestConnection] === true
 }
+/**
+ * Shared match time already elapsed when a client mounts a fresh round (B-002).
+ * The "ready" write reaches the two clients at different moments, so each one
+ * catches up from the common start (countdown end) instead of starting gravity
+ * at its own mount time. Capped so a late mount cannot drop pieces unseen.
+ */
+export const MAX_START_CATCH_UP_MS = 3000
+export function startCatchUp(start: Pick<MatchStart, 'countdownAt'>, serverNow: number): number {
+  if (!Number.isFinite(serverNow)) return 0
+  return Math.min(MAX_START_CATCH_UP_MS, Math.max(0, serverNow - start.countdownAt - 5000))
+}
 export function countdownSeconds(start: MatchStart, now: number): number {
   return Math.max(0, Math.ceil((start.countdownAt + 5000 - now) / 1000))
 }
