@@ -11,6 +11,7 @@ import type { GamepadBindings } from './input/gamepad.ts'
 import { HeldInputs } from './input/repeat.ts'
 import { actionsForSwipe } from './input/swipe.ts'
 import { HoldBox, Playfield, PiecePreview, TouchControls } from './ui/GameViews.tsx'
+import { ColorPreview, Segmented, Stepper } from './ui/SettingsControls.tsx'
 import { addHighscore, DEFAULT_PERSONAL_SETTINGS, DEFAULT_SINGLE_PLAYER_SETTINGS, parseHighscores, parsePersonalSettings, parseSinglePlayerSettings, serializeHighscores } from './persistence.ts'
 import type { HighscoreRecord, PersonalSettings, SinglePlayerSettings } from './persistence.ts'
 import { BricksAudio } from './audio/synth.ts'
@@ -422,21 +423,41 @@ function App() {
   if (view === 'settings') return <main className="shell">
     <header className="topbar"><Brand compact /><button className="back-button" onClick={() => { setCapture(null); setGamepadCapture(null); setView('menu') }}>← Back to menu</button></header>
     <section className="settings-card">
-      <h1 tabIndex={-1}>Personal settings</h1>
+      <h1 tabIndex={-1}>Settings</h1>
+      <h2 className="settings-heading">Personal</h2>
       <form className="name-form" onSubmit={saveUsername}>
         <label htmlFor="username">Player name</label>
         <input id="username" maxLength={16} minLength={2} onChange={(event) => setDraft(event.target.value)} required value={draft} />
         <span className="field-hint">2–16 characters</span>
         <button className="button button-primary" type="submit">Save name</button>
       </form>
+      <span className="setting-label" id="touch-controls-label">Touch controls</span>
+      <Segmented label="Touch controls" value={personal.mobileControlMethod} options={[{ value: 'dpad', label: 'Buttons' }, { value: 'swipe', label: 'Swipe' }]} onChange={(mobileControlMethod) => savePersonal({ ...personal, mobileControlMethod })} />
+      <div className="setting-group">
       <label className="toggle-row"><span>Hard Drop</span><input checked={personal.hardDropEnabled} onChange={(event) => savePersonal({ ...personal, hardDropEnabled: event.target.checked })} type="checkbox" /></label>
+      <label className="audio-volume"><span>Button size</span><input aria-label="Touch button size" max="72" min="44" onChange={(event) => savePersonal({ ...personal, touchButtonSize: Number(event.target.value) })} step="4" type="range" value={personal.touchButtonSize} /><output>{personal.touchButtonSize}px</output></label>
+      <label className="toggle-row"><span>Left-handed layout</span><input checked={personal.leftHandedControls} onChange={(event) => savePersonal({ ...personal, leftHandedControls: event.target.checked })} type="checkbox" /></label>
+      <label className="toggle-row"><span>Hide touch controls when a controller is connected</span><input checked={personal.hideTouchControlsWhenController} onChange={(event) => savePersonal({ ...personal, hideTouchControlsWhenController: event.target.checked })} type="checkbox" /></label>
+      </div>
+      <h2 className="settings-heading">Display</h2>
+      <span className="setting-label">Block colors</span>
+      <Segmented label="Block colors" value={personal.blockColors} options={[{ value: 'level', label: 'Change by level' }, { value: 'classic', label: 'Classic' }]} onChange={(blockColors) => savePersonal({ ...personal, blockColors })} />
+      <ColorPreview colors={personal.blockColors} level={singlePlayer.startLevel} />
+      <div className="setting-group">
+      <label className="toggle-row"><span>Ghost piece</span><input checked={personal.ghostPiece} onChange={(event) => savePersonal({ ...personal, ghostPiece: event.target.checked })} type="checkbox" /></label>
+      </div>
+      <h2 className="settings-heading">1 Player</h2>
+      <div className="setting-group">
+        <Stepper label="Starting Level" value={singlePlayer.startLevel} min={0} max={19} lowerLabel="Lower starting level" raiseLabel="Raise starting level" onChange={(startLevel) => saveSinglePlayer({ ...singlePlayer, startLevel })} />
+      <label className="toggle-row"><span>Hold Piece</span><input checked={singlePlayer.holdEnabled} onChange={(event) => saveSinglePlayer({ ...singlePlayer, holdEnabled: event.target.checked })} type="checkbox" /></label>
+      </div>
+      <h2 className="settings-heading">Audio</h2>
+      <div className="setting-group">
       <label className="toggle-row"><span>Music</span><input checked={personal.musicEnabled} onChange={(event) => savePersonal({ ...personal, musicEnabled: event.target.checked })} type="checkbox" /></label>
       <label className="audio-volume"><span>Music volume</span><input aria-label="Music volume" max="100" min="0" onChange={(event) => savePersonal({ ...personal, musicVolume: Number(event.target.value) })} type="range" value={personal.musicVolume} /><output>{personal.musicVolume}%</output></label>
       <label className="toggle-row"><span>Sound effects</span><input checked={personal.effectsEnabled} onChange={(event) => savePersonal({ ...personal, effectsEnabled: event.target.checked })} type="checkbox" /></label>
       <label className="audio-volume"><span>Effects volume</span><input aria-label="Effects volume" max="100" min="0" onChange={(event) => savePersonal({ ...personal, effectsVolume: Number(event.target.value) })} type="range" value={personal.effectsVolume} /><output>{personal.effectsVolume}%</output></label>
-      <h2 className="settings-heading">Display</h2>
-      <label className="setting-select-row" htmlFor="block-colors"><span>Block colors</span><select aria-label="Block colors" id="block-colors" onChange={(event) => savePersonal({ ...personal, blockColors: event.target.value === 'classic' ? 'classic' : 'level' })} value={personal.blockColors}><option value="level">Change by level</option><option value="classic">Classic</option></select></label>
-      <label className="toggle-row"><span>Ghost piece</span><input checked={personal.ghostPiece} onChange={(event) => savePersonal({ ...personal, ghostPiece: event.target.checked })} type="checkbox" /></label>
+      </div>
       <h2 className="settings-heading">Keyboard</h2>
       <div className="binding-list">{INPUT_ACTIONS.map((action) => <div className="binding-row" key={action}>
         <span>{ACTION_LABELS[action]}</span>
@@ -454,14 +475,6 @@ function App() {
       {gamepadCaptureError && <p className="notice" role="status">{gamepadCaptureError}</p>}
       {gamepadCapture && <button className="back-button cancel-capture" onClick={() => { setGamepadCapture(null); setGamepadCaptureError('') }}>Cancel</button>}
       <button className="reset-button" onClick={resetGamepadBindings}>Reset controller controls</button>
-      <h2 className="settings-heading">Mobile controls</h2>
-      <label className="setting-select-row" htmlFor="mobile-controls"><span>Control method</span><select aria-label="Control method" id="mobile-controls" onChange={(event) => savePersonal({ ...personal, mobileControlMethod: event.target.value as PersonalSettings['mobileControlMethod'] })} value={personal.mobileControlMethod}><option value="dpad">D-Pad</option><option value="swipe">Swipe</option></select></label>
-      <label className="audio-volume"><span>Button size</span><input aria-label="Touch button size" max="72" min="44" onChange={(event) => savePersonal({ ...personal, touchButtonSize: Number(event.target.value) })} step="4" type="range" value={personal.touchButtonSize} /><output>{personal.touchButtonSize}px</output></label>
-      <label className="toggle-row"><span>Left-handed layout</span><input checked={personal.leftHandedControls} onChange={(event) => savePersonal({ ...personal, leftHandedControls: event.target.checked })} type="checkbox" /></label>
-      <label className="toggle-row"><span>Hide touch controls when a controller is connected</span><input checked={personal.hideTouchControlsWhenController} onChange={(event) => savePersonal({ ...personal, hideTouchControlsWhenController: event.target.checked })} type="checkbox" /></label>
-      <h2 className="settings-heading">1 Player Settings</h2>
-      <label className="setting-select-row" htmlFor="start-level"><span>Starting Level</span><select aria-label="Starting Level" id="start-level" onChange={(event) => saveSinglePlayer({ ...singlePlayer, startLevel: Number(event.target.value) })} value={singlePlayer.startLevel}>{Array.from({ length: 20 }, (_, level) => <option key={level} value={level}>Level {String(level).padStart(2, '0')}</option>)}</select></label>
-      <label className="toggle-row"><span>Hold Piece</span><input checked={singlePlayer.holdEnabled} onChange={(event) => saveSinglePlayer({ ...singlePlayer, holdEnabled: event.target.checked })} type="checkbox" /></label>
       {notice && <p className="notice" role="status">{notice}</p>}
     </section>
   </main>

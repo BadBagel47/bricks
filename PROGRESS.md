@@ -5,6 +5,10 @@
 - **Status:** Phase 3.13 review is documented in `docs/PHASE3_REVIEW.md`. Public gameplay remains at `09a7cb6`; the separately approved operating controls are live in a Worker preview on `feature/operating-controls`. See current checkpoint below and `HANDOVER.md` for verified setup and remaining live checks.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
+## Run 1 — admin page and settings (F-001, B-001, F-003) — 2026-11-10
+
+Owner approved ("Kör"). Admin page and Settings now follow the sketch's structure and behavior; Revoke only for active unexpired invitations. Updated `tests/operating.browser.mjs` (segmented controls, tabs, new expired-invitation check) and `tests/browser.integration.mjs` (heading "Settings", stepper, Swipe radio). Local: operating browser 3/3, browser integration 15/15, typecheck clean; six unit tests that need `firebase`/`miniflare` cannot run in this sandbox (fail identically without the change), so CI is authoritative. Remaining sketch work: F-002, F-004, F-005 (run 2).
+
 ## Visual and audio refresh — 2026-11-10
 
 Owner approved ("Kör") a refresh based on the Claude design sketch and sound test page. Built on `feature/visual-refresh` (from `feature/operating-controls`):
@@ -15,7 +19,7 @@ Owner approved ("Kör") a refresh based on the Claude design sketch and sound te
 - Admin page restyled with unchanged element IDs and behavior.
 - Local checks with the available toolchain: unit tests, the 15 single-player Chromium tests and the 3 operating browser tests passed against a local build. Full CI (lint, build, Firebase emulator and two-session tests) runs on GitHub.
 
-Backlog: multiplayer-only effects (victory, defeat, garbage sent/incoming/rise, countdown) exist in `effects.ts` but are not yet wired to match events. The owner plans more music tracks later.
+Open follow-up work is tracked in `docs/BACKLOG.md` (F-001 to F-008, B-001, T-001, T-002).
 
 ## Reusable operating controls — current checkpoint, 2026-11-10
 
