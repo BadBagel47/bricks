@@ -89,6 +89,15 @@ export default function MatchStartPanel({ options, database, joined, settings, a
   useEffect(() => {
     if (active && !connected && start) interrupted.current.add(start.id)
   }, [active, connected, start])
+  const countdown = start?.status === 'countdown' && offset !== null ? countdownSeconds(start, now + offset) : null
+  const heardCount = useRef<number | null>(null)
+  useEffect(() => {
+    const previous = heardCount.current
+    heardCount.current = countdown
+    if (countdown === null || countdown === previous) return
+    if (countdown > 0 && countdown <= 3) options.audio.cue('countdownTick')
+    else if (countdown === 0 && previous !== null) options.audio.cue('countdownGo')
+  }, [countdown, options.audio])
   const needsReadiness = start?.roundVersion === 1 && start.status === 'countdown'
   const session = recovery?.matchId === start?.id ? recovery : null
   const resumed = session?.phase === 'resumed' ? session : null
@@ -187,7 +196,7 @@ export default function MatchStartPanel({ options, database, joined, settings, a
     {active && start ? <>
       <h2>{ready ? 'Match in progress' : 'Starting match'}</h2>
       <p>{start.settings.mode === 'battle' ? 'Battle' : 'Score Duel'} · Level {String(start.settings.startLevel).padStart(2, '0')} · Hold {start.settings.hold ? 'on' : 'off'}</p>
-      {start.status === 'countdown' && <p role="status" aria-label="Countdown">{offset === null ? 'Synchronizing…' : countdownSeconds(start, now + offset) || 'Starting…'}</p>}
+      {start.status === 'countdown' && <p role="status" aria-label="Countdown">{countdown === null ? 'Synchronizing…' : countdown || 'Starting…'}</p>}
       {active && start.settings.mode === 'battle' && start.battleVersion !== 1 && <p role="status">Battle has been updated. Return to the lobby and start a new match.</p>}
       {ready && !selected && <p role="status">This match is controlled by another tab.</p>}
       {paused && <p role="status">Match paused. Waiting for reconnection…</p>}

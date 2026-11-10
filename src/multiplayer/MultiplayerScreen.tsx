@@ -8,7 +8,7 @@ import type { Connections } from './match-start.ts'
 import { WaitingMessages } from './waiting-messages.ts'
 import MatchSettingsPanel from './MatchSettingsPanel.tsx'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { readFirebaseConfig } from './config.ts'
 import { MultiplayerError, playerFacingError } from './errors.ts'
 import { inviteURL, previousRoomCode } from './room-model.ts'
@@ -217,11 +217,20 @@ export default function MultiplayerScreen({ username, branding, onBack, preferen
   }
 
   const status = (uid: string) => connected === false ? 'Unknown' : presence[uid] ? 'Connected' : 'Disconnected'
+  const statusClass = (uid: string) => connected === false ? 'unknown' : presence[uid] ? 'online' : 'offline'
   const isHost = joined?.uid === joined?.room.hostUid
   return <><main className="shell" inert={playing || completed !== null} onPointerDownCapture={() => audio.unlock()} onKeyDownCapture={() => audio.unlock()}>
     <header className="topbar">{branding}<button className="back-button" disabled={busy} onClick={() => void back()}>← Back to menu</button></header>
     <section className="settings-card multiplayer-card" aria-busy={busy}>
-      <h1 ref={heading} tabIndex={-1}>{joined ? `Room ${joined.code}` : '2 Players'}</h1>
+      {joined ? <div className="room-code-card">
+        <span className="room-code-label" aria-hidden="true">Room code</span>
+        <h1 ref={heading} tabIndex={-1} aria-label={`Room ${joined.code}`} className="code-tiles" style={{ '--count': joined.code.length } as CSSProperties}>{[...joined.code].map((letter, index) => <span aria-hidden="true" className="brand-tile" key={index}>{letter}</span>)}</h1>
+        <div className="room-copy">
+          {sharingURL && <button className="button button-primary" onClick={() => void copy(sharingURL, 'Invite link copied.')}>Copy Invite Link</button>}
+          <button className="back-button" onClick={() => void copy(joined.code, 'Code copied.')}>Copy Code</button>
+        </div>
+        {sharingURL ? <label className="invite-field">Invite link<input readOnly value={sharingURL} onFocus={event => event.currentTarget.select()} /></label> : <p className="notice">Share the original private invitation link. The room code alone does not grant access.</p>}
+      </div> : <h1 ref={heading} tabIndex={-1}>2 Players</h1>}
       {!available && <p className="notice" role="status">Multiplayer is not connected yet.</p>}
       {accessNotice && <p className="notice" role="status">{accessNotice}</p>}
       {error && <div role="alert"><p className="notice">{error.message}</p><div className="room-actions">
@@ -232,15 +241,13 @@ export default function MultiplayerScreen({ username, branding, onBack, preferen
       {copyFallback && <label className="invite-field">Copy text<input readOnly autoFocus value={copyFallback} onFocus={event => event.currentTarget.select()} /></label>}
       {busy && <p role="status">Connecting…</p>}
       {joined ? <>
-        {database && <MatchSettingsPanel options={{ preferences, audio, onPlaying: setPlaying, completedId: completed?.result.id ?? null, lastCompletedId, onCompleted }} key={`${joined.code}:${joined.room.epoch}:${joined.room.roleRevision ?? 0}`} database={database} joined={joined} connected={connected === true} hostConnected={presence[joined.room.hostUid] === true} messages={waitingMessages.current.messages} connections={connections} localConnection={localConnection} locked={starting} onLocked={setStarting} />}
+        <dl className="room-players lobby-players" aria-label="Players">
+          <div><dt>Host</dt><dd><span className="player-name">{joined.room.players.host.name}</span><span className={`player-status ${statusClass(joined.room.players.host.uid)}`}>{status(joined.room.players.host.uid)}</span></dd></div>
+          <div className={joined.room.players.guest ? undefined : 'waiting'}><dt>Guest</dt><dd>{joined.room.players.guest ? <><span className="player-name">{joined.room.players.guest.name}</span><span className={`player-status ${statusClass(joined.room.players.guest.uid)}`}>{status(joined.room.players.guest.uid)}</span></> : <span className="player-name">Waiting for opponent…</span>}</dd></div>
+        </dl>
         {localHost && guestUid && !guestOnline && connected === true && <p role="status">Opponent disconnected. Waiting up to 15 seconds before freeing the slot.</p>}
-        <dl className="room-players" aria-label="Players"><div><dt>Host</dt><dd><span>{joined.room.players.host.name}</span> · <span>{status(joined.room.players.host.uid)}</span></dd></div><div><dt>Opponent</dt><dd>{joined.room.players.guest ? <><span>{joined.room.players.guest.name}</span> · <span>{status(joined.room.players.guest.uid)}</span></> : 'Waiting for opponent…'}</dd></div></dl>
         {connected === false && <p className="notice" role="status">Unable to connect. Check your connection and try again.</p>}
-        <div className="room-actions">
-          <button className="back-button" onClick={() => void copy(joined.code, 'Code copied.')}>Copy Code</button>
-          {sharingURL && <button className="back-button" onClick={() => void copy(sharingURL, 'Invite link copied.')}>Copy Invite Link</button>}
-        </div>
-        {sharingURL ? <label className="invite-field">Invite link<input readOnly value={sharingURL} onFocus={event => event.currentTarget.select()} /></label> : <p className="notice">Share the original private invitation link. The room code alone does not grant access.</p>}
+        {database && <MatchSettingsPanel options={{ preferences, audio, onPlaying: setPlaying, completedId: completed?.result.id ?? null, lastCompletedId, onCompleted }} key={`${joined.code}:${joined.room.epoch}:${joined.room.roleRevision ?? 0}`} database={database} joined={joined} connected={connected === true} hostConnected={presence[joined.room.hostUid] === true} messages={waitingMessages.current.messages} connections={connections} localConnection={localConnection} locked={starting} onLocked={setStarting} />}
         <div className="room-actions">
           {isHost && joined.room.players.guest && <button className="back-button" disabled={busy || starting || connected !== true || !presence[joined.room.players.guest.uid]} onClick={() => void run(async () => (await rooms()).transfer(joined))}>Transfer Host</button>}
           <button className="back-button" disabled={busy} onClick={() => void back()}>Leave Lobby</button>

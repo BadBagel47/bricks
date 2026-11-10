@@ -50,6 +50,8 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
   const resultsVisible = options.completedId !== null
   const current = useRef(game)
   const [battleGame] = useState(initial.battleGame)
+  // Counters already heard; restored matches start from their saved totals.
+  const battleSounds = useRef({ produced: initial.battleGame?.produced ?? 0, applied: initial.battleGame?.applied ?? 0, received: initial.battleGame?.received ?? 0 })
   const [clock] = useState(() => {
     const elapsed = restored?.battle && resumedAt !== undefined ? (resumedFrame ?? restored.battle.battle.frame) * 1000 / 60 + Math.max(0, Date.now() + serverTimeOffset - resumedAt) + 0.0001 : Date.now() + serverTimeOffset - start.countdownAt - 5000
     const value = new MatchClock(elapsed, performance.now())
@@ -96,6 +98,12 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     setGame(transition.state)
     audio.handleEvents(transition.events)
     audio.setDanger(transition.state.board)
+    if (battleGame) {
+      const heard = battleSounds.current
+      if (battleGame.produced > heard.produced) audio.cue('garbageSent', 0.12)
+      if (battleGame.applied > heard.applied) audio.cue('garbageRise', 0.06)
+      heard.produced = battleGame.produced; heard.applied = battleGame.applied
+    }
     if (transition.events.some(event => event.type === 'linesCleared' || event.type === 'gameOver')) setAnnouncement(transition.state.status === 'gameOver' ? 'Game over.' : `${transition.state.score} points. ${transition.state.lines} lines.`)
   }
   function apply(action: GameAction) {
@@ -132,7 +140,12 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     const stopAttacks = battleGame ? onValue(ref(database, battlePath('battleAttacks', joined, opponentUid)), snapshot => {
       try {
         const stream = parseAttackStream(snapshot.val())
-        if (stream?.matchId === start.id && (stream.connection === otherConnection || Boolean(previousOpponentConnection))) { battleGame.receive(stream.total); refreshBattle(value => value + 1) }
+        if (stream?.matchId === start.id && (stream.connection === otherConnection || Boolean(previousOpponentConnection))) {
+          battleGame.receive(stream.total)
+          if (battleGame.received > battleSounds.current.received && battleGame.pending > 0) audio.cue('garbageIncoming')
+          battleSounds.current.received = battleGame.received
+          refreshBattle(value => value + 1)
+        }
       } catch { setError('Opponent attacks are invalid. Return to the lobby.') }
     }, () => setError('Unable to synchronize attacks. Return to the lobby.')) : () => {}
     const stopFinish = battleGame ? onValue(ref(database, battlePath('battleFinishes', joined, opponentUid)), snapshot => {
@@ -190,7 +203,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     }
     timer = setTimeout(() => void publish(), 0)
     return () => { alive = false; clearTimeout(timer); stop(); stopAttacks(); stopFinish() }
-  }, [database, base, joined.uid, opponentUid, start.id, connection, otherConnection, previousOpponentConnection, battleGame, joined, start, collector, restored])
+  }, [database, base, joined.uid, opponentUid, start.id, connection, otherConnection, previousOpponentConnection, battleGame, joined, start, collector, restored, audio])
 
   useLayoutEffect(() => {
     if (resultsVisible) return
@@ -271,14 +284,49 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
   const outcome = duel && !error ? scoreDuelOutcome(publishedFinal, opponent) : battleResult ? { result: battleResult, difference } : null
   const outcomeTitle = outcome ? outcome.result === 'win' ? 'You win' : outcome.result === 'loss' ? 'You lose' : 'Draw' : ''
   const duelStatus = outcome ? `${outcomeTitle}. ${ownName}: ${game.score.toLocaleString()}. ${otherName}: ${opponent!.score.toLocaleString()}.` : finished ? publishedFinal ? 'Waiting for opponent to finish.' : 'Saving final score…' : opponent?.status === 'gameOver' ? 'Opponent finished. Keep playing.' : ''
+  const outcomeResult = outcome?.result
+  useEffect(() => {
+    if (outcomeResult === 'win') audio.cue('victory', 0.4)
+    else if (outcomeResult === 'loss') audio.cue('defeat', 0.4)
+  }, [outcomeResult, audio])
+  const pending = battleGame?.pending ?? 0
+  const link = paused ? { text: 'Paused', kind: 'wait' } : opponent ? opponent.status === 'gameOver' ? { text: 'Finished', kind: 'done' } : { text: 'Connected', kind: 'ok' } : { text: 'Synchronizing…', kind: 'wait' }
+  const pad = (value: number) => String(value).padStart(2, '0')
   if (resultsVisible) return null
   return createPortal(<>
     <main ref={screen} className="multiplayer-game" inert={confirm} aria-label="Multiplayer game">
-      <header className="multiplayer-hud"><strong>{start.settings.mode === 'battle' ? 'Battle' : 'Score Duel'}</strong><span aria-label="Score difference">{difference > 0 ? '+' : ''}{difference.toLocaleString()}</span>{!outcome && <button tabIndex={-1} className="back-button" onClick={() => setConfirm(true)}>Leave match</button>}</header>
-      {paused && <p role="status">Match paused. Waiting for reconnection…</p>}
+      <header className="match-bar">
+        {!outcome && <button tabIndex={-1} type="button" className="match-leave" aria-label="Leave match" onClick={() => setConfirm(true)}><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 5 8 12 15 19" /></svg></button>}
+        <span className="match-chip">{battle ? 'Battle' : 'Score Duel'}</span>
+        <span className={`match-chip link-${link.kind}`}><i aria-hidden="true" />{link.text}</span>
+        <span className="match-room">Room {joined.code}</span>
+      </header>
+      <div className="score-row">
+        <div className="score-card own"><span>{ownName}</span><strong>{game.score.toLocaleString()}</strong></div>
+        <div className="score-diff"><span>Diff</span><strong aria-label="Score difference" className={difference > 0 ? 'ahead' : difference < 0 ? 'behind' : undefined}>{difference > 0 ? '+' : ''}{difference.toLocaleString()}</strong></div>
+        <div className="score-card"><span>{otherName}</span><strong>{opponent?.score.toLocaleString() ?? '0'}</strong></div>
+      </div>
+      {paused && <p className="match-note" role="status">Match paused. Waiting for reconnection…</p>}
       <div className="duel-boards">
-        <section aria-label="Your game"><h2>{ownName}</h2><dl className="live-stats"><div><dt>Score</dt><dd>{game.score.toLocaleString()}</dd></div><div><dt>Level</dt><dd>{game.level}</dd></div><div><dt>Lines</dt><dd>{game.lines}</dd></div></dl><Playfield game={game} ghost={personal.ghostPiece && !finished} colors={personal.blockColors} swipeMode={personal.mobileControlMethod === 'swipe' && !finished} onSwipe={(from, to) => actionsForSwipe(from, to).forEach(action => apply(action))} /><div className="live-previews"><div><span>Next</span><PiecePreview type={game.next} level={game.level} colors={personal.blockColors} /></div>{game.holdEnabled && <div><HoldBox type={game.held} level={game.level} colors={personal.blockColors} enabled={!finished && !error && !confirm && !paused && !game.holdUsed} onHold={() => apply('hold')} /></div>}</div><p role="status">{finished ? 'Game over' : 'Playing'}</p></section>
-        <section aria-label="Opponent game"><h2>{otherName}</h2><dl className="live-stats"><div><dt>Score</dt><dd>{opponent?.score.toLocaleString() ?? '0'}</dd></div><div><dt>Level</dt><dd>{opponent?.level ?? start.settings.startLevel}</dd></div><div><dt>Lines</dt><dd>{opponent?.lines ?? 0}</dd></div></dl><Playfield game={{ board: decodeBoard(opponent?.board ?? '0'.repeat(200)), active: null, level: opponent?.level ?? start.settings.startLevel }} colors={personal.blockColors} swipeMode={false} onSwipe={() => {}} /><p role="status">{opponent ? opponent.status === 'gameOver' ? 'Game over' : 'Connected' : 'Synchronizing…'}</p></section>
+        {battleGame && <div className="incoming-meter" role="img" aria-label={`Incoming garbage: ${pending} ${pending === 1 ? 'row' : 'rows'}`}><span style={{ height: `${Math.min(pending, 20) * 5}%` }} /></div>}
+        <section className="own-board" aria-label="Your game">
+          <h2 className="visually-hidden">{ownName}</h2>
+          <Playfield game={game} ghost={personal.ghostPiece && !finished} colors={personal.blockColors} swipeMode={personal.mobileControlMethod === 'swipe' && !finished} onSwipe={(from, to) => actionsForSwipe(from, to).forEach(action => apply(action))} />
+          <dl className="live-stats"><div className="visually-hidden"><dt>Score</dt><dd>{game.score.toLocaleString()}</dd></div><div><dt>Level</dt><dd>{pad(game.level)}</dd></div><div><dt>Lines</dt><dd>{game.lines}</dd></div></dl>
+          <p role="status" className={finished ? 'board-status' : 'visually-hidden'}>{finished ? 'Game over' : 'Playing'}</p>
+        </section>
+        <aside className="match-side">
+          <section className="opponent-board" aria-label="Opponent game">
+            <h2>{otherName}</h2>
+            <dl className="live-stats visually-hidden"><div><dt>Score</dt><dd>{opponent?.score.toLocaleString() ?? '0'}</dd></div><div><dt>Level</dt><dd>{opponent?.level ?? start.settings.startLevel}</dd></div><div><dt>Lines</dt><dd>{opponent?.lines ?? 0}</dd></div></dl>
+            <Playfield game={{ board: decodeBoard(opponent?.board ?? '0'.repeat(200)), active: null, level: opponent?.level ?? start.settings.startLevel }} colors={personal.blockColors} swipeMode={false} onSwipe={() => {}} />
+          </section>
+          <div className="live-previews">
+            <div className="preview-card"><span>Next</span><PiecePreview type={game.next} level={game.level} colors={personal.blockColors} /></div>
+            {game.holdEnabled && <div><HoldBox type={game.held} level={game.level} colors={personal.blockColors} enabled={!finished && !error && !confirm && !paused && !game.holdUsed} onHold={() => apply('hold')} /></div>}
+            {battleGame && pending > 0 && <div className="incoming-badge" aria-hidden="true"><strong>+{pending}</strong><span>incoming</span></div>}
+          </div>
+        </aside>
       </div>
       {battleGame && <p className="battle-stats" aria-label="Battle attacks">Pending: {battleGame.pending} · Sent: {sentRows} · Applied: {battleGame.applied} · Cancelled: {battleGame.cancelled}</p>}
       {(duel || battle) && !error && duelStatus && <section className="duel-status" aria-label={battle ? "Battle status" : "Score Duel status"} role="status">{outcome ? <><h2>{outcomeTitle}</h2><p>{ownName}: {game.score.toLocaleString()} · {otherName}: {opponent!.score.toLocaleString()}</p><p>{battle ? `Survival: ${(ownFinishFrame! / 60).toFixed(2)} s · ${(otherFinish!.frame / 60).toFixed(2)} s` : `Score difference: ${Math.abs(outcome.difference).toLocaleString()}`}</p></> : <p>{duelStatus}</p>}</section>}

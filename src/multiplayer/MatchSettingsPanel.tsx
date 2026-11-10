@@ -15,6 +15,12 @@ import type { JoinedRoom } from './room-model.ts'
 import { DEFAULT_MATCH_SETTINGS, isApproved, parseSettings, sameSettings } from './match-settings.ts'
 import type { Approval, MatchSettings } from './match-settings.ts'
 import { MultiplayerError, playerFacingError } from './errors.ts'
+import { Segmented } from '../ui/SettingsControls.tsx'
+
+const MODE_HELP: Record<MatchSettings['mode'], string> = {
+  'score-duel': 'Highest score wins when both games are over.',
+  battle: 'Clearing lines sends garbage rows. Last player standing wins.',
+}
 
 export default function MatchSettingsPanel({ options, database, joined, connected, hostConnected, messages, connections, localConnection, locked, onLocked }: { options: LiveOptions; database: Database; joined: JoinedRoom; connected: boolean; hostConnected: boolean; messages: WaitingMessages; connections: Connections | null; localConnection: string | null; locked: boolean; onLocked: (value: boolean) => void }) {
   const [settings, setSettings] = useState(DEFAULT_MATCH_SETTINGS)
@@ -81,15 +87,22 @@ export default function MatchSettingsPanel({ options, database, joined, connecte
   return <section aria-label="Match settings">
     {error && <p className="notice" role="alert">{error}</p>}
     {!loaded ? <p role="status">Loading match settings…</p> : <>
-      <dl className="room-players"><div><dt>Match mode</dt><dd>{settings.mode === 'battle' ? 'Battle' : 'Score Duel'}</dd></div><div><dt>Start level</dt><dd>{String(settings.startLevel).padStart(2, '0')}</dd></div><div><dt>Hold</dt><dd>{settings.hold ? 'On' : 'Off'}</dd></div><div><dt>Require approval</dt><dd>{settings.requireApproval ? 'On' : 'Off'}</dd></div></dl>
+      <h2 className="settings-heading">Match settings</h2>
+      {!draft && <>
+        <div className="mode-summary"><strong>{settings.mode === 'battle' ? 'Battle' : 'Score Duel'}</strong><p>{MODE_HELP[settings.mode]}</p></div>
+        <dl className="match-rows"><div><dt>Starting level</dt><dd>{String(settings.startLevel).padStart(2, '0')}</dd></div><div><dt>Hold</dt><dd>{settings.hold ? 'On' : 'Off'}</dd></div><div><dt>Guest approval</dt><dd className={settings.requireApproval ? undefined : 'off'}>{settings.requireApproval ? 'On' : 'Off'}</dd></div></dl>
+      </>}
       {settings.requireApproval && <p role="status">{!joined.room.players.guest ? 'Waiting for opponent…' : approved ? 'Settings approved.' : 'Waiting for opponent approval.'}</p>}
       {!host && settings.requireApproval && <button className="back-button" disabled={!connected || busy || approved || locked || !roundLoaded} onClick={() => void approve()}>👍 Approve settings</button>}
       {host && !draft && <button className="back-button" disabled={!connected || busy || locked} onClick={() => setDraft({ ...settings })}>Edit Match Settings</button>}
       {host && draft && !locked && <form className="match-settings-editor" aria-label="Edit match settings" onSubmit={event => { event.preventDefault(); void save() }}>
-        <label className="setting-select-row">Match mode<select aria-label="Match mode" value={draft.mode} disabled={busy} onChange={event => setDraft({ ...draft, mode: event.target.value as MatchSettings['mode'] })}><option value="score-duel">Score Duel</option><option value="battle">Battle</option></select></label>
+        <Segmented label="Match mode" value={draft.mode} options={[{ value: 'score-duel', label: 'Score Duel' }, { value: 'battle', label: 'Battle' }]} onChange={mode => { if (!busy) setDraft({ ...draft, mode }) }} />
+        <p className="mode-help">{MODE_HELP[draft.mode]}</p>
+        <div className="setting-group">
         <label className="setting-select-row">Start level<select aria-label="Start level" value={draft.startLevel} disabled={busy} onChange={event => setDraft({ ...draft, startLevel: Number(event.target.value) })}>{Array.from({ length: 20 }, (_, level) => <option key={level} value={level}>{String(level).padStart(2, '0')}</option>)}</select></label>
         <label className="toggle-row"><input type="checkbox" checked={draft.hold} disabled={busy} onChange={event => setDraft({ ...draft, hold: event.target.checked })} /> Hold piece</label>
         <label className="toggle-row"><input type="checkbox" checked={draft.requireApproval} disabled={busy} onChange={event => setDraft({ ...draft, requireApproval: event.target.checked })} /> Require approval</label>
+        </div>
         <div className="room-actions"><button className="button button-primary" disabled={!connected || busy} type="submit">Apply Settings</button><button className="back-button" disabled={busy} type="button" onClick={() => setDraft(null)}>Cancel</button></div>
       </form>}
       <MatchStartPanel options={options} database={database} joined={joined} settings={settings} approved={approved} editing={editing} otherEditors={Object.keys(editors[joined.room.hostUid] ?? {}).length > 0} connected={connected} connections={connections} localConnection={localConnection} onLocked={onLocked} />

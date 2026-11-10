@@ -23,11 +23,12 @@ records released changes.
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
 | F-001 | Feature | Admin page with the sketch's structure and functions | P1 | Done (run 1, 2026-11-10) | Standard |
-| F-002 | Feature | Lobby with the sketch's structure and functions | P1 | Approved, waiting for go-ahead | Strong |
+| F-002 | Feature | Lobby with the sketch's structure and functions | P1 | Done (run 2, 2026-11-10) | Strong |
 | F-003 | Feature | Settings with the sketch's structure and functions | P1 | Done (run 1, 2026-11-10) | Standard |
-| F-004 | Feature | Match and 1 Player screens per the sketch | P1 | Approved, waiting for go-ahead | Strong |
-| F-005 | Feature | Wire multiplayer sound effects | P1 | Approved, waiting for go-ahead | Standard |
+| F-004 | Feature | Match and 1 Player screens per the sketch | P1 | Done (run 2, 2026-11-10) | Strong |
+| F-005 | Feature | Wire multiplayer sound effects | P1 | Done (run 2, 2026-11-10) | Standard |
 | B-001 | Bug | Admin offers Revoke for expired invitations | P1 | Done (run 1, 2026-11-10) | Standard |
+| B-002 | Bug | Pieces start falling at slightly different moments on the two devices in a match | P2 | Proposed | Strong |
 | T-001 | Task | Owner check of a real private two-player match in the Worker preview | P1 | Open | — (owner) |
 | T-002 | Task | Controlled public Pages activation of operating controls | P2 | Open | Strong |
 | F-006 | Feature | More music tracks | P3 | Idea | Standard |
@@ -92,6 +93,16 @@ Grouped by shared code and risk to save quota without lowering quality.
 ### B-001 Admin offers Revoke for expired invitations
 - Observed in the admin UI code: Revoke is shown when `state === 'active'`
   even if `expiresAt` has passed. Show it only for active, unexpired invitations.
+
+### B-002 Match start not simultaneous on both devices
+- Owner observation 2026-11-10: with both devices on the same network, pieces
+  begin to fall first on one screen and then on the other (same pieces, offset
+  timing).
+- Likely cause: each client starts its countdown/gravity locally from its own
+  clock offset (`.info/serverTimeOffset`). Investigate a shared server start
+  timestamp that both clients wait for, and measure the real offset in a test.
+- Not a sequence bug (same seed); treat as start-timing polish. Must not weaken
+  recovery/resume timing.
 
 ### T-001 Owner check of a real private two-player match
 - Steps are in `HANDOVER.md` → *Next session: finish the playable preview*.

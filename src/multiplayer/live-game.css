@@ -1,43 +1,97 @@
-.multiplayer-game{position:fixed;inset:0;z-index:20;overflow:auto;background:var(--bg,#101410);color:var(--text,#f3f2ed);padding:16px max(14px,calc((100vw - 980px)/2));display:flex;flex-direction:column;align-items:center;gap:10px}
-.multiplayer-hud{display:flex;align-items:center;justify-content:space-between;width:100%;gap:12px}.multiplayer-hud>strong{padding:6px 12px;border-radius:14px;background:var(--panel);font-size:14px}.multiplayer-hud>span{font:700 18px var(--display);font-variant-numeric:tabular-nums;color:var(--accent)}
-.duel-boards{display:grid;grid-template-columns:1fr 1fr;gap:clamp(16px,5vw,64px)}.duel-boards>section{min-width:0}.duel-boards h2{font-size:18px;margin:0 0 10px;overflow-wrap:anywhere}.duel-boards>section:nth-child(2) .playfield{--ring:1px;padding:3px;gap:1px;border-radius:8px}.duel-boards .playfield{width:min(34vw,260px,calc((100dvh - 310px)/2))}.live-stats{display:flex;justify-content:space-between;gap:10px;margin:0 0 10px}.live-stats dt{color:var(--muted);font-size:12px}.live-stats dd{margin:4px 0 0;font:700 16px var(--display);font-variant-numeric:tabular-nums}.duel-boards>section:first-child .live-stats>div:first-child dd{color:var(--accent)}.live-previews{display:flex;gap:20px;min-height:58px}.live-previews>div{display:flex;align-items:center;gap:8px}.live-previews span{font-size:12px;color:var(--muted)}.live-previews .piece-preview{width:48px;height:48px}.live-previews .hold-box{flex-direction:row;padding:3px 8px;gap:6px;border-radius:10px}.live-previews .empty-hold{width:40px;aspect-ratio:1;font-size:16px}.duel-boards p{font-size:13px;margin:6px 0}.multiplayer-game>.touch-controls{flex-shrink:0}.multiplayer-game>.control-hint{margin:0;max-width:600px}
-@media(max-width:900px){.duel-boards .playfield{width:min(35vw,240px,calc((100dvh - 370px)/2))}.multiplayer-game .touch-controls{margin-top:0}.live-stats{font-size:14px}.multiplayer-hud{font-size:14px}.multiplayer-hud button{font-size:13px;padding:10px}.multiplayer-game .control-hint{font-size:12px}}
-@media(max-width:480px){.duel-boards{width:100%;grid-template-columns:1.15fr 1fr;gap:14px}.duel-boards .playfield{width:100%}.duel-boards>section:nth-child(2){align-self:start}.duel-boards h2{font-size:15px}.live-stats{gap:5px;font-size:13px}.live-previews{gap:6px}.live-previews .piece-preview{width:40px;height:40px}}
+/* Two-player match (spec 5.0, F-004): bar, score row, own board with meter,
+   side column with the opponent's board and previews, controls below. */
+.multiplayer-game{
+  --side:clamp(78px,24vw,150px);--meter:0px;--chrome:330px;
+  position:fixed;inset:0;z-index:20;overflow:auto;background:var(--bg);color:var(--text);
+  padding:12px max(14px,calc((100vw - 640px)/2));display:flex;flex-direction:column;align-items:center;gap:10px
+}
+.multiplayer-game:has(.incoming-meter){--meter:16px}
+
+.match-bar{width:100%;display:flex;align-items:center;gap:8px;min-height:44px}
+.match-leave{width:44px;height:44px;flex:0 0 auto;display:grid;place-items:center;padding:0;border:0;border-radius:12px;background:var(--panel);color:var(--soft);cursor:pointer}
+.match-chip{height:32px;padding:0 12px;border-radius:16px;background:var(--panel);display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;white-space:nowrap}
+.match-chip i{width:8px;height:8px;border-radius:4px;background:var(--muted)}
+.match-chip.link-ok{color:var(--soft);font-weight:500}.match-chip.link-ok i{background:var(--ok)}
+.match-chip.link-wait i{background:var(--accent)}.match-chip.link-done i{background:var(--muted)}
+.match-room{margin-left:auto;font-size:14px;color:var(--muted);white-space:nowrap}
+
+.score-row{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px}
+.score-card{min-width:0;display:flex;flex-direction:column;padding:6px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--panel-3)}
+.score-card+.score-diff+.score-card{align-items:flex-end}
+.score-card.own{border-color:var(--accent)}
+.score-card span{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.score-card strong{font:700 22px/1.2 var(--display);font-variant-numeric:tabular-nums}
+.score-card.own strong{color:var(--accent)}
+.score-diff{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 4px}
+.score-diff span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.score-diff strong{font:700 18px var(--display);font-variant-numeric:tabular-nums}
+.score-diff .ahead{color:var(--ok)}.score-diff .behind{color:var(--bad)}
+.match-note{margin:0;font-size:13px;color:var(--accent)}
+
+.duel-boards{display:flex;align-items:flex-start;justify-content:center;gap:8px;width:100%;min-height:0}
+.incoming-meter{flex:0 0 10px;align-self:stretch;margin-bottom:22px;border-radius:5px;background:var(--panel);display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+.incoming-meter span{display:block;background:var(--bad);border-radius:3px;transition:height .2s}
+.own-board{min-width:0;display:flex;flex-direction:column;gap:4px}
+.own-board .playfield{width:min(calc(100vw - 28px - var(--side) - 8px - var(--meter)),300px,calc((100dvh - var(--chrome))/2))}
+.live-stats{display:flex;gap:14px;margin:0;font-size:12px}
+.live-stats>div{display:flex;align-items:baseline;gap:6px}
+.live-stats dt{color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-size:11px}
+.live-stats dd{margin:0;font:700 14px var(--display);font-variant-numeric:tabular-nums}
+.board-status{margin:0;font-size:13px;font-weight:600;color:var(--bad)}
+
+.match-side{flex:0 0 var(--side);width:var(--side);display:flex;flex-direction:column;gap:8px}
+.opponent-board h2{margin:0 0 4px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.opponent-board .playfield{width:100%;padding:3px;gap:1px;border-radius:8px;--ring:1px;box-shadow:none}
+.live-previews{display:flex;flex-direction:column;gap:8px}
+.live-previews>div{min-width:0}
+.preview-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 6px;border-radius:12px;background:var(--panel)}
+.live-previews .piece-preview{width:min(48px,100%)}
+.live-previews .hold-box{width:100%;padding:8px 6px;gap:6px;border-radius:12px}
+.live-previews .empty-hold{width:min(40px,100%)}
+.incoming-badge{display:flex;flex-direction:column;align-items:center;padding:6px;border-radius:12px;background:#2A1719;border:1px solid var(--bad)}
+.incoming-badge strong{font:700 20px var(--display);color:#FF9A97}
+.incoming-badge span{font-size:12px;color:#F5C9C8}
+
+.battle-stats{font-size:12px;margin:0;line-height:18px;text-align:center;color:var(--muted)}
+.duel-status{width:100%;text-align:center}.duel-status h2{font-size:24px;margin:0 0 8px}.duel-status p{font-size:14px;margin:4px 0}.duel-status[role="status"]{color:var(--accent)}
+.multiplayer-game>.touch-controls{flex-shrink:0;margin:auto 0 0}
+.multiplayer-game>.control-hint{margin:0;max-width:600px}
+.multiplayer-game .touch-row{gap:8px}
+
+/* Wide screens: larger side column; keyboard hint visible. */
+@media(min-width:901px){
+  .multiplayer-game{--side:170px;--chrome:260px}
+  .own-board .playfield{width:min(320px,calc((100dvh - var(--chrome))/2))}
+}
+
+/* Phones and small windows. */
 @media(max-width:900px){
   .multiplayer-game{padding:10px 14px;gap:8px}
   .multiplayer-game .control-hint{display:none}
-  .multiplayer-game .touch-controls{flex-wrap:wrap;gap:8px;--touch-size:48px}
-  .multiplayer-game .touch-pad{display:flex;gap:4px}
-  .multiplayer-game .touch-pad>span{display:none}
-  .multiplayer-game .touch-pad .touch-button:nth-child(4){order:3}
-  .multiplayer-game .touch-actions{gap:6px}
-  .duel-boards h2{line-height:20px;margin:0 0 6px;font-size:15px}
-  .live-stats{font-size:13px;margin-bottom:6px}.live-stats dt{font-size:10px}.live-stats dd{margin-top:2px}
-  .multiplayer-hud button{padding:6px 9px}
-  .duel-boards .playfield{width:min(35vw,240px,calc((100dvh - 326px)/2))}
-  .live-previews{min-height:40px}.live-previews .piece-preview{width:40px;height:40px}
-  .duel-boards p{margin:3px 0;font-size:12px;line-height:16px}
+  .multiplayer-game .touch-controls{--touch-size:min(var(--preferred-touch-size),calc((100vw - 72px)/5),60px)}
 }
-@media(max-width:480px){
-  .duel-boards{grid-template-columns:1.15fr 1fr;gap:12px}
-  .duel-boards .playfield{width:min(100%,calc((100dvh - 346px)/2))}
-  .multiplayer-game .touch-controls{max-width:360px}
-  .live-previews>div{gap:2px}.live-previews{gap:4px}.live-previews span{font-size:10px}
-}
-@media(max-width:900px) and (orientation:landscape){
-  .multiplayer-game{display:grid;grid-template-columns:minmax(0,1fr) 210px;grid-template-rows:auto 1fr;gap:8px 16px;padding:8px 14px;align-items:start}
-  .multiplayer-hud{grid-column:1/-1}.duel-boards{grid-template-columns:repeat(2,minmax(0,max-content));justify-content:center;gap:24px}
-  .duel-boards .playfield{width:min(25vw,calc((100dvh - 205px)/2));height:auto}
-  .multiplayer-game>.touch-controls{grid-column:2;grid-row:2;align-self:center;display:flex;flex-direction:column;gap:14px}
-  .multiplayer-game .touch-actions{max-width:210px}
+@media(max-width:360px){
+  .match-chip{padding:0 9px;font-size:13px}
+  .score-card strong{font-size:19px}
 }
 
-.duel-status{width:100%;text-align:center}.duel-status h2{font-size:24px;margin:0 0 8px}.duel-status p{font-size:14px;margin:4px 0}.duel-status[role="status"]{color:var(--lime)}
-.battle-stats{font-size:12px;margin:0;line-height:18px;text-align:center;color:var(--muted)}
-@media(max-width:900px) and (orientation:landscape){.multiplayer-game>.battle-stats{position:absolute;right:14px;bottom:10px;width:210px}.multiplayer-game>.duel-status{grid-column:2;grid-row:2;align-self:start}.multiplayer-game>.duel-status p{font-size:12px}.multiplayer-game>button{grid-column:2;grid-row:2;align-self:end;margin-bottom:40px}}
-
-/* Single-row touch controls in multiplayer. */
-.multiplayer-game .touch-row{gap:8px}
+/* Landscape phones: boards left, scores and controls in a right column. */
 @media(max-width:900px) and (orientation:landscape){
-  .multiplayer-game .touch-row{flex-wrap:wrap;max-width:210px}
+  .multiplayer-game{display:grid;grid-template-columns:minmax(0,1fr) 220px;grid-template-rows:auto auto auto 1fr auto;gap:6px 16px;padding:8px 14px;align-items:start}
+  .match-bar{grid-column:1;grid-row:1;min-height:36px}
+  .match-leave{width:40px;height:40px}
+  .duel-boards{grid-column:1;grid-row:2/6;justify-content:center}
+  .own-board .playfield{width:min(260px,calc((100dvh - 92px)/2))}
+  .match-side{flex:0 0 auto;width:auto;flex-direction:row;align-items:flex-start}
+  .opponent-board .playfield{width:min(120px,calc((100dvh - 92px)/2.6))}
+  .opponent-board{width:min(120px,calc((100dvh - 92px)/2.6))}
+  .live-previews{width:76px}
+  .score-row{grid-column:2;grid-row:1}
+  .score-card{padding:4px 8px}.score-card strong{font-size:17px}.score-diff strong{font-size:15px}
+  .multiplayer-game>.battle-stats{grid-column:2;grid-row:2}
+  .multiplayer-game>.match-note,.multiplayer-game>.duel-status,.multiplayer-game>[role=alert]{grid-column:2;grid-row:3}
+  .multiplayer-game>.duel-status p{font-size:12px}
+  .multiplayer-game>.touch-controls{grid-column:2;grid-row:4;align-self:end;margin:0}
+  .multiplayer-game .touch-row{flex-wrap:wrap;max-width:220px}
+  .multiplayer-game>button{grid-column:2;grid-row:5}
 }
