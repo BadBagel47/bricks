@@ -22,12 +22,12 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| F-001 | Feature | Admin page with the sketch's structure and functions | P1 | Approved, waiting for go-ahead | Standard |
+| F-001 | Feature | Admin page with the sketch's structure and functions | P1 | Done (run 1, 2026-11-10) | Standard |
 | F-002 | Feature | Lobby with the sketch's structure and functions | P1 | Approved, waiting for go-ahead | Strong |
-| F-003 | Feature | Settings with the sketch's structure and functions | P1 | Approved, waiting for go-ahead | Standard |
+| F-003 | Feature | Settings with the sketch's structure and functions | P1 | Done (run 1, 2026-11-10) | Standard |
 | F-004 | Feature | Match and 1 Player screens per the sketch | P1 | Approved, waiting for go-ahead | Strong |
 | F-005 | Feature | Wire multiplayer sound effects | P1 | Approved, waiting for go-ahead | Standard |
-| B-001 | Bug | Admin offers Revoke for expired invitations | P1 | Approved, waiting for go-ahead | Standard |
+| B-001 | Bug | Admin offers Revoke for expired invitations | P1 | Done (run 1, 2026-11-10) | Standard |
 | T-001 | Task | Owner check of a real private two-player match in the Worker preview | P1 | Open | — (owner) |
 | T-002 | Task | Controlled public Pages activation of operating controls | P2 | Open | Strong |
 | F-006 | Feature | More music tracks | P3 | Idea | Standard |
