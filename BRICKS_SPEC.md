@@ -248,6 +248,17 @@ Create an original identity for Bricks.
 
 # 5. BRANDING AND GRAPHIC DESIGN
 
+## 5.0 Approved visual design (owner decision 2026-11-10)
+
+The owner approved a visual refresh based on the Claude design sketch "Bricks – skiss v2":
+
+- Dark navy background (`#0E1120`) with rounded panels, a warm amber accent (`#FFB547`) and high-contrast text.
+- Logo: six tilted, rounded letter blocks spelling BRICKS, each in a different block color.
+- Touch controls: one row of five large buttons below the board — Move left, Move right, Soft Drop, Rotate (clockwise, accent color) and Hard Drop (when enabled). Hold is used by tapping the Hold box beside the board. Counterclockwise rotation stays available on keyboard and controller.
+- Player-facing text remains English. The interface uses system fonts; no external font service is loaded.
+
+Where this section differs from 5.1–5.3 and 10.2, this section applies.
+
 ## 5.1 Logo
 
 Create an original logo reading:
@@ -473,9 +484,11 @@ Document and test the algorithm.
 
 ## 9.5 Colors
 
-Use original NES-inspired **level-dependent color palettes**.
+Use original NES-inspired **level-dependent color palettes** by default.
 
-Colors change with level rather than being permanently assigned to particular tetromino types.
+Colors change with level rather than being permanently assigned to particular tetromino types. Each level has two colors: T, O and I are light blocks outlined in the first color, J and S use the first color, Z and L the second.
+
+Personal Settings offers **Block colors: Change by level (default) / Classic**. Classic uses fixed per-piece colors from the approved design.
 
 Store palette definitions separately from game logic.
 
@@ -548,7 +561,7 @@ Do not make it a host-controlled setting.
 
 ## 9.10 Ghost Piece
 
-No Ghost Piece feature in the initial version.
+Optional Ghost Piece in Personal Settings, **off by default**. It outlines where the active piece would land. It is display-only and never affects scoring or multiplayer data.
 
 ## 9.11 Game Over
 
@@ -602,6 +615,8 @@ Prevent gameplay keys from scrolling the page.
 Implement appropriate held-key repetition.
 
 ## 10.2 Mobile D-Pad — default
+
+Owner decision 2026-11-10: the approved five-button row in section 5.0 replaces the classic D-pad layout and A/B rotation pair below.
 
 Provide virtual controls for:
 

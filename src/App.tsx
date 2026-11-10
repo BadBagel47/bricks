@@ -10,7 +10,7 @@ import { DEFAULT_GAMEPAD_BINDINGS, gamepadActions, gamepadButtonLabel, parseGame
 import type { GamepadBindings } from './input/gamepad.ts'
 import { HeldInputs } from './input/repeat.ts'
 import { actionsForSwipe } from './input/swipe.ts'
-import { Playfield, PiecePreview, TouchControls } from './ui/GameViews.tsx'
+import { HoldBox, Playfield, PiecePreview, TouchControls } from './ui/GameViews.tsx'
 import { addHighscore, DEFAULT_PERSONAL_SETTINGS, DEFAULT_SINGLE_PLAYER_SETTINGS, parseHighscores, parsePersonalSettings, parseSinglePlayerSettings, serializeHighscores } from './persistence.ts'
 import type { HighscoreRecord, PersonalSettings, SinglePlayerSettings } from './persistence.ts'
 import { BricksAudio } from './audio/synth.ts'
@@ -434,6 +434,9 @@ function App() {
       <label className="audio-volume"><span>Music volume</span><input aria-label="Music volume" max="100" min="0" onChange={(event) => savePersonal({ ...personal, musicVolume: Number(event.target.value) })} type="range" value={personal.musicVolume} /><output>{personal.musicVolume}%</output></label>
       <label className="toggle-row"><span>Sound effects</span><input checked={personal.effectsEnabled} onChange={(event) => savePersonal({ ...personal, effectsEnabled: event.target.checked })} type="checkbox" /></label>
       <label className="audio-volume"><span>Effects volume</span><input aria-label="Effects volume" max="100" min="0" onChange={(event) => savePersonal({ ...personal, effectsVolume: Number(event.target.value) })} type="range" value={personal.effectsVolume} /><output>{personal.effectsVolume}%</output></label>
+      <h2 className="settings-heading">Display</h2>
+      <label className="setting-select-row" htmlFor="block-colors"><span>Block colors</span><select aria-label="Block colors" id="block-colors" onChange={(event) => savePersonal({ ...personal, blockColors: event.target.value === 'classic' ? 'classic' : 'level' })} value={personal.blockColors}><option value="level">Change by level</option><option value="classic">Classic</option></select></label>
+      <label className="toggle-row"><span>Ghost piece</span><input checked={personal.ghostPiece} onChange={(event) => savePersonal({ ...personal, ghostPiece: event.target.checked })} type="checkbox" /></label>
       <h2 className="settings-heading">Keyboard</h2>
       <div className="binding-list">{INPUT_ACTIONS.map((action) => <div className="binding-row" key={action}>
         <span>{ACTION_LABELS[action]}</span>
@@ -483,8 +486,8 @@ function App() {
         <div><span>Level</span><strong>{game.level}</strong></div>
         <div><span>Lines</span><strong>{game.lines}</strong></div>
       </aside>
-      <Playfield game={game} swipeMode={personal.mobileControlMethod === 'swipe'} onSwipe={(start, end) => actionsForSwipe(start, end).forEach(apply)} />
-      <aside className="game-side next-panel"><span>Next</span><PiecePreview type={game.next} level={game.level} />{game.holdEnabled && <><span>Hold</span>{game.held ? <PiecePreview type={game.held} level={game.level} /> : <span className="empty-hold">—</span>}</>}</aside>
+      <Playfield game={game} ghost={personal.ghostPiece} colors={personal.blockColors} swipeMode={personal.mobileControlMethod === 'swipe'} onSwipe={(start, end) => actionsForSwipe(start, end).forEach(apply)} />
+      <aside className="game-side next-panel"><div className="next-box"><span>Next</span><PiecePreview type={game.next} level={game.level} colors={personal.blockColors} /></div>{game.holdEnabled && <HoldBox type={game.held} level={game.level} colors={personal.blockColors} enabled={game.status === 'playing' && !game.holdUsed} onHold={() => apply('hold')} />}</aside>
     </section>
     {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={personal.touchButtonSize} leftHanded={personal.leftHandedControls} holdEnabled={game.holdEnabled} hardDropEnabled={game.hardDropEnabled} enabled={game.status === 'playing'} apply={apply} />}
     <p className="controller-status" aria-live="polite">{controllerStatus}</p>
@@ -496,9 +499,9 @@ function App() {
   </>
 
   return <main className="shell menu-shell">
-    <header className="topbar"><Brand compact /><button aria-label="Open personal settings" className="settings-button" onClick={() => { setDraft(username); setView('settings') }}>⚙<span>Settings</span></button></header>
+    <header className="topbar menu-topbar"><span className="player-name">Playing as <strong>{username}</strong></span><button aria-label="Open personal settings" className="settings-button" onClick={() => { setDraft(username); setView('settings') }}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 17h16" /><circle cx="9" cy="7" r="2.2" fill="currentColor" /><circle cx="15" cy="17" r="2.2" fill="currentColor" /></svg><span>Settings</span></button></header>
     <section className="menu-content">
-      <div className="hero-copy"><h1 tabIndex={-1}>Make room<br />for <span>one more.</span></h1></div>
+      <div className="hero-copy"><Brand hero /><h1 tabIndex={-1}>Make room for one more.</h1></div>
       <div className="menu-actions" aria-label="Main menu">
         <button className="mode-card single-player" onClick={beginGame}><span className="mode-copy"><strong>1 Player</strong></span></button>
         <button className="mode-card" onClick={() => setView('multiplayer')}><span className="mode-copy"><strong>2 Players</strong></span></button>
@@ -523,9 +526,9 @@ function HighscoreTable({ records, compact = false }: { records: readonly Highsc
   </div>
 }
 
-function Brand({ compact = false }: { compact?: boolean }) {
-  return <span className={`brand${compact ? ' brand-compact' : ''}`}>
-    <span className="brand-mark" aria-hidden="true"><i /><i /><i /><i /></span><span>BRICKS<span className="brand-period">.</span></span>
+function Brand({ compact = false, hero = false }: { compact?: boolean; hero?: boolean }) {
+  return <span className={`brand${compact ? ' brand-compact' : ''}${hero ? ' brand-hero' : ''}`} role="img" aria-label="Bricks">
+    {'BRICKS'.split('').map((letter, index) => <span aria-hidden="true" className="brand-tile" key={index}>{letter}</span>)}
   </span>
 }
 

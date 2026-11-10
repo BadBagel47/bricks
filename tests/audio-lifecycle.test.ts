@@ -2,13 +2,14 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import type { TestContext } from 'node:test'
 import { BricksAudio } from '../src/audio/synth.ts'
-import { frequencyForNote, ORIGINAL_MELODY } from '../src/audio/tempo.ts'
 import { createBoard } from '../src/engine/board.ts'
 import { DEFAULT_PERSONAL_SETTINGS } from '../src/persistence.ts'
 
+type Source = { active: boolean; ended: boolean; startedAt: number }
+
 function audioHarness(t: TestContext) {
   t.mock.timers.enable({ apis: ['Date', 'setTimeout'] })
-  const tones: { frequency: { value: number }; active: boolean }[] = []
+  const sources: Source[] = []
   const parameter = () => ({
     value: 1,
     setValueAtTime(value: number) { this.value = value },
@@ -17,26 +18,35 @@ function audioHarness(t: TestContext) {
     linearRampToValueAtTime() {},
     cancelScheduledValues() {},
   })
+  const node = () => ({ connect() {}, disconnect() {} })
+  const source = () => {
+    let endTimer: ReturnType<typeof setTimeout> | undefined
+    const item = {
+      ...node(), active: false, ended: false, startedAt: 0, type: 'sine', buffer: null, loop: false,
+      frequency: parameter(), onended: () => {},
+      setPeriodicWave() {},
+      start(when = Date.now() / 1000) { this.active = true; this.startedAt = when },
+      stop(when = Date.now() / 1000) {
+        clearTimeout(endTimer)
+        endTimer = setTimeout(() => { this.active = false; this.ended = true; this.onended() }, Math.max(0, when * 1000 - Date.now()))
+      },
+    }
+    sources.push(item)
+    return item
+  }
   class Context {
     state = 'running'
-    destination = {}
+    sampleRate = 800
+    destination = node()
     get currentTime() { return Date.now() / 1000 }
     resume() { return Promise.resolve() }
-    createGain() { return { gain: parameter(), connect() {}, disconnect() {} } }
-    createOscillator() {
-      let endTimer: ReturnType<typeof setTimeout> | undefined
-      const tone = {
-        frequency: parameter(), active: false, type: 'sine',
-        onended: () => {}, connect() {}, disconnect() {},
-        start() { this.active = true },
-        stop(when = Date.now() / 1000) {
-          clearTimeout(endTimer)
-          endTimer = setTimeout(() => { this.active = false; this.onended() }, Math.max(0, when * 1000 - Date.now()))
-        },
-      }
-      tones.push(tone)
-      return tone
-    }
+    createGain() { return { ...node(), gain: parameter() } }
+    createOscillator() { return source() }
+    createBufferSource() { return source() }
+    createPeriodicWave() { return {} }
+    createBuffer(_channels: number, length: number) { return { getChannelData: () => new Float32Array(length) } }
+    createBiquadFilter() { return { ...node(), type: 'lowpass', Q: parameter(), frequency: parameter() } }
+    createDynamicsCompressor() { return { ...node(), threshold: parameter(), knee: parameter(), ratio: parameter(), attack: parameter(), release: parameter() } }
   }
   const original = Object.getOwnPropertyDescriptor(globalThis, 'AudioContext')
   Object.defineProperty(globalThis, 'AudioContext', { configurable: true, value: Context })
@@ -44,81 +54,86 @@ function audioHarness(t: TestContext) {
     if (original) Object.defineProperty(globalThis, 'AudioContext', original)
     else Reflect.deleteProperty(globalThis, 'AudioContext')
   })
-  return { audio: new BricksAudio(DEFAULT_PERSONAL_SETTINGS), tones, tick: (ms: number) => t.mock.timers.tick(ms) }
+  const active = () => sources.filter((item) => item.active).length
+  return { audio: new BricksAudio(DEFAULT_PERSONAL_SETTINGS), sources, active, tick: (ms: number) => t.mock.timers.tick(ms) }
 }
 
-test('pause silences active tones and cancels the remaining line-clear effect; resume only restarts music', (t) => {
-  const { audio, tones, tick } = audioHarness(t)
+test('music schedules continuously; pause silences everything and schedules nothing until resume', (t) => {
+  const { audio, sources, active, tick } = audioHarness(t)
   audio.beginGame(DEFAULT_PERSONAL_SETTINGS)
+  tick(500)
+  assert.ok(sources.length > 5, 'music keeps scheduling ahead')
   audio.handleEvents([{ type: 'linesCleared', count: 1, points: 40 }])
-  tick(0)
-  assert.ok(tones.filter((tone) => tone.active).length >= 2)
   audio.pauseGame()
   tick(20)
-  assert.equal(tones.some((tone) => tone.active), false)
-  const stoppedCount = tones.length
+  assert.equal(active(), 0)
+  const stoppedCount = sources.length
   tick(1000)
-  assert.equal(tones.length, stoppedCount)
+  assert.equal(sources.length, stoppedCount)
   audio.resumeGame()
-  assert.equal(tones.length, stoppedCount + 1)
-  assert.equal(tones.at(-1)?.frequency.value, frequencyForNote(ORIGINAL_MELODY[1], false))
-  tick(250)
-  assert.equal(tones.length, stoppedCount + 1)
+  assert.ok(sources.length > stoppedCount, 'resume starts a note immediately, even if the audio clock is coarse')
 })
 
-test('replay cancels the Game Over sequence and resets melody and danger state', (t) => {
-  const { audio, tones, tick } = audioHarness(t)
+test('replay and leaving cancel the Game Over effect and leftover music', (t) => {
+  const { audio, sources, active, tick } = audioHarness(t)
   audio.beginGame(DEFAULT_PERSONAL_SETTINGS)
+  tick(100)
+  audio.endGame()
+  const gameOverSources = sources.length
+  tick(50)
+  assert.equal(sources.length, gameOverSources, 'music stops at Game Over')
+  const previous = [...sources]
+  audio.beginGame(DEFAULT_PERSONAL_SETTINGS)
+  tick(20)
+  assert.equal(previous.some((item) => item.active), false)
+  audio.leaveGame()
+  tick(20)
+  const count = sources.length
+  tick(1000)
+  assert.equal(sources.length, count)
+  assert.equal(active(), 0)
+})
+
+test('muting effects cancels queued notes while music continues', (t) => {
+  const { audio, sources, tick } = audioHarness(t)
+  audio.beginGame(DEFAULT_PERSONAL_SETTINGS)
+  tick(100)
+  const before = sources.length
+  audio.handleEvents([{ type: 'linesCleared', count: 4, points: 1200 }])
+  const effectSources = sources.slice(before)
+  assert.ok(effectSources.length > 10)
+  audio.updateSettings({ ...DEFAULT_PERSONAL_SETTINGS, musicVolume: 35, effectsEnabled: false })
+  tick(20)
+  assert.equal(effectSources.some((item) => item.active), false)
+  const afterMute = sources.length
+  tick(400)
+  assert.ok(sources.length > afterMute, 'music keeps playing at the new volume')
+  const quiet = sources.length
+  audio.handleEvents([{ type: 'rotated', direction: 'clockwise' }])
+  assert.equal(sources.length, quiet, 'muted effects create no sounds')
+})
+
+test('silent settings create no sound sources at all', (t) => {
+  const { audio, sources, tick } = audioHarness(t)
+  const silent = { ...DEFAULT_PERSONAL_SETTINGS, musicEnabled: false, effectsEnabled: false }
+  audio.beginGame(silent)
+  audio.handleEvents([{ type: 'rotated', direction: 'clockwise' }, { type: 'linesCleared', count: 2, points: 100 }])
+  tick(1000)
+  assert.equal(sources.length, 0)
+})
+
+test('danger tempo schedules more music per second than calm play', (t) => {
+  const calm = audioHarness(t)
+  calm.audio.beginGame(DEFAULT_PERSONAL_SETTINGS)
+  calm.tick(2000)
+  const calmCount = calm.sources.length
+  calm.audio.leaveGame()
+  calm.tick(50)
   const board = createBoard().map((row) => [...row])
   board[0][0] = 'T'
-  audio.setDanger(board)
-  audio.endGame()
-  tick(0)
-  const previousTones = [...tones]
-  audio.beginGame(DEFAULT_PERSONAL_SETTINGS)
-  assert.equal(tones.at(-1)?.frequency.value, frequencyForNote(ORIGINAL_MELODY[0], false))
-  const replayCount = tones.length
-  tick(20)
-  assert.equal(previousTones.some((tone) => tone.active), false)
-  tick(280)
-  assert.equal(tones.length, replayCount, 'No old Game Over tones or danger-tempo notes leak into the replay')
-})
-
-test('leaving during Game Over cancels its remaining notes and all active sound', (t) => {
-  const { audio, tones, tick } = audioHarness(t)
-  audio.beginGame(DEFAULT_PERSONAL_SETTINGS)
-  audio.endGame()
-  tick(0)
-  audio.leaveGame()
-  const count = tones.length
-  tick(1000)
-  assert.equal(tones.length, count)
-  assert.equal(tones.some((tone) => tone.active), false)
-})
-
-test('Game Over completes its three-note effect while music stays stopped', (t) => {
-  const { audio, tones, tick } = audioHarness(t)
-  audio.beginGame(DEFAULT_PERSONAL_SETTINGS)
-  audio.endGame()
-  tick(0)
-  tick(120)
-  tick(120)
-  assert.deepEqual(tones.slice(1).map((tone) => tone.frequency.value), [59, 55, 50].map((note) => frequencyForNote(note, false)))
-  tick(1000)
-  assert.equal(tones.length, 4)
-  assert.equal(tones.some((tone) => tone.active), false)
-})
-
-test('volume changes keep the current melody step; muting effects cancels queued notes', (t) => {
-  const { audio, tones, tick } = audioHarness(t)
-  audio.beginGame(DEFAULT_PERSONAL_SETTINGS)
-  audio.handleEvents([{ type: 'linesCleared', count: 4, points: 1200 }])
-  tick(0)
-  const count = tones.length
-  audio.updateSettings({ ...DEFAULT_PERSONAL_SETTINGS, musicVolume: 35, effectsEnabled: false })
-  tick(250)
-  assert.equal(tones.length, count)
-  tick(140)
-  assert.equal(tones.length, count + 1)
-  assert.equal(tones.at(-1)?.frequency.value, frequencyForNote(ORIGINAL_MELODY[1], false))
+  calm.audio.beginGame(DEFAULT_PERSONAL_SETTINGS)
+  calm.audio.setDanger(board)
+  const start = calm.sources.length
+  calm.tick(2000)
+  assert.ok(calm.sources.length - start > calmCount)
 })

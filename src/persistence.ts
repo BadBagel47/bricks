@@ -9,6 +9,8 @@ export interface PersonalSettings {
   readonly touchButtonSize: number
   readonly leftHandedControls: boolean
   readonly hideTouchControlsWhenController: boolean
+  readonly ghostPiece: boolean
+  readonly blockColors: 'level' | 'classic'
 }
 
 export interface SinglePlayerSettings {
@@ -35,6 +37,7 @@ export interface HighscoreResult {
 export const DEFAULT_PERSONAL_SETTINGS: PersonalSettings = {
   version: 1, hardDropEnabled: true, musicEnabled: true, musicVolume: 70, effectsEnabled: true, effectsVolume: 70,
   mobileControlMethod: 'dpad', touchButtonSize: 56, leftHandedControls: false, hideTouchControlsWhenController: true,
+  ghostPiece: false, blockColors: 'level',
 }
 export const DEFAULT_SINGLE_PLAYER_SETTINGS: SinglePlayerSettings = { version: 1, startLevel: 0, holdEnabled: false }
 
@@ -62,6 +65,8 @@ export function parsePersonalSettings(raw: string | null): PersonalSettings {
     touchButtonSize: typeof value?.touchButtonSize === 'number' && Number.isInteger(value.touchButtonSize) && value.touchButtonSize >= 44 && value.touchButtonSize <= 72 ? value.touchButtonSize : 56,
     leftHandedControls: typeof value?.leftHandedControls === 'boolean' ? value.leftHandedControls : false,
     hideTouchControlsWhenController: typeof value?.hideTouchControlsWhenController === 'boolean' ? value.hideTouchControlsWhenController : true,
+    ghostPiece: typeof value?.ghostPiece === 'boolean' ? value.ghostPiece : false,
+    blockColors: value?.blockColors === 'classic' ? 'classic' : 'level',
   }
 }
 

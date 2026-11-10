@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
-  advanceFrames, advanceGame, BOARD_HEIGHT, BOARD_WIDTH, clearRows, collides, createBoard,
+  advanceFrames, advanceGame, BOARD_HEIGHT, BOARD_WIDTH, clearRows, collides, createBoard, dropPosition,
   createGame, createRandomizer, dispatch, drawPiece, firstLevelThreshold, FRAME_MS,
   framesPerFall, levelForLines, lineClearPoints, lockPiece, orientationCount,
   pieceCells, PIECE_TYPES, rotatedPiece, spawnPiece,
@@ -503,4 +503,17 @@ test('developer scenarios reject malformed and colliding boards', () => {
   const board = emptyBoard()
   board[0][4] = 'J'
   assert.throws(() => createScenario({ board, active: spawnPiece('T') }), RangeError)
+})
+
+test('dropPosition finds the landing spot used by Hard Drop and the ghost piece', () => {
+  const game = createGame({ seed: 47 })
+  const active = game.active!
+  const landed = dropPosition(game.board, active)
+  assert.equal(landed.x, active.x)
+  assert.ok(landed.y > active.y)
+  assert.equal(collides(game.board, landed), false)
+  assert.equal(collides(game.board, { ...landed, y: landed.y + 1 }), true)
+  const dropped = dispatch(game, 'hardDrop')
+  const locked = dropped.state.board.flatMap((row, y) => row.flatMap((cell, x) => cell ? [[x, y]] : []))
+  assert.deepEqual(locked.sort(), pieceCells(landed).map(([x, y]) => [x, y]).sort())
 })

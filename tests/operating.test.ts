@@ -154,7 +154,7 @@ test('worker serves admin assets with a strict policy and fails closed without p
   const page = await worker.fetch(new Request('https://admin.example.invalid/admin/'), env, context)
   assert.equal(page.status, 200)
   assert.ok(page.headers.get('Content-Security-Policy')?.includes("script-src 'self'"))
-  assert.ok((await page.text()).includes('Public single player'))
+  assert.ok((await page.text()).includes('Public access'))
   assert.equal((await worker.fetch(new Request('https://admin.example.invalid/api/access'), env, context)).status, 503)
 })
 

@@ -18,6 +18,13 @@ export function collides(board: Board, piece: ActivePiece): boolean {
   )
 }
 
+/** Lowest position the piece can fall to from where it is, as used by Hard Drop and the ghost piece. */
+export function dropPosition(board: Board, piece: ActivePiece): ActivePiece {
+  let landed = piece
+  while (!collides(board, { ...landed, y: landed.y + 1 })) landed = { ...landed, y: landed.y + 1 }
+  return landed
+}
+
 export function lockPiece(board: Board, piece: ActivePiece): Board {
   if (collides(board, piece)) throw new RangeError('Cannot lock a colliding piece')
   const result = board.map((row) => [...row])

@@ -1,9 +1,23 @@
 # Audio
 
-Bricks generates its own retro-style sound using the Web Audio API. It does not download music or effects. The first Start or Resume button click initializes or resumes the browser audio context, as required by browser autoplay policies.
+Bricks generates all of its sound with the Web Audio API. Nothing is downloaded. The first Start/Resume click (or a lobby interaction in multiplayer) initializes or resumes the audio context, as browser autoplay policies require.
 
-The looping square-wave melody is a sixteen-note sequence written for this game. Normal tempo is 390 ms per note. When locked blocks reach any of the top five rows, the same motif speeds up to 230 ms per note and rises one octave. Music and sound effects have separate local on/off and 0–100% volume settings; both default to on at 70%.
+## Instruments
 
-Short synthesized effects respond to rotations, Hold, piece locking, Hard Drop, line clears and Game Over. Pause and returning to the menu cancel queued effect notes and fade active music/effects out over 8 ms before stopping their oscillators at 10 ms. Resuming continues the melody without replaying interrupted effects. New games reset the melody and danger tempo and cancel leftover Game Over sounds. Volume changes preserve the melody position; muting effects cancels their pending notes.
+Four NES-style voices are synthesized in `src/audio/synth.ts`: two band-limited pulse waves (12.5%, 25% and 50% duty), a triangle bass and filtered white noise for drums and impacts. Music and effects have separate gain buses that share a gentle compressor.
 
-Automated coverage checks the audio defaults and volume validation, original melody shape, danger threshold, tempo change, octave shift, and audio playback lifecycle (pause/resume, rapid replay, menu exit, Game Over completion and volume changes). Chromium integration tests also exercise real Web Audio initialization, pause/resume and saved mute settings. Audible output still needs a listening check on the published site.
+## Music
+
+`src/audio/music.ts` holds an original 16-bar theme in A minor (sections A and B). The loop plays it twice; the second pass adds an arpeggio layer and a lead doubling. Normal tempo is 132 BPM. A look-ahead scheduler queues notes about 120 ms ahead of the audio clock so timing stays steady.
+
+Danger music starts when locked blocks reach the top six rows and ends once the stack is below the top nine rows (hysteresis in `src/audio/tempo.ts`). In danger the tempo rises to 172 BPM, the bass and hi-hats move to sixteenth notes and the arpeggio plays continuously. The switch happens on the next beat. Gameplay speed is never affected. In multiplayer each player's own board drives their music.
+
+## Effects
+
+`src/audio/effects.ts` defines 22 named effects: move, rotate, lock, hard drop, hold, 1/2/3-line clears, four-line clear, level up, menu move/select/back, pause, countdown tick/go, garbage sent/incoming/rise, Game Over, victory and defeat. Engine events trigger the gameplay effects; `BricksAudio.cue(name)` plays any effect from interface code.
+
+## Lifecycle and settings
+
+Pause, Game Over and leaving a game stop scheduled music and pending effect notes with an 8 ms fade. Resume continues the song where it was. A new game restarts the song in calm mode. Music and effects have separate on/off and 0–100% volume settings saved locally; muting effects cancels pending effect notes, and silent settings create no sound sources.
+
+Automated tests cover the theme structure, danger tempo and hysteresis, every effect's timing and pitch range, and the playback lifecycle. Chromium integration tests exercise real Web Audio start, pause/resume and saved mute settings. How it sounds still needs a listening check.

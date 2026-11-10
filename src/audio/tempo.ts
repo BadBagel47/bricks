@@ -1,17 +1,21 @@
 import type { Board } from '../engine/types.ts'
 
-export const DANGER_ROW = 5
-export const ORIGINAL_MELODY = [62, 69, 74, 69, 65, 72, 77, 72, 62, 69, 76, 74, 65, 72, 79, 77] as const
+/** Danger music starts when locked blocks reach the top six rows. */
+export const DANGER_ROW = 6
+/** Hysteresis: danger ends only once the stack is below the top nine rows. */
+export const SAFE_ROW = 9
+
+function highestFilledRow(board: Board): number {
+  const index = board.findIndex((row) => row.some((cell) => cell !== null))
+  return index === -1 ? board.length : index
+}
 
 export function isDangerStack(board: Board): boolean {
-  return board.slice(0, DANGER_ROW).some((row) => row.some((cell) => cell !== null))
+  return highestFilledRow(board) < DANGER_ROW
 }
 
-export function musicIntervalMs(danger: boolean): number {
-  return danger ? 230 : 390
-}
-
-export function frequencyForNote(midiNote: number, danger: boolean): number {
-  const note = midiNote + (danger ? 12 : 0)
-  return 440 * 2 ** ((note - 69) / 12)
+/** Next danger state with hysteresis, so the tempo does not flicker around one row. */
+export function nextDangerState(board: Board, current: boolean): boolean {
+  const top = highestFilledRow(board)
+  return current ? top < SAFE_ROW : top < DANGER_ROW
 }
