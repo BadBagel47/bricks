@@ -7,3 +7,5 @@ The looping square-wave melody is a sixteen-note sequence written for this game.
 Short synthesized effects respond to rotations, Hold, piece locking, Hard Drop, line clears and Game Over. Pause and returning to the menu cancel queued effect notes and fade active music/effects out over 8 ms before stopping their oscillators at 10 ms. Resuming continues the melody without replaying interrupted effects. New games reset the melody and danger tempo and cancel leftover Game Over sounds. Volume changes preserve the melody position; muting effects cancels their pending notes.
 
 Automated coverage checks the audio defaults and volume validation, original melody shape, danger threshold, tempo change, octave shift, and audio playback lifecycle (pause/resume, rapid replay, menu exit, Game Over completion and volume changes). Chromium integration tests also exercise real Web Audio initialization, pause/resume and saved mute settings. Audible output still needs a listening check on the published site.
+
+A proposed replacement theme, "Troika" (original, Russian folk style), is stored un-integrated in [`docs/music/`](music/README.md) at the owner's request.
