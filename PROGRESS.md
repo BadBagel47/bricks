@@ -5,6 +5,10 @@
 - **Status:** Phase 3.13 review is documented in `docs/PHASE3_REVIEW.md`. Public gameplay remains at `09a7cb6`; the separately approved operating controls are live in a Worker preview on `feature/operating-controls`. See current checkpoint below and `HANDOVER.md` for verified setup and remaining live checks.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
+## Run 2 — lobby, match screens and match sounds (F-002, F-004, F-005) — 2026-11-10
+
+Owner approved ("Kör"). Lobby, two-player match and 1 Player screens follow the sketch; multiplayer sound effects are wired without engine changes (counter deltas in `LiveGame`, countdown in `MatchStartPanel`). Test updates in `tests/firebase.rooms.mjs`: Match mode is now a radio group, and Next/Hold (`.live-previews`) moved to the side column outside *Your game*. Local: browser integration 15/15, typecheck clean; a local harness (stubbed Firebase) confirmed the match screen fits without scrolling at 320×667, 390×844, 844×390, 800×600 and 1280×800 in both modes. Firebase emulator suites are not runnable here; CI is authoritative.
+
 ## Run 1 — admin page and settings (F-001, B-001, F-003) — 2026-11-10
 
 Owner approved ("Kör"). Admin page and Settings now follow the sketch's structure and behavior; Revoke only for active unexpired invitations. Updated `tests/operating.browser.mjs` (segmented controls, tabs, new expired-invitation check) and `tests/browser.integration.mjs` (heading "Settings", stepper, Swipe radio). Local: operating browser 3/3, browser integration 15/15, typecheck clean; six unit tests that need `firebase`/`miniflare` cannot run in this sandbox (fail identically without the change), so CI is authoritative. Remaining sketch work: F-002, F-004, F-005 (run 2).

@@ -9,6 +9,21 @@ not publish version numbers yet; entries are grouped by deployment.
 Deployed to the Worker preview (`feature/operating-controls`, merge `89b856c`);
 not yet on the public GitHub Pages site.
 
+### Changed (run 2)
+- F-002: lobby rebuilt per the sketch: room-code tiles with *Copy Invite Link* /
+  *Copy Code*, player cards (Host/Guest, connection status), mode summary with a
+  one-line rule explanation and compact rows (starting level, Hold, guest
+  approval); the editor uses a segmented Score Duel / Battle choice.
+- F-004: match screen per the sketch: leave button, mode and connection chips,
+  room code, score row with the signed difference, own board with Battle
+  incoming-garbage meter, side column with the opponent board, Next, Hold and
+  an incoming badge; landscape uses a right-hand column. 1 Player: icon pause
+  button and two-digit level.
+
+### Added (run 2)
+- F-005: multiplayer sounds: countdown tick/go, garbage sent/incoming/rise,
+  victory and defeat.
+
 ### Fixed
 - B-001: Revoke is offered only for active, unexpired invitations.
 

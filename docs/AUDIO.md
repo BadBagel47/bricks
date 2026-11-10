@@ -14,7 +14,7 @@ Danger music starts when locked blocks reach the top six rows and ends once the 
 
 ## Effects
 
-`src/audio/effects.ts` defines 22 named effects: move, rotate, lock, hard drop, hold, 1/2/3-line clears, four-line clear, level up, menu move/select/back, pause, countdown tick/go, garbage sent/incoming/rise, Game Over, victory and defeat. Engine events trigger the gameplay effects; `BricksAudio.cue(name)` plays any effect from interface code.
+`src/audio/effects.ts` defines 22 named effects: move, rotate, lock, hard drop, hold, 1/2/3-line clears, four-line clear, level up, menu move/select/back, pause, countdown tick/go, garbage sent/incoming/rise, Game Over, victory and defeat. Engine events trigger the gameplay effects; `BricksAudio.cue(name)` plays any effect from interface code. Multiplayer uses it for the countdown (tick at 3, 2, 1; go at 0, in `MatchStartPanel`), Battle garbage (sent when your lock produces attack rows, incoming when the opponent's attack total grows, rise when rows are applied; in `LiveGame`) and the final outcome (victory or defeat; nothing for a draw).
 
 ## Lifecycle and settings
 
