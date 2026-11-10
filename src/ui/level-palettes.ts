@@ -1,14 +1,34 @@
 import type { PieceType } from '../engine/types.ts'
 
-const palettes: readonly Record<PieceType, string>[] = [
-  { I: '#43d9e8', O: '#f5d547', T: '#b77af5', S: '#72d759', Z: '#ef5a62', J: '#5389f2', L: '#f29a45' },
-  { I: '#8fd6ff', O: '#ffd46b', T: '#ff91c8', S: '#b5e86e', Z: '#ff806f', J: '#7795ff', L: '#ffb36b' },
-  { I: '#76efd0', O: '#ffd36e', T: '#d6a2ff', S: '#a9e878', Z: '#ff827f', J: '#77a8ff', L: '#ffc078' },
-  { I: '#59d5ff', O: '#ffdc59', T: '#ff82b2', S: '#79e9a2', Z: '#ff6d68', J: '#828cff', L: '#ffa158' },
-  { I: '#94e1ff', O: '#ffe58a', T: '#e3a1ff', S: '#a8ee88', Z: '#ff9d8f', J: '#91aaff', L: '#ffd092' },
-]
+export type BlockColors = 'level' | 'classic'
+export interface BlockStyle { readonly fill: string; readonly ring: string | null }
 
-export function colorForPiece(type: PieceType | 'G', level: number): string {
-  if (type === 'G') return '#8c9487'
-  return palettes[level % palettes.length][type]
+/** Fixed per-piece colors, used when the player chooses Classic block colors. */
+const CLASSIC: Record<PieceType, string> = { I: '#38D1E8', O: '#F5C443', T: '#A98BF5', S: '#4FD98A', Z: '#F2706D', J: '#5B9CF6', L: '#F7964A' }
+
+/**
+ * Original NES-inspired level palettes: each level has two colors. T, O and I
+ * are light blocks outlined in the first color; J and S use the first color,
+ * Z and L the second. Adjacent levels never share a first color.
+ */
+const LEVEL_PAIRS: readonly (readonly [string, string])[] = [
+  ['#3C7BF0', '#5DD6F5'], ['#2FA84F', '#A6E05A'], ['#B347D1', '#F27BE6'], ['#2F6FE0', '#4FD98A'], ['#D93A73', '#4FD98A'],
+  ['#2FA88F', '#7C8CF5'], ['#D9452F', '#8E97B5'], ['#7A4FE0', '#C9375A'], ['#2F6FE0', '#D9452F'], ['#D9452F', '#F2A33A'],
+]
+const LIGHT = '#F4F1EA'
+const GARBAGE = '#4A5170'
+
+export function blockStyle(type: PieceType | 'G', level: number, colors: BlockColors = 'level'): BlockStyle {
+  if (type === 'G') return { fill: GARBAGE, ring: null }
+  if (colors === 'classic') return { fill: CLASSIC[type], ring: null }
+  const [first, second] = LEVEL_PAIRS[((level % LEVEL_PAIRS.length) + LEVEL_PAIRS.length) % LEVEL_PAIRS.length]
+  if (type === 'T' || type === 'O' || type === 'I') return { fill: LIGHT, ring: first }
+  if (type === 'J' || type === 'S') return { fill: first, ring: null }
+  return { fill: second, ring: null }
+}
+
+/** The color that identifies a block: its outline when it has one, otherwise its fill. */
+export function colorForPiece(type: PieceType | 'G', level: number, colors: BlockColors = 'level'): string {
+  const style = blockStyle(type, level, colors)
+  return style.ring ?? style.fill
 }
