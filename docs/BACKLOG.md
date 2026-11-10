@@ -22,7 +22,7 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| F-001 | Feature | Admin page with the sketch's structure and functions | P1 | Approved, waiting for go-ahead | Strong (e.g. Claude Opus, high) |
+| F-001 | Feature | Admin page with the sketch's structure and functions | P1 | Approved, waiting for go-ahead | Standard |
 | F-002 | Feature | Lobby with the sketch's structure and functions | P1 | Approved, waiting for go-ahead | Strong |
 | F-003 | Feature | Settings with the sketch's structure and functions | P1 | Approved, waiting for go-ahead | Standard |
 | F-004 | Feature | Match and 1 Player screens per the sketch | P1 | Approved, waiting for go-ahead | Strong |
@@ -37,6 +37,17 @@ records released changes.
 The approved P1 items come from the owner's request of 2026-11-10: use the
 sketch's layout **and behavior**, not only its look. Design reference:
 "Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
+
+## Proposed runs (2026-11-10)
+
+Grouped by shared code and risk to save quota without lowering quality.
+
+| Run | Items | Why together | Suggested model |
+| --- | --- | --- | --- |
+| 1 | F-001, B-001, F-003 | Self-contained screens (admin page, Settings) with their own fast tests; no multiplayer logic | Standard, medium reasoning (e.g. Claude Sonnet, GPT-6.1 Sol Medium) |
+| 2 | F-002, F-004, F-005 | Share lobby/match components and the two-session Firebase tests; highest regression risk | Strong, high reasoning (e.g. Claude Opus, GPT-6.1 Terra High) |
+| Later | F-006 | Music data only | Standard, medium |
+| Later | F-007, then F-008 | Architecture work; plan first, then build | Strong, high |
 
 ## Details
 
