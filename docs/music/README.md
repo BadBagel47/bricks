@@ -1,44 +1,46 @@
 # Proposed music (owner-provided, not integrated)
 
-Added 2026-11-10 at the owner's request as a candidate replacement/extension for
-the current music loop in `src/audio/`. **Not wired into the game.** Integration
-is a separate task that needs owner authorization like any other milestone work.
+Candidate themes for Bricks, sorted by the owner into groups **A**, **B** and **C**.
+**None is wired into the game.** Integration is a separate task that needs owner
+authorization like any other milestone work. All are original compositions
+(no Korobeiniki or other existing tunes), self-contained plain-JS Web Audio
+players with a standalone `*-preview.html` listening page.
 
-## Stackline (recommended main theme)
+## Owner rule: stable BPM for new themes (2026-11-11)
 
-- `stackline.js` / `stackline-preview.html` — original NES-style puzzle theme in
-  C major, 16 bars, base 132 BPM. API: `createStackline({ volume })` →
-  `start()`, `stop()`, `toggle()`, `setDanger(bool)`, `setVolume(v)`, `bpm`.
-- Built for spec §12.1: `setDanger(true)` raises tempo ×1.4 and switches to
-  driving eighth-note bass, denser hats and constant arpeggios; it can switch
-  mid-bar. No per-loop or per-level acceleration. Music never affects gameplay.
-- Integration: port note data to a small testable module, play it through
-  `BricksAudio` (`src/audio/synth.ts`) using existing music gain, settings,
-  lifecycle and unlock, and drive `setDanger` from `isDangerStack`.
+New music proposals must keep a **fixed tempo**. Danger urgency (spec §12.1) is
+expressed through intensity (bass pattern, drum density, arpeggios), not speed.
+This differs from spec §12.1's "faster" wording and from the older proposals in
+B and C, which the owner kept as they are; confirm with the owner before
+integrating a tempo-changing theme.
 
-## Troika (alternative, Russian folk style)
+## Group A
 
-- `troika.js` — self-contained Web Audio player (plain JS, no dependencies).
-  Exposes `createTroika({ bpm, volume })` → `start()`, `stop()`, `toggle()`,
-  `setLevel(n)`, `setVolume(v)`, `bpm`.
-- `troika-preview.html` — standalone listening page (open in a browser, press play).
+### Night Shift — `A/nightshift.js`
+D minor, syncopated groove bass, square lead with dotted-eighth echo, 16 bars.
+**Fixed 120 BPM.** API: `createNightShift({ volume })` → `start()`, `stop()`,
+`toggle()`, `setDanger(bool)`, `setVolume(v)`, `bpm`. `setDanger(true)` switches
+to pumping eighth-note bass, denser kicks/hats and constant arpeggios; can switch
+mid-bar.
 
-## Musical content
+## Group B
 
-Original composition (not Korobeiniki or any other existing tune), Russian folk
-style: A harmonic minor, 16 bars (A section + "kazachok" B section), 2-beat polka
-bass on triangle, 25 % pulse lead with balalaika-style tremolo on long notes,
-12.5 % pulse arpeggios in the B section, noise drums. Base tempo 150 BPM.
+### Stackline — `B/stackline.js`
+Bright C-major NES puzzle theme, 16 bars, 132 BPM. `setDanger(true)` raises tempo
+×1.4 plus denser bass/drums/arpeggios. API as Night Shift.
+
+## Group C
+
+### Troika — `C/troika.js`
+Russian folk style: A harmonic minor, polka bass, balalaika-style tremolo, 16 bars,
+150 BPM. Accelerates +5 % per loop (resets after 4) and per level via
+`setLevel(n)`. API: `createTroika({ bpm, volume })` → `start()`, `stop()`,
+`toggle()`, `setLevel(n)`, `setVolume(v)`, `bpm`.
 
 ## Notes for integration
 
-- The prototype accelerates per loop (+5 % per loop, resets after 4) and per
-  level (`setLevel`). Spec §12.1 instead requires a faster, more urgent version
-  when the stack reaches danger height, and that music speed never affects
-  gameplay. When integrating, map danger state to tempo (and drop or keep the
-  per-loop acceleration as the owner prefers) rather than copying the prototype
-  behaviour as-is.
-- Port it into `BricksAudio` (`src/audio/synth.ts`) so it uses the existing
-  `musicGain`, music on/off/volume settings, pause/resume/menu fade lifecycle and
-  autoplay unlock. Keep note data in a small testable module like `tempo.ts`.
+- Port note data to a small testable module (like `src/audio/tempo.ts`) and play
+  it through `BricksAudio` (`src/audio/synth.ts`) using the existing music gain,
+  on/off/volume settings, pause/resume/menu fade lifecycle and autoplay unlock.
+- Drive danger from `isDangerStack`. Music must never affect gameplay speed.
 - Update `docs/AUDIO.md` and the audio tests when the current melody is replaced.
