@@ -15,7 +15,16 @@ Owner approved ("Kör") a refresh based on the Claude design sketch and sound te
 - Admin page restyled with unchanged element IDs and behavior.
 - Local checks with the available toolchain: unit tests, the 15 single-player Chromium tests and the 3 operating browser tests passed against a local build. Full CI (lint, build, Firebase emulator and two-session tests) runs on GitHub.
 
-Backlog: multiplayer-only effects (victory, defeat, garbage sent/incoming/rise, countdown) exist in `effects.ts` but are not yet wired to match events. The owner plans more music tracks later.
+### Backlog — collected for the next run (owner request 2026-11-10, awaiting "Kör")
+
+The owner wants the sketch's structure and functions, not only its look, in these areas:
+
+1. **Admin page:** two tabs (Public access / Private invitations); On / Off / Timer segmented buttons per mode with the closing time shown only for Timer; status badges such as "Open", "Closed", "Open until 22:00"; invitation list as rows with code, Active / Expired / Revoked badge, closing time and Revoke only for active ones; new link box with room code and Copy. Expired invitations must not offer Revoke.
+2. **Lobby:** large room code tiles with Copy link / Copy code; player cards (name, Host/Guest, connection); Score Duel / Battle as a segmented choice with a one-line rule explanation; compact match settings rows (starting level, Hold, guest approval); one Start match button.
+3. **Settings:** segmented choices instead of dropdowns where the sketch has them (block colors, touch controls), live block-color preview, stepper buttons for starting level, grouped sections (Personal, Display, 1 Player, Audio, Keyboard, Controller).
+4. **Match and 1 Player:** match header with both names, scores and signed difference between them; incoming garbage meter beside the board in Battle; stats row as in the sketch; wire the multiplayer effects (victory, defeat, garbage sent/incoming/rise, countdown).
+
+Later: more music tracks.
 
 ## Reusable operating controls — current checkpoint, 2026-11-10
 
