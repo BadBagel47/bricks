@@ -335,7 +335,7 @@ test('countdown freezes approved settings, produces identical starts despite clo
     await host.getByRole('main', { name: 'Multiplayer game', exact: true }).waitFor()
     await guest.getByRole('main', { name: 'Multiplayer game', exact: true }).waitFor()
     assert.ok(Date.now() - beganAt >= 4800)
-    assert.equal(await host.getByLabel('Your game', { exact: true }).getByLabel(/piece$/).first().getAttribute('aria-label'), await guest.getByLabel('Your game', { exact: true }).getByLabel(/piece$/).first().getAttribute('aria-label'))
+    assert.equal(await host.locator('.live-previews').getByLabel(/piece$/).first().getAttribute('aria-label'), await guest.locator('.live-previews').getByLabel(/piece$/).first().getAttribute('aria-label'))
     await host.keyboard.press('Escape')
     await host.getByRole('dialog').getByRole('button', { name: 'Return to lobby', exact: true }).click()
     await guest.getByRole('button', { name: '👍 Approve settings', exact: true }).click()
