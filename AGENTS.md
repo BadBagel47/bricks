@@ -15,3 +15,14 @@
 - Keep interface copy direct and functional. Retain the approved “Make room for one more.” headline; avoid decorative subheadings, slogans, menu descriptions, and footers. Keep necessary instructions, validation, and availability status.
 
 - Owner preference: include GPT-6.1 Terra alongside Sol and Luna when recommending a model and reasoning level at each checkpoint.
+
+## Owner working rules (all agents)
+
+- **Replies:** Keep replies to the owner short without omitting important information. Leave out technical detail the owner does not need.
+- **Documentation:** Keep handoff, goals, working method, features and bugs documented and current. Follow established technical and naming standards where they exist. Documentation must be usable by any AI agent, not tied to one tool.
+- **IDs:** If no ID system for bugs and features exists, propose one and ask whether to apply it. Do not introduce it without approval.
+- **Batching:** Document reported bugs and feature requests first and collect them for a joint run. Do not start the run until the owner gives explicit go-ahead (e.g. “Kör”). After a run, push the changes automatically when possible.
+- **Model choice:** Before every run, recommend a suitable model and reasoning level. Conserve available quota without sacrificing quality; speed is not a priority unless stated. Suggest priorities for bugs and features and group them by suitable model and level.
+- **Language:** Write documentation on GitHub and other external services in English. Communicate with the owner in Swedish during development. If external text exists in Swedish, ask whether it should be translated.
+- **Sensitive data:** Publish personal or otherwise sensitive data only with the owner’s explicit approval. The question must state clearly why it is needed or how it helps, and explain the consequences and risks.
+- **Owner actions:** When the owner must do something the agent cannot, provide everything needed to complete it: direct links, text to copy, exact steps. Suggest integrations that remove manual steps, and flag integrations likely to be needed later to avoid future blockers.
