@@ -1,5 +1,6 @@
 # Bricks development instructions
 
+- Documentation map: [HANDOVER.md](HANDOVER.md) (start here), [docs/BACKLOG.md](docs/BACKLOG.md) (open work with `F-`/`B-`/`T-` IDs), [PROGRESS.md](PROGRESS.md) (done work), [CHANGELOG.md](CHANGELOG.md) (Keep a Changelog), [docs/adr/](docs/adr/) (decisions). At the end of every run update the backlog status, the changelog's *Unreleased* section, PROGRESS and the handover checkpoint; add an ADR for any significant new decision.
 - Treat [BRICKS_SPEC.md](BRICKS_SPEC.md) as the product source of truth. Keep player-facing text in English and communicate with the owner in Swedish.
 - At a new work session or milestone, read [HANDOVER.md](HANDOVER.md) first, then verify current facts in `PROGRESS.md` and follow its links to the relevant phase docs. Update the handover at each milestone checkpoint; keep durable requirements in the spec/AGENTS, not only in the handover.
 - Keep gameplay rules independent from React, rendering, input, audio, persistence, and multiplayer. Prefer small, testable modules and avoid unnecessary dependencies or rewrites.

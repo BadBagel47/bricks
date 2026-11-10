@@ -3,11 +3,38 @@
 Read this first, then `AGENTS.md`, `BRICKS_SPEC.md` and the relevant linked
 guides. Owner instructions and the specification take precedence.
 
+## Documentation map
+
+| What | Where |
+| --- | --- |
+| Agent instructions and owner working rules | `AGENTS.md` (`CLAUDE.md` imports it) |
+| Product requirements | `BRICKS_SPEC.md` (section 5.0 = approved visual design) |
+| Current checkpoint, environments, resources | this file |
+| Goals | *Product direction* below and spec section 4 |
+| Open features, bugs and tasks (`F-`/`B-`/`T-` IDs) | `docs/BACKLOG.md` |
+| Done work per milestone, with checks | `PROGRESS.md` |
+| Released changes | `CHANGELOG.md` |
+| Why things are built this way | `docs/adr/` |
+| Subsystems | `docs/ENGINE.md`, `docs/AUDIO.md`, `docs/INPUT.md`, `docs/MULTIPLAYER.md`, `docs/OPERATING_CONTROLS.md`, `docs/OPERATING_SETUP.md`, `docs/FIREBASE_QUOTA.md`, `docs/FIREBASE_ACCESS.md` |
+
+## Product direction (goals)
+
+- A polished, NES-inspired falling-block game for casual play with friends, on
+  phone and desktop, in the browser.
+- Two-player Score Duel and Battle with honest reconnection, results and rematch.
+- Owner-controlled access: public on/off/timer and private invitations.
+- Free to run: Firebase Spark, Cloudflare free tier, GitHub Pages; no paid
+  services without owner approval.
+- Later: more music (F-006) and a second game, Stones (F-008), reusing the lobby
+  (F-007).
+
 ## Current checkpoint — 2026-11-10
 
-**Continue on `feature/operating-controls`, not main.** The local checkout is
-`/workspace/bricks` (local branch `work`). Verify Git status and remote heads
-before editing; preserve user changes. Operating controls are not merged to main.
+**Continue on `feature/operating-controls`, not main.** Work in the existing
+checkout of your environment. Verify Git status and remote heads before editing;
+preserve user changes. Operating controls are not merged to main. Short-lived
+feature branches (e.g. `feature/visual-refresh`) are merged into
+`feature/operating-controls` after CI passes.
 
 - Public game: https://badbagel47.github.io/bricks/?v=09a7cb6 .
   Last verified Pages application deployment is recovery Phase 3.12, `09a7cb6`:
@@ -30,7 +57,13 @@ before editing; preserve user changes. Operating controls are not merged to main
 
 ## Visual and audio refresh (2026-11-10)
 
-Built on `feature/visual-refresh` and merged into `feature/operating-controls` for the Worker preview once CI passed. Details and backlog in `PROGRESS.md`; design rules in spec section 5.0; audio in `docs/AUDIO.md`.
+Merged into `feature/operating-controls` as `89b856c` and deployed to the Worker
+preview; full CI and the live preview check passed:
+https://github.com/BadBagel47/bricks/actions/runs/42838139082 .
+Details in `PROGRESS.md` and `CHANGELOG.md`; design rules in spec section 5.0
+and ADR 0005; audio in `docs/AUDIO.md`. The owner then approved reworking admin,
+lobby, settings and match screens to the sketch's behavior (backlog F-001 to
+F-005, B-001), waiting for the go-ahead.
 
 ## Next session: finish the playable preview
 
@@ -173,9 +206,11 @@ first-time route. Secret values and the real allowlist deliberately are not in G
   allowlists remain private.
 - Keep this checkpoint current and retain durable requirements in the spec.
   Operating controls are authorized; later Phase 4 work needs authorization.
-- Recommended model: **GPT-6.1 Sol Medium** for this verification/setup stage.
-  Terra High for a difficult access/rules issue; Luna for routine copy-only work.
-  Do not claim a model switch happened.
+- Model choice is per run (see AGENTS.md). Tiers: a strong model with high
+  reasoning (e.g. Claude Opus, GPT-6.1 Terra High) for multiplayer, rules or
+  access work; a standard model (e.g. GPT-6.1 Sol Medium) for focused features;
+  an economical model (e.g. GPT-6 Luna) for copy or styling only. Suggested
+  models per item are in `docs/BACKLOG.md`. Do not claim a model switch happened.
 
 ## Verification and environment limits
 
@@ -193,6 +228,14 @@ npm run test:browser
 npm run test:operating
 npm run test:firebase
 ```
+
+Restricted environments without package installs (observed in a Claude cloud
+session, 2026-11-10): Node 22+ runs `node --test tests/*.test.ts` directly via
+type stripping for every suite that does not need `firebase`, `miniflare` or
+`esbuild`; a global `tsc` can type-check `tsconfig.tests.json` apart from those
+modules. If React, esbuild and playwright-core exist globally, the gameplay and
+operating browser suites can run against an esbuild bundle with Firebase
+stubbed. Treat such runs as supporting evidence; CI remains the gate.
 
 Cached Firebase emulator JAR works with proxies unset **only for loopback tests**:
 

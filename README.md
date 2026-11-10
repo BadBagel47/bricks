@@ -42,7 +42,11 @@ The expected address after successful deployment is `https://badbagel47.github.i
 
 - `BRICKS_SPEC.md`: complete product specification.
 - `AGENTS.md`: concise working instructions.
+- `HANDOVER.md`: start here — current checkpoint, documentation map and goals.
+- `docs/BACKLOG.md`: open features, bugs and tasks with IDs.
 - `PROGRESS.md`: implemented scope, checks, and next review checkpoint.
+- `CHANGELOG.md`: released changes (Keep a Changelog).
+- `docs/adr/`: architecture decision records.
 - `docs/ENGINE.md`: engine API, deterministic piece algorithm, rotation, gravity, scores, level thresholds and developer scenarios.
 - `docs/AUDIO.md`: generated soundtrack, danger tempo, sound effects and browser audio behavior.
 - `docs/INPUT.md`: keyboard, touch and gamepad defaults, remapping and gesture behavior.
