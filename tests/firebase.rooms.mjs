@@ -660,7 +660,7 @@ test('Battle restores queued attacks after reconnect, applies them once and sett
     await host.waitForFunction(async code => (await (await import('/tests/fixtures/firebase-browser.ts')).recoveryData(code)).session?.phase === 'resumed', code, { timeout: 12000 })
     await guest.getByText('Match paused. Waiting for reconnection…', { exact: true }).waitFor({ state: 'hidden' })
     await guest.getByLabel('Battle attacks', { exact: true }).filter({ hasText: `Pending: ${rows}` }).waitFor()
-    const grey = () => guest.getByLabel('Your game', { exact: true }).locator('.board-cell.filled').evaluateAll(nodes => nodes.filter(node => node.style.getPropertyValue('--cell-color').toLowerCase() === '#8c9487').length)
+    const grey = () => guest.getByLabel('Your game', { exact: true }).locator('.board-cell.filled').evaluateAll(nodes => nodes.filter(node => node.style.getPropertyValue('--cell-color').toLowerCase() === '#4a5170').length)
     assert.equal(await grey(), 0)
     await guest.keyboard.press('ArrowLeft')
     assert.match(await guest.getByLabel('Battle attacks').innerText(), new RegExp(`Pending: ${rows}`))
