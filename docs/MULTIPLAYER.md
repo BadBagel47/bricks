@@ -162,7 +162,9 @@ skips the database ownership check; it does not replace the full rules suite.
    emulator results. Until that happens, production Firebase is unverified.
 
 There is deliberately no default production project in `.firebaserc`, no Hosting
-deployment and no automatic rules deployment. Firebase Hosting is Phase 4.
+deployment and no automatic rules deployment. For Phase 4 the owner chose GitHub
+Pages with the custom domain `bricks.trythis.one` instead of Firebase Hosting for
+now; see `DEPLOYMENT.md`.
 GitHub Pages builds read the public Web App fields from repository Actions
 variables, as wired in milestone 3.2.
 

@@ -4,14 +4,24 @@ Read this first when starting a new work session. It is an index and current
 checkpoint, not a replacement for owner instructions or the product specification.
 Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 
-## Current checkpoint — 2026-11-08
+## Current checkpoint — 2026-11-10
 
-- **Phase 3, milestone 3.12:** Reconnection and recovery (published).
-- **Live:** https://badbagel47.github.io/bricks/?v=09a7cb6 (3.12).
-- **Status:** Owner confirmed the checked Firebase rules published. Main `09a7cb6` passed all tests and Pages deployment: https://github.com/BadBagel47/bricks/actions/runs/42434535645 . App and rules match tested `03d97ed`. Direct live-site requests from this environment are blocked by the proxy (403); no live Firebase playtest is claimed.
-- **Workflow:** Owner wants manual tests consolidated. Finish automated two-session/security verification before the one necessary external action: checked rule publication. Later milestones still need authorization.
-- **Next:** Owner authorized 3.13. The engineering review and automated verification are recorded in `docs/PHASE3_REVIEW.md`. Public competitive trust, abuse resistance and retention remain product/architecture decisions; do not represent them as solved. Phase 4 requires owner authorization.
-- **Next model:** GPT-6.1 Sol Medium for a focused quota/abuse mitigation plan; consider Terra High for server-authoritative competitive architecture and Luna for routine UI changes.
+- **Phase 4:** Public deployment (authorized by the owner 2026-11-10).
+- **Target:** https://bricks.trythis.one via GitHub Pages custom domain (approved
+  deviation from Firebase Hosting, "for now"). Firebase stays the auth/database
+  backend. Setup, origin-change effects, checklist and maintenance:
+  `docs/DEPLOYMENT.md`.
+- **Current live build:** 3.12 at https://badbagel47.github.io/bricks/?v=09a7cb6 .
+  No application code changed for Phase 4; the domain is a repository setting.
+- **Waiting on owner:** DNS CNAME `bricks → badbagel47.github.io`; GitHub
+  Settings → Pages custom domain + Enforce HTTPS; Firebase Authorized domains;
+  API-key referrer list if restricted. Then a consolidated live two-device
+  playtest against the checklist (this environment cannot reach the live site).
+- **Open decisions from 3.13:** trusted competition, abuse resistance and
+  retention (`docs/PHASE3_REVIEW.md`) remain unsolved; do not represent them as solved.
+- **Next model:** GPT-6.1 Sol Medium for Phase 4 verification and any quota/abuse
+  mitigation; Terra High only for server-authoritative competition; Luna for
+  routine UI/doc changes.
 
 ## Product direction and durable constraints
 
@@ -35,7 +45,7 @@ Verify status and commits in `PROGRESS.md`/GitHub before relying on them.
 - Read `AGENTS.md`, this handover, `PROGRESS.md`, and the relevant section of
   `BRICKS_SPEC.md` before changes. Phase-specific architecture and limits live in
   `docs/MULTIPLAYER.md`, `docs/FIREBASE_QUOTA.md` and `docs/FIREBASE_ACCESS.md`.
-- Work in `/workspace/bricks`, on the existing checkout; no worktrees. Preserve
+- Work in the existing checkout (currently `/home/user/bricks` in cloud sessions); no worktrees. Preserve
   user changes. Do not use parallel agents unless the owner or repo instructions
   explicitly requests them.
 - Communicate in Swedish; keep player-facing UI in English, direct and useful.

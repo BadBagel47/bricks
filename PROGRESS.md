@@ -1,8 +1,9 @@
 # Bricks progress
 
-- **Phase:** 3 — Multiplayer (explicitly approved by the owner)
-- **Milestone:** 3.13 — Integration and security review
-- **Status:** Owner authorized review. Engineering findings and limits are in `docs/PHASE3_REVIEW.md`; 148 unit, 15 browser and 42 Firebase emulator tests passed locally. Production Firebase behavior and configuration remain independently unverified. Live: https://badbagel47.github.io/bricks/?v=09a7cb6 .
+- **Phase:** 4 — Public deployment (authorized by the owner 2026-11-10)
+- **Target:** https://bricks.trythis.one on GitHub Pages with a custom domain (owner-approved deviation from Firebase Hosting for now). Firebase remains the backend. See `docs/DEPLOYMENT.md`.
+- **Status:** Documentation and maintenance instructions added; no application code changed. Waiting for owner DNS, GitHub Pages custom-domain/HTTPS, Firebase Authorized domains (and API-key referrer, if restricted). Live verification checklist not yet observed; this environment cannot reach the site.
+- **Phase 3 (complete):** 3.13 integration and security review done. Engineering findings and limits are in `docs/PHASE3_REVIEW.md`; 148 unit, 15 browser and 42 Firebase emulator tests passed locally. Production Firebase behavior and configuration remain independently unverified. Live: https://badbagel47.github.io/bricks/?v=09a7cb6 .
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## Milestone 3.11
@@ -185,6 +186,7 @@
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
+- Phase 4: owner completes the domain setup in `docs/DEPLOYMENT.md`, then a consolidated live two-device playtest against its checklist; record observed results here.
 - Review the findings in `docs/PHASE3_REVIEW.md` and decide the intended level of public access, abuse resistance and trusted competition before Phase 4. Continue consolidated manual playtesting.
 - Recommended model: GPT-6.1 Sol Medium for focused quota and abuse mitigation planning; GPT-6.1 Terra High for server-authoritative competitive architecture.
 

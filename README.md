@@ -29,7 +29,7 @@ The browser suite uses `playwright-core` with an installed Chromium or Google Ch
 
 `.github/workflows/pages.yml` lints, runs unit tests, builds, runs Chromium integration tests, and deploys the site on pushes to `main`. The GitHub Ubuntu runner supplies Chrome. The workflow can also be run manually from the Actions tab. In the repository's **Settings → Pages**, set **Build and deployment → Source** to **GitHub Actions** before deployment. No paid services or application secrets are required by the workflow.
 
-The expected address after successful deployment is `https://badbagel47.github.io/bricks/`. The build uses relative asset URLs so it can also be hosted elsewhere.
+The public address is `https://bricks.trythis.one` (custom domain on GitHub Pages; the old `https://badbagel47.github.io/bricks/` address redirects once the domain is configured). The build uses relative asset URLs so it can also be hosted elsewhere. Domain setup, verification and maintenance are in `docs/DEPLOYMENT.md`.
 
 ## Project instructions
 
