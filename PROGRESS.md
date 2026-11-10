@@ -5,6 +5,10 @@
 - **Status:** Phase 3.13 review is documented in `docs/PHASE3_REVIEW.md`. Public gameplay remains at `09a7cb6`; the separately approved operating controls are live in a Worker preview on `feature/operating-controls`. See current checkpoint below and `HANDOVER.md` for verified setup and remaining live checks.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
+## B-002 — shared start in Score Duel — 2026-11-10
+
+Owner approved ("Kör b2"). Cause: Score Duel gravity started at each client's mount, i.e. when the "ready" write arrived (host first). Fix: `startCatchUp` in `src/multiplayer/match-start.ts` advances a fresh round from the shared countdown end (capped 3 s); Battle unchanged (shared frame clock), restored games unchanged. Tests: unit test in `tests/match-start.test.ts`; `tests/firebase.rooms.mjs` (clock-skew test) now checks that both first pieces are within one row. Local: unit 170 pass (6 environment-only failures as before), browser 15/15.
+
 ## Run 2 — lobby, match screens and match sounds (F-002, F-004, F-005) — 2026-11-10
 
 Owner approved ("Kör"). Lobby, two-player match and 1 Player screens follow the sketch; multiplayer sound effects are wired without engine changes (counter deltas in `LiveGame`, countdown in `MatchStartPanel`). Test updates in `tests/firebase.rooms.mjs`: Match mode is now a radio group, and Next/Hold (`.live-previews`) moved to the side column outside *Your game*. Local: browser integration 15/15, typecheck clean; a local harness (stubbed Firebase) confirmed the match screen fits without scrolling at 320×667, 390×844, 844×390, 800×600 and 1280×800 in both modes. Firebase emulator suites are not runnable here; CI is authoritative.

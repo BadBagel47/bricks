@@ -336,6 +336,11 @@ test('countdown freezes approved settings, produces identical starts despite clo
     await guest.getByRole('main', { name: 'Multiplayer game', exact: true }).waitFor()
     assert.ok(Date.now() - beganAt >= 4800)
     assert.equal(await host.locator('.live-previews').getByLabel(/piece$/).first().getAttribute('aria-label'), await guest.locator('.live-previews').getByLabel(/piece$/).first().getAttribute('aria-label'))
+    // B-002: both games follow the shared start time, so the first piece falls together.
+    const activeRow = page => page.getByLabel('Your game', { exact: true }).locator('.board-cell').evaluateAll(nodes => Math.floor(nodes.findIndex(node => node.classList.contains('filled')) / 10))
+    await host.waitForTimeout(1200)
+    const [hostRow, guestRow] = await Promise.all([activeRow(host), activeRow(guest)])
+    assert.ok(hostRow > 0 && Math.abs(hostRow - guestRow) <= 1, `pieces fall together (host row ${hostRow}, guest row ${guestRow})`)
     await host.keyboard.press('Escape')
     await host.getByRole('dialog').getByRole('button', { name: 'Return to lobby', exact: true }).click()
     await guest.getByRole('button', { name: '👍 Approve settings', exact: true }).click()

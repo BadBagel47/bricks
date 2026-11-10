@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { countdownSeconds, initialMatchState, parseMatchStart, startStillValid } from '../src/multiplayer/match-start.ts'
+import { countdownSeconds, initialMatchState, MAX_START_CATCH_UP_MS, parseMatchStart, startCatchUp, startStillValid } from '../src/multiplayer/match-start.ts'
+import { advanceGame, createGame } from '../src/engine/index.ts'
 import type { MatchStart } from '../src/multiplayer/match-start.ts'
 import { DEFAULT_MATCH_SETTINGS } from '../src/multiplayer/match-settings.ts'
 import type { Room } from '../src/multiplayer/room-model.ts'
@@ -33,4 +34,20 @@ test('both participants derive identical initial boards and seeded continuation;
   }
   assert.deepEqual(parseMatchStart(start), start)
   for (const bad of [{ ...start, seed: -1 }, { ...start, extra: true }, { ...start, guestUid: 'host' }, { ...start, settings: { ...DEFAULT_MATCH_SETTINGS, hold: true } }]) assert.throws(() => parseMatchStart(bad))
+})
+
+test('clients that mount a round at different moments share one gravity timeline (B-002)', () => {
+  assert.equal(startCatchUp(start, 14000), 0, 'nothing elapses before the countdown ends')
+  assert.equal(startCatchUp(start, 15100), 100)
+  assert.equal(startCatchUp(start, 60000), MAX_START_CATCH_UP_MS, 'late mounts are capped')
+  assert.equal(startCatchUp(start, Number.NaN), 0)
+  // Host sees "ready" at 15 100 ms, guest 450 ms later; both then run for the
+  // same wall-clock time until 17 000 ms of shared time.
+  const fresh = () => createGame({ seed: start.seed, startLevel: 5, holdEnabled: false, hardDropEnabled: true })
+  const host = advanceGame(advanceGame(fresh(), startCatchUp(start, 15100)).state, 1900).state
+  const guest = advanceGame(advanceGame(fresh(), startCatchUp(start, 15550)).state, 1450).state
+  assert.deepEqual(guest.active, host.active)
+  // Without the catch-up the guest would trail by the delivery delay.
+  const late = advanceGame(fresh(), 1450).state
+  assert.notDeepEqual(late.active, host.active)
 })

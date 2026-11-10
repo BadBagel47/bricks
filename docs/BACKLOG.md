@@ -28,7 +28,7 @@ records released changes.
 | F-004 | Feature | Match and 1 Player screens per the sketch | P1 | Done (run 2, 2026-11-10) | Strong |
 | F-005 | Feature | Wire multiplayer sound effects | P1 | Done (run 2, 2026-11-10) | Standard |
 | B-001 | Bug | Admin offers Revoke for expired invitations | P1 | Done (run 1, 2026-11-10) | Standard |
-| B-002 | Bug | Pieces start falling at slightly different moments on the two devices in a match | P2 | Proposed | Strong |
+| B-002 | Bug | Pieces start falling at slightly different moments on the two devices in a match | P2 | Done (2026-11-10) | Strong |
 | T-001 | Task | Owner check of a real private two-player match in the Worker preview | P1 | Open | — (owner) |
 | T-002 | Task | Controlled public Pages activation of operating controls | P2 | Open | Strong |
 | F-006 | Feature | More music tracks | P3 | Idea | Standard |
@@ -103,6 +103,10 @@ Grouped by shared code and risk to save quota without lowering quality.
   timestamp that both clients wait for, and measure the real offset in a test.
 - Not a sequence bug (same seed); treat as start-timing polish. Must not weaken
   recovery/resume timing.
+- Resolution: Score Duel advanced gravity from each client's own mount time
+  (when the "ready" write arrived; the host sees it first). A fresh round now
+  catches up from the shared countdown end (`startCatchUp`, capped at 3 s);
+  Battle already used the shared frame clock. Restored games are unchanged.
 
 ### T-001 Owner check of a real private two-player match
 - Steps are in `HANDOVER.md` → *Next session: finish the playable preview*.

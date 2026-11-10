@@ -25,6 +25,8 @@ not yet on the public GitHub Pages site.
   victory and defeat.
 
 ### Fixed
+- B-002: in Score Duel both devices now start gravity from the shared match
+  start, so the first pieces fall together.
 - B-001: Revoke is offered only for active, unexpired invitations.
 
 ### Added
