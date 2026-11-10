@@ -2,25 +2,56 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.13 — Integration and security review
-- **Status:** Owner authorized review. Engineering findings and limits are in `docs/PHASE3_REVIEW.md`; 148 unit, 15 browser and 42 Firebase emulator tests passed locally. Production Firebase behavior and configuration remain independently unverified. Live: https://badbagel47.github.io/bricks/?v=09a7cb6 .
+- **Status:** Phase 3.13 review is documented in `docs/PHASE3_REVIEW.md`. Public gameplay remains at `09a7cb6`; the separately approved operating controls are live in a Worker preview on `feature/operating-controls`. See current checkpoint below and `HANDOVER.md` for verified setup and remaining live checks.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
-## Reusable operating controls — Worker preview deployed, public rollout pending
+## Reusable operating controls — current checkpoint, 2026-11-10
 
-- **2026-11-09, invitation entry repaired:** First owner private link hit Worker root and Not found after Static Assets redirected internal index.html. `498c293` serves the game through internal `/`, adds a legacy-root redirect preserving invitation query/fragment behavior, and expands live checking to `/play/?room=ABCD` without following redirects. All CI, deployment and live checks passed: https://github.com/BadBagel47/bricks/actions/runs/42533876102 . Local 181 tests/lint/build pass. Owner two-player private invitation retry is next.
-- **2026-11-09, real login confirmed:** Owner completed local browser-only subject generation, D1 allowlist insertion and Firebase subject mirror. Actual Mailjet link login reaches settings. No private inputs were shared here. Live private invitations, two-player play, closure/draining and session/revocation checks remain pending before Pages rollout.
+The authoritative current setup, resources, failure diagnoses, next steps and
+environment limits are in [HANDOVER.md](HANDOVER.md). Continue on
+`feature/operating-controls`; public Pages activation remains pending.
 
-- **Live access repaired:** `0e84d3b` passed full CI, Worker deployment and actual read-only admin/access checks: https://github.com/BadBagel47/bricks/actions/runs/42525336450 . In addition to unsupported redirect:error, native fetch was invoked with a class receiver; a real workerd regression test reproduced the failure and passes with a local unbound function. 180 local tests, lint and build passed. Firebase policy reads now succeed. Private allowlist provisioning and actual Mailjet delivery remain pending.
-- **Preview deployment checkpoint:** Owner reports checked Firebase rules published after the public-open config was confirmed in Console. GitHub run https://github.com/BadBagel47/bricks/actions/runs/42520439790 passed all checks and deployed `afcfb8e` to https://bricks-operating.l8p1.workers.dev . Public Pages remains at `09a7cb6`. Live API/UI readback, private administrator provisioning and real Mailjet delivery are still pending; this runtime's network policy blocks workers.dev.
-- Owner chose Mailjet transactional email and reports sender `system@trythis.one` verified through Cloudflare DNS. Replaced the Resend adapter with Mailjet Send API v3.1 using private key/secret, explicit message-success checks, sanitized failures and disabled click/open tracking. Approved lifetimes are now 1 hour for single-use links and 8 hours for sessions/cookies. Local 177 unit/adapter tests, 2 HTTPS admin browser tests, lint and build pass. Actual Mailjet delivery and Worker configuration remain untested. Owner reports Mailjet Free allows 200/day and 6,000/month; the project cap is now 90/day (at most 2,790/month with 31 days). Other account traffic shares the provider quota.
-- **Review/CI follow-up:** Feature commit `7fa6133` passed every GitHub check: https://github.com/BadBagel47/bricks/actions/runs/42482035336 . Earlier CI failures were traced to the mobile admin overflow assertion; constrained form minimum widths and heading wrapping resolved it. The focused code review found no additional access/quota issue. Private provider setup and live smoke tests remain outstanding; no production deployment occurred. Next recommended model: GPT-6.1 Sol Medium.
-- Owner approved implementation of the complete operating-control plan, with the correction that **public singleplayer and multiplayer initialize On**. Independent on/off/timers, private email-link administration, administrator play while closed, and shared timed private multiplayer links are implemented. Existing ready matches may finish; new starts/rematches require current access. The tentative sender domain remains `l8p.one`.
-- Added the admin UI, Cloudflare Worker/D1 bindings, Resend mail adapter, private setup CLI and conditional Firebase publication. The API verifies anonymous identities rather than trusting submitted UIDs. Private links carry a 256-bit fragment key; codes alone fail, including when public access is On. Concurrent redemption elects one host and never overwrites an existing room. Cookie/session revocation is mirrored before logout, and forged cookies create no mirror records.
-- Firebase rules gate new rooms/joins/reopens/countdown/ready transitions, preserving admitted-game, recovery, result and disconnect cleanup paths. Publisher privilege is constrained by a tested auth override and per-path rules, not a root grant. The underlying service-account key remains privileged and requires private setup. Bootstrap explicitly opens both modes before the new rules are installed; it never resets existing settings.
-- Public solo checks once per new round, with no Firebase Auth or persistent socket. Multiplayer listens to the tiny policy on its existing connection. Login attempts have durable recipient/source limits and a shared default cap of 20 mail attempts/day/project. Scheduled retention is bounded; code/private markers and UID memberships remain stored and must be measured. Future P2P evaluation is recorded in the quota backlog only.
-- **Observed local checks:** 177 unit/adapter tests passed, including real local workerd D1 schema/concurrency, OAuth signatures, identity/mail contracts and CSRF/session controls. Existing gameplay Chromium suite: 15 passed. New HTTPS admin/solo Chromium suite: 2 passed. The complete Firebase suite passed 51 tests with zero failures/skips, including actual REST auth override enforcement and a two-browser private-room game with continued snapshots after revocation. Worker deploy dry-run passed; the schema also executed successfully through local Wrangler D1. The 15 gameplay and 2 admin/solo browser checks also passed with a configured operating-origin build; fixtures do not contact a live backend. No skipped checks are hidden in these counts.
-- Official Cloudflare D1 numeric allowances and the Resend API/domain-verification requirement were verified from their GitHub sources. Resend's current free allowance still needs account verification. Exact sources, limitations, reuse guidance and the private rollout sequence are in `docs/OPERATING_CONTROLS.md` and `docs/OPERATING_SETUP.md`.
-- **Not performed:** actual mail sending, DNS edits, production D1/Worker provisioning, IAM permission changes, Firebase rule publication or a new Pages deployment. The runtime has no bound credentials/outbound identities. Private setup/live smoke tests remain required before publishing. Current public game stays at `09a7cb6`.
+- Worker application `498c293` passed complete CI, deployment and live admin,
+  game-entry and policy checks:
+  https://github.com/BadBagel47/bricks/actions/runs/42533876102 .
+  Preview: https://bricks-operating.l8p1.workers.dev/admin/ .
+- Owner confirmed first real Mailjet login reaches settings after browser-only
+  subject generation, D1 insertion and the Firebase allowlist entry. Owner has
+  no local Node and chose the local HTML helper. Private values were not shared.
+- Owner provisioned the EU D1 database, DB binding, Worker secrets, GitHub
+  deployment token, verified sender `system@trythis.one`, Firebase publisher
+  key, initial On/On policy and operating-aware rules. Actual live policy reads
+  pass. Six D1 tables were confirmed in Console; detailed remote schema/index
+  verification and restored Google policy readback remain pending.
+- The legacy key-creation constraint required a temporary Bricks-project
+  exception; owner reports restoring inheritance. The managed constraint alone
+  was not the blocker. See setup guide for the exact procedure and scope.
+- Live access failures were repaired with manual redirect handling and unbound
+  native fetch calls, tested in actual workerd. Private invitation Not found
+  was repaired by avoiding Static Assets' index.html canonical redirect.
+- Latest observed local checks: 181 unit/runtime/adapter tests, lint/build pass.
+  Complete feature CI passed gameplay, operating/helper and Firebase suites;
+  recorded suite counts: 15, 3 and 51 respectively. Emulator private play and
+  post-revocation snapshots passed; an owner-completed production private match
+  has not yet been confirmed.
+- Next: fresh invitation in two browsers, start a match, then production
+  closure/draining/session/revocation checks before Pages rollout. Do not reset
+  existing policy or remove private-room protection.
+- Mailjet replaced the earlier Resend plan. Links last 1 hour, sessions 8 hours;
+  cap 90 attempts/project/day. Reported provider allowance 200/day, 6,000/month
+  is shared with other projects. Ordinary quota protection remains a priority.
+- Architecture/reuse: [OPERATING_CONTROLS.md](docs/OPERATING_CONTROLS.md).
+  Private provisioning and staged rollout: [OPERATING_SETUP.md](docs/OPERATING_SETUP.md).
+  Other projects need distinct secrets/database/origins and their own adapter and
+  authorization tests. No paid plan or later Phase 4 work is authorized.
+- Recommended model: GPT-6.1 Sol Medium; Terra High for difficult access/rules
+  issues, Luna for copy-only tasks.
+
+## Historical milestone record
+
+The sections below preserve observations at their original checkpoint. Statements
+such as “pending”, old test counts or “not deployed” are historical; use the current
+checkpoint above and HANDOVER.md for present status.
 
 ## Milestone 3.11
 - Owner confirmed rules published. Main `da4009e` passed full CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42403753502. App code matches tested `0ddf8c4`.

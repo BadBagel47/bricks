@@ -1,7 +1,9 @@
 # Reusable access-control core
 
-Independent of React, Firebase, Cloudflare and the mail provider. Staged on
-`feature/operating-controls`; production setup and review remain outstanding.
+Independent of React, Firebase, Cloudflare and the mail provider. Used by the
+deployed Bricks Worker preview on `feature/operating-controls`; public Pages
+activation and remaining production checks are tracked in
+[HANDOVER.md](../../HANDOVER.md).
 
 - `magic-links.ts`: private project-scoped HMAC subjects, allowlist lookup,
   256-bit one-use tokens and 1-hour expiry.

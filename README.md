@@ -1,6 +1,13 @@
 # Bricks
 
-A portable React + TypeScript + Vite falling-block puzzle game, developed in controlled milestones. Current scope: **Milestone 1.7 — Phase 1 integration and quality review**. The playable single-player build includes keyboard/touch/gamepad input, audio, saved settings and local highscores. See `docs/PHASE1_REVIEW.md` for verification and remaining device checks.
+A portable React + TypeScript + Vite falling-block puzzle game with single-player,
+multiplayer Score Duel/Battle, results, rematches and bounded recovery.
+
+**Continuing development? Start with [HANDOVER.md](HANDOVER.md).** Current operating
+controls work is on `feature/operating-controls`, including the live Worker preview;
+it is not merged to main. [PROGRESS.md](PROGRESS.md) records verified checkpoints,
+and [OPERATING_SETUP.md](docs/OPERATING_SETUP.md) explains private setup and reuse.
+Public Pages operating-control activation remains pending.
 
 ## Development
 

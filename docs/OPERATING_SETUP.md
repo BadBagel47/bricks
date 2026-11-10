@@ -1,9 +1,11 @@
 # Operating controls: private deployment setup
 
-This is a staged implementation, not an already provisioned service. Keep the
-existing Pages deployment running while completing these steps. No billing
-upgrade or paid plan is authorized. The owner selected `system@trythis.one` and reports Mailjet DNS verification
-complete through Cloudflare; actual delivery still requires a live test.
+The Bricks Worker preview is provisioned and deployed; the owner confirmed real
+Mailjet login reaches settings. Public Pages operating-control activation remains
+pending. Read [HANDOVER.md](../HANDOVER.md) for current resources, completed steps
+and outstanding live checks before using this reusable runbook. Do not repeat
+initialization on an existing installation. Keep public Pages running during
+verification. No billing upgrade or paid plan is authorized.
 
 ## Accounts and configuration
 
@@ -121,7 +123,8 @@ Never share helper input screenshots, secret values or allowlist identifiers.
 The automated browser test validates the helper and exact server HMAC against
 fake inputs on the permitted local HTTPS fixture, with no requests during
 generation and cleared fields on reload. Managed Chromium blocks direct file
-navigation here; the file URL opening itself still needs the owner's local check.
+navigation here. The owner subsequently completed the local helper route and
+confirmed real login; this runtime did not independently inspect local file opening.
 
 Use Node 24 and a local file named `.operating.local`, which is ignored by Git.
 Restrict its permissions to your user. Supply these fields privately:
@@ -204,8 +207,9 @@ server-side; ordinary variables (including MAIL_FROM) are declared in Wrangler.
    Worker secret may use a `VITE_` prefix. Verify the actual Firebase/API-key
    configuration allows the Worker game origin and the server-side identity
    lookup; do not assume the existing Pages hostname settings cover both.
-2. Run `init` against the intended database. Read back both modes and confirm
-   they are On. Do not install admission rules against a missing policy.
+2. For a new installation, run `init` against the intended database. Read back
+   both modes and confirm they are On. For an existing installation, inspect its
+   policy without resetting it. Do not install admission rules against missing policy.
 3. Publish the checked `firebase/database.rules.json`. Existing public clients
    remain usable because the policy is explicitly open; ongoing ready matches
    retain their existing participant-scoped permissions.
@@ -214,8 +218,9 @@ server-side; ordinary variables (including MAIL_FROM) are declared in Wrangler.
    API automatically. Do not distribute private invites to the older Pages build.
 5. Run the private allow command for the intended administrators. Verify actual
    mail receipt with the owner, one-use confirmation, logout/revocation, D1
-   behavior and real Firebase publication. This environment has not performed
-   those live tests or sent mail.
+   behavior and real Firebase publication. For Bricks, owner-confirmed receipt
+   and settings-page login and GitHub-verified policy reads are complete;
+   the remaining live checks are listed in HANDOVER.md.
 6. Set GitHub Actions repository variable `VITE_OPERATING_ORIGIN` to the Worker
    HTTPS origin (no trailing slash). Merge/publish the reviewed client only after
    those checks pass. Once Pages has deployed, set Worker `GAME_URL` back to

@@ -12,7 +12,10 @@ GitHub Pages remains the public game. A Cloudflare Worker serves the admin UI,
 its first-party `/play/` game and small APIs; D1 stores HMAC administrator subjects,
 hashed one-use email links, short sessions and hashed private invitation keys.
 No allowlist email or credential belongs in Git, Vite code or public responses.
-Mailjet is the isolated mail adapter; provider/domain configuration is still needed.
+Mailjet is the isolated mail adapter. The owner configured its sender/domain and
+confirmed real login reaches settings in the deployed Worker preview. Public
+Pages activation and remaining production checks are tracked in
+[HANDOVER.md](../HANDOVER.md).
 
 - Admin email links last 1 hour and are consumed by an explicit confirmation
   POST, never GET. Sessions last 8 hours, use Secure/HttpOnly/SameSite cookies,
@@ -137,5 +140,8 @@ project cap is 90/day, shared across administrators:
 - https://github.com/mailjet/mailjet-apiv3-nodejs
 
 Direct provider documentation sites remain proxy-blocked. The owner reports
-Mailjet DNS verification complete for `system@trythis.one`. No live mail test,
-remote D1 provisioning, real IAM grant or backend deployment has been performed here.
+Mailjet DNS verification complete for `system@trythis.one`; the owner subsequently
+provisioned D1 and publisher credentials and confirmed real mail login. GitHub CI
+deployed the Worker and verified public policy reads. This runtime could not
+directly inspect those production providers; outstanding verification is listed
+in [HANDOVER.md](../HANDOVER.md).
