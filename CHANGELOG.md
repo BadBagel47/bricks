@@ -24,6 +24,10 @@ not yet on the public GitHub Pages site.
 - F-005: multiplayer sounds: countdown tick/go, garbage sent/incoming/rise,
   victory and defeat.
 
+### Documentation
+- Phase 4 deployment plan for bricks.trythis.one merged from a parallel session
+  (`docs/DEPLOYMENT.md`); owner steps tracked as T-003.
+
 ### Fixed
 - B-003: the opponent board updates about five times per second instead of
   twice, so it lags less and moves more evenly (client and rules: 200 ms).

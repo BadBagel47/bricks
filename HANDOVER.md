@@ -17,6 +17,28 @@ guides. Owner instructions and the specification take precedence.
 | Why things are built this way | `docs/adr/` |
 | Subsystems | `docs/ENGINE.md`, `docs/AUDIO.md`, `docs/INPUT.md`, `docs/MULTIPLAYER.md`, `docs/OPERATING_CONTROLS.md`, `docs/OPERATING_SETUP.md`, `docs/FIREBASE_QUOTA.md`, `docs/FIREBASE_ACCESS.md` |
 
+## Phase 4 public deployment (parallel track)
+
+- **Phase 4:** Public deployment (authorized by the owner 2026-11-10).
+- **Target:** https://bricks.trythis.one via GitHub Pages custom domain (approved
+  deviation from Firebase Hosting, "for now"). Firebase stays the auth/database
+  backend. Setup, origin-change effects, checklist and maintenance:
+  `docs/DEPLOYMENT.md`.
+- **Current live build:** 3.12 at https://badbagel47.github.io/bricks/?v=09a7cb6 .
+  No application code changed for Phase 4; the domain is a repository setting.
+- **Waiting on owner:** DNS CNAME `bricks → badbagel47.github.io`; GitHub
+  Settings → Pages custom domain + Enforce HTTPS; Firebase Authorized domains;
+  API-key referrer list if restricted. Then a consolidated live two-device
+  playtest against the checklist (this environment cannot reach the live site).
+- **Open decisions from 3.13:** trusted competition, abuse resistance and
+  retention (`docs/PHASE3_REVIEW.md`) remain unsolved; do not represent them as solved.
+- **Next model:** GPT-6.1 Sol Medium for Phase 4 verification and any quota/abuse
+  mitigation; Terra High only for server-authoritative competition; Luna for
+  routine UI/doc changes.
+- Relation to this branch: Phase 4 publishes `main` (3.12) on the custom
+  domain. The visual refresh and operating controls reach the public site only
+  through T-002. Owner steps are tracked as T-003 in `docs/BACKLOG.md`.
+
 ## Product direction (goals)
 
 - A polished, NES-inspired falling-block game for casual play with friends, on
