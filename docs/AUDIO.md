@@ -8,4 +8,4 @@ Short synthesized effects respond to rotations, Hold, piece locking, Hard Drop, 
 
 Automated coverage checks the audio defaults and volume validation, original melody shape, danger threshold, tempo change, octave shift, and audio playback lifecycle (pause/resume, rapid replay, menu exit, Game Over completion and volume changes). Chromium integration tests also exercise real Web Audio initialization, pause/resume and saved mute settings. Audible output still needs a listening check on the published site.
 
-Proposed replacement themes, sorted into groups A, B and C, are stored un-integrated in [`docs/music/`](music/README.md) at the owner's request.
+Proposed replacement themes and a shared test player are stored un-integrated in [`docs/music/`](music/README.md) at the owner's request.

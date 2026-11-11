@@ -15,4 +15,4 @@
 - Keep interface copy direct and functional. Retain the approved “Make room for one more.” headline; avoid decorative subheadings, slogans, menu descriptions, and footers. Keep necessary instructions, validation, and availability status.
 
 - Owner preference: include GPT-6.1 Terra alongside Sol and Luna when recommending a model and reasoning level at each checkpoint.
-- Owner rule 2026-11-11: new music must keep a stable BPM; express danger urgency through intensity, not tempo. Music proposals live in `docs/music/` (groups A/B/C).
+- Owner rule 2026-11-11: new music must keep a stable BPM; express danger urgency through intensity, not tempo. Music proposals and the shared test player live in `docs/music/`.
