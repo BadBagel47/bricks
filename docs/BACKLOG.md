@@ -32,6 +32,7 @@ records released changes.
 | B-003 | Bug | Opponent board lags and moves unevenly | P2 | Done (2026-11-11) | Standard |
 | T-001 | Task | Owner check of a real private two-player match in the Worker preview | P1 | Open | — (owner) |
 | T-002 | Task | Controlled public Pages activation of operating controls | P2 | Open | Strong |
+| T-003 | Task | Phase 4: publish at bricks.trythis.one (owner DNS, Pages custom domain, Firebase authorized domains); see `docs/DEPLOYMENT.md` | P2 | Open (owner steps) | — (owner) |
 | F-006 | Feature | More music tracks | P3 | Idea | Standard |
 | F-007 | Feature | Extract the multiplayer lobby into a reusable module | P3 | Idea | Strong |
 | F-008 | Feature | Stones: Bomberman-like game for 1–2 players | P3 | Idea | Strong |

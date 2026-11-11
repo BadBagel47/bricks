@@ -3,6 +3,9 @@
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.13 — Integration and security review
 - **Status:** Phase 3.13 review is documented in `docs/PHASE3_REVIEW.md`. Public gameplay remains at `09a7cb6`; the separately approved operating controls are live in a Worker preview on `feature/operating-controls`. See current checkpoint below and `HANDOVER.md` for verified setup and remaining live checks.
+- **Phase 4 (parallel):** Public deployment (authorized by the owner 2026-11-10)
+- **Target:** https://bricks.trythis.one on GitHub Pages with a custom domain (owner-approved deviation from Firebase Hosting for now). Firebase remains the backend. See `docs/DEPLOYMENT.md`.
+- **Phase 4 status:** Documentation and maintenance instructions added; no application code changed. Waiting for owner DNS, GitHub Pages custom-domain/HTTPS, Firebase Authorized domains (and API-key referrer, if restricted). Live verification checklist not yet observed; this environment cannot reach the site.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 ## B-003 — faster opponent board — 2026-11-11
@@ -261,6 +264,7 @@ checkpoint above and HANDOVER.md for present status.
 - The graphical style does not need to be finalized before gameplay integration.
 
 ## Next recommended task
+- Phase 4: owner completes the domain setup in `docs/DEPLOYMENT.md`, then a consolidated live two-device playtest against its checklist; record observed results here.
 - Review the findings in `docs/PHASE3_REVIEW.md` and decide the intended level of public access, abuse resistance and trusted competition before Phase 4. Continue consolidated manual playtesting.
 - Recommended model: GPT-6.1 Sol Medium for focused quota and abuse mitigation planning; GPT-6.1 Terra High for server-authoritative competitive architecture.
 
