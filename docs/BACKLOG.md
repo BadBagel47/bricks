@@ -29,7 +29,7 @@ records released changes.
 | F-005 | Feature | Wire multiplayer sound effects | P1 | Done (run 2, 2026-11-10) | Standard |
 | B-001 | Bug | Admin offers Revoke for expired invitations | P1 | Done (run 1, 2026-11-10) | Standard |
 | B-002 | Bug | Pieces start falling at slightly different moments on the two devices in a match | P2 | Done (2026-11-10) | Strong |
-| B-003 | Bug | Opponent board lags and moves unevenly | P2 | Staged; waits for owner rule publication | Standard |
+| B-003 | Bug | Opponent board lags and moves unevenly | P2 | Done (2026-11-11) | Standard |
 | T-001 | Task | Owner check of a real private two-player match in the Worker preview | P1 | Open | — (owner) |
 | T-002 | Task | Controlled public Pages activation of operating controls | P2 | Open | Strong |
 | F-006 | Feature | More music tracks | P3 | Idea | Standard |
