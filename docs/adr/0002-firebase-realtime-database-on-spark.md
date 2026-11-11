@@ -12,7 +12,8 @@ be shared.
 
 ## Decision
 Use Firebase Anonymous Auth and Realtime Database (`europe-west1`) on the Spark
-plan. Share changed-only board snapshots at most twice per second per player,
+plan. Share changed-only board snapshots at most five times per second per player
+(200 ms; raised from twice per second on 2026-11-11, B-003, for a smoother opponent view),
 with no heartbeats. Security rules enforce membership, schema and rates.
 
 ## Consequences
