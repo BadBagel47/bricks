@@ -4,7 +4,7 @@ import { battleHighscores, duelHighscores, readResults, RESULT_STORAGE_KEY, RESU
 import type { MatchResult } from './results.ts'
 import './results.css'
 
-export function MultiplayerHighscores({ mode }: { mode: MatchResult['mode'] }) {
+export function MultiplayerHighscores({ mode, onPlay }: { mode: MatchResult['mode']; onPlay?: () => void }) {
   const [matches, setMatches] = useState<MatchResult[]>([])
   const [error, setError] = useState('')
   useEffect(() => {
@@ -15,8 +15,8 @@ export function MultiplayerHighscores({ mode }: { mode: MatchResult['mode'] }) {
   }, [])
   const duel = duelHighscores(matches), battle = battleHighscores(matches)
   return <section aria-label={mode === 'battle' ? 'Battle highscores' : 'Score Duel highscores'}>
-    <h2>{mode === 'battle' ? 'Battle' : 'Score Duel'} highscores</h2>
-    {error ? <p role="alert">{error}</p> : (mode === 'battle' ? battle : duel).length === 0 ? <p>No scores yet.</p> : <div className="score-table-wrap">
+    {!onPlay && <h2>{mode === 'battle' ? 'Battle' : 'Score Duel'} highscores</h2>}
+    {error ? <p role="alert">{error}</p> : (mode === 'battle' ? battle : duel).length === 0 ? <div className="empty-scores"><p>No scores yet.</p>{onPlay && <button className="button button-primary" onClick={onPlay}>Play 2 Players</button>}</div> : <div className="score-table-wrap">
       {mode === 'score-duel' ? <table className="score-table" aria-label="Score Duel highscores"><thead><tr><th>#</th><th>Player</th><th>Score</th><th>Level</th><th>Lines</th><th>Result</th></tr></thead><tbody>{duel.map((p, i) => <tr key={p.id}><td>{i + 1}</td><td>{p.name}</td><td>{p.score.toLocaleString()}</td><td>{p.level}</td><td>{p.lines}</td><td>{p.outcome}</td></tr>)}</tbody></table>
         : <><table className="score-table" aria-label="Battle highscores"><thead><tr><th>#</th><th>Player</th><th>Wins</th><th>Played</th><th>Win %</th><th>Points</th><th>Lines</th><th>Rows sent</th></tr></thead><tbody>{battle.map((p, i) => <tr key={p.uid}><td>{i + 1}</td><td>{p.name}</td><td>{p.wins}</td><td>{p.played}</td><td>{(p.wins / p.played * 100).toFixed(1)}%</td><td>{p.score.toLocaleString()}</td><td>{p.lines}</td><td>{p.sent}</td></tr>)}</tbody></table><p className="ranking-note">Ranked by wins, then win percentage, total points and player ID.</p></>}
     </div>}

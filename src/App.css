@@ -269,3 +269,27 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
 .room-copy>*{white-space:nowrap;padding:0 12px;font-size:16px}
 .match-settings-editor .room-actions{margin:6px 0 0;align-items:stretch}
 .match-settings-editor .room-actions>*{min-height:52px;margin:0}
+
+/* Subpage top bar: back icon + title (F-013) */
+.subpage-bar{justify-content:flex-start;gap:10px;margin-bottom:8px}
+.icon-back{width:44px;height:44px;flex:none;display:inline-grid;place-items:center;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--soft);cursor:pointer}
+.icon-back svg{width:22px;height:22px}
+.icon-back:hover:not(:disabled){border-color:var(--accent);color:var(--text)}
+.icon-back:disabled{opacity:.5;cursor:default}
+.subpage-title{margin:0;font-size:clamp(22px,4vw,30px)}
+.settings-card>:first-child{margin-top:0}
+
+/* High Scores tabs (F-012) */
+.score-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;margin-bottom:16px;border:1px solid var(--line-soft);border-radius:14px;background:var(--panel)}
+.score-tabs button{min-height:44px;border:0;border-radius:10px;background:transparent;color:var(--muted);font:600 15px var(--display);cursor:pointer}
+.score-tabs button.active{background:var(--accent);color:#10131F}
+.score-tabs button:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.empty-scores{display:grid;justify-items:start;gap:14px;padding:8px 0}
+.empty-scores p{margin:0}
+.score-table tbody tr:nth-child(-n+3) td:first-child{color:var(--accent);font-weight:800}
+
+/* Main menu (F-014) */
+.player-name-button{min-height:44px;padding:0 4px;border:0;background:transparent;cursor:pointer}
+.player-name-button:hover strong{text-decoration:underline}
+.mode-best{display:block;margin-top:4px;color:var(--muted);font:600 14px var(--display);font-variant-numeric:tabular-nums}
+.subpage-bar+.settings-card{margin:0 auto;padding:24px 0 56px}

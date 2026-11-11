@@ -43,7 +43,7 @@ test('unconfigured multiplayer preserves an invite through onboarding and keeps 
     await page.getByRole('status').filter({ hasText: 'Multiplayer is not connected yet.' }).waitFor()
     assert.equal(await page.getByLabel('Room code', { exact: true }).inputValue(), 'BRK724')
     assert.equal(await page.getByRole('button', { name: 'Host Game', exact: true }).isDisabled(), true)
-    await page.getByRole('button', { name: '← Back to menu', exact: true }).click()
+    await page.getByRole('button', { name: 'Back to menu', exact: true }).click()
     assert.equal(new URL(page.url()).searchParams.has('room'), false)
     assert.equal(await page.getByRole('button', { name: '1 Player', exact: true }).isVisible(), true)
   } finally { await context.close() }

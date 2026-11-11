@@ -1,3 +1,4 @@
+import { SubpageBar } from '../ui/SubpageBar.tsx'
 import { MatchResults } from './ResultViews.tsx'
 import { recordResult } from './results.ts'
 import type { MatchResult } from './results.ts'
@@ -8,7 +9,7 @@ import type { Connections } from './match-start.ts'
 import { WaitingMessages } from './waiting-messages.ts'
 import MatchSettingsPanel from './MatchSettingsPanel.tsx'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties } from 'react'
 import { readFirebaseConfig } from './config.ts'
 import { MultiplayerError, playerFacingError } from './errors.ts'
 import { inviteURL, previousRoomCode } from './room-model.ts'
@@ -28,7 +29,7 @@ function setInvite(code: string | null) {
   history.replaceState(null, '', url)
 }
 
-export default function MultiplayerScreen({ username, branding, onBack, preferences }: { preferences: MultiplayerPreferences; username: string; branding: ReactNode; onBack: () => void }) {
+export default function MultiplayerScreen({ username, onBack, preferences }: { preferences: MultiplayerPreferences; username: string; onBack: () => void }) {
   const [playing, setPlaying] = useState(false)
   const [completed, setCompleted] = useState<{ result: MatchResult; uid: string } | null>(null)
   const [lastCompletedId, setLastCompletedId] = useState<string | null>(null)
@@ -220,7 +221,7 @@ export default function MultiplayerScreen({ username, branding, onBack, preferen
   const statusClass = (uid: string) => connected === false ? 'unknown' : presence[uid] ? 'online' : 'offline'
   const isHost = joined?.uid === joined?.room.hostUid
   return <><main className="shell" inert={playing || completed !== null} onPointerDownCapture={() => audio.unlock()} onKeyDownCapture={() => audio.unlock()}>
-    <header className="topbar">{branding}<button className="back-button" disabled={busy} onClick={() => void back()}>← Back to menu</button></header>
+    <SubpageBar title="2 Players" heading={false} disabled={busy} onBack={() => void back()} />
     <section className="settings-card multiplayer-card" aria-busy={busy}>
       {joined ? <div className="room-code-card">
         <span className="room-code-label" aria-hidden="true">Room code</span>

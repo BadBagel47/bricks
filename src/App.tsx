@@ -1,3 +1,4 @@
+import { SubpageBar } from './ui/SubpageBar.tsx'
 import { MultiplayerHighscores } from './multiplayer/ResultViews.tsx'
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
@@ -24,6 +25,7 @@ const GAMEPAD_CONTROLS_KEY = 'bricks.gamepad-controls.v1'
 const PERSONAL_KEY = 'bricks.personal.v1'
 const SINGLE_PLAYER_KEY = 'bricks.single-player.v1'
 const HIGHSCORES_KEY = 'bricks.highscores.v1'
+const SCORE_TABS = [{ id: 'single', label: '1 Player' }, { id: 'score-duel', label: 'Score Duel' }, { id: 'battle', label: 'Battle' }] as const
 type View = 'welcome' | 'menu' | 'settings' | 'highScores' | 'game' | 'multiplayer'
 const MultiplayerScreen = lazy(() => import('./multiplayer/MultiplayerScreen.tsx'))
 
@@ -84,6 +86,8 @@ function App() {
   const bindingsRef = useRef(bindings)
   const gamepadBindingsRef = useRef(gamepadBindings)
   const controllerStatusRef = useRef(controllerStatus)
+  const [scoreTab, setScoreTab] = useState<(typeof SCORE_TABS)[number]['id']>('single')
+  const bestScore = highscores.length ? Math.max(...highscores.map(record => record.score)) : null
   const highscoresRef = useRef(highscores)
   const usernameRef = useRef(username)
   const runIdRef = useRef('')
@@ -418,12 +422,11 @@ function App() {
     </section>
   </main>
 
-  if (view === 'multiplayer') return <Suspense fallback={<main className="shell"><p role="status">Loading…</p></main>}><MultiplayerScreen preferences={{ personal, bindings, gamepadBindings }} username={username} branding={<Brand compact />} onBack={() => setView('menu')} /></Suspense>
+  if (view === 'multiplayer') return <Suspense fallback={<main className="shell"><p role="status">Loading…</p></main>}><MultiplayerScreen preferences={{ personal, bindings, gamepadBindings }} username={username} onBack={() => setView('menu')} /></Suspense>
 
   if (view === 'settings') return <main className="shell">
-    <header className="topbar"><Brand compact /><button className="back-button" onClick={() => { setCapture(null); setGamepadCapture(null); setView('menu') }}>← Back to menu</button></header>
+    <SubpageBar title="Settings" onBack={() => { setCapture(null); setGamepadCapture(null); setView('menu') }} />
     <section className="settings-card">
-      <h1 tabIndex={-1}>Settings</h1>
       <h2 className="settings-heading">Personal</h2>
       <form className="name-form" onSubmit={saveUsername}>
         <label htmlFor="username">Player name</label>
@@ -480,13 +483,23 @@ function App() {
   </main>
 
   if (view === 'highScores') return <main className="shell">
-    <header className="topbar"><Brand compact /><button className="back-button" onClick={() => { setCapture(null); setGamepadCapture(null); setView('menu') }}>← Back to menu</button></header>
+    <SubpageBar title="High Scores" onBack={() => setView('menu')} />
     <section className="settings-card score-list-page">
-      <h1 tabIndex={-1}>High Scores</h1>
-      <h2>1 Player</h2>
-      {highscores.length === 0 ? <p className="empty-scores">No scores yet.</p> : <HighscoreTable records={highscores} />}
-      <MultiplayerHighscores mode="score-duel" />
-      <MultiplayerHighscores mode="battle" />
+      <div className="score-tabs" role="tablist" aria-label="High Scores">
+        {SCORE_TABS.map(tab => <button key={tab.id} role="tab" id={`score-tab-${tab.id}`} aria-selected={scoreTab === tab.id} aria-controls="score-panel" tabIndex={scoreTab === tab.id ? 0 : -1} className={scoreTab === tab.id ? 'active' : ''} onClick={() => setScoreTab(tab.id)} onKeyDown={event => {
+          if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return
+          event.preventDefault()
+          const next = SCORE_TABS[(SCORE_TABS.findIndex(t => t.id === tab.id) + (event.key === 'ArrowRight' ? 1 : SCORE_TABS.length - 1)) % SCORE_TABS.length]
+          setScoreTab(next.id)
+          document.getElementById(`score-tab-${next.id}`)?.focus()
+        }}>{tab.label}</button>)}
+      </div>
+      <div id="score-panel" role="tabpanel" aria-labelledby={`score-tab-${scoreTab}`}>
+        {scoreTab === 'single' ? (highscores.length === 0
+          ? <div className="empty-scores"><p>No scores yet.</p><button className="button button-primary" onClick={beginGame}>Play 1 Player</button></div>
+          : <HighscoreTable records={highscores} />)
+          : <MultiplayerHighscores mode={scoreTab} onPlay={() => setView('multiplayer')} />}
+      </div>
     </section>
   </main>
 
@@ -512,11 +525,11 @@ function App() {
   </>
 
   return <main className="shell menu-shell">
-    <header className="topbar menu-topbar"><span className="player-name">Playing as <strong>{username}</strong></span><button aria-label="Open personal settings" className="settings-button" onClick={() => { setDraft(username); setView('settings') }}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 17h16" /><circle cx="9" cy="7" r="2.2" fill="currentColor" /><circle cx="15" cy="17" r="2.2" fill="currentColor" /></svg><span>Settings</span></button></header>
+    <header className="topbar menu-topbar"><button className="player-name player-name-button" aria-label="Change player name" onClick={() => { setDraft(username); setView('settings') }}>Playing as <strong>{username}</strong></button><button aria-label="Open personal settings" className="settings-button" onClick={() => { setDraft(username); setView('settings') }}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 17h16" /><circle cx="9" cy="7" r="2.2" fill="currentColor" /><circle cx="15" cy="17" r="2.2" fill="currentColor" /></svg><span>Settings</span></button></header>
     <section className="menu-content">
       <div className="hero-copy"><Brand hero /><h1 tabIndex={-1}>Make room for one more.</h1></div>
       <div className="menu-actions" aria-label="Main menu">
-        <button className="mode-card single-player" onClick={beginGame}><span className="mode-copy"><strong>1 Player</strong></span></button>
+        <button className="mode-card single-player" aria-label="1 Player" aria-describedby={bestScore === null ? undefined : 'best-score'} onClick={beginGame}><span className="mode-copy"><strong>1 Player</strong>{bestScore !== null && <span className="mode-best" id="best-score">Best {bestScore.toLocaleString()}</span>}</span></button>
         <button className="mode-card" onClick={() => setView('multiplayer')}><span className="mode-copy"><strong>2 Players</strong></span></button>
         <button className="secondary-card" onClick={() => setView('highScores')}>High Scores</button>
         {notice && <p className="notice menu-notice" role="status">{notice}</p>}
