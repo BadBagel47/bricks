@@ -23,6 +23,8 @@
 
 - Owner approved 2026-11-10: visual refresh per spec section 5.0, new generated audio, optional Ghost piece (off by default) and Classic block colors. Keep player-facing text English.
 
+- Owner rule 2026-11-11: new music must keep a stable BPM; express danger urgency through intensity, not tempo. Music proposals and the shared test player live in `docs/music/`.
+
 ## Owner working rules (all agents)
 
 - **Replies:** Keep replies to the owner fairly short without omitting important information. Leave out technical detail the owner does not need.

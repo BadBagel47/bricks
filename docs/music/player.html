@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bricks – musiktestare</title>
+<style>
+  :root { --bg:#0e1222; --panel:#171d33; --line:#2a3356; --text:#e8ecff; --dim:#8b93b8; --gold:#ffd54f; --red:#ef5350; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.4 system-ui, sans-serif; }
+  main { max-width:1100px; margin:0 auto; padding:16px; }
+  h1 { font:700 22px "Courier New", monospace; letter-spacing:3px; color:var(--gold); margin:4px 0 14px; }
+  h2 { font-size:13px; text-transform:uppercase; letter-spacing:1.5px; color:var(--dim); margin:0 0 10px; }
+  .grid { display:grid; grid-template-columns: 320px 1fr; gap:16px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px; }
+  .rank { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+  .rank li { display:grid; grid-template-columns: 34px 1fr auto; gap:10px; align-items:center; padding:10px;
+             border:2px solid var(--line); border-radius:8px; cursor:pointer; background:#121831; }
+  .rank li.sel { border-color:var(--gold); }
+  .num { font:700 22px "Courier New", monospace; color:var(--gold); text-align:center; }
+  .title { font-weight:700; }
+  .cat { display:inline-block; font-size:12px; padding:1px 8px; border-radius:99px; margin-top:3px; color:#0e1222; font-weight:600; }
+  .meta { font-size:12px; color:var(--dim); margin-top:2px; }
+  .mv { display:flex; flex-direction:column; gap:4px; }
+  .mv button { width:34px; height:28px; padding:0; font-size:14px; background:#232b4d; color:var(--text); border:0; border-radius:5px; cursor:pointer; }
+  .mv button:disabled { opacity:.3; cursor:default; }
+  .controls { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:12px; }
+  .btn { font:600 15px system-ui; padding:10px 18px; border:0; border-radius:8px; cursor:pointer; }
+  #play { background:var(--gold); color:#0e1222; min-width:110px; }
+  #danger { background:#2d3456; color:var(--text); }
+  #danger.on { background:var(--red); }
+  #danger:disabled { opacity:.35; cursor:default; }
+  .ctl { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--dim); }
+  .ctl input { accent-color:var(--gold); width:110px; }
+  .stat { font:13px "Courier New", monospace; color:var(--gold); margin-left:auto; }
+  .info { font-size:13px; color:var(--dim); margin-bottom:10px; }
+  .tl { display:grid; grid-template-columns: 100px 1fr; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  .labels { background:#121831; border-right:1px solid var(--line); }
+  .labels div { display:flex; align-items:center; gap:6px; padding-left:8px; font-size:12px; color:var(--dim); }
+  .lamp { width:8px; height:8px; border-radius:50%; background:#2a3356; flex:none; transition:background .06s; }
+  .scroll { overflow-x:auto; position:relative; }
+  .scroll canvas { display:block; }
+  #overlay { position:absolute; left:0; top:0; pointer-events:none; }
+  .copyrow { margin-top:12px; display:flex; gap:8px; align-items:center; }
+  .copyrow button { background:#232b4d; color:var(--text); }
+  .copied { font-size:12px; color:var(--gold); }
+  .note { font-size:12px; color:var(--dim); margin-top:10px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>BRICKS · MUSIKTESTARE</h1>
+  <div class="grid">
+    <section class="panel">
+      <h2>Rangordning</h2>
+      <ol class="rank" id="rank"></ol>
+      <div class="copyrow">
+        <button class="btn" id="copy">Kopiera rangordning</button>
+        <span class="copied" id="copied"></span>
+      </div>
+      <div class="note">Klicka på ett tema för att välja det. Ordningen sparas i den här webbläsaren.</div>
+    </section>
+    <section class="panel">
+      <h2 id="nowTitle">Spelare</h2>
+      <div class="info" id="nowInfo"></div>
+      <div class="controls">
+        <button class="btn" id="play">▶ Spela</button>
+        <button class="btn" id="danger">Fara: av</button>
+        <label class="ctl" id="levelCtl">Nivå <input id="level" type="range" min="0" max="15" value="0"> <span id="levelVal">0</span></label>
+        <label class="ctl">Volym <input id="vol" type="range" min="0" max="1" step="0.05" value="0.6"></label>
+        <span class="stat" id="stat">– BPM</span>
+      </div>
+      <div class="tl">
+        <div class="labels" id="labels"></div>
+        <div class="scroll" id="scroll">
+          <canvas id="base"></canvas>
+          <canvas id="overlay"></canvas>
+        </div>
+      </div>
+      <div class="note">Tidslinjen visar hela slingan. Lamporna lyser när instrumentet spelar. Med Fara på visas fara-versionen.</div>
+    </section>
+  </div>
+</main>
+<script src="engine.js"></script>
+<script src="themes/original.js"></script>
+<script src="themes/nightshift.js"></script>
+<script src="themes/stackline.js"></script>
+<script src="themes/troika.js"></script>
+<script>
+(() => {
+  const player = BricksMusic.createPlayer();
+  const themes = player.themes;
+  const CAT_COLORS = ['#b388ff', '#4fc3f7', '#ff8a65', '#81c784', '#f06292', '#ffd54f'];
+  const catColor = {};
+  [...new Set(themes.map((t) => t.category))].forEach((c, i) => (catColor[c] = CAT_COLORS[i % CAT_COLORS.length]));
+
+  // ---------- ranking ----------
+  const KEY = 'bricks-music-ranking';
+  let order = themes.map((t) => t.id);
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
+    const known = saved.filter((id) => order.includes(id));
+    order = [...known, ...order.filter((id) => !known.includes(id))];
+  } catch (e) { /* storage unavailable */ }
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(order)); } catch (e) {} };
+  const byId = (id) => themes.find((t) => t.id === id);
+  let selected = order[0];
+
+  const rankEl = document.getElementById('rank');
+  function renderRank() {
+    rankEl.innerHTML = '';
+    order.forEach((id, i) => {
+      const t = byId(id);
+      const li = document.createElement('li');
+      if (id === selected) li.className = 'sel';
+      li.innerHTML = `<div class="num">${i + 1}</div>
+        <div><div class="title"></div><span class="cat"></span><div class="meta"></div></div>
+        <div class="mv"><button aria-label="Flytta upp">▲</button><button aria-label="Flytta ner">▼</button></div>`;
+      li.querySelector('.title').textContent = t.title;
+      const cat = li.querySelector('.cat'); cat.textContent = t.category; cat.style.background = catColor[t.category];
+      li.querySelector('.meta').textContent = t.tempoLabel;
+      const [up, down] = li.querySelectorAll('.mv button');
+      up.disabled = i === 0; down.disabled = i === order.length - 1;
+      up.onclick = (e) => { e.stopPropagation(); move(i, -1); };
+      down.onclick = (e) => { e.stopPropagation(); move(i, 1); };
+      li.onclick = () => select(id);
+      rankEl.appendChild(li);
+    });
+  }
+  function move(i, d) {
+    const j = i + d;
+    [order[i], order[j]] = [order[j], order[i]];
+    save(); renderRank();
+  }
+  document.getElementById('copy').onclick = async () => {
+    const text = 'Rangordning av Bricks-musik:\n' + order.map((id, i) => {
+      const t = byId(id); return `${i + 1}. ${t.title} (${t.category})`;
+    }).join('\n');
+    const msg = document.getElementById('copied');
+    try { await navigator.clipboard.writeText(text); msg.textContent = 'Kopierat!'; }
+    catch (e) { msg.textContent = 'Kunde inte kopiera'; }
+    setTimeout(() => (msg.textContent = ''), 2000);
+  };
+
+  // ---------- timeline ----------
+  let PX = 6; // px per 16th step (wider for short loops)
+  const ROWS = [
+    { key: 'section', label: 'Del', h: 20 },
+    { key: 'chord', label: 'Ackord', h: 18 },
+    { key: 'lead', label: 'Melodi', h: 72, color: '#ffd54f' },
+    { key: 'bass', label: 'Bas', h: 44, color: '#4fc3f7' },
+    { key: 'arp', label: 'Arpeggio', h: 36, color: '#b388ff' },
+    { key: 'kick', label: 'Bastrumma', h: 16, color: '#ff8a65' },
+    { key: 'snare', label: 'Virvel', h: 16, color: '#f06292' },
+    { key: 'hat', label: 'Hi-hat', h: 16, color: '#81c784' },
+  ];
+  let y = 0; for (const r of ROWS) { r.y = y; y += r.h; }
+  const H = y;
+  const labelsEl = document.getElementById('labels');
+  const lamps = {};
+  for (const r of ROWS) {
+    const d = document.createElement('div'); d.style.height = r.h + 'px';
+    if (r.color) { const l = document.createElement('span'); l.className = 'lamp'; d.appendChild(l); lamps[r.key] = l; }
+    d.appendChild(document.createTextNode(r.label));
+    labelsEl.appendChild(d);
+  }
+  const base = document.getElementById('base'), overlay = document.getElementById('overlay');
+  const scroll = document.getElementById('scroll');
+  const dpr = window.devicePixelRatio || 1;
+  let rects = []; // {row, x, y, w, h, from, to}
+  let starts = {}; // step -> set of row keys starting there
+
+  function setupCanvas(c, w) {
+    c.width = w * dpr; c.height = H * dpr; c.style.width = w + 'px'; c.style.height = H + 'px';
+    const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); return g;
+  }
+
+  function buildTimeline() {
+    const t = byId(selected), danger = player.danger && t.dangerMode;
+    PX = Math.max(6, Math.floor((scroll.clientWidth || 600) / t.length));
+    const W = t.length * PX;
+    const g = setupCanvas(base, W); setupCanvas(overlay, W);
+    rects = []; starts = {};
+    const mark = (step, key) => ((starts[step] ||= new Set()).add(key));
+    const row = (k) => ROWS.find((r) => r.key === k);
+
+    // pitch ranges for melodic rows
+    const steps = danger ? t.danger : t.normal;
+    const range = { lead: [], bass: [], arp: [] };
+    t.lead.forEach((n) => n && range.lead.push(n.midi));
+    steps.flat().forEach((v) => v.midi && range[v.kind].push(v.midi));
+    const span = (k) => [Math.min(...range[k]) - 1, Math.max(...range[k]) + 1];
+    const pitchY = (k, m) => { const r = row(k), [lo, hi] = span(k); const nh = Math.max(3, (r.h - 6) / (hi - lo)); return { y: r.y + 3 + (hi - m) / (hi - lo) * (r.h - 6 - nh), h: nh }; };
+
+    t.lead.forEach((n, s) => {
+      if (!n) return; const p = pitchY('lead', n.midi);
+      rects.push({ row: 'lead', x: s * PX, y: p.y, w: n.len * PX - 1, h: p.h, from: s, to: s + n.len }); mark(s, 'lead');
+    });
+    steps.forEach((vs, s) => vs.forEach((v) => {
+      const r = row(v.kind);
+      if (v.midi) {
+        const p = pitchY(v.kind, v.midi), len = Math.max(1, Math.round(v.len));
+        rects.push({ row: v.kind, x: s * PX, y: p.y, w: len * PX - 1, h: p.h, from: s, to: s + len });
+      } else {
+        rects.push({ row: v.kind, x: s * PX + 1, y: r.y + 3, w: PX - 2, h: r.h - 6, from: s, to: s + 1 });
+      }
+      mark(s, v.kind);
+    }));
+
+    // background, sections, chords, grid
+    g.fillStyle = '#0f1430'; g.fillRect(0, 0, W, H);
+    const secCols = ['#1f2a55', '#3a2350', '#1f4a45', '#4a3a1f'];
+    t.sections.forEach((sec, i) => {
+      const r = row('section');
+      g.fillStyle = secCols[i % secCols.length]; g.fillRect(sec.from * 16 * PX, r.y, (sec.to - sec.from) * 16 * PX, r.h);
+      g.fillStyle = '#e8ecff'; g.font = '600 12px system-ui'; g.fillText('Del ' + sec.name, sec.from * 16 * PX + 6, r.y + 14);
+    });
+    for (let b = 0; b < t.chords.length; b++) {
+      const r = row('chord'); g.fillStyle = '#8b93b8'; g.font = '11px system-ui';
+      g.fillText(`${b + 1} · ${t.chords[b]}`, b * 16 * PX + 4, r.y + 13);
+    }
+    for (const r of ROWS) { g.fillStyle = '#2a3356'; g.fillRect(0, r.y + r.h - 1, W, 1); }
+    for (let s = 0; s <= t.length; s += 4) {
+      g.fillStyle = s % 16 === 0 ? '#3a4575' : '#1c2448';
+      g.fillRect(s * PX, row('lead').y, 1, H - row('lead').y);
+    }
+    for (const rc of rects) {
+      g.fillStyle = row(rc.row).color; g.globalAlpha = 0.55; g.fillRect(rc.x, rc.y, rc.w, rc.h);
+    }
+    g.globalAlpha = 1;
+  }
+
+  let lastStep = -1;
+  function frame() {
+    const now = player.now();
+    const g = overlay.getContext('2d');
+    if (now && now.step !== lastStep) {
+      lastStep = now.step;
+      g.clearRect(0, 0, overlay.width, overlay.height);
+      const x = now.step * PX;
+      for (const rc of rects) if (rc.from <= now.step && now.step < rc.to) {
+        g.fillStyle = ROWS.find((r) => r.key === rc.row).color; g.shadowColor = g.fillStyle; g.shadowBlur = 8;
+        g.fillRect(rc.x, rc.y, rc.w, rc.h);
+      }
+      g.shadowBlur = 0; g.fillStyle = '#ffffff'; g.fillRect(x, 0, 2, H);
+      const hit = starts[now.step] || new Set();
+      for (const k in lamps) {
+        const active = rects.some((rc) => rc.row === k && rc.from <= now.step && now.step < rc.to);
+        lamps[k].style.background = hit.has(k) ? ROWS.find((r) => r.key === k).color : active ? '#555f8f' : '#2a3356';
+      }
+      const target = x - scroll.clientWidth * 0.3;
+      if (Math.abs(scroll.scrollLeft - target) > scroll.clientWidth * 0.4 || now.step === 0) scroll.scrollLeft = Math.max(0, target);
+      else scroll.scrollLeft += (target - scroll.scrollLeft) * 0.2;
+      document.getElementById('stat').textContent = `${Math.round(now.bpm)} BPM · takt ${Math.floor(now.step / 16) + 1}/${byId(selected).chords.length} · varv ${now.loop + 1}`;
+    } else if (!now && lastStep !== -1) {
+      lastStep = -1; g.clearRect(0, 0, overlay.width, overlay.height);
+      for (const k in lamps) lamps[k].style.background = '#2a3356';
+      document.getElementById('stat').textContent = `${player.bpm} BPM`;
+    }
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- controls ----------
+  const playBtn = document.getElementById('play'), dangerBtn = document.getElementById('danger');
+  const levelCtl = document.getElementById('levelCtl');
+  function select(id) {
+    selected = id;
+    const t = player.load(id);
+    document.getElementById('nowTitle').textContent = t.title;
+    document.getElementById('nowInfo').textContent = `${t.category} · ${t.tempoLabel} · ${t.description}`;
+    dangerBtn.disabled = !t.dangerMode;
+    dangerBtn.title = t.dangerMode ? '' : 'Det här temat har ingen fara-version';
+    levelCtl.style.display = t.usesLevel ? '' : 'none';
+    lastStep = -1; renderRank(); buildTimeline();
+    document.getElementById('stat').textContent = `${player.bpm} BPM`;
+    playBtn.textContent = player.playing ? '■ Stoppa' : '▶ Spela';
+  }
+  playBtn.onclick = () => { playBtn.textContent = player.toggle() ? '■ Stoppa' : '▶ Spela'; };
+  dangerBtn.onclick = () => {
+    player.setDanger(!player.danger);
+    dangerBtn.classList.toggle('on', player.danger);
+    dangerBtn.textContent = 'Fara: ' + (player.danger ? 'på' : 'av');
+    lastStep = -1; buildTimeline();
+  };
+  document.getElementById('level').oninput = (e) => { player.setLevel(+e.target.value); document.getElementById('levelVal').textContent = e.target.value; };
+  document.getElementById('vol').oninput = (e) => player.setVolume(+e.target.value);
+
+  select(selected);
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
