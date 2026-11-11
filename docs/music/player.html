@@ -78,11 +78,12 @@
           <canvas id="overlay"></canvas>
         </div>
       </div>
-      <div class="note">Tidslinjen visar hela slingan (16 takter). Lamporna lyser när instrumentet spelar. Med Fara på visas fara-versionen.</div>
+      <div class="note">Tidslinjen visar hela slingan. Lamporna lyser när instrumentet spelar. Med Fara på visas fara-versionen.</div>
     </section>
   </div>
 </main>
 <script src="engine.js"></script>
+<script src="themes/original.js"></script>
 <script src="themes/nightshift.js"></script>
 <script src="themes/stackline.js"></script>
 <script src="themes/troika.js"></script>
@@ -143,7 +144,7 @@
   };
 
   // ---------- timeline ----------
-  const PX = 6; // px per 16th step
+  let PX = 6; // px per 16th step (wider for short loops)
   const ROWS = [
     { key: 'section', label: 'Del', h: 20 },
     { key: 'chord', label: 'Ackord', h: 18 },
@@ -177,6 +178,7 @@
 
   function buildTimeline() {
     const t = byId(selected), danger = player.danger && t.dangerMode;
+    PX = Math.max(6, Math.floor((scroll.clientWidth || 600) / t.length));
     const W = t.length * PX;
     const g = setupCanvas(base, W); setupCanvas(overlay, W);
     rects = []; starts = {};
@@ -250,7 +252,7 @@
       const target = x - scroll.clientWidth * 0.3;
       if (Math.abs(scroll.scrollLeft - target) > scroll.clientWidth * 0.4 || now.step === 0) scroll.scrollLeft = Math.max(0, target);
       else scroll.scrollLeft += (target - scroll.scrollLeft) * 0.2;
-      document.getElementById('stat').textContent = `${Math.round(now.bpm)} BPM · takt ${Math.floor(now.step / 16) + 1}/16 · varv ${now.loop + 1}`;
+      document.getElementById('stat').textContent = `${Math.round(now.bpm)} BPM · takt ${Math.floor(now.step / 16) + 1}/${byId(selected).chords.length} · varv ${now.loop + 1}`;
     } else if (!now && lastStep !== -1) {
       lastStep = -1; g.clearRect(0, 0, overlay.width, overlay.height);
       for (const k in lamps) lamps[k].style.background = '#2a3356';

@@ -10,7 +10,8 @@
  *   melody: [[note, eighths], ...] ("r" = rest);  chords: [name per bar]
  *   chordDefs: { name: { root, top, oct, triad[3] } }
  *   sections: [{ name, from, to }] in bars
- *   mix: { lead: { wave, vol, tremolo, vibrato, echo }, bass: { vol }, arp: { vol, dangerVol } }
+ *   mix: { lead: { wave, vol, tremolo, vibrato, echo, gate }, bass: { vol }, arp: { vol, dangerVol } }
+ *   leadTranspose({ danger }) -> semitones (optional)
  *   voices(step, danger, { bar, s, ch }) -> [{ kind: 'bass'|'arp', note, len } | { kind: 'kick'|'snare'|'hat' }]
  */
 (function (global) {
@@ -88,7 +89,7 @@
     function tone(t, dur, m, o) {
       const osc = ctx.createOscillator(); wave(osc, o.wave);
       osc.frequency.value = hz(m);
-      const g = ctx.createGain(), end = t + dur * 0.88;
+      const g = ctx.createGain(), end = t + dur * (o.gate || 0.88);
       g.gain.setValueAtTime(0, t);
       g.gain.linearRampToValueAtTime(o.vol, t + 0.004);
       g.gain.setTargetAtTime(o.vol * 0.65, t + 0.01, 0.06);
@@ -140,8 +141,9 @@
         queue.push({ step, time: next, loop, bpm });
         echoDelay.delayTime.setValueAtTime(sx * 3, next);
         const ld = theme.lead[step];
-        if (ld) tone(next, ld.len * sx, ld.midi, {
-          wave: mix.lead.wave, vol: mix.lead.vol, echo: mix.lead.echo,
+        const tr = theme.leadTranspose ? theme.leadTranspose({ danger: danger && theme.dangerMode }) : 0;
+        if (ld) tone(next, ld.len * sx, ld.midi + tr, {
+          wave: mix.lead.wave, vol: mix.lead.vol, echo: mix.lead.echo, gate: mix.lead.gate,
           tremolo: mix.lead.tremolo && ld.len >= 8, vibrato: mix.lead.vibrato && ld.len >= 6,
         });
         const useDanger = danger && theme.dangerMode;

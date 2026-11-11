@@ -27,6 +27,7 @@ fill exactly `chords.length × 16` sixteenth steps.
 
 | Theme | Category | Tempo | Danger |
 |---|---|---|---|
+| Nuvarande spelmusik (`original`) | Minimal NES-slinga | ≈77 BPM (390 ms/note), danger ≈130 BPM (230 ms) | Tempo + octave up (mirrors `src/audio/`) |
 | Night Shift | Mörk groove | Fixed 120 BPM | Intensity only |
 | Stackline | Klassisk NES-pussel | 132 BPM, danger ×1.4 | Tempo + intensity |
 | Troika | Rysk folkmusik | 150 BPM, +5 %/loop (resets after 4), +6 %/level | None |
