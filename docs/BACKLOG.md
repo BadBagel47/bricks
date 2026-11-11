@@ -37,9 +37,11 @@ records released changes.
 | F-012 | Feature | High Scores with tabs (1 Player / Score Duel / Battle), ranked rows and empty states with an action | P2 | Proposed | Standard |
 | F-013 | Feature | Consistent top bar on all subpages: back icon + title (replaces the "Back to menu" pill) | P2 | Proposed | Standard |
 | F-014 | Feature | Main menu: tap "Playing as" to change name; show best 1 Player score | P3 | Proposed | Standard |
-| T-001 | Task | Owner check of a real private two-player match in the Worker preview | P1 | Open | — (owner) |
+| T-001 | Task | Owner check of a real private two-player match in the Worker preview | P1 | Done (2026-11-11, owner: works on bricks.trythis.one) | — (owner) |
 | T-002 | Task | Controlled public Pages activation of operating controls | P2 | Done (2026-11-11), live checks pending | Strong |
 | T-003 | Task | Phase 4: publish at bricks.trythis.one (owner DNS, Pages custom domain, Firebase authorized domains); see `docs/DEPLOYMENT.md` | P2 | Done (2026-11-11), live checks pending | — (owner) |
+| T-004 | Task | Adapt Bricks to the shared agent rules (BadBagel47/agent-rules): HANDOFF.md, AGENTS.md reference, ID/priority format; keep the main/Worker publishing exception | P2 | Proposed | Standard |
+| T-005 | Task | Decide whether Bricks Theme keeps its danger tempo rise (owner stable-BPM rule) | P3 | Owner decision | — (owner) |
 | F-006 | Feature | More music tracks | P3 | Idea | Standard |
 | F-007 | Feature | Extract the multiplayer lobby into a reusable module | P3 | Idea | Strong |
 | F-008 | Feature | Stones: Bomberman-like game for 1–2 players | P3 | Idea | Strong |
