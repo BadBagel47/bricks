@@ -31,6 +31,7 @@ records released changes.
 | B-002 | Bug | Pieces start falling at slightly different moments on the two devices in a match | P2 | Done (2026-11-10) | Strong |
 | B-003 | Bug | Opponent board lags and moves unevenly | P2 | Done (2026-11-11) | Standard |
 | F-009 | Feature | Shared music test player in the game's style with the game theme and all proposals | P2 | Done (2026-11-11) | Strong |
+| B-004 | Bug | Opponent board still lags behind after B-003 | P2 | Proposed (deferred by owner) | Strong |
 | T-001 | Task | Owner check of a real private two-player match in the Worker preview | P1 | Open | — (owner) |
 | T-002 | Task | Controlled public Pages activation of operating controls | P2 | Done (2026-11-11), live checks pending | Strong |
 | T-003 | Task | Phase 4: publish at bricks.trythis.one (owner DNS, Pages custom domain, Firebase authorized domains); see `docs/DEPLOYMENT.md` | P2 | Done (2026-11-11), live checks pending | — (owner) |
@@ -125,6 +126,12 @@ Grouped by shared code and risk to save quota without lowering quality.
   `gameSnapshots`, `recoveryCheckpoints` and `battleAttacks` lowered from 500 to
   200 ms. Rollout order: the owner publishes the new rules first (old clients stay
   valid), then the client is deployed. Old rules reject the new client's writes.
+
+### B-004 Opponent board still lags
+- Owner observation 2026-11-11 on bricks.trythis.one: after B-003 (200 ms
+  snapshots) the opponent's board still lags. Investigate measured end-to-end
+  delay (write ack time, Firebase delivery) before changing rates again;
+  consider showing the opponent's falling piece locally between snapshots.
 
 ### T-001 Owner check of a real private two-player match
 - Steps are in `HANDOVER.md` → *Next session: finish the playable preview*.
