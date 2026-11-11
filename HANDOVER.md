@@ -16,6 +16,7 @@ guides. Owner instructions and the specification take precedence.
 | Released changes | `CHANGELOG.md` |
 | Why things are built this way | `docs/adr/` |
 | Subsystems | `docs/ENGINE.md`, `docs/AUDIO.md`, `docs/INPUT.md`, `docs/MULTIPLAYER.md`, `docs/OPERATING_CONTROLS.md`, `docs/OPERATING_SETUP.md`, `docs/FIREBASE_QUOTA.md`, `docs/FIREBASE_ACCESS.md` |
+| Music themes and the owner test player | `docs/music/` (see its README) |
 
 ## Phase 4 public deployment (parallel track)
 
@@ -52,11 +53,11 @@ guides. Owner instructions and the specification take precedence.
 
 ## Current checkpoint — 2026-11-10
 
-**Continue on `feature/operating-controls`, not main.** Work in the existing
+**Continue on `main` (since 2026-11-11; previously `feature/operating-controls`).** Work in the existing
 checkout of your environment. Verify Git status and remote heads before editing;
-preserve user changes. Operating controls are not merged to main. Short-lived
-feature branches (e.g. `feature/visual-refresh`) are merged into
-`feature/operating-controls` after CI passes.
+preserve user changes. Everything is merged to `main`, which deploys https://bricks.trythis.one.
+The admin Worker still deploys from `feature/operating-controls` with
+`[deploy operating]` (see AGENTS publishing rule).
 
 - Public game: https://badbagel47.github.io/bricks/?v=09a7cb6 .
   Last verified Pages application deployment is recovery Phase 3.12, `09a7cb6`:

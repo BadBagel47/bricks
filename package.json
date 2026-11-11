@@ -13,7 +13,8 @@
     "test:operating": "node --test tests/operating.browser.mjs",
     "emulators": "node scripts/firebase-emulators.mjs",
     "test:firebase": "node scripts/firebase-emulators.mjs --test",
-    "test:firebase:auth": "node scripts/firebase-emulators.mjs --auth-only"
+    "test:firebase:auth": "node scripts/firebase-emulators.mjs --auth-only",
+    "music:player": "node scripts/build-music-player.mjs"
   },
   "dependencies": {
     "firebase": "^13.0.0",

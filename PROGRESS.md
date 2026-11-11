@@ -8,6 +8,14 @@
 - **Phase 4 status:** Documentation and maintenance instructions added; no application code changed. Waiting for owner DNS, GitHub Pages custom-domain/HTTPS, Firebase Authorized domains (and API-key referrer, if restricted). Live verification checklist not yet observed; this environment cannot reach the site.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
+## T-002 / T-003 — public release on bricks.trythis.one — 2026-11-11
+
+Owner completed: `VITE_OPERATING_ORIGIN` repository variable, Cloudflare CNAME (DNS only), GitHub Pages custom domain, Firebase authorized domain. Agent: Worker `GAME_URL` → https://bricks.trythis.one/ (deployed via `[deploy operating]`), `feature/visual-refresh` → `feature/operating-controls` → `main`. Publishing rule changed: push to `main`. Live checks are the owner's (this environment cannot reach the site).
+
+## F-009 — shared music test player — 2026-11-11
+
+Owner request. Merged `main`'s music proposals (`docs/music/`, owner stable-BPM rule in AGENTS). New generated player `docs/music/player.html` (`npm run music:player`, source `src/music-player/`) in the game's style; *Bricks Theme* plays through the game's scheduler and the extracted `VoicePool` (`src/audio/web-voices.ts`), proposals through `docs/music/engine.js`. Local: audio unit tests 10/10; headless Chrome check at 390×844 and 1280×900 — playback starts, BPM 132→172 with danger, switching to Night Shift (120) and Troika (150) works, no console errors, no horizontal overflow. Open decision: whether Bricks Theme keeps its danger tempo rise (owner stable-BPM rule applies to new music).
+
 ## B-003 — faster opponent board — 2026-11-11
 
 Owner approved ("Kör b3"). Snapshot interval 500 → 200 ms (`SNAPSHOT_INTERVAL_MS`), with matching rule changes for snapshots, recovery checkpoints and Battle attacks. Docs: ADR 0002, FIREBASE_QUOTA, MULTIPLAYER. Tests: gate unit tests and the rooms budget check use 200 ms. The owner published the rules on 2026-11-11; the client was then deployed to the Worker preview.

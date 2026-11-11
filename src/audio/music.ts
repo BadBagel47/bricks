@@ -41,6 +41,9 @@ const SCORE: readonly (readonly [keyof typeof CHORDS, string])[] = [
   ['E', 'G#5 4 E5 4 B4 4 G#4 4'],
 ]
 
+/** Chord name per theme bar (for visualization). */
+export const THEME_CHORDS: readonly string[] = SCORE.map(([name]) => name)
+
 export const THEME: readonly Bar[] = SCORE.map(([name, melody]) => {
   const tokens = melody.split(' ')
   const steps = new Map<number, readonly [number, number]>()
@@ -62,16 +65,16 @@ export function stepSeconds(danger: boolean): number {
 }
 
 function kick(voices: Voices, t: number) {
-  voices.tone({ t, dur: 0.14, f: 150, f2: 42, wave: 'sine', vol: 0.55, a: 0.001, dec: 0.02, sus: 0.8 })
+  voices.tone({ t, dur: 0.14, f: 150, f2: 42, wave: 'sine', vol: 0.55, a: 0.001, dec: 0.02, sus: 0.8, ch: 'kick' })
 }
 
 function snare(voices: Voices, t: number) {
-  voices.noise({ t, dur: 0.15, f: 1900, q: 0.7, vol: 0.22 })
-  voices.tone({ t, dur: 0.06, f: 240, f2: 160, wave: 'tri', vol: 0.18, a: 0.001 })
+  voices.noise({ t, dur: 0.15, f: 1900, q: 0.7, vol: 0.22, ch: 'snare' })
+  voices.tone({ t, dur: 0.06, f: 240, f2: 160, wave: 'tri', vol: 0.18, a: 0.001, ch: 'snare' })
 }
 
 function hat(voices: Voices, t: number, open: boolean) {
-  voices.noise({ t, dur: open ? 0.14 : 0.035, type: 'highpass', f: 7500, q: 0.5, vol: open ? 0.07 : 0.06 })
+  voices.noise({ t, dur: open ? 0.14 : 0.035, type: 'highpass', f: 7500, q: 0.5, vol: open ? 0.07 : 0.06, ch: 'hat' })
 }
 
 /** Schedule every channel for one sixteenth step. Danger adds drive without changing the tune. */
@@ -85,20 +88,20 @@ export function scheduleMusicStep(voices: Voices, bar: number, step: number, t: 
   const note = steps.get(step)
   if (note) {
     const [midi, length] = note
-    voices.tone({ t, dur: length * sd * 0.9, f: frequency(midi), wave: secondPass ? 'p12' : 'p25', vol: 0.12, dec: 0.1, sus: 0.7, vib: length >= 4 ? 12 : 0 })
-    if (secondPass) voices.tone({ t, dur: length * sd * 0.85, f: frequency(midi - 12), wave: 'p50', vol: 0.035 })
+    voices.tone({ t, dur: length * sd * 0.9, f: frequency(midi), wave: secondPass ? 'p12' : 'p25', vol: 0.12, dec: 0.1, sus: 0.7, vib: length >= 4 ? 12 : 0, ch: 'lead' })
+    if (secondPass) voices.tone({ t, dur: length * sd * 0.85, f: frequency(midi - 12), wave: 'p50', vol: 0.035, ch: 'lead' })
   }
 
   if (danger) {
-    voices.tone({ t, dur: sd * 0.85, f: frequency(harmony.root + (step % 2 ? 12 : 0)), wave: 'tri', vol: 0.3, a: 0.002, dec: 0.03, sus: 0.8 })
+    voices.tone({ t, dur: sd * 0.85, f: frequency(harmony.root + (step % 2 ? 12 : 0)), wave: 'tri', vol: 0.3, a: 0.002, dec: 0.03, sus: 0.8, ch: 'bass' })
   } else if (step % 2 === 0) {
     const offset = [0, 0, 12, 0, 7, 0, 12, 7][step / 2]
-    voices.tone({ t, dur: sd * 1.7, f: frequency(harmony.root + offset), wave: 'tri', vol: 0.32, a: 0.002, dec: 0.04, sus: 0.85 })
+    voices.tone({ t, dur: sd * 1.7, f: frequency(harmony.root + offset), wave: 'tri', vol: 0.32, a: 0.002, dec: 0.04, sus: 0.85, ch: 'bass' })
   }
 
   if (secondPass || danger) {
     const arp = harmony.arp[[0, 1, 2, 1][step % 4]] + 12
-    voices.tone({ t, dur: sd * 0.8, f: frequency(arp), wave: 'p12', vol: 0.04, a: 0.002, dec: 0.03, sus: 0.6 })
+    voices.tone({ t, dur: sd * 0.8, f: frequency(arp), wave: 'p12', vol: 0.04, a: 0.002, dec: 0.03, sus: 0.6, ch: 'arp' })
   }
 
   const fill = local === 7 || local === 15

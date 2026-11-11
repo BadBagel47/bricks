@@ -30,9 +30,10 @@ records released changes.
 | B-001 | Bug | Admin offers Revoke for expired invitations | P1 | Done (run 1, 2026-11-10) | Standard |
 | B-002 | Bug | Pieces start falling at slightly different moments on the two devices in a match | P2 | Done (2026-11-10) | Strong |
 | B-003 | Bug | Opponent board lags and moves unevenly | P2 | Done (2026-11-11) | Standard |
+| F-009 | Feature | Shared music test player in the game's style with the game theme and all proposals | P2 | Done (2026-11-11) | Strong |
 | T-001 | Task | Owner check of a real private two-player match in the Worker preview | P1 | Open | — (owner) |
-| T-002 | Task | Controlled public Pages activation of operating controls | P2 | Open | Strong |
-| T-003 | Task | Phase 4: publish at bricks.trythis.one (owner DNS, Pages custom domain, Firebase authorized domains); see `docs/DEPLOYMENT.md` | P2 | Open (owner steps) | — (owner) |
+| T-002 | Task | Controlled public Pages activation of operating controls | P2 | Done (2026-11-11), live checks pending | Strong |
+| T-003 | Task | Phase 4: publish at bricks.trythis.one (owner DNS, Pages custom domain, Firebase authorized domains); see `docs/DEPLOYMENT.md` | P2 | Done (2026-11-11), live checks pending | — (owner) |
 | F-006 | Feature | More music tracks | P3 | Idea | Standard |
 | F-007 | Feature | Extract the multiplayer lobby into a reusable module | P3 | Idea | Strong |
 | F-008 | Feature | Stones: Bomberman-like game for 1–2 players | P3 | Idea | Strong |
@@ -129,6 +130,7 @@ Grouped by shared code and risk to save quota without lowering quality.
 - Steps are in `HANDOVER.md` → *Next session: finish the playable preview*.
 
 ### T-002 Controlled public Pages activation
+- 2026-11-11: owner set `VITE_OPERATING_ORIGIN`, DNS, Pages custom domain and Firebase authorized domain; `main` now carries the visual refresh and operating controls; Worker `GAME_URL` = https://bricks.trythis.one/. Owner tests live (one public round, one private match).
 - Follow `docs/OPERATING_SETUP.md`. Never just merge to `main` and assume rollout.
 
 ### F-006 More music tracks

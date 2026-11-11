@@ -21,3 +21,5 @@ Danger music starts when locked blocks reach the top six rows and ends once the 
 Pause, Game Over and leaving a game stop scheduled music and pending effect notes with an 8 ms fade. Resume continues the song where it was. A new game restarts the song in calm mode. Music and effects have separate on/off and 0–100% volume settings saved locally; muting effects cancels pending effect notes, and silent settings create no sound sources.
 
 Automated tests cover the theme structure, danger tempo and hysteresis, every effect's timing and pitch range, and the playback lifecycle. Chromium integration tests exercise real Web Audio start, pause/resume and saved mute settings. How it sounds still needs a listening check.
+
+Candidate themes and the shared owner test player live in [`docs/music/`](music/README.md); the current game theme is included there as *Bricks Theme*.

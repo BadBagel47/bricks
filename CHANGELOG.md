@@ -28,6 +28,23 @@ not yet on the public GitHub Pages site.
 - Phase 4 deployment plan for bricks.trythis.one merged from a parallel session
   (`docs/DEPLOYMENT.md`); owner steps tracked as T-003.
 
+### Added (music)
+- F-009: shared owner music test player (`docs/music/player.html`, built by
+  `npm run music:player`) in the game's style: the current game theme plays
+  through the game's own voices next to the proposals Night Shift, Stackline,
+  Troika and the previous music, with timeline, danger, level, volume, BPM and
+  ranking. Music proposals from `main` merged into this branch.
+
+### Changed (audio internals)
+- Web Audio voices moved from `BricksAudio` into `src/audio/web-voices.ts`
+  (`VoicePool`) so the game and the test player sound identical; music notes
+  carry a channel tag for visualization. No audible change.
+
+### Deployment
+- Public release on https://bricks.trythis.one from `main` (T-002, T-003):
+  visual refresh, runs 1–2, B-002, B-003, F-009 and operating controls. Agents
+  now publish by pushing to `main`.
+
 ### Fixed
 - B-003: the opponent board updates about five times per second instead of
   twice, so it lags less and moves more evenly (client and rules: 200 ms).
