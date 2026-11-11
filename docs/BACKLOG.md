@@ -6,60 +6,66 @@ records released changes.
 
 ## Conventions
 
-- **IDs:** `F-###` feature, `B-###` bug, `T-###` operational task. IDs are never
+- **IDs:** `F-###` feature, `B-###` bug, `T-###` operational/owner task (Bricks keeps `T-` instead of the shared `D-`). IDs are never
   reused or renumbered. Reference them in commit messages, PRs and docs
   (for example `F-001: add admin tabs`).
 - **Status:** `Idea` → `Proposed` → `Approved` → `In progress` → `Done`
-  (or `Dropped`). Only the owner moves an item to `Approved`.
-- **Priority:** `P1` next run, `P2` soon, `P3` later.
+  (or `Dropped`). Only the owner moves an item to `Approved`. Done items are moved to the *Done* table, not deleted.
+- **Priority:** High, Medium, Low (shared agent-rules scale; converted from P1/P2/P3 on 2026-11-11: P1 = High, P2 = Medium, P3 = Low).
 - **Runs:** collect approved items into one run. Start a run only after the
   owner's explicit go-ahead (for example "Kör"). Recommend a model and reasoning
   level per run before starting.
 - When an item is done: set `Done`, add the commit or PR, and add a line to
   `CHANGELOG.md` under *Unreleased*.
 
-## Overview
+## Open
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| F-001 | Feature | Admin page with the sketch's structure and functions | P1 | Done (run 1, 2026-11-10) | Standard |
-| F-002 | Feature | Lobby with the sketch's structure and functions | P1 | Done (run 2, 2026-11-10) | Strong |
-| F-003 | Feature | Settings with the sketch's structure and functions | P1 | Done (run 1, 2026-11-10) | Standard |
-| F-004 | Feature | Match and 1 Player screens per the sketch | P1 | Done (run 2, 2026-11-10) | Strong |
-| F-005 | Feature | Wire multiplayer sound effects | P1 | Done (run 2, 2026-11-10) | Standard |
-| B-001 | Bug | Admin offers Revoke for expired invitations | P1 | Done (run 1, 2026-11-10) | Standard |
-| B-002 | Bug | Pieces start falling at slightly different moments on the two devices in a match | P2 | Done (2026-11-10) | Strong |
-| B-003 | Bug | Opponent board lags and moves unevenly | P2 | Done (2026-11-11) | Standard |
-| F-009 | Feature | Shared music test player in the game's style with the game theme and all proposals | P2 | Done (2026-11-11) | Strong |
-| B-004 | Bug | Opponent board still lags behind after B-003 | P2 | Proposed (deferred by owner) | Strong |
-| F-010 | Feature | Match screen cleanup: hide the Battle debug line, show the opponent name once, larger board, level/lines in the side column | P1 | Proposed | Strong |
-| F-011 | Feature | New 2 Players start screen: Host and Join cards, room code as letter tiles | P1 | Proposed | Strong |
-| F-012 | Feature | High Scores with tabs (1 Player / Score Duel / Battle), ranked rows and empty states with an action | P2 | Proposed | Standard |
-| F-013 | Feature | Consistent top bar on all subpages: back icon + title (replaces the "Back to menu" pill) | P2 | Proposed | Standard |
-| F-014 | Feature | Main menu: tap "Playing as" to change name; show best 1 Player score | P3 | Proposed | Standard |
-| T-001 | Task | Owner check of a real private two-player match in the Worker preview | P1 | Done (2026-11-11, owner: works on bricks.trythis.one) | — (owner) |
-| T-002 | Task | Controlled public Pages activation of operating controls | P2 | Done (2026-11-11), live checks pending | Strong |
-| T-003 | Task | Phase 4: publish at bricks.trythis.one (owner DNS, Pages custom domain, Firebase authorized domains); see `docs/DEPLOYMENT.md` | P2 | Done (2026-11-11), live checks pending | — (owner) |
-| T-004 | Task | Adapt Bricks to the shared agent rules (BadBagel47/agent-rules): HANDOFF.md, AGENTS.md reference, ID/priority format; keep the main/Worker publishing exception | P2 | Proposed | Standard |
-| T-005 | Task | Decide whether Bricks Theme keeps its danger tempo rise (owner stable-BPM rule) | P3 | Done (2026-11-11): keeps the tempo rise | — (owner) |
-| F-006 | Feature | More music tracks | P3 | Idea | Standard |
-| F-007 | Feature | Extract the multiplayer lobby into a reusable module | P3 | Idea | Strong |
-| F-008 | Feature | Stones: Bomberman-like game for 1–2 players | P3 | Idea | Strong |
+| B-004 | Bug | Opponent board still lags behind after B-003 | Medium | Proposed (deferred by owner) | Strong |
+| F-010 | Feature | Match screen cleanup: hide the Battle debug line, show the opponent name once, larger board, level/lines in the side column | High | Proposed | Strong |
+| F-011 | Feature | New 2 Players start screen: Host and Join cards, room code as letter tiles | High | Proposed | Strong |
+| F-006 | Feature | More music tracks | Low | Idea | Standard |
+| F-007 | Feature | Extract the multiplayer lobby into a reusable module | Low | Idea | Strong |
+| F-008 | Feature | Stones: Bomberman-like game for 1–2 players | Low | Idea | Strong |
 
-The approved P1 items come from the owner's request of 2026-11-10: use the
+## Done
+
+| ID | Type | Title | Priority | Status | Suggested model |
+| --- | --- | --- | --- | --- | --- |
+| F-001 | Feature | Admin page with the sketch's structure and functions | High | Done (run 1, 2026-11-10) | Standard |
+| F-002 | Feature | Lobby with the sketch's structure and functions | High | Done (run 2, 2026-11-10) | Strong |
+| F-003 | Feature | Settings with the sketch's structure and functions | High | Done (run 1, 2026-11-10) | Standard |
+| F-004 | Feature | Match and 1 Player screens per the sketch | High | Done (run 2, 2026-11-10) | Strong |
+| F-005 | Feature | Wire multiplayer sound effects | High | Done (run 2, 2026-11-10) | Standard |
+| B-001 | Bug | Admin offers Revoke for expired invitations | High | Done (run 1, 2026-11-10) | Standard |
+| B-002 | Bug | Pieces start falling at slightly different moments on the two devices in a match | Medium | Done (2026-11-10) | Strong |
+| B-003 | Bug | Opponent board lags and moves unevenly | Medium | Done (2026-11-11) | Standard |
+| F-009 | Feature | Shared music test player in the game's style with the game theme and all proposals | Medium | Done (2026-11-11) | Strong |
+| T-001 | Task | Owner check of a real private two-player match in the Worker preview | High | Done (2026-11-11, owner: works on bricks.trythis.one) | — (owner) |
+| T-002 | Task | Controlled public Pages activation of operating controls | Medium | Done (2026-11-11), live checks pending | Strong |
+| T-003 | Task | Phase 4: publish at bricks.trythis.one (owner DNS, Pages custom domain, Firebase authorized domains); see `docs/DEPLOYMENT.md` | Medium | Done (2026-11-11), live checks pending | — (owner) |
+| T-005 | Task | Decide whether Bricks Theme keeps its danger tempo rise (owner stable-BPM rule) | Low | Done (2026-11-11): keeps the tempo rise | — (owner) |
+| T-004 | Task | Adapt Bricks to the shared agent rules (BadBagel47/agent-rules): HANDOFF.md, AGENTS.md reference, ID/priority format; keep the main/Worker publishing exception | Medium | Done (2026-11-11) | Standard |
+| F-012 | Feature | High Scores with tabs (1 Player / Score Duel / Battle), ranked rows and empty states with an action | Medium | Done (2026-11-11) | Standard |
+| F-013 | Feature | Consistent top bar on all subpages: back icon + title (replaces the "Back to menu" pill) | Medium | Done (2026-11-11) | Standard |
+| F-014 | Feature | Main menu: tap "Playing as" to change name; show best 1 Player score | Low | Done (2026-11-11) | Standard |
+
+The approved High items come from the owner's request of 2026-11-10: use the
 sketch's layout **and behavior**, not only its look. Design reference:
 "Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
 
-## Proposed runs (2026-11-10)
+## Proposed runs (2026-11-11)
 
-Grouped by shared code and risk to save quota without lowering quality.
+Letters refer to this latest proposal; commits and reports use the IDs.
 
-| Run | Items | Why together | Suggested model |
-| --- | --- | --- | --- |
-| 1 | F-001, B-001, F-003 | Self-contained screens (admin page, Settings) with their own fast tests; no multiplayer logic | Standard, medium reasoning (e.g. Claude Sonnet, GPT-6.1 Terra Medium) |
-| 2 | F-002, F-004, F-005 | Share lobby/match components and the two-session Firebase tests; highest regression risk | Strong, high reasoning (e.g. Claude Opus, GPT-6.1 Sol High) |
-| Later | F-006 | Music data only | Standard, medium |
-| Later | F-007, then F-008 | Architecture work; plan first, then build | Strong, high |
+- **A** – Claude Opus or GPT-6.1 Sol, high – Multiplayer screens
+  - F-010 – Match screen cleanup
+  - F-011 – New 2 Players start screen
+- **D** – Claude Opus or GPT-6.1 Sol, high – Opponent board (deferred by owner)
+  - B-004 – Opponent board still lags
+
+Run B (F-012, F-013, F-014) and run C (T-004) were completed on 2026-11-11.
 
 ## Details
 
@@ -147,7 +153,7 @@ Grouped by shared code and risk to save quota without lowering quality.
   labels the tests use or update the tests.
 
 ### T-001 Owner check of a real private two-player match
-- Steps are in `HANDOVER.md` → *Next session: finish the playable preview*.
+- Steps are in `HANDOFF.md` → *Next session: finish the playable preview*.
 
 ### T-002 Controlled public Pages activation
 - 2026-11-11: owner set `VITE_OPERATING_ORIGIN`, DNS, Pages custom domain and Firebase authorized domain; `main` now carries the visual refresh and operating controls; Worker `GAME_URL` = https://bricks.trythis.one/. Owner tests live (one public round, one private match).

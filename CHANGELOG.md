@@ -9,6 +9,12 @@ not publish version numbers yet; entries are grouped by deployment.
 Deployed to the Worker preview (`feature/operating-controls`, merge `89b856c`);
 not yet on the public GitHub Pages site.
 
+### Changed (run 3)
+- F-012: High Scores has tabs (1 Player / Score Duel / Battle); empty tabs offer a Play button; top three ranks are highlighted.
+- F-013: Settings, High Scores and 2 Players share a top bar with a back icon and the page title (replaces the "Back to menu" pill).
+- F-014: on the main menu, "Playing as" opens the name settings and the 1 Player button shows the best local score.
+- T-004: repository adapted to the shared agent rules v1.0: `AGENTS.md` is now a reference, project rules moved to `HANDOFF.md` (renamed from `HANDOVER.md`), backlog uses High/Medium/Low and a Done table.
+
 ### Changed (run 2)
 - F-002: lobby rebuilt per the sketch: room-code tiles with *Copy Invite Link* /
   *Copy Code*, player cards (Host/Guest, connection status), mode summary with a

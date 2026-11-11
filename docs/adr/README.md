@@ -12,3 +12,4 @@ for each new decision; never rewrite an accepted record — supersede it instead
 | [0004](0004-generated-web-audio.md) | All audio generated with Web Audio | Accepted |
 | [0005](0005-visual-refresh-from-design-sketch.md) | Visual refresh from the approved design sketch | Accepted |
 | [0006](0006-documentation-and-backlog-conventions.md) | Documentation and backlog conventions | Accepted |
+| [0007](0007-shared-agent-rules.md) | Adopt the shared agent rules | Accepted |
