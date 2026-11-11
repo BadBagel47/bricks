@@ -32,6 +32,11 @@ records released changes.
 | B-003 | Bug | Opponent board lags and moves unevenly | P2 | Done (2026-11-11) | Standard |
 | F-009 | Feature | Shared music test player in the game's style with the game theme and all proposals | P2 | Done (2026-11-11) | Strong |
 | B-004 | Bug | Opponent board still lags behind after B-003 | P2 | Proposed (deferred by owner) | Strong |
+| F-010 | Feature | Match screen cleanup: hide the Battle debug line, show the opponent name once, larger board, level/lines in the side column | P1 | Proposed | Strong |
+| F-011 | Feature | New 2 Players start screen: Host and Join cards, room code as letter tiles | P1 | Proposed | Strong |
+| F-012 | Feature | High Scores with tabs (1 Player / Score Duel / Battle), ranked rows and empty states with an action | P2 | Proposed | Standard |
+| F-013 | Feature | Consistent top bar on all subpages: back icon + title (replaces the "Back to menu" pill) | P2 | Proposed | Standard |
+| F-014 | Feature | Main menu: tap "Playing as" to change name; show best 1 Player score | P3 | Proposed | Standard |
 | T-001 | Task | Owner check of a real private two-player match in the Worker preview | P1 | Open | — (owner) |
 | T-002 | Task | Controlled public Pages activation of operating controls | P2 | Done (2026-11-11), live checks pending | Strong |
 | T-003 | Task | Phase 4: publish at bricks.trythis.one (owner DNS, Pages custom domain, Firebase authorized domains); see `docs/DEPLOYMENT.md` | P2 | Done (2026-11-11), live checks pending | — (owner) |
@@ -132,6 +137,12 @@ Grouped by shared code and risk to save quota without lowering quality.
   snapshots) the opponent's board still lags. Investigate measured end-to-end
   delay (write ack time, Firebase delivery) before changing rates again;
   consider showing the opponent's falling piece locally between snapshots.
+
+### F-010 – F-014 UX review 2026-11-11
+- From an agent review of all screens. Mockups P1–P3 in the design canvas
+  (https://claude.ai/artifact/Es5mgaHFDTha7LiSz9W9Zv, row "Förslag 2026-11-11").
+- F-010/F-011 touch multiplayer screens and their emulator tests; keep the
+  labels the tests use or update the tests.
 
 ### T-001 Owner check of a real private two-player match
 - Steps are in `HANDOVER.md` → *Next session: finish the playable preview*.
