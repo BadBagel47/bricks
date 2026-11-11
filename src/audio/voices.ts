@@ -1,5 +1,6 @@
 /** Instrument vocabulary shared by the music sequencer and the sound effects. */
 export type Wave = 'p12' | 'p25' | 'p50' | 'tri' | 'sine'
+export type MusicChannel = 'lead' | 'bass' | 'arp' | 'kick' | 'snare' | 'hat'
 
 export interface ToneSpec {
   /** Start time in AudioContext seconds. */
@@ -18,6 +19,8 @@ export interface ToneSpec {
   readonly rel?: number
   /** Vibrato depth in cents, faded in on longer notes. */
   readonly vib?: number
+  /** Music channel, used only for visualization (test player timeline). */
+  readonly ch?: MusicChannel
 }
 
 export interface NoiseSpec {
@@ -29,6 +32,7 @@ export interface NoiseSpec {
   readonly q?: number
   readonly vol?: number
   readonly a?: number
+  readonly ch?: MusicChannel
 }
 
 export interface Voices {

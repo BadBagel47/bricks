@@ -30,6 +30,7 @@ records released changes.
 | B-001 | Bug | Admin offers Revoke for expired invitations | P1 | Done (run 1, 2026-11-10) | Standard |
 | B-002 | Bug | Pieces start falling at slightly different moments on the two devices in a match | P2 | Done (2026-11-10) | Strong |
 | B-003 | Bug | Opponent board lags and moves unevenly | P2 | Done (2026-11-11) | Standard |
+| F-009 | Feature | Shared music test player in the game's style with the game theme and all proposals | P2 | Done (2026-11-11) | Strong |
 | T-001 | Task | Owner check of a real private two-player match in the Worker preview | P1 | Open | — (owner) |
 | T-002 | Task | Controlled public Pages activation of operating controls | P2 | Open | Strong |
 | T-003 | Task | Phase 4: publish at bricks.trythis.one (owner DNS, Pages custom domain, Firebase authorized domains); see `docs/DEPLOYMENT.md` | P2 | Open (owner steps) | — (owner) |
