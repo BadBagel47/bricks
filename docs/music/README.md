@@ -32,7 +32,7 @@ fill exactly `chords.length × 16` sixteenth steps.
 
 | Theme | Category | Tempo | Danger |
 |---|---|---|---|
-| **Bricks Theme** (in the game, `src/audio/music.ts`) | Game music | 132 BPM, danger 172 BPM | Tempo + bass/hi-hat/arpeggio intensity |
+| **Bricks Theme** (in the game, `src/audio/music.ts`) | Game music | 132 BPM, danger 172 BPM (kept by owner decision T-005) | Tempo + bass/hi-hat/arpeggio intensity |
 | Previous game music (`original`, replaced 2026-11-10; shown as *Tidigare spelmusik*) | Minimal NES-slinga | ≈77 BPM (390 ms/note), danger ≈130 BPM (230 ms) | Tempo + octave up (mirrors `src/audio/`) |
 | Night Shift | Mörk groove | Fixed 120 BPM | Intensity only |
 | Stackline | Klassisk NES-pussel | 132 BPM, danger ×1.4 | Tempo + intensity |

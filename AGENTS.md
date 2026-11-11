@@ -23,7 +23,7 @@
 
 - Owner approved 2026-11-10: visual refresh per spec section 5.0, new generated audio, optional Ghost piece (off by default) and Classic block colors. Keep player-facing text English.
 
-- Owner rule 2026-11-11: new music must keep a stable BPM; express danger urgency through intensity, not tempo. Music proposals and the shared test player live in `docs/music/`.
+- Owner rule 2026-11-11: new music must keep a stable BPM; express danger urgency through intensity, not tempo. Exception (owner decision 2026-11-11, T-005): the game theme *Bricks Theme* keeps its danger tempo rise (132 → 172 BPM). Music proposals and the shared test player live in `docs/music/`.
 
 ## Owner working rules (all agents)
 

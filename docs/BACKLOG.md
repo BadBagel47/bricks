@@ -41,7 +41,7 @@ records released changes.
 | T-002 | Task | Controlled public Pages activation of operating controls | P2 | Done (2026-11-11), live checks pending | Strong |
 | T-003 | Task | Phase 4: publish at bricks.trythis.one (owner DNS, Pages custom domain, Firebase authorized domains); see `docs/DEPLOYMENT.md` | P2 | Done (2026-11-11), live checks pending | — (owner) |
 | T-004 | Task | Adapt Bricks to the shared agent rules (BadBagel47/agent-rules): HANDOFF.md, AGENTS.md reference, ID/priority format; keep the main/Worker publishing exception | P2 | Proposed | Standard |
-| T-005 | Task | Decide whether Bricks Theme keeps its danger tempo rise (owner stable-BPM rule) | P3 | Owner decision | — (owner) |
+| T-005 | Task | Decide whether Bricks Theme keeps its danger tempo rise (owner stable-BPM rule) | P3 | Done (2026-11-11): keeps the tempo rise | — (owner) |
 | F-006 | Feature | More music tracks | P3 | Idea | Standard |
 | F-007 | Feature | Extract the multiplayer lobby into a reusable module | P3 | Idea | Strong |
 | F-008 | Feature | Stones: Bomberman-like game for 1–2 players | P3 | Idea | Strong |
