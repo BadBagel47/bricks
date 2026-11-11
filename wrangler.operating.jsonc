@@ -11,7 +11,7 @@
   "vars": {
     "PROJECT": "bricks",
     "ADMIN_ORIGIN": "https://bricks-operating.l8p1.workers.dev",
-    "GAME_URL": "https://bricks-operating.l8p1.workers.dev/play/",
+    "GAME_URL": "https://bricks.trythis.one/",
     "FIREBASE_PROJECT_ID": "bricks-8f56b",
     "FIREBASE_DATABASE_ORIGIN": "https://bricks-8f56b-default-rtdb.europe-west1.firebasedatabase.app",
     "DAILY_MAIL_LIMIT": "90",

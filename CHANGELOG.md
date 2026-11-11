@@ -40,6 +40,11 @@ not yet on the public GitHub Pages site.
   (`VoicePool`) so the game and the test player sound identical; music notes
   carry a channel tag for visualization. No audible change.
 
+### Deployment
+- Public release on https://bricks.trythis.one from `main` (T-002, T-003):
+  visual refresh, runs 1–2, B-002, B-003, F-009 and operating controls. Agents
+  now publish by pushing to `main`.
+
 ### Fixed
 - B-003: the opponent board updates about five times per second instead of
   twice, so it lags less and moves more evenly (client and rules: 200 ms).
