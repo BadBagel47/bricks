@@ -7,7 +7,7 @@
 
 ## B-003 — faster opponent board — 2026-11-11
 
-Owner approved ("Kör b3"). Snapshot interval 500 → 200 ms (`SNAPSHOT_INTERVAL_MS`), with matching rule changes for snapshots, recovery checkpoints and Battle attacks. Docs: ADR 0002, FIREBASE_QUOTA, MULTIPLAYER. Tests: gate unit tests and the rooms budget check use 200 ms. Rules must be published by the owner before the client is deployed to the preview.
+Owner approved ("Kör b3"). Snapshot interval 500 → 200 ms (`SNAPSHOT_INTERVAL_MS`), with matching rule changes for snapshots, recovery checkpoints and Battle attacks. Docs: ADR 0002, FIREBASE_QUOTA, MULTIPLAYER. Tests: gate unit tests and the rooms budget check use 200 ms. The owner published the rules on 2026-11-11; the client was then deployed to the Worker preview.
 
 ## B-002 — shared start in Score Duel — 2026-11-10
 
