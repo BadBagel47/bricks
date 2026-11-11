@@ -29,6 +29,7 @@ records released changes.
 | F-005 | Feature | Wire multiplayer sound effects | P1 | Done (run 2, 2026-11-10) | Standard |
 | B-001 | Bug | Admin offers Revoke for expired invitations | P1 | Done (run 1, 2026-11-10) | Standard |
 | B-002 | Bug | Pieces start falling at slightly different moments on the two devices in a match | P2 | Done (2026-11-10) | Strong |
+| B-003 | Bug | Opponent board lags and moves unevenly | P2 | Proposed | Standard |
 | T-001 | Task | Owner check of a real private two-player match in the Worker preview | P1 | Open | — (owner) |
 | T-002 | Task | Controlled public Pages activation of operating controls | P2 | Open | Strong |
 | F-006 | Feature | More music tracks | P3 | Idea | Standard |
@@ -107,6 +108,17 @@ Grouped by shared code and risk to save quota without lowering quality.
   (when the "ready" write arrived; the host sees it first). A fresh round now
   catches up from the shared countdown end (`startCatchUp`, capped at 3 s);
   Battle already used the shared frame clock. Restored games are unchanged.
+
+### B-003 Opponent board lags and moves unevenly
+- Owner observation 2026-11-11: on both devices the opponent's piece appears a
+  little later and does not fall at an even pace.
+- Cause: board snapshots are shared at most twice per second per player
+  (`SnapshotGate`, 500 ms; ADR 0002) to save Spark quota, so the mirror trails
+  by up to ~0.5 s plus network and moves in jumps.
+- Proposal: lower the interval to about 200 ms (≈5 updates/s). Estimated cost is
+  roughly 10 MB download per match hour, far inside the Spark 10 GB/month
+  limit for casual play. Update ADR 0002 and the quota notes; keep
+  changed-only publishing.
 
 ### T-001 Owner check of a real private two-player match
 - Steps are in `HANDOVER.md` → *Next session: finish the playable preview*.
