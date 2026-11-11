@@ -424,7 +424,7 @@ test('two sessions recover twice from confirmed snapshots without a false result
     for (let i = 0; i < 30; i++) await host.keyboard.press(i % 2 ? 'ArrowRight' : 'ArrowLeft')
     await host.waitForTimeout(1100)
     const after = await data()
-    assert.ok(after.snapshots[hu].seq - sequence <= Math.ceil((Date.now() - sampledAt) / 500) + 1)
+    assert.ok(after.snapshots[hu].seq - sequence <= Math.ceil((Date.now() - sampledAt) / 200) + 1)
     await host.evaluate(() => { window.__blurCount = 0; window.addEventListener('blur', () => window.__blurCount++) })
     for (let i = 0; i < 12; i++) await host.keyboard.press('Tab')
     assert.equal(await host.evaluate(() => window.__blurCount), 0)

@@ -94,11 +94,13 @@ or review a hosting/backend change with the owner; never upgrade billing silentl
 
 The visible board is 200 characters; the complete 11-field payload is under
 600 UTF-8 bytes in automated tests. Each player writes changed snapshots only,
-with one request in flight and at least 500 ms after acknowledgement. Rules also
+with one request in flight and at least 200 ms after acknowledgement (500 ms
+before B-003, 2026-11-11). Rules also
 enforce the minimum interval. Unchanged gravity counters and stable final states
 produce no writes. Each client subscribes only to the opponent's current record.
-At the 2 Hz ceiling, two active players produce at most 2.4 KB/s of JSON snapshot
-payload (about 1.44 MB per ten-minute match); TLS/WebSocket/Firebase overhead and
+At the 5 Hz ceiling, two active players produce at most 6 KB/s of JSON snapshot
+payload (about 3.6 MB per ten-minute match, ~22 MB per match hour; changed-only
+publishing keeps real use lower); TLS/WebSocket/Firebase overhead and
 other lobby traffic are additional and have not been measured in production.
 Actual download quota usage must be checked in the Firebase console; this is a
 protocol budget, not a verified billed-traffic estimate. Retention remains two
@@ -107,9 +109,9 @@ epochs are not automatically pruned yet.
 
 ### 3.9 Battle traffic
 
-Boards retain the existing <=2 changed snapshots/second/player and compact 200-cell
+Boards retain the existing <=5 changed snapshots/second/player and compact 200-cell
 encoding. Battle adds one <=250-byte cumulative attack record/player, written only
-when net outgoing rows exist and at most once per >=500 ms publisher cycle. It
+when net outgoing rows exist and at most once per >=200 ms publisher cycle. It
 also adds one small finish record/player/match. There are no per-row events,
 heartbeat writes or growing attack histories. Receivers add two participant-scoped
 listeners (opponent attack prefix and finish); Score Duel adds none.

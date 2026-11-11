@@ -41,6 +41,9 @@ export function snapshotContent(game: GameState) {
   return { board: visibleBoard(game), next: game.next, held: game.held ?? '-' as const, status: game.status === 'gameOver' ? 'gameOver' as const : 'playing' as const, score: game.score, level: game.level, lines: game.lines }
 }
 
+/** Minimum time between board snapshots per player (B-003: about five per second). Rules enforce the same interval. */
+export const SNAPSHOT_INTERVAL_MS = 200
+
 /** Call after acknowledgement; unchanged state consumes neither a sequence nor a write. */
 export class SnapshotGate {
   private previous = ''
@@ -59,7 +62,7 @@ export class SnapshotGate {
   next(game: GameState, now: number) {
     const content = snapshotContent(game)
     const fingerprint = JSON.stringify(content)
-    if (fingerprint === this.previous || now - this.sentAt < 500) return null
+    if (fingerprint === this.previous || now - this.sentAt < SNAPSHOT_INTERVAL_MS) return null
     this.previous = fingerprint
     this.sentAt = now
     return { ...content, seq: ++this.sequence }

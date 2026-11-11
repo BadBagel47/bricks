@@ -64,7 +64,8 @@ Details in `PROGRESS.md` and `CHANGELOG.md`; design rules in spec section 5.0
 and ADR 0005; audio in `docs/AUDIO.md`. The owner then approved reworking admin,
 lobby, settings and match screens to the sketch's behavior (backlog F-001 to
 F-005, B-001). Runs 1 and 2 are done (see `PROGRESS.md`). B-002 (match start
-timing) is fixed.
+timing) is fixed. B-003 (200 ms opponent updates) is staged: the owner must
+publish `firebase/database.rules.json` before the client is deployed.
 
 ## Next session: finish the playable preview
 

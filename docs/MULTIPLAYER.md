@@ -450,8 +450,9 @@ match ID, frozen connection, monotone sequence, server update time, 200 visible
 cells encoded as digits 0–7, Next/Hold, status, score, level and lines. Eleven
 bounded fields; no histories. Stale match IDs and sequences are ignored. The client
 publishes only changed visible state, with one request in flight and a minimum
-500 ms delay after acknowledgement; the server also enforces 500 ms between
-updates. Terminal Game Over is sent once, through the same budget.
+200 ms delay after acknowledgement; the server also enforces 200 ms between
+updates (500 ms before B-003). Checkpoints and Battle attack records use the same
+200 ms rule interval. Terminal Game Over is sent once, through the same budget.
 
 Rules restrict writes to the owning participant and the current ready session's
 selected present connection. Numbers, pieces, schema, monotonicity and terminal
@@ -534,7 +535,7 @@ repeated, late and coalesced snapshots cannot replay rows. Pending counts stay
 numeric, and at most 20 physical rows are allocated even for a maliciously large
 prefix (overflow ends the local game). No event history or per-row writes.
 
-The sender batches net generated rows inside the existing >=500 ms publisher
+The sender batches net generated rows inside the existing >=200 ms publisher
 cycle, with event-driven preflight reads and a transaction. Server rules bind the
 stream to the current Battle version, selected connection, membership/presence,
 monotone sequence/total, bounded fields and update interval. They reject sending

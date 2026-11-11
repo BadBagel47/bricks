@@ -20,12 +20,12 @@ test('snapshots omit physics counters, throttle rapid input, suppress unchanged 
   let game = createGame({ seed: 47 })
   assert.equal(gate.next(game, 0)?.seq, 1)
   game = advanceGame(game, 10).state
-  assert.equal(gate.next(game, 500), null)
+  assert.equal(gate.next(game, 200), null)
   game = dispatch(game, 'moveLeft').state
-  assert.equal(gate.next(game, 499), null)
-  assert.equal(gate.next(game, 500)?.seq, 2)
-  assert.equal(gate.next({ ...game, status: 'gameOver' }, 999), null)
-  assert.equal(gate.next({ ...game, status: 'gameOver' }, 1000)?.status, 'gameOver')
+  assert.equal(gate.next(game, 199), null)
+  assert.equal(gate.next(game, 200)?.seq, 2)
+  assert.equal(gate.next({ ...game, status: 'gameOver' }, 399), null)
+  assert.equal(gate.next({ ...game, status: 'gameOver' }, 400)?.status, 'gameOver')
   assert.equal(gate.next({ ...game, status: 'gameOver' }, 5000), null)
 })
 
@@ -40,9 +40,9 @@ test('a restored publisher continues after its acknowledged sequence and keeps t
   const game = createGame({ seed: 47 })
   const previous = { ...snapshotContent(game), matchId: 'a'.repeat(32), connection: 'b'.repeat(32), seq: 8, updatedAt: 1234 }
   const gate = new SnapshotGate(previous, 1000)
-  assert.equal(gate.next(game, 1500), null)
+  assert.equal(gate.next(game, 1200), null)
   const moved = dispatch(game, 'moveLeft').state
-  assert.equal(gate.next(moved, 1499), null)
-  assert.equal(gate.next(moved, 1500)?.seq, 9)
+  assert.equal(gate.next(moved, 1199), null)
+  assert.equal(gate.next(moved, 1200)?.seq, 9)
   assert.throws(() => new SnapshotGate({ ...previous, seq: 0 }, 0))
 })

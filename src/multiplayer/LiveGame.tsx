@@ -20,7 +20,7 @@ import { gamepadActions } from '../input/gamepad.ts'
 import { HeldInputs } from '../input/repeat.ts'
 import { actionsForSwipe } from '../input/swipe.ts'
 import { HoldBox, PiecePreview, Playfield, TouchControls } from '../ui/GameViews.tsx'
-import { decodeBoard, parseGameSnapshot, SnapshotGate } from './game-snapshot.ts'
+import { decodeBoard, parseGameSnapshot, SnapshotGate, SNAPSHOT_INTERVAL_MS } from './game-snapshot.ts'
 import type { GameSnapshot } from './game-snapshot.ts'
 import type { JoinedRoom } from './room-model.ts'
 import { startCatchUp } from './match-start.ts'
@@ -202,7 +202,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
       }
       if (next?.status === 'gameOver') return
       // Wait after server acknowledgement: no queued writes, no per-frame traffic.
-      if (alive) timer = setTimeout(() => void publish(), 500)
+      if (alive) timer = setTimeout(() => void publish(), SNAPSHOT_INTERVAL_MS)
     }
     timer = setTimeout(() => void publish(), 0)
     return () => { alive = false; clearTimeout(timer); stop(); stopAttacks(); stopFinish() }
