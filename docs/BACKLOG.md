@@ -54,8 +54,8 @@ Grouped by shared code and risk to save quota without lowering quality.
 
 | Run | Items | Why together | Suggested model |
 | --- | --- | --- | --- |
-| 1 | F-001, B-001, F-003 | Self-contained screens (admin page, Settings) with their own fast tests; no multiplayer logic | Standard, medium reasoning (e.g. Claude Sonnet, GPT-6.1 Sol Medium) |
-| 2 | F-002, F-004, F-005 | Share lobby/match components and the two-session Firebase tests; highest regression risk | Strong, high reasoning (e.g. Claude Opus, GPT-6.1 Terra High) |
+| 1 | F-001, B-001, F-003 | Self-contained screens (admin page, Settings) with their own fast tests; no multiplayer logic | Standard, medium reasoning (e.g. Claude Sonnet, GPT-6.1 Terra Medium) |
+| 2 | F-002, F-004, F-005 | Share lobby/match components and the two-session Firebase tests; highest regression risk | Strong, high reasoning (e.g. Claude Opus, GPT-6.1 Sol High) |
 | Later | F-006 | Music data only | Standard, medium |
 | Later | F-007, then F-008 | Architecture work; plan first, then build | Strong, high |
 

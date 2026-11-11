@@ -232,8 +232,8 @@ first-time route. Secret values and the real allowlist deliberately are not in G
 - Keep this checkpoint current and retain durable requirements in the spec.
   Operating controls are authorized; later Phase 4 work needs authorization.
 - Model choice is per run (see AGENTS.md). Tiers: a strong model with high
-  reasoning (e.g. Claude Opus, GPT-6.1 Terra High) for multiplayer, rules or
-  access work; a standard model (e.g. GPT-6.1 Sol Medium) for focused features;
+  reasoning (e.g. Claude Opus, GPT-6.1 Sol High) for multiplayer, rules or
+  access work; a standard model (e.g. Claude Sonnet, GPT-6.1 Terra Medium) for focused features;
   an economical model (e.g. GPT-6 Luna) for copy or styling only. Suggested
   models per item are in `docs/BACKLOG.md`. Do not claim a model switch happened.
 
