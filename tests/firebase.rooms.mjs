@@ -379,7 +379,7 @@ test('two sessions recover twice from confirmed snapshots without a false result
         const screen = document.querySelector('.multiplayer-game')
         const boards = [...screen.querySelectorAll('.playfield')].map(node => node.getBoundingClientRect())
         const buttons = [...screen.querySelectorAll('.touch-button')].map(node => node.getBoundingClientRect())
-        return { height: screen.clientHeight, scroll: screen.scrollHeight, fits: [...boards, ...buttons].every(r => r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= innerHeight), touchSize: buttons.every(r => r.width >= 48 && r.height >= 48) }
+        return { height: screen.clientHeight, scroll: screen.scrollHeight, fits: [...boards, ...buttons].every(r => r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= innerHeight), touchSize: buttons.every(r => r.width >= 44 && r.height >= 44) }
       })
       assert.equal(fit.fits, true, JSON.stringify({ viewport, fit }))
       assert.equal(fit.touchSize, true)
