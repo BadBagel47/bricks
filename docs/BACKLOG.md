@@ -42,6 +42,7 @@ records released changes.
 | B-015 | Feature | Main menu: remove the best score from the buttons, larger button text | Low | Done (2026-11-12) | Standard |
 | F-021 | Feature | Interface animations: screen transitions, sliding segmented controls, springy switches, dialog pop-in, list fade-in; setting *Interface animations* | Medium | Done (2026-11-12) | Standard |
 | F-022 | Feature | Game effects: line clears flash away and the rows above fall into place, hard-drop bump, level-up pulse; setting *Game effects* | Medium | Done (2026-11-12) | Strong |
+| F-023 | Feature | Touch rotation both ways: optional second rotate button (counterclockwise), Row or Split layout, preview in Settings; Swipe: tap left half ↺, right half ↻ (mockups T1–T3) | Medium | Proposed | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-007 | Feature | Extract the multiplayer lobby into a reusable module | Low | Idea | Strong |
 | F-008 | Feature | Stones: Bomberman-like game for 1–2 players | Low | Idea | Strong |
@@ -76,7 +77,7 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 ## Proposed runs (2026-11-12)
 
-No approved runs are waiting. Runs A (F-015, F-016, F-019), B (B-005 to B-010, F-017, F-018, F-020) and C (B-004) are done. B-004 needs the owner's two-device check.
+Proposed: F-023 (touch rotation both ways, mockups T1–T3), Claude Sonnet or GPT-6.1 Terra, medium. No approved runs are waiting. Runs A (F-015, F-016, F-019), B (B-005 to B-010, F-017, F-018, F-020) and C (B-004) are done. B-004 needs the owner's two-device check.
 
 ## Details
 
