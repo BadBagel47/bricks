@@ -534,7 +534,13 @@ function App() {
       </div>
       <div className="pause-actions"><button className="secondary-card" onClick={() => void beginGame()}>Restart</button><button className="secondary-card" onClick={() => { audioRef.current?.leaveGame(); setView('menu') }}>Main menu</button></div>
     </section></div>, document.body)}
-    {game.status === 'gameOver' && createPortal(<div className="game-overlay"><section className="overlay-card result-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title"><h1 id="overlay-title">Game over</h1>{isNewRecord && <p className="record-badge">New record</p>}{notice && <p className="notice" role="status">{notice}</p>}<div className="result-stats"><div><span>Final score</span><strong>{game.score.toLocaleString()}</strong></div><div><span>Level</span><strong>{String(game.level).padStart(2, '0')}</strong></div><div><span>Lines</span><strong>{game.lines}</strong></div><div><span>Highscore</span><strong>{resultRank ? `#${resultRank}` : '—'}</strong></div></div><HighscoreTable records={highscores} compact /><button className="button button-primary" autoFocus onClick={() => { if (performance.now() - gameOverAtRef.current >= GAME_OVER_INPUT_GUARD_MS) void beginGame() }}>Play Again</button><button className="overlay-link" onClick={() => { audioRef.current?.leaveGame(); setCapture(null); setGamepadCapture(null); setView('menu') }}>Main Menu</button></section></div>, document.body)}
+    {game.status === 'gameOver' && createPortal(<div className="game-overlay"><section className="overlay-card result-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
+      <header className="result-card-head"><h1 id="overlay-title">Game over</h1>{isNewRecord ? <p className="record-badge">New record</p> : resultRank ? <p className="record-badge rank">#{resultRank} on your list</p> : null}</header>
+      {notice && <p className="notice" role="status">{notice}</p>}
+      <div className="final-score"><span>Final score</span><strong>{game.score.toLocaleString()}</strong></div>
+      <div className="result-stats"><div><span>Level</span><strong>{String(game.level).padStart(2, '0')}</strong></div><div><span>Lines</span><strong>{game.lines}</strong></div><div><span>Best</span><strong>{bestScore === null ? '—' : bestScore.toLocaleString()}</strong></div></div>
+      <HighscoreTable records={highscores.slice(0, 5)} compact highlight={runIdRef.current} />
+      <button className="button button-primary" autoFocus onClick={() => { if (performance.now() - gameOverAtRef.current >= GAME_OVER_INPUT_GUARD_MS) void beginGame() }}>Play Again</button><button className="overlay-link" onClick={() => { audioRef.current?.leaveGame(); setCapture(null); setGamepadCapture(null); setView('menu') }}>Main Menu</button></section></div>, document.body)}
   </>
 
   return <main className="shell menu-shell">
@@ -557,12 +563,11 @@ function focusableControls(scope: HTMLElement): HTMLElement[] {
   )).filter((control) => control.offsetWidth > 0 || control.offsetHeight > 0)
 }
 
-function HighscoreTable({ records, compact = false }: { records: readonly HighscoreRecord[]; compact?: boolean }) {
-  return <div className={`score-table-wrap${compact ? ' score-table-compact' : ''}`}>
-    <table className="score-table"><thead><tr><th>#</th><th>Player</th><th>Score</th><th>Level</th><th>Lines</th></tr></thead>
-      <tbody>{records.map((record, index) => <tr key={record.id}><td>{index + 1}</td><td>{record.username}</td><td>{record.score.toLocaleString()}</td><td>{record.level}</td><td>{record.lines}</td></tr>)}</tbody>
-    </table>
-  </div>
+function HighscoreTable({ records, compact = false, highlight }: { records: readonly HighscoreRecord[]; compact?: boolean; highlight?: string }) {
+  return <table className={`score-cards${compact ? ' compact' : ''}`} aria-label="1 Player highscores">
+    <thead className="visually-hidden"><tr><th>#</th><th>Player</th><th>Level and lines</th><th>Score</th></tr></thead>
+    <tbody>{records.map((record, index) => <tr key={record.id} className={record.id === highlight ? 'own' : undefined}><td className="rank">{index + 1}</td><td className="name">{record.username}</td><td className="meta">Level {String(record.level).padStart(2, '0')} · {record.lines} lines</td><td className="value">{record.score.toLocaleString()}</td></tr>)}</tbody>
+  </table>
 }
 
 function Brand({ compact = false, hero = false }: { compact?: boolean; hero?: boolean }) {

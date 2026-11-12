@@ -139,11 +139,12 @@ button.mode-card:hover{border-color:var(--accent);transform:translateY(-1px)}
 .overlay-link:hover{color:var(--accent)}
 .result-card{max-height:min(94dvh,780px);overflow:auto;padding:24px}
 .result-card h1{margin-bottom:12px}
-.result-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 16px}
-.result-stats>div{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:12px;background:var(--panel-2)}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 14px;text-align:center}
+.result-stats>div{display:flex;flex-direction:column;gap:2px;padding:8px;border-radius:12px;background:var(--bg);border:1px solid var(--line-soft)}
 .result-stats span{color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
 .result-stats strong{font:700 20px var(--display)}
-.record-badge{margin:0 0 10px!important;color:var(--accent)!important;font-size:15px!important;font-weight:700}
+.record-badge{display:inline-grid;place-items:center;height:26px;margin:8px 0 0!important;padding:0 12px;border-radius:13px;background:var(--accent);color:var(--accent-ink)!important;font-size:12px!important;font-weight:700;letter-spacing:.06em;text-transform:uppercase;line-height:1!important}
+.record-badge.rank{background:var(--panel-3);color:var(--soft)!important}
 .score-table-compact{margin-bottom:16px}
 .score-table-compact .score-table{font-size:13px}
 .score-table-compact .score-table th,.score-table-compact .score-table td{padding:8px}
@@ -339,3 +340,12 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
 .name-field{position:relative}
 .name-field input{width:100%;padding-right:64px}
 .name-count{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;pointer-events:none}
+
+/* F-016: 1 Player game over. */
+.result-card{padding:22px 18px}
+.result-card-head{text-align:center;margin-bottom:10px}
+.result-card-head h1{margin:0}
+.final-score{display:flex;flex-direction:column;align-items:center;margin:0 0 12px}
+.final-score span{color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+.final-score strong{font:700 44px/1.1 var(--display);color:var(--accent);font-variant-numeric:tabular-nums}
+.result-card .score-cards{margin-bottom:14px}

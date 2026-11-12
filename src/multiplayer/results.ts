@@ -130,3 +130,28 @@ export function battleHighscores(matches: readonly MatchResult[]) {
   }
   return [...players.values()].sort((a, b) => b.wins - a.wins || b.wins / b.played - a.wins / a.played || b.score - a.score || a.uid.localeCompare(b.uid)).slice(0, 10)
 }
+
+export const OWNER_STORAGE_KEY = 'bricks.multiplayer-owner.v1'
+
+/** This device's player in the archive: the remembered UID, or the only player present in every match. */
+export function archiveOwner(matches: readonly MatchResult[], remembered: string | null = null): string | null {
+  if (remembered && matches.some(m => m.players.some(p => p.uid === remembered))) return remembered
+  if (!matches.length) return null
+  const [first, ...rest] = matches
+  const common = first.players.map(p => p.uid).filter(uid => rest.every(m => m.players.some(p => p.uid === uid)))
+  return common.length === 1 ? common[0] : null
+}
+
+/** Record between two players in one mode, oldest to newest; `recent` holds the last four outcomes for `uid`. */
+export function headToHead(matches: readonly MatchResult[], mode: MatchResult['mode'], uid: string, otherUid: string) {
+  const outcomes = matches
+    .filter(m => m.mode === mode && m.players.some(p => p.uid === uid) && m.players.some(p => p.uid === otherUid))
+    .sort((a, b) => Date.parse(a.playedAt) - Date.parse(b.playedAt) || a.id.localeCompare(b.id))
+    .map(m => m.players.find(p => p.uid === uid)!.outcome)
+  return {
+    wins: outcomes.filter(o => o === 'win').length,
+    losses: outcomes.filter(o => o === 'loss').length,
+    draws: outcomes.filter(o => o === 'draw').length,
+    recent: outcomes.slice(-4),
+  }
+}

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { battleHighscores, duelHighscores, parseResults, readResults, recordResult, RESULT_STORAGE_KEY, ResultCollector, validResult } from '../src/multiplayer/results.ts'
+import { archiveOwner, battleHighscores, duelHighscores, headToHead, parseResults, readResults, recordResult, RESULT_STORAGE_KEY, ResultCollector, validResult } from '../src/multiplayer/results.ts'
 import type { MatchResult } from '../src/multiplayer/results.ts'
 import type { MatchStart } from '../src/multiplayer/match-start.ts'
 import type { JoinedRoom } from '../src/multiplayer/room-model.ts'
@@ -108,4 +108,18 @@ test('Battle aggregates by identity, ranks wins then rate then points, and retai
   assert.equal(battleHighscores([sameName]).length, 2, 'equal names never merge identities')
   const tie = battle('d'.repeat(32), 60, 60)
   assert.deepEqual(battleHighscores([tie]).map(p => [p.wins, p.played, p.draws]), [[0, 1, 1], [0, 1, 1]])
+})
+
+test('head-to-head record counts only matches between the two players in one mode, newest last', () => {
+  const first = battle('1'.repeat(32), 30, 20), second = battle('2'.repeat(32), 10, 20), third = battle('3'.repeat(32), 40, 20)
+  first.playedAt = '2026-11-01T10:00:00.000Z'; second.playedAt = '2026-11-02T10:00:00.000Z'; third.playedAt = '2026-11-03T10:00:00.000Z'
+  const duel = completed('4'.repeat(32))
+  const record = headToHead([third, duel, first, second], 'battle', 'host', 'guest')
+  assert.deepEqual(record, { wins: 2, losses: 1, draws: 0, recent: ['win', 'loss', 'win'] })
+  assert.deepEqual(headToHead([third], 'battle', 'host', 'someone'), { wins: 0, losses: 0, draws: 0, recent: [] })
+  assert.equal(archiveOwner([first, duel]), null, 'ambiguous when both players are in every match')
+  assert.equal(archiveOwner([first, duel], 'guest'), 'guest')
+  const other = battle('5'.repeat(32)); other.players[1].uid = 'third'
+  assert.equal(archiveOwner([first, other]), 'host')
+  assert.equal(archiveOwner([]), null)
 })
