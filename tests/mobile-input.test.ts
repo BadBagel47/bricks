@@ -35,3 +35,10 @@ test('swipes have thresholds for movement, drop, hard drop and rotation', () => 
   assert.deepEqual(actionsForSwipe({ x: 0, y: 0 }, { x: 5, y: 5 }), ['rotateClockwise'])
   assert.deepEqual(actionsForSwipe({ x: 0, y: 0 }, { x: 30, y: 2 }), [])
 })
+
+test('a tap on the left half of the board rotates counterclockwise, on the right half clockwise', () => {
+  const board = { left: 100, width: 200 }
+  assert.deepEqual(actionsForSwipe({ x: 150, y: 300 }, { x: 152, y: 301 }, board), ['rotateCounterclockwise'])
+  assert.deepEqual(actionsForSwipe({ x: 250, y: 300 }, { x: 251, y: 302 }, board), ['rotateClockwise'])
+  assert.deepEqual(actionsForSwipe({ x: 150, y: 300 }, { x: 152, y: 301 }), ['rotateClockwise'], 'without board bounds a tap rotates clockwise')
+})

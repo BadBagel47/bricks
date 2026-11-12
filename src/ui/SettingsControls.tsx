@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react'
 import type { KeyboardEvent } from 'react'
 import type { PieceType } from '../engine/types.ts'
+import { previewShape } from './piece-preview.ts'
 import { blockStyle } from './level-palettes.ts'
 import type { BlockColors } from './level-palettes.ts'
 
@@ -36,20 +37,20 @@ export function Stepper({ label, value, min, max, lowerLabel, raiseLabel, onChan
   </div>
 }
 
-const PREVIEW_SHAPES: readonly (readonly [PieceType, string])[] = [
-  ['I', '####....'], ['O', '.##..##.'], ['T', '###..#..'], ['S', '.##.##..'], ['Z', '##...##.'], ['J', '#...###.'], ['L', '..#.###.'],
-]
+const PREVIEW_TYPES: readonly PieceType[] = ['I', 'O', 'T', 'S', 'Z', 'J', 'L']
 
 /** Seven sample pieces in the chosen block colors, drawn at the given level. */
 export function ColorPreview({ colors, level }: { colors: BlockColors; level: number }) {
-  return <div className="color-preview" role="img" aria-label={colors === 'level' ? 'Preview: colors change with each level' : 'Preview: fixed classic colors'}>
-    {PREVIEW_SHAPES.map(([type, mask]) => {
+  return <div className="color-preview" role="img" aria-label={colors === 'level' ? 'Preview: retro colors that change with each level' : colors === 'tones' ? 'Preview: shades that change with each level' : 'Preview: fixed modern colors'}>
+    {PREVIEW_TYPES.map((type) => {
       const style = blockStyle(type, level, colors)
-      return <div aria-hidden="true" className="preview-piece" key={type}>
-        {[...mask].map((cell, index) => cell === '#'
+      // B-016: each piece is drawn in its own bounding box and centred in its slot.
+      const shape = previewShape(type)
+      return <div aria-hidden="true" className="preview-piece" key={type}><div style={{ gridTemplateColumns: `repeat(${shape.width}, 8px)` }}>
+        {Array.from({ length: shape.width * shape.height }, (_, index) => shape.cells.has(index)
           ? <i key={index} style={{ background: style.fill, boxShadow: style.ring ? `inset 0 0 0 2px ${style.ring}` : undefined }} />
           : <i key={index} className="empty" />)}
-      </div>
+      </div></div>
     })}
   </div>
 }

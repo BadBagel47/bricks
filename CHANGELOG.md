@@ -7,6 +7,8 @@ not publish version numbers yet; entries are grouped by deployment.
 ## [Unreleased]
 
 ### Added (2026-11-12)
+- F-023: touch rotation both ways: *Rotate buttons* One/Two (Two by default: ↺ beside ↻), *Layout* Row/Split (two-thumb layout with round rotate buttons) and a live preview in Settings. In Swipe mode a tap on the left half rotates ↺, on the right half ↻.
+- F-024: block colors *Retro* (NES style, formerly "Change by level"), *Tones* (new: every piece filled in shades of the level's colors) and *Modern* (fixed colors, formerly "Classic").
 - F-022: game effects: cleared rows flash and shrink away, the blocks above fall into place, hard drops bump the board and level-ups pulse the Level box. Setting *Game effects* (Display), also on your own board in 2 Players.
 - F-021: interface animations: screens cross-fade, segmented controls and High Scores tabs slide, switches spring, dialogs pop in, lists and menu buttons fade in. Setting *Interface animations* (Display).
 
@@ -23,6 +25,7 @@ not yet on the public GitHub Pages site.
 - B-009: top bars sit at the same edge on game and match screens; the match Back button has the standard size.
 
 ### Fixed (run 5, 2026-11-12)
+- B-016: pieces in the block color preview are centred; on phones the Score/Level/Lines row spans the full width again.
 - B-011: top bars line up with the content on wide screens; phones use one edge on every screen.
 - B-012: focus outlines only after Tab, never on headings or dialogs.
 - B-014: Space can no longer restart from the game-over dialog.

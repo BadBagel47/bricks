@@ -59,7 +59,7 @@ guides. Owner instructions and the specification take precedence.
 
 ## Current checkpoint — 2026-11-11
 
-Latest work (2026-11-12): F-021 interface animations and F-022 game effects, after run 5 (F-015 – F-020, B-004 – B-015). B-004 needs the owner's two-device check. Ideas F-006 – F-008 remain in `docs/BACKLOG.md`.
+Latest work (2026-11-12): F-023 touch rotation both ways, F-024 Retro/Tones/Modern block colors, B-016; before that F-021/F-022 animations and run 5. B-004 needs the owner's two-device check. Ideas F-006 – F-008 remain in `docs/BACKLOG.md`.
 
 ### Earlier checkpoint — 2026-11-10
 

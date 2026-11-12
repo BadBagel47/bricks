@@ -8,6 +8,10 @@
 - **Phase 4 status:** Documentation and maintenance instructions added; no application code changed. Waiting for owner DNS, GitHub Pages custom-domain/HTTPS, Firebase Authorized domains (and API-key referrer, if restricted). Live verification checklist not yet observed; this environment cannot reach the site.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
+## F-023, F-024, B-016 — 2026-11-12
+
+Owner approved ("Kör"). Personal settings `rotateButtons` ('one' | 'two', default two), `touchLayout` ('row' | 'split') and block colors value `tones`; `TouchControls` renders row or split layouts, `TouchPreview` in Settings; `actionsForSwipe` takes board bounds for left/right-half taps; Tones palette computed in `level-palettes.ts` (HSL, short way round the hue circle). Touch buttons may shrink to 44 px so six fit at 320 px. Local: unit tests 176 pass (6 firebase/miniflare suites cannot run here), browser integration 15/15; screenshots of row/split at 390 and 320.
+
 ## F-021, F-022 — 2026-11-12
 
 Owner request ("Titta på … animationer", "Kör en inställning för effekter"). New personal settings `interfaceAnimations` and `gameEffects` (default on). Board effects via `lineClearEffect` (unit-tested) and Web Animations in `Playfield`; CSS overlay for clearing rows; view transitions through `document.startViewTransition` except into the game. Local: unit tests 176 pass (6 firebase/miniflare suites cannot run here), browser integration 15/15; animation frames checked in a harness.

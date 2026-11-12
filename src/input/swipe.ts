@@ -5,12 +5,13 @@ export interface SwipePoint {
   readonly y: number
 }
 
-export function actionsForSwipe(start: SwipePoint, end: SwipePoint): GameAction[] {
+/** `board` lets a tap rotate counterclockwise on the left half and clockwise on the right half (F-023). */
+export function actionsForSwipe(start: SwipePoint, end: SwipePoint, board?: { left: number; width: number }): GameAction[] {
   const dx = end.x - start.x
   const dy = end.y - start.y
   const horizontal = Math.abs(dx)
   const vertical = Math.abs(dy)
-  if (Math.max(horizontal, vertical) < 20) return ['rotateClockwise']
+  if (Math.max(horizontal, vertical) < 20) return [board && start.x < board.left + board.width / 2 ? 'rotateCounterclockwise' : 'rotateClockwise']
   if (Math.max(horizontal, vertical) < 36) return []
   if (horizontal > vertical) {
     const action: GameAction = dx < 0 ? 'moveLeft' : 'moveRight'

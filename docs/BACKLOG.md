@@ -42,9 +42,9 @@ records released changes.
 | B-015 | Feature | Main menu: remove the best score from the buttons, larger button text | Low | Done (2026-11-12) | Standard |
 | F-021 | Feature | Interface animations: screen transitions, sliding segmented controls, springy switches, dialog pop-in, list fade-in; setting *Interface animations* | Medium | Done (2026-11-12) | Standard |
 | F-022 | Feature | Game effects: line clears flash away and the rows above fall into place, hard-drop bump, level-up pulse; setting *Game effects* | Medium | Done (2026-11-12) | Strong |
-| F-023 | Feature | Touch rotation both ways: optional second rotate button (counterclockwise), Row or Split layout, preview in Settings; Swipe: tap left half ↺, right half ↻ (mockups T1–T3) | Medium | Proposed | Standard |
-| F-024 | Feature | Block colors: three modes – Retro (NES style by level, today's "Change by level"), Modern (fixed colors, today's "Classic") and new Tones (all filled, shades of the level's two colors) | Medium | Proposed | Standard |
-| B-016 | Bug | Block color preview in Settings: the I piece sits at the top of its slot instead of centred | Low | Proposed | Standard |
+| F-023 | Feature | Touch rotation both ways: optional second rotate button (counterclockwise), Row or Split layout, preview in Settings; Swipe: tap left half ↺, right half ↻ (mockups T1–T3) | Medium | Done (2026-11-12) | Standard |
+| F-024 | Feature | Block colors: three modes – Retro (NES style by level, today's "Change by level"), Modern (fixed colors, today's "Classic") and new Tones (all filled, shades of the level's two colors) | Medium | Done (2026-11-12) | Standard |
+| B-016 | Bug | Block color preview in Settings: the I piece sits at the top of its slot instead of centred | Low | Done (2026-11-12) | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-007 | Feature | Extract the multiplayer lobby into a reusable module | Low | Idea | Strong |
 | F-008 | Feature | Stones: Bomberman-like game for 1–2 players | Low | Idea | Strong |
@@ -79,13 +79,13 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 ## Proposed runs (2026-11-12)
 
-Proposed: F-023 (touch rotation both ways, mockups T1–T3), F-024 (Retro/Modern/Tones block colors) and B-016 (preview centring), Claude Sonnet or GPT-6.1 Terra, medium. No approved runs are waiting. Runs A (F-015, F-016, F-019), B (B-005 to B-010, F-017, F-018, F-020) and C (B-004) are done. B-004 needs the owner's two-device check.
+No approved runs are waiting. F-023, F-024 and B-016 are done (2026-11-12). Runs A (F-015, F-016, F-019), B (B-005 to B-010, F-017, F-018, F-020) and C (B-004) are done. B-004 needs the owner's two-device check.
 
 ## Details
 
 ### F-024 block color modes (2026-11-12)
 - Owner: "Classic" is misleading since the level mode is the classic NES look; wants a third mode with modern filled pieces whose colors follow the level.
-- Proposal: rename to *Retro* and *Modern*, add *Tones*: seven shades per level, interpolated around the colour wheel between the level's two colours with varied lightness (no grey mid-tones). Comparison image shared in chat.
+- Done: labels *Retro* / *Tones* / *Modern*; saved values stay `level` / `tones` / `classic` so existing settings keep working. Tones: seven shades per level, interpolated around the colour wheel between the level's two colours with varied lightness (no grey mid-tones). Comparison image shared in chat.
 
 ### F-021, F-022 animations and effects (2026-11-12)
 - Owner request: nicer UI with animations on view changes and switches, and a setting for game effects such as a line-clear animation where the blocks above fall down.

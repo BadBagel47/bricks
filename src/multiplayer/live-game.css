@@ -73,7 +73,9 @@
 @media(max-width:900px){
   .multiplayer-game{padding:10px 14px;gap:8px}
   .multiplayer-game .control-hint{display:none}
-  .multiplayer-game .touch-controls{--touch-size:min(var(--preferred-touch-size),calc((100vw - 72px)/5),60px)}
+  .multiplayer-game .touch-controls{--touch-size:min(var(--preferred-touch-size),calc((100vw - 28px - (var(--touch-count, 5) - 1) * clamp(5px, 2vw, 12px)) / var(--touch-count, 5)),60px)}
+  .multiplayer-game .touch-split{--touch-size:min(var(--preferred-touch-size),calc((100vw - 68px) / 6.2),60px)}
+  .multiplayer-game:has(.touch-split){--chrome:calc(280px + var(--touch-size, 56px) * 0.6)}
 }
 @media(max-width:360px){
   .match-chip{padding:0 9px;font-size:13px}

@@ -32,6 +32,13 @@ test('the level palette changes on every level transition', () => {
 test('classic colors stay fixed per piece and level palettes keep two colors per level', () => {
   for (const type of PIECE_TYPES) assert.equal(colorForPiece(type, 0, 'classic'), colorForPiece(type, 7, 'classic'))
   assert.equal(new Set(PIECE_TYPES.map((type) => colorForPiece(type, 0, 'classic'))).size, 7)
+  // Tones (F-024): seven filled, distinct shades per level that change with the level.
+  for (let level = 0; level < 10; level++) {
+    const tones = PIECE_TYPES.map((type) => blockStyle(type, level, 'tones'))
+    assert.ok(tones.every(({ fill, ring }) => /^#[0-9A-F]{6}$/.test(fill) && ring === null), `level ${level}`)
+    assert.equal(new Set(tones.map(({ fill }) => fill)).size, 7, `level ${level}`)
+  }
+  assert.notEqual(colorForPiece('T', 0, 'tones'), colorForPiece('T', 1, 'tones'))
   for (let level = 0; level < 30; level++) {
     assert.ok(new Set(PIECE_TYPES.map((type) => colorForPiece(type, level))).size <= 2)
     assert.ok(blockStyle('T', level).ring)

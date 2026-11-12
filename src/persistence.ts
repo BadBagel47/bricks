@@ -1,3 +1,4 @@
+import type { BlockColors } from './ui/level-palettes.ts'
 export interface PersonalSettings {
   readonly version: 1
   readonly hardDropEnabled: boolean
@@ -8,9 +9,13 @@ export interface PersonalSettings {
   readonly mobileControlMethod: 'dpad' | 'swipe'
   readonly touchButtonSize: number
   readonly leftHandedControls: boolean
+  /** F-023: one rotate button (clockwise) or two (counterclockwise and clockwise). */
+  readonly rotateButtons: 'one' | 'two'
+  /** F-023: all buttons in one row, or split between two thumbs. */
+  readonly touchLayout: 'row' | 'split'
   readonly hideTouchControlsWhenController: boolean
   readonly ghostPiece: boolean
-  readonly blockColors: 'level' | 'classic'
+  readonly blockColors: BlockColors
   /** Menu and screen transitions, switches, dialogs (F-021). */
   readonly interfaceAnimations: boolean
   /** Line clears, landing and level-up effects on the board (F-022). */
@@ -40,7 +45,7 @@ export interface HighscoreResult {
 
 export const DEFAULT_PERSONAL_SETTINGS: PersonalSettings = {
   version: 1, hardDropEnabled: true, musicEnabled: true, musicVolume: 70, effectsEnabled: true, effectsVolume: 70,
-  mobileControlMethod: 'dpad', touchButtonSize: 56, leftHandedControls: false, hideTouchControlsWhenController: true,
+  mobileControlMethod: 'dpad', touchButtonSize: 56, leftHandedControls: false, rotateButtons: 'two', touchLayout: 'row', hideTouchControlsWhenController: true,
   ghostPiece: false, blockColors: 'level', interfaceAnimations: true, gameEffects: true,
 }
 export const DEFAULT_SINGLE_PLAYER_SETTINGS: SinglePlayerSettings = { version: 1, startLevel: 0, holdEnabled: false }
@@ -68,9 +73,11 @@ export function parsePersonalSettings(raw: string | null): PersonalSettings {
     mobileControlMethod: value?.mobileControlMethod === 'swipe' ? 'swipe' : 'dpad',
     touchButtonSize: typeof value?.touchButtonSize === 'number' && Number.isInteger(value.touchButtonSize) && value.touchButtonSize >= 44 && value.touchButtonSize <= 72 ? value.touchButtonSize : 56,
     leftHandedControls: typeof value?.leftHandedControls === 'boolean' ? value.leftHandedControls : false,
+    rotateButtons: value?.rotateButtons === 'one' ? 'one' : 'two',
+    touchLayout: value?.touchLayout === 'split' ? 'split' : 'row',
     hideTouchControlsWhenController: typeof value?.hideTouchControlsWhenController === 'boolean' ? value.hideTouchControlsWhenController : true,
     ghostPiece: typeof value?.ghostPiece === 'boolean' ? value.ghostPiece : false,
-    blockColors: value?.blockColors === 'classic' ? 'classic' : 'level',
+    blockColors: value?.blockColors === 'classic' || value?.blockColors === 'tones' ? value.blockColors : 'level',
     interfaceAnimations: typeof value?.interfaceAnimations === 'boolean' ? value.interfaceAnimations : true,
     gameEffects: typeof value?.gameEffects === 'boolean' ? value.gameEffects : true,
   }

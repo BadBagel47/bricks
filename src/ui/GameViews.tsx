@@ -15,7 +15,7 @@ function blockVars(type: PieceType | 'G', level: number, colors: BlockColors): C
   return { '--cell-fill': style.fill, '--cell-ring': style.ring ?? 'transparent', '--cell-color': style.ring ?? style.fill } as CSSProperties
 }
 
-export function Playfield({ game, swipeMode, onSwipe, ghost = false, colors = 'level', clear = null, thump = 0 }: { game: Pick<GameState, 'board' | 'active' | 'level'>; swipeMode: boolean; onSwipe: (start: SwipePoint, end: SwipePoint) => void; ghost?: boolean; colors?: BlockColors; clear?: ClearEffect | null; thump?: number }) {
+export function Playfield({ game, swipeMode, onSwipe, ghost = false, colors = 'level', clear = null, thump = 0 }: { game: Pick<GameState, 'board' | 'active' | 'level'>; swipeMode: boolean; onSwipe: (start: SwipePoint, end: SwipePoint, board: { left: number; width: number }) => void; ghost?: boolean; colors?: BlockColors; clear?: ClearEffect | null; thump?: number }) {
   const cells: Cell[] = game.board.flatMap((row) => [...row])
   const ghosts = new Set<number>()
   const swipeStart = useRef<SwipePoint | null>(null)
@@ -50,7 +50,7 @@ export function Playfield({ game, swipeMode, onSwipe, ghost = false, colors = 'l
   const ghostStyle = game.active ? blockVars(game.active.type, game.level, colors) : undefined
   return <div ref={root} className={`playfield${swipeMode ? ' swipe-active' : ''}`} role="img" aria-label="Game board, 10 columns by 20 rows"
     onPointerDown={(event) => { if (swipeMode && event.pointerType !== 'mouse') { swipeStart.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId) } }}
-    onPointerUp={(event) => { if (!swipeMode || !swipeStart.current) return; onSwipe(swipeStart.current, { x: event.clientX, y: event.clientY }); swipeStart.current = null }}
+    onPointerUp={(event) => { if (!swipeMode || !swipeStart.current) return; const rect = event.currentTarget.getBoundingClientRect(); onSwipe(swipeStart.current, { x: event.clientX, y: event.clientY }, { left: rect.left, width: rect.width }); swipeStart.current = null }}
     onPointerCancel={() => { swipeStart.current = null }}>
     {cells.map((type, index) => type
       ? <div className="board-cell filled" key={index} style={blockVars(type, game.level, colors)} />
@@ -61,22 +61,50 @@ export function Playfield({ game, swipeMode, onSwipe, ghost = false, colors = 'l
   </div>
 }
 
-export function TouchControls({ method, buttonSize, leftHanded, hardDropEnabled, enabled, apply }: {
-  method: 'dpad' | 'swipe'; buttonSize: number; leftHanded: boolean; holdEnabled?: boolean; hardDropEnabled: boolean; enabled: boolean; apply: (action: GameAction) => void
+const ICONS = {
+  left: <path d="M15 5l-7 7 7 7" />,
+  right: <path d="M9 5l7 7-7 7" />,
+  down: <path d="M5 9l7 7 7-7" />,
+  clockwise: <><path d="M20 12a8 8 0 1 1-2.6-5.9" /><path d="M20 4v5h-5" /></>,
+  counterclockwise: <><path d="M4 12a8 8 0 1 0 2.6-5.9" /><path d="M4 4v5h5" /></>,
+  hardDrop: <><path d="M6 5l6 6 6-6" /><path d="M6 11l6 6 6-6" /><path d="M5 21h14" /></>,
+}
+
+export function TouchControls({ method, buttonSize, leftHanded, hardDropEnabled, enabled, apply, rotateButtons = 'two', layout = 'row' }: {
+  method: 'dpad' | 'swipe'; buttonSize: number; leftHanded: boolean; holdEnabled?: boolean; hardDropEnabled: boolean; enabled: boolean; apply: (action: GameAction) => void; rotateButtons?: 'one' | 'two'; layout?: 'row' | 'split'
 }) {
-  return <section className={`touch-controls${leftHanded ? ' left-handed' : ''}`} style={{ '--preferred-touch-size': `${buttonSize}px` } as CSSProperties} aria-label="Touch controls">
-    {method === 'dpad' ? <div className="touch-row">
-      <TouchButton enabled={enabled} label="Move left" icon={<path d="M15 5l-7 7 7 7" />} action="moveLeft" apply={apply} repeat />
-      <TouchButton enabled={enabled} label="Move right" icon={<path d="M9 5l7 7-7 7" />} action="moveRight" apply={apply} repeat />
-      <TouchButton enabled={enabled} label="Soft drop" icon={<path d="M5 9l7 7 7-7" />} action="softDrop" apply={apply} repeat />
-      <TouchButton enabled={enabled} label="Rotate" icon={<><path d="M20 12a8 8 0 1 1-2.6-5.9" /><path d="M20 4v5h-5" /></>} action="rotateClockwise" apply={apply} primary />
-      {hardDropEnabled && <TouchButton enabled={enabled} label="Hard drop" icon={<><path d="M6 5l6 6 6-6" /><path d="M6 11l6 6 6-6" /><path d="M5 21h14" /></>} action="hardDrop" apply={apply} />}
-    </div> : <p className="swipe-instructions">Tap to rotate · Swipe left/right to move · Swipe down to soft drop · Swipe up to hard drop</p>}
+  const two = rotateButtons === 'two'
+  const left = <TouchButton enabled={enabled} label="Move left" icon={ICONS.left} action="moveLeft" apply={apply} repeat />
+  const right = <TouchButton enabled={enabled} label="Move right" icon={ICONS.right} action="moveRight" apply={apply} repeat />
+  const down = <TouchButton enabled={enabled} label="Soft drop" icon={ICONS.down} action="softDrop" apply={apply} repeat />
+  const ccw = two && <TouchButton enabled={enabled} label="Rotate counterclockwise" icon={ICONS.counterclockwise} action="rotateCounterclockwise" apply={apply} secondary />
+  const cw = <TouchButton enabled={enabled} label={two ? 'Rotate clockwise' : 'Rotate'} icon={ICONS.clockwise} action="rotateClockwise" apply={apply} primary />
+  const drop = hardDropEnabled && <TouchButton enabled={enabled} label="Hard drop" icon={ICONS.hardDrop} action="hardDrop" apply={apply} />
+  const count = 4 + (two ? 1 : 0) + (hardDropEnabled ? 1 : 0)
+  return <section className={`touch-controls${leftHanded ? ' left-handed' : ''}${method === 'dpad' && layout === 'split' ? ' touch-split' : ''}`} style={{ '--preferred-touch-size': `${buttonSize}px`, '--touch-count': count } as CSSProperties} aria-label="Touch controls">
+    {method === 'swipe' ? <p className="swipe-instructions">Tap the left half to rotate ↺ and the right half to rotate ↻ · Swipe left/right to move · Swipe down to soft drop · Swipe up to hard drop</p>
+      : layout === 'split' ? <>
+        <div className="touch-pad">{drop || <span />}{left}{down}{right}</div>
+        <div className={`touch-rotate${two ? ' two' : ''}`}>{ccw}{cw}</div>
+      </>
+      : <div className="touch-row">{left}{right}{down}{ccw}{cw}{drop}</div>}
   </section>
 }
 
-function TouchButton({ label, icon, action, apply, enabled, repeat = false, primary = false }: {
-  label: string; icon: ReactNode; action: GameAction; apply: (action: GameAction) => void; enabled: boolean; repeat?: boolean; primary?: boolean
+/** Small static copy of the touch buttons for the Settings preview (F-023). */
+export function TouchPreview({ rotateButtons, layout, hardDrop, leftHanded }: { rotateButtons: 'one' | 'two'; layout: 'row' | 'split'; hardDrop: boolean; leftHanded: boolean }) {
+  const icon = (paths: ReactNode, kind = '') => <span className={`preview-key${kind}`}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">{paths}</svg></span>
+  const two = rotateButtons === 'two'
+  const ccw = two && icon(ICONS.counterclockwise, ' secondary'), cw = icon(ICONS.clockwise, ' primary'), drop = hardDrop ? icon(ICONS.hardDrop) : <span />
+  return <div className={`touch-preview${layout === 'split' ? ' split' : ''}${leftHanded ? ' left-handed' : ''}`} role="img" aria-label={`Preview: ${layout === 'split' ? 'split layout' : 'one row'} with ${two ? 'two rotate buttons' : 'one rotate button'}`}>
+    {layout === 'split'
+      ? <><div className="touch-pad">{drop}{icon(ICONS.left)}{icon(ICONS.down)}{icon(ICONS.right)}</div><div className={`touch-rotate${two ? ' two' : ''}`}>{ccw}{cw}</div></>
+      : <div className="touch-row">{icon(ICONS.left)}{icon(ICONS.right)}{icon(ICONS.down)}{ccw}{cw}{hardDrop && drop}</div>}
+  </div>
+}
+
+function TouchButton({ label, icon, action, apply, enabled, repeat = false, primary = false, secondary = false }: {
+  label: string; icon: ReactNode; action: GameAction; apply: (action: GameAction) => void; enabled: boolean; repeat?: boolean; primary?: boolean; secondary?: boolean
 }) {
   const activePointer = useRef<number | null>(null)
   const delay = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -101,7 +129,7 @@ function TouchButton({ label, icon, action, apply, enabled, repeat = false, prim
     if (activePointer.current === event.pointerId) stop()
   }
   useEffect(() => { if (!enabled) stop(); return stop }, [enabled])
-  return <button aria-label={label} disabled={!enabled} className={`touch-button${primary ? ' touch-primary' : ''}`} onClick={(event) => { if (event.detail === 0) apply(action) }} onLostPointerCapture={release} onPointerCancel={release} onPointerDown={press} onPointerUp={release} type="button"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">{icon}</svg></button>
+  return <button aria-label={label} disabled={!enabled} className={`touch-button${primary ? ' touch-primary' : ''}${secondary ? ' touch-secondary' : ''}`} onClick={(event) => { if (event.detail === 0) apply(action) }} onLostPointerCapture={release} onPointerCancel={release} onPointerDown={press} onPointerUp={release} type="button"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">{icon}</svg></button>
 }
 
 export function PiecePreview({ type, level, colors = 'level' }: { type: PieceType; level: number; colors?: BlockColors }) {

@@ -14,7 +14,7 @@ import { DEFAULT_GAMEPAD_BINDINGS, gamepadActions, gamepadButtonLabel, parseGame
 import type { GamepadBindings } from './input/gamepad.ts'
 import { HeldInputs } from './input/repeat.ts'
 import { actionsForSwipe } from './input/swipe.ts'
-import { HoldBox, Playfield, PiecePreview, TouchControls } from './ui/GameViews.tsx'
+import { HoldBox, Playfield, PiecePreview, TouchControls, TouchPreview } from './ui/GameViews.tsx'
 import { ColorPreview, Segmented, Stepper } from './ui/SettingsControls.tsx'
 import { addHighscore, DEFAULT_PERSONAL_SETTINGS, DEFAULT_SINGLE_PLAYER_SETTINGS, parseHighscores, parsePersonalSettings, parseSinglePlayerSettings, serializeHighscores } from './persistence.ts'
 import type { HighscoreRecord, PersonalSettings, SinglePlayerSettings } from './persistence.ts'
@@ -474,6 +474,13 @@ function App() {
       </form>
       <span className="setting-label" id="touch-controls-label">Touch controls</span>
       <Segmented label="Touch controls" value={personal.mobileControlMethod} options={[{ value: 'dpad', label: 'Buttons' }, { value: 'swipe', label: 'Swipe' }]} onChange={(mobileControlMethod) => savePersonal({ ...personal, mobileControlMethod })} />
+      {personal.mobileControlMethod === 'dpad' && <>
+        <span className="setting-label">Rotate buttons</span>
+        <Segmented label="Rotate buttons" value={personal.rotateButtons} options={[{ value: 'one', label: 'One' }, { value: 'two', label: 'Two' }]} onChange={(rotateButtons) => savePersonal({ ...personal, rotateButtons })} />
+        <span className="setting-label">Layout</span>
+        <Segmented label="Button layout" value={personal.touchLayout} options={[{ value: 'row', label: 'Row' }, { value: 'split', label: 'Split' }]} onChange={(touchLayout) => savePersonal({ ...personal, touchLayout })} />
+        <TouchPreview rotateButtons={personal.rotateButtons} layout={personal.touchLayout} hardDrop={personal.hardDropEnabled} leftHanded={personal.leftHandedControls} />
+      </>}
       <div className="setting-group">
       <label className="toggle-row"><span>Hard Drop</span><input checked={personal.hardDropEnabled} onChange={(event) => savePersonal({ ...personal, hardDropEnabled: event.target.checked })} type="checkbox" /></label>
       <label className="audio-volume"><span>Button size</span><input aria-label="Touch button size" max="72" min="44" onChange={(event) => savePersonal({ ...personal, touchButtonSize: Number(event.target.value) })} step="4" type="range" value={personal.touchButtonSize} /><output>{personal.touchButtonSize}px</output></label>
@@ -482,7 +489,7 @@ function App() {
       </div>
       <h2 className="settings-heading">Display</h2>
       <span className="setting-label">Block colors</span>
-      <Segmented label="Block colors" value={personal.blockColors} options={[{ value: 'level', label: 'Change by level' }, { value: 'classic', label: 'Classic' }]} onChange={(blockColors) => savePersonal({ ...personal, blockColors })} />
+      <Segmented label="Block colors" value={personal.blockColors} options={[{ value: 'level', label: 'Retro' }, { value: 'tones', label: 'Tones' }, { value: 'classic', label: 'Modern' }]} onChange={(blockColors) => savePersonal({ ...personal, blockColors })} />
       <ColorPreview colors={personal.blockColors} level={singlePlayer.startLevel} />
       <div className="setting-group">
       <label className="toggle-row"><span>Ghost piece</span><input checked={personal.ghostPiece} onChange={(event) => savePersonal({ ...personal, ghostPiece: event.target.checked })} type="checkbox" /></label>
@@ -553,10 +560,10 @@ function App() {
         <div className={levelUp ? 'level-up' : undefined} key={`level-${levelUp}`}><span>Level</span><strong>{String(game.level).padStart(2, '0')}</strong></div>
         <div><span>Lines</span><strong>{game.lines}</strong></div>
       </aside>
-      <Playfield game={game} ghost={personal.ghostPiece} colors={personal.blockColors} clear={clearFx} thump={thump} swipeMode={personal.mobileControlMethod === 'swipe'} onSwipe={(start, end) => actionsForSwipe(start, end).forEach(apply)} />
+      <Playfield game={game} ghost={personal.ghostPiece} colors={personal.blockColors} clear={clearFx} thump={thump} swipeMode={personal.mobileControlMethod === 'swipe'} onSwipe={(start, end, board) => actionsForSwipe(start, end, board).forEach(apply)} />
       <aside className="game-side next-panel"><div className="next-box"><span>Next</span><PiecePreview type={game.next} level={game.level} colors={personal.blockColors} /></div>{game.holdEnabled && <HoldBox type={game.held} level={game.level} colors={personal.blockColors} enabled={game.status === 'playing' && !game.holdUsed} onHold={() => apply('hold')} />}</aside>
     </section>
-    {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={personal.touchButtonSize} leftHanded={personal.leftHandedControls} holdEnabled={game.holdEnabled} hardDropEnabled={game.hardDropEnabled} enabled={game.status === 'playing'} apply={apply} />}
+    {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={personal.touchButtonSize} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdEnabled={game.holdEnabled} hardDropEnabled={game.hardDropEnabled} enabled={game.status === 'playing'} apply={apply} />}
     <p className="controller-status" aria-live="polite">{controllerStatus}</p>
     <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">{gameAnnouncement}</p>
     <p className="control-hint" aria-label="Keyboard controls">{keyLabel(bindings.moveLeft)} {keyLabel(bindings.moveRight)} Move · {keyLabel(bindings.softDrop)} Soft drop · {keyLabel(bindings.rotateCounterclockwise)} {keyLabel(bindings.rotateClockwise)} Rotate · {personal.hardDropEnabled ? `${keyLabel(bindings.hardDrop)} Hard drop` : 'Hard Drop off'}{game.holdEnabled ? ` · ${keyLabel(bindings.hold)} Hold` : ''} · {keyLabel(bindings.pause)} / Esc Pause</p>
