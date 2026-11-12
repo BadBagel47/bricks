@@ -42,7 +42,7 @@ async function waitForHostEditor(host, guest) {
     throw new Error(`Host: ${(await host.locator('body').innerText()).slice(0, 600)} Guest: ${(await guest.locator('body').innerText()).slice(0, 600)} State: ${JSON.stringify(data)}`, { cause: error })
   }
 }
-const menu = page => page.getByRole('button', { name: '← Back to menu', exact: true }).click()
+const menu = page => page.getByRole('button', { name: 'Back to menu', exact: true }).click()
 async function roomHeading(page, name) {
   try { await page.getByRole('heading', { name, exact: typeof name === 'string' }).waitFor() }
   catch (error) { throw new Error(`Lobby screen: ${await page.locator('body').innerText()}`, { cause: error }) }
@@ -621,6 +621,7 @@ test('Score Duel retains a finished player through reconnect, settles by points 
     for (const page of [host, guest]) {
       await page.reload()
       await page.getByRole('button', { name: 'High Scores', exact: true }).click()
+      await page.getByRole('tab', { name: 'Score Duel', exact: true }).click()
       const table = page.getByRole('table', { name: 'Score Duel highscores', exact: true })
       await table.waitFor()
       assert.equal(await table.locator('tbody tr').count(), 4)
@@ -705,6 +706,7 @@ test('Battle restores queued attacks after reconnect, applies them once and sett
     await host.getByRole('main', { name: 'Match results', exact: true }).getByRole('heading', { name: 'You lose', exact: true }).waitFor()
     await host.getByRole('button', { name: 'Main Menu', exact: true }).click()
     await host.getByRole('button', { name: 'High Scores', exact: true }).click()
+    await host.getByRole('tab', { name: 'Battle', exact: true }).click()
     const ranking = host.getByRole('table', { name: 'Battle highscores', exact: true })
     assert.match(await ranking.locator('tbody tr').first().innerText(), /Battle Guest/)
   } finally { for (const context of contexts) await context.close() }

@@ -1,3 +1,4 @@
+import { SubpageBar } from '../ui/SubpageBar.tsx'
 import { MatchResults } from './ResultViews.tsx'
 import { recordResult } from './results.ts'
 import type { MatchResult } from './results.ts'
@@ -8,7 +9,7 @@ import type { Connections } from './match-start.ts'
 import { WaitingMessages } from './waiting-messages.ts'
 import MatchSettingsPanel from './MatchSettingsPanel.tsx'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties } from 'react'
 import { readFirebaseConfig } from './config.ts'
 import { MultiplayerError, playerFacingError } from './errors.ts'
 import { inviteURL, previousRoomCode } from './room-model.ts'
@@ -28,7 +29,7 @@ function setInvite(code: string | null) {
   history.replaceState(null, '', url)
 }
 
-export default function MultiplayerScreen({ username, branding, onBack, preferences }: { preferences: MultiplayerPreferences; username: string; branding: ReactNode; onBack: () => void }) {
+export default function MultiplayerScreen({ username, onBack, preferences }: { preferences: MultiplayerPreferences; username: string; onBack: () => void }) {
   const [playing, setPlaying] = useState(false)
   const [completed, setCompleted] = useState<{ result: MatchResult; uid: string } | null>(null)
   const [lastCompletedId, setLastCompletedId] = useState<string | null>(null)
@@ -219,8 +220,9 @@ export default function MultiplayerScreen({ username, branding, onBack, preferen
   const status = (uid: string) => connected === false ? 'Unknown' : presence[uid] ? 'Connected' : 'Disconnected'
   const statusClass = (uid: string) => connected === false ? 'unknown' : presence[uid] ? 'online' : 'offline'
   const isHost = joined?.uid === joined?.room.hostUid
+  const slots = Math.min(8, Math.max(4, code.length))
   return <><main className="shell" inert={playing || completed !== null} onPointerDownCapture={() => audio.unlock()} onKeyDownCapture={() => audio.unlock()}>
-    <header className="topbar">{branding}<button className="back-button" disabled={busy} onClick={() => void back()}>← Back to menu</button></header>
+    <SubpageBar title="2 Players" heading={!joined} headingRef={joined ? undefined : heading} disabled={busy} onBack={() => void back()} aside={joined ? undefined : <>Playing as <b>{username}</b></>} />
     <section className="settings-card multiplayer-card" aria-busy={busy}>
       {joined ? <div className="room-code-card">
         <span className="room-code-label" aria-hidden="true">Room code</span>
@@ -230,7 +232,7 @@ export default function MultiplayerScreen({ username, branding, onBack, preferen
           <button className="back-button" onClick={() => void copy(joined.code, 'Code copied.')}>Copy Code</button>
         </div>
         {sharingURL ? <label className="invite-field">Invite link<input readOnly value={sharingURL} onFocus={event => event.currentTarget.select()} /></label> : <p className="notice">Share the original private invitation link. The room code alone does not grant access.</p>}
-      </div> : <h1 ref={heading} tabIndex={-1}>2 Players</h1>}
+      </div> : null}
       {!available && <p className="notice" role="status">Multiplayer is not connected yet.</p>}
       {accessNotice && <p className="notice" role="status">{accessNotice}</p>}
       {error && <div role="alert"><p className="notice">{error.message}</p><div className="room-actions">
@@ -254,14 +256,19 @@ export default function MultiplayerScreen({ username, branding, onBack, preferen
         </div>
 
       </> : <>
-        <div className="menu-actions">
+        <section className="mp-choice mp-host" aria-labelledby="host-heading">
+          <div className="mp-choice-head"><span className="brand-tile" aria-hidden="true">+</span><h2 id="host-heading">Host a game</h2></div>
           <button className="button button-primary" disabled={busy || !available} onClick={() => void run(async () => (await rooms()).create(username))}>Host Game</button>
           {previous && <button className="secondary-card" disabled={busy || !available} onClick={() => void run(async () => (await rooms()).reopen(previous, username))}>Reopen Previous Room</button>}
-        </div>
-        <form className="name-form" onSubmit={event => { event.preventDefault(); void run(async () => (await rooms()).join(code, username)) }}>
-          <label htmlFor="join-room-code">Room code</label>
-          <input ref={input} autoCapitalize="characters" autoComplete="off" id="join-room-code" maxLength={8} value={code} onChange={event => setCode(event.target.value)} />
-          <button className="button button-primary" disabled={busy || !available} type="submit">Join Game</button>
+        </section>
+        <form className="mp-choice mp-join" aria-labelledby="join-heading" onSubmit={event => { event.preventDefault(); void run(async () => (await rooms()).join(code, username)) }}>
+          <div className="mp-choice-head"><span className="brand-tile" aria-hidden="true">#</span><h2 id="join-heading">Join a game</h2></div>
+          <label htmlFor="join-room-code" className="code-entry-label">Room code</label>
+          <div className="code-entry" style={{ '--count': slots } as CSSProperties}>
+            <input ref={input} autoCapitalize="characters" autoComplete="off" autoCorrect="off" spellCheck={false} id="join-room-code" maxLength={8} value={code} onChange={event => setCode(event.target.value.toUpperCase())} />
+            {Array.from({ length: slots }, (_, index) => <span aria-hidden="true" key={index} className={index < code.length ? 'brand-tile filled' : index === code.length ? 'code-slot next' : 'code-slot'}>{code[index] ?? ''}</span>)}
+          </div>
+          <button className={code.trim().length >= 4 ? 'button button-primary' : 'secondary-card join-idle'} disabled={busy || !available} type="submit">Join Game</button>
         </form>
       </>}
     </section>

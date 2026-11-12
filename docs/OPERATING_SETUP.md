@@ -2,7 +2,7 @@
 
 The Bricks Worker preview is provisioned and deployed; the owner confirmed real
 Mailjet login reaches settings. Public Pages operating-control activation remains
-pending. Read [HANDOVER.md](../HANDOVER.md) for current resources, completed steps
+pending. Read [HANDOFF.md](../HANDOFF.md) for current resources, completed steps
 and outstanding live checks before using this reusable runbook. Do not repeat
 initialization on an existing installation. Keep public Pages running during
 verification. No billing upgrade or paid plan is authorized.
@@ -220,7 +220,7 @@ server-side; ordinary variables (including MAIL_FROM) are declared in Wrangler.
    mail receipt with the owner, one-use confirmation, logout/revocation, D1
    behavior and real Firebase publication. For Bricks, owner-confirmed receipt
    and settings-page login and GitHub-verified policy reads are complete;
-   the remaining live checks are listed in HANDOVER.md.
+   the remaining live checks are listed in HANDOFF.md.
 6. Set GitHub Actions repository variable `VITE_OPERATING_ORIGIN` to the Worker
    HTTPS origin (no trailing slash). Merge/publish the reviewed client only after
    those checks pass. Once Pages has deployed, set Worker `GAME_URL` back to

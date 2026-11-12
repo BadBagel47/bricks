@@ -2,11 +2,23 @@
 
 - **Phase:** 3 — Multiplayer (explicitly approved by the owner)
 - **Milestone:** 3.13 — Integration and security review
-- **Status:** Phase 3.13 review is documented in `docs/PHASE3_REVIEW.md`. Public gameplay remains at `09a7cb6`; the separately approved operating controls are live in a Worker preview on `feature/operating-controls`. See current checkpoint below and `HANDOVER.md` for verified setup and remaining live checks.
+- **Status:** Phase 3.13 review is documented in `docs/PHASE3_REVIEW.md`. Public gameplay remains at `09a7cb6`; the separately approved operating controls are live in a Worker preview on `feature/operating-controls`. See current checkpoint below and `HANDOFF.md` for verified setup and remaining live checks.
 - **Phase 4 (parallel):** Public deployment (authorized by the owner 2026-11-10)
 - **Target:** https://bricks.trythis.one on GitHub Pages with a custom domain (owner-approved deviation from Firebase Hosting for now). Firebase remains the backend. See `docs/DEPLOYMENT.md`.
 - **Phase 4 status:** Documentation and maintenance instructions added; no application code changed. Waiting for owner DNS, GitHub Pages custom-domain/HTTPS, Firebase Authorized domains (and API-key referrer, if restricted). Live verification checklist not yet observed; this environment cannot reach the site.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
+
+## Run 5: F-015 – F-020, B-004 – B-010 — 2026-11-12
+
+Owner approved ("Vi kör A-C") after a full screen review (mockups R1–R6 in the design canvas). Group B: input-modality focus rings (`src/ui/input-modality.ts`), 700 ms Play Again guard, zero-point games dropped from high scores, bounding-box previews (`previewShape`), aligned top bars, admin `scrollbar-gutter`, new pause dialog and name entry, consistent outlines and room chip. Group A: `ResultViews.tsx`/`results.css` rewritten (player cards, Battle comparison, `headToHead`, `archiveOwner`, top 3, sticky actions); game over and High Scores use shared `score-cards` rows. Group C (B-004): snapshot writes spaced from their start (`SNAPSHOT_SPACING_MS` 250, poll 40 ms), rollback and retry of failed writes; rules unchanged. Local: unit tests 174 pass (6 firebase/miniflare suites cannot run here), browser integration 15/15; harness screenshots at 320, 390 and 844 wide. Emulator suites run in CI. B-004 still needs a two-device check by the owner.
+
+## F-010, F-011 — 2026-11-12
+
+Owner approved ("Kör A"). Match screen (`LiveGame.tsx`, `live-game.css`): Battle debug line visually hidden, opponent board heading visually hidden (name stays in the score row), level/lines in a new side-column block (`side-stats`), own stats row hidden, `--chrome` reduced so the board grows on short screens (320×667: 184 → 194 px). 2 Players start (`MultiplayerScreen.tsx`, `App.css`): Host/Join cards, tile-based room-code entry over a transparent real input (label "Room code" kept), `SubpageBar` gained `headingRef` and `aside` ("Playing as"). Local: unit tests unchanged (170 pass; 6 firebase/miniflare suites cannot run here); harness screenshots at 390×844, 320×667, 844×390, 1280×800 — no overflow, touch targets ≥ 48 px. Emulator suites run in CI.
+
+## F-012, F-013, F-014, T-004 — 2026-11-11
+
+Owner approved ("Kör b och c"). UI: new `SubpageBar` (back icon + title) on Settings, High Scores and 2 Players; High Scores tabs with empty-state actions (the match result screen keeps its own headings); menu "Playing as" opens settings and shows the best 1 Player score. Tests updated for the new accessible names ("Back to menu", score tabs). Local: browser suite 15/15; unit tests unchanged (firebase-dependent suites cannot run here); emulator suites run in CI. T-004: `HANDOVER.md` → `HANDOFF.md`, `AGENTS.md` reduced to a reference to the shared rules v1.0, Bricks rules moved to HANDOFF.md, backlog priorities High/Medium/Low, Done table, ADR 0007.
 
 ## T-002 / T-003 — public release on bricks.trythis.one — 2026-11-11
 
@@ -14,7 +26,7 @@ Owner completed: `VITE_OPERATING_ORIGIN` repository variable, Cloudflare CNAME (
 
 ## F-009 — shared music test player — 2026-11-11
 
-Owner request. Merged `main`'s music proposals (`docs/music/`, owner stable-BPM rule in AGENTS). New generated player `docs/music/player.html` (`npm run music:player`, source `src/music-player/`) in the game's style; *Bricks Theme* plays through the game's scheduler and the extracted `VoicePool` (`src/audio/web-voices.ts`), proposals through `docs/music/engine.js`. Local: audio unit tests 10/10; headless Chrome check at 390×844 and 1280×900 — playback starts, BPM 132→172 with danger, switching to Night Shift (120) and Troika (150) works, no console errors, no horizontal overflow. Open decision: whether Bricks Theme keeps its danger tempo rise (owner stable-BPM rule applies to new music).
+Owner request. Merged `main`'s music proposals (`docs/music/`, owner stable-BPM rule in the HANDOFF.md project rules). New generated player `docs/music/player.html` (`npm run music:player`, source `src/music-player/`) in the game's style; *Bricks Theme* plays through the game's scheduler and the extracted `VoicePool` (`src/audio/web-voices.ts`), proposals through `docs/music/engine.js`. Local: audio unit tests 10/10; headless Chrome check at 390×844 and 1280×900 — playback starts, BPM 132→172 with danger, switching to Night Shift (120) and Troika (150) works, no console errors, no horizontal overflow. Open decision: whether Bricks Theme keeps its danger tempo rise (owner stable-BPM rule applies to new music).
 
 ## B-003 — faster opponent board — 2026-11-11
 
@@ -47,7 +59,7 @@ Open follow-up work is tracked in `docs/BACKLOG.md` (F-001 to F-008, B-001, T-00
 ## Reusable operating controls — current checkpoint, 2026-11-10
 
 The authoritative current setup, resources, failure diagnoses, next steps and
-environment limits are in [HANDOVER.md](HANDOVER.md). Continue on
+environment limits are in [HANDOFF.md](HANDOFF.md). Continue on
 `feature/operating-controls`; public Pages activation remains pending.
 
 - Worker application `498c293` passed complete CI, deployment and live admin,
@@ -90,7 +102,7 @@ environment limits are in [HANDOVER.md](HANDOVER.md). Continue on
 
 The sections below preserve observations at their original checkpoint. Statements
 such as “pending”, old test counts or “not deployed” are historical; use the current
-checkpoint above and HANDOVER.md for present status.
+checkpoint above and HANDOFF.md for present status.
 
 ## Milestone 3.11
 - Owner confirmed rules published. Main `da4009e` passed full CI and deployed Pages: https://github.com/BadBagel47/bricks/actions/runs/42403753502. App code matches tested `0ddf8c4`.

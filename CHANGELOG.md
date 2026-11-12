@@ -9,6 +9,33 @@ not publish version numbers yet; entries are grouped by deployment.
 Deployed to the Worker preview (`feature/operating-controls`, merge `89b856c`);
 not yet on the public GitHub Pages site.
 
+### Changed (run 5, 2026-11-12)
+- F-015: new match result screen: outcome headline, two player cards, Battle comparison (survived, rows sent, cancelled), head-to-head record with the last four matches, top 3 and Rematch/Main Menu kept at the bottom.
+- F-016: 1 Player game over with large final score, record badge, Level/Lines/Best and a top 5 with the new entry highlighted.
+- F-019: High Scores shown as card rows; the player's own multiplayer entries are marked "(you)".
+- F-017: pause dialog shows score, level and lines, has Music and Sound effects switches, Restart and Main menu.
+- F-018: name entry centred under the logo with a character counter.
+- F-020: consistent 1 px outlines on panels, chips, tab bars and secondary buttons; the room code is a chip in the match bar.
+- B-009: top bars sit at the same edge on game and match screens; the match Back button has the standard size.
+
+### Fixed (run 5, 2026-11-12)
+- B-004: opponent board updates more often and more evenly (writes spaced from their start, early arrivals retried).
+- B-005: focus outlines only appear after keyboard navigation.
+- B-006: pressing Space right at game over no longer starts a new game.
+- B-007: games without points are no longer saved as high scores.
+- B-008: Next and Hold pieces are centred exactly.
+- B-010: the admin page no longer shifts sideways when switching tabs.
+
+### Changed (run 4)
+- F-010: match screen: the Battle debug line is hidden (kept for screen readers and tests), the opponent's name appears once (score row), level and lines moved to the side column, larger own board.
+- F-011: 2 Players start screen with *Host a game* and *Join a game* cards; the room code is typed into letter tiles; "Playing as" in the top bar.
+
+### Changed (run 3)
+- F-012: High Scores has tabs (1 Player / Score Duel / Battle); empty tabs offer a Play button; top three ranks are highlighted.
+- F-013: Settings, High Scores and 2 Players share a top bar with a back icon and the page title (replaces the "Back to menu" pill).
+- F-014: on the main menu, "Playing as" opens the name settings and the 1 Player button shows the best local score.
+- T-004: repository adapted to the shared agent rules v1.0: `AGENTS.md` is now a reference, project rules moved to `HANDOFF.md` (renamed from `HANDOVER.md`), backlog uses High/Medium/Low and a Done table.
+
 ### Changed (run 2)
 - F-002: lobby rebuilt per the sketch: room-code tiles with *Copy Invite Link* /
   *Copy Code*, player cards (Host/Guest, connection status), mode summary with a

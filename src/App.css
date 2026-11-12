@@ -50,7 +50,7 @@ button.mode-card:hover{border-color:var(--accent);transform:translateY(-1px)}
 .mode-card.single-player{border-color:transparent;background:var(--accent);color:var(--accent-ink)}
 .mode-card.single-player:hover{background:var(--accent-hover)}
 .mode-copy strong{font-size:17px;font-weight:700}
-.secondary-card{min-height:56px;display:flex;justify-content:center;align-items:center;padding:0 18px;border:0;border-radius:16px;color:var(--text);background:var(--panel);font-size:16px;font-weight:600;cursor:pointer}
+.secondary-card{min-height:56px;display:flex;justify-content:center;align-items:center;padding:0 18px;border:1px solid var(--line);border-radius:16px;color:var(--text);background:var(--panel);font-size:16px;font-weight:600;cursor:pointer}
 .secondary-card:hover{background:var(--panel-3)}
 .notice{color:var(--accent);font-size:15px;line-height:1.5}
 .menu-notice{margin:4px 2px 0}
@@ -112,15 +112,16 @@ button.mode-card:hover{border-color:var(--accent);transform:translateY(-1px)}
 .board-cell.filled,.piece-preview .filled{background:var(--cell-fill,var(--cell-color));border-radius:4px;box-shadow:inset 0 0 0 var(--ring,3px) var(--cell-ring,transparent),inset 0 2px 0 rgba(255,255,255,.28),inset 0 -3px 0 rgba(0,0,0,.28)}
 .board-cell.ghost{background:transparent;border:2px dashed var(--cell-color);border-radius:4px;opacity:.55}
 .game-side{width:100%;max-width:190px;display:flex;flex-direction:column;gap:12px}
-.game-stats>div{display:flex;flex-direction:column;gap:2px;padding:10px 14px;border-radius:14px;background:var(--panel)}
+.game-stats>div{display:flex;flex-direction:column;gap:2px;padding:10px 14px;border-radius:14px;background:var(--panel);border:1px solid var(--line-soft)}
 .game-stats span,.next-box>span,.hold-box>span:first-child,.live-previews span{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
 .game-stats strong{font:700 clamp(20px,2.6vw,26px) var(--display);font-variant-numeric:tabular-nums}
 .game-stats>div:first-child strong{color:var(--accent)}
 .next-panel{align-items:stretch}
-.next-box,.hold-box{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 10px;border-radius:14px;background:var(--panel);border:1px solid transparent}
+.next-box,.hold-box{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 10px;border-radius:14px;background:var(--panel);border:1px solid var(--line-soft)}
 .hold-box{border-color:var(--line);color:var(--text);cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none}
 .hold-box:not(:disabled):hover{border-color:var(--accent)}
-.piece-preview{width:96px;aspect-ratio:1;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:2px;--ring:2px}
+.piece-preview{width:96px;aspect-ratio:1;display:grid;place-items:center;--ring:2px}
+.piece-preview-grid{display:grid;gap:2px}
 .piece-preview span{border-radius:3px}
 .empty-hold{display:grid;place-items:center;width:96px;aspect-ratio:2;color:var(--muted);font:20px var(--display)}
 .control-hint{margin:16px auto 0;color:var(--muted);font-size:14px;line-height:1.5;text-align:center}
@@ -138,11 +139,12 @@ button.mode-card:hover{border-color:var(--accent);transform:translateY(-1px)}
 .overlay-link:hover{color:var(--accent)}
 .result-card{max-height:min(94dvh,780px);overflow:auto;padding:24px}
 .result-card h1{margin-bottom:12px}
-.result-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 16px}
-.result-stats>div{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:12px;background:var(--panel-2)}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 14px;text-align:center}
+.result-stats>div{display:flex;flex-direction:column;gap:2px;padding:8px;border-radius:12px;background:var(--bg);border:1px solid var(--line-soft)}
 .result-stats span{color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
 .result-stats strong{font:700 20px var(--display)}
-.record-badge{margin:0 0 10px!important;color:var(--accent)!important;font-size:15px!important;font-weight:700}
+.record-badge{display:inline-grid;place-items:center;height:26px;margin:8px 0 0!important;padding:0 12px;border-radius:13px;background:var(--accent);color:var(--accent-ink)!important;font-size:12px!important;font-weight:700;letter-spacing:.06em;text-transform:uppercase;line-height:1!important}
+.record-badge.rank{background:var(--panel-3);color:var(--soft)!important}
 .score-table-compact{margin-bottom:16px}
 .score-table-compact .score-table{font-size:13px}
 .score-table-compact .score-table th,.score-table-compact .score-table td{padding:8px}
@@ -196,7 +198,7 @@ button.mode-card:hover{border-color:var(--accent);transform:translateY(-1px)}
 .room-actions{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
 .room-actions .back-button{min-height:48px}
 .room-players{display:grid;gap:8px;margin:24px 0}
-.room-players>div{padding:12px 16px;border-radius:14px;background:var(--panel)}
+.room-players>div{padding:12px 16px;border-radius:14px;background:var(--panel);border:1px solid var(--line-soft)}
 .room-players dt{color:var(--muted);font-size:14px}
 .room-players dd{margin:4px 0 0;font-size:17px;font-weight:600;overflow-wrap:anywhere}
 .invite-field{display:grid;gap:8px;font-size:15px;color:var(--soft)}
@@ -208,7 +210,7 @@ button.mode-card:hover{border-color:var(--accent);transform:translateY(-1px)}
 
 .settings-card .name-form{margin-top:0}
 .setting-label{display:block;margin:18px 0 8px;font-size:14px;color:var(--soft)}
-.segmented{display:grid;gap:4px;padding:4px;background:var(--panel);border-radius:14px}
+.segmented{display:grid;gap:4px;padding:4px;background:var(--panel);border:1px solid var(--line-soft);border-radius:14px}
 .segmented button{min-height:44px;border:0;border-radius:10px;background:transparent;color:var(--soft);font-family:inherit;font-weight:500;font-size:15px;cursor:pointer}
 .segmented button[aria-checked=true]{background:var(--accent);color:var(--accent-ink);font-weight:700}
 .segmented button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
@@ -251,10 +253,10 @@ button.mode-card:hover{border-color:var(--accent);transform:translateY(-1px)}
 .lobby-players .player-status{grid-area:status;font-size:14px;font-weight:600}
 .player-status.online{color:var(--ok)}.player-status.offline{color:var(--bad)}.player-status.unknown{color:var(--muted)}
 .multiplayer-card .settings-heading{margin:24px 0 10px}
-.mode-summary{padding:12px 14px;border-radius:14px;background:var(--panel)}
+.mode-summary{padding:12px 14px;border-radius:14px;background:var(--panel);border:1px solid var(--line-soft)}
 .mode-summary strong{font-size:16px}
 .mode-summary p,.mode-help{margin:4px 0 0;font-size:14px;line-height:1.45;color:var(--muted)}
-.match-rows{margin:8px 0 0;border-radius:14px;background:var(--panel);overflow:hidden}
+.match-rows{margin:8px 0 0;border-radius:14px;background:var(--panel);border:1px solid var(--line-soft);overflow:hidden}
 .match-rows>div{display:flex;justify-content:space-between;align-items:center;height:50px;padding:0 14px;border-bottom:1px solid #222842}
 .match-rows>div:last-child{border-bottom:0}
 .match-rows dt{font-size:16px}.match-rows dd{margin:0;font-size:16px;font-weight:600}
@@ -269,3 +271,81 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
 .room-copy>*{white-space:nowrap;padding:0 12px;font-size:16px}
 .match-settings-editor .room-actions{margin:6px 0 0;align-items:stretch}
 .match-settings-editor .room-actions>*{min-height:52px;margin:0}
+
+/* Subpage top bar: back icon + title (F-013) */
+.subpage-bar{justify-content:flex-start;gap:10px;margin-bottom:8px}
+.icon-back{width:44px;height:44px;flex:none;display:inline-grid;place-items:center;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--soft);cursor:pointer}
+.icon-back svg{width:22px;height:22px}
+.icon-back:hover:not(:disabled){border-color:var(--accent);color:var(--text)}
+.icon-back:disabled{opacity:.5;cursor:default}
+.subpage-title{margin:0;font-size:clamp(22px,4vw,30px)}
+.settings-card>:first-child{margin-top:0}
+
+/* High Scores tabs (F-012) */
+.score-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;margin-bottom:16px;border:1px solid var(--line-soft);border-radius:14px;background:var(--panel)}
+.score-tabs button{min-height:44px;border:0;border-radius:10px;background:transparent;color:var(--muted);font:600 15px var(--display);cursor:pointer}
+.score-tabs button.active{background:var(--accent);color:#10131F}
+.score-tabs button:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.empty-scores{display:grid;justify-items:start;gap:14px;padding:8px 0}
+.empty-scores p{margin:0}
+.score-table tbody tr:nth-child(-n+3) td:first-child{color:var(--accent);font-weight:800}
+
+/* Main menu (F-014) */
+.player-name-button{min-height:44px;padding:0 4px;border:0;background:transparent;cursor:pointer}
+.player-name-button:hover strong{text-decoration:underline}
+.mode-best{display:block;margin-top:4px;color:var(--muted);font:600 14px var(--display);font-variant-numeric:tabular-nums}
+.subpage-bar+.settings-card{margin:0 auto;padding:24px 0 56px}
+
+/* 2 Players start (F-011): Host and Join cards, room code entered as tiles. */
+.subpage-aside{margin-left:auto;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.subpage-aside b{color:var(--text)}
+.mp-choice{display:flex;flex-direction:column;gap:14px;margin:0 0 16px;padding:18px;border-radius:20px;background:var(--panel);border:1px solid var(--panel-3)}
+.mp-choice>*{margin:0}
+.mp-choice-head{display:flex;align-items:center;gap:12px}
+.mp-choice-head h2{margin:0;font-size:18px}
+.mp-choice-head .brand-tile{--tile:40px;transform:none;flex:none}
+.mp-host .mp-choice-head .brand-tile{background:#F5C443}
+.mp-join .mp-choice-head .brand-tile{background:#A98BF5}
+.code-entry-label{font-size:14px;font-weight:600;color:var(--soft)}
+.code-entry{position:relative;display:grid;grid-template-columns:repeat(var(--count,4),1fr);gap:10px}
+.code-entry input{position:absolute;inset:0;z-index:1;width:100%;height:100%;padding:0;border:0;background:transparent;color:transparent;caret-color:transparent;font-size:16px;outline:none;cursor:text}
+.code-entry>span{height:calc(64px * 4 / max(var(--count,4),4));min-height:40px;border-radius:8px;display:grid;place-items:center;font:700 calc(30px * 4 / max(var(--count,4),4))/1 var(--display)}
+.code-entry .brand-tile{width:auto;--tile:auto;transform:none;color:#10131F}
+.code-entry .brand-tile:nth-of-type(6n+1){background:#5B9CF6}.code-entry .brand-tile:nth-of-type(6n+2){background:#F2706D}.code-entry .brand-tile:nth-of-type(6n+3){background:#38D1E8}
+.code-entry .brand-tile:nth-of-type(6n+4){background:#4FD98A}.code-entry .brand-tile:nth-of-type(6n+5){background:#A98BF5}.code-entry .brand-tile:nth-of-type(6n+6){background:#F7964A}
+.code-slot{border:2px dashed #2C3352;background:var(--bg)}
+.code-entry:focus-within .code-slot.next{border:2px solid var(--accent)}
+.code-entry:focus-within .brand-tile:last-of-type:nth-of-type(8){outline:2px solid var(--accent);outline-offset:2px}
+.mp-choice .secondary-card{min-height:56px}
+.mp-join .join-idle{background:#1B2036;border:1px solid #2C3352}
+.subpage-title:focus{outline:none}
+
+/* B-009: top bars sit at the same edge (18 px) and size on every screen. */
+.game-topbar{padding-inline:4px}
+/* F-017: pause dialog. */
+.pause-card{display:flex;flex-direction:column;gap:12px}
+.pause-card h1{margin:0;text-align:center}
+.pause-card .pause-stats{margin:0;text-align:center;font-size:14px}
+.pause-stats b{color:var(--text);font-family:var(--display);font-variant-numeric:tabular-nums}
+.pause-audio{border-radius:14px;overflow:hidden}
+.pause-audio .toggle-row{min-height:52px;background:var(--bg)}
+.pause-audio .toggle-row:first-child{border-radius:14px 14px 0 0}
+.pause-audio .toggle-row:last-child{border-radius:0 0 14px 14px}
+.pause-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pause-actions .secondary-card{min-height:48px;padding:0 10px;font-size:15px}
+/* F-018: name entry, centred under the logo. */
+.welcome-shell .welcome-card{display:flex;flex-direction:column;align-items:stretch}
+.welcome-card>.brand{align-self:center}
+.welcome-card>h1{text-align:center;margin-top:36px}
+.name-field{position:relative}
+.name-field input{width:100%;padding-right:64px}
+.name-count{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;pointer-events:none}
+
+/* F-016: 1 Player game over. */
+.result-card{padding:22px 18px}
+.result-card-head{text-align:center;margin-bottom:10px}
+.result-card-head h1{margin:0}
+.final-score{display:flex;flex-direction:column;align-items:center;margin:0 0 12px}
+.final-score span{color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+.final-score strong{font:700 44px/1.1 var(--display);color:var(--accent);font-variant-numeric:tabular-nums}
+.result-card .score-cards{margin-bottom:14px}

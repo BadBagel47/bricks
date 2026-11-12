@@ -15,7 +15,7 @@ No allowlist email or credential belongs in Git, Vite code or public responses.
 Mailjet is the isolated mail adapter. The owner configured its sender/domain and
 confirmed real login reaches settings in the deployed Worker preview. Public
 Pages activation and remaining production checks are tracked in
-[HANDOVER.md](../HANDOVER.md).
+[HANDOFF.md](../HANDOFF.md).
 
 - Admin email links last 1 hour and are consumed by an explicit confirmation
   POST, never GET. Sessions last 8 hours, use Secure/HttpOnly/SameSite cookies,
@@ -144,4 +144,4 @@ Mailjet DNS verification complete for `system@trythis.one`; the owner subsequent
 provisioned D1 and publisher credentials and confirmed real mail login. GitHub CI
 deployed the Worker and verified public policy reads. This runtime could not
 directly inspect those production providers; outstanding verification is listed
-in [HANDOVER.md](../HANDOVER.md).
+in [HANDOFF.md](../HANDOFF.md).

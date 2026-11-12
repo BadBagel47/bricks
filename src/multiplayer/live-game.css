@@ -1,19 +1,20 @@
 /* Two-player match (spec 5.0, F-004): bar, score row, own board with meter,
    side column with the opponent's board and previews, controls below. */
 .multiplayer-game{
-  --side:clamp(78px,24vw,150px);--meter:0px;--chrome:330px;
+  --side:clamp(78px,24vw,150px);--meter:0px;--chrome:280px;
   position:fixed;inset:0;z-index:20;overflow:auto;background:var(--bg);color:var(--text);
   padding:12px max(14px,calc((100vw - 640px)/2));display:flex;flex-direction:column;align-items:center;gap:10px
 }
 .multiplayer-game:has(.incoming-meter){--meter:16px}
 
-.match-bar{width:100%;display:flex;align-items:center;gap:8px;min-height:44px}
-.match-leave{width:44px;height:44px;flex:0 0 auto;display:grid;place-items:center;padding:0;border:0;border-radius:12px;background:var(--panel);color:var(--soft);cursor:pointer}
-.match-chip{height:32px;padding:0 12px;border-radius:16px;background:var(--panel);display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;white-space:nowrap}
+.match-bar{width:100%;display:flex;align-items:center;gap:8px;min-height:44px;padding-inline:4px}
+.match-leave{width:44px;height:44px;flex:0 0 auto;display:grid;place-items:center;padding:0;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--soft);cursor:pointer}
+.match-chip{height:32px;padding:0 12px;border-radius:16px;background:var(--panel);border:1px solid var(--panel-3);display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;white-space:nowrap}
 .match-chip i{width:8px;height:8px;border-radius:4px;background:var(--muted)}
 .match-chip.link-ok{color:var(--soft);font-weight:500}.match-chip.link-ok i{background:var(--ok)}
 .match-chip.link-wait i{background:var(--accent)}.match-chip.link-done i{background:var(--muted)}
-.match-room{margin-left:auto;font-size:14px;color:var(--muted);white-space:nowrap}
+.match-room{margin-left:auto;color:var(--muted);font-weight:500;min-width:0}
+.match-room b{color:var(--text);font-weight:600;letter-spacing:.04em}
 
 .score-row{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px}
 .score-card{min-width:0;display:flex;flex-direction:column;padding:6px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--panel-3)}
@@ -29,7 +30,7 @@
 .match-note{margin:0;font-size:13px;color:var(--accent)}
 
 .duel-boards{display:flex;align-items:flex-start;justify-content:center;gap:8px;width:100%;min-height:0}
-.incoming-meter{flex:0 0 10px;align-self:stretch;margin-bottom:22px;border-radius:5px;background:var(--panel);display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+.incoming-meter{flex:0 0 10px;align-self:stretch;border-radius:5px;background:var(--panel);display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
 .incoming-meter span{display:block;background:var(--bad);border-radius:3px;transition:height .2s}
 .own-board{min-width:0;display:flex;flex-direction:column;gap:4px}
 .own-board .playfield{width:min(calc(100vw - 28px - var(--side) - 8px - var(--meter)),300px,calc((100dvh - var(--chrome))/2))}
@@ -39,12 +40,16 @@
 .live-stats dd{margin:0;font:700 14px var(--display);font-variant-numeric:tabular-nums}
 .board-status{margin:0;font-size:13px;font-weight:600;color:var(--bad)}
 
-.match-side{flex:0 0 var(--side);width:var(--side);display:flex;flex-direction:column;gap:8px}
+.match-side{flex:0 0 var(--side);width:var(--side);align-self:stretch;display:flex;flex-direction:column;gap:8px}
+.side-stats{margin:auto 0 0;display:grid;gap:6px;font-size:12px}
+.side-stats>div{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.side-stats dt{color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-size:11px}
+.side-stats dd{margin:0;font:700 14px var(--display);font-variant-numeric:tabular-nums}
 .opponent-board h2{margin:0 0 4px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .opponent-board .playfield{width:100%;padding:3px;gap:1px;border-radius:8px;--ring:1px;box-shadow:none}
 .live-previews{display:flex;flex-direction:column;gap:8px}
 .live-previews>div{min-width:0}
-.preview-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 6px;border-radius:12px;background:var(--panel)}
+.preview-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 6px;border-radius:12px;background:var(--panel);border:1px solid var(--line-soft)}
 .live-previews .piece-preview{width:min(48px,100%)}
 .live-previews .hold-box{width:100%;padding:8px 6px;gap:6px;border-radius:12px}
 .live-previews .empty-hold{width:min(40px,100%)}
@@ -60,7 +65,7 @@
 
 /* Wide screens: larger side column; keyboard hint visible. */
 @media(min-width:901px){
-  .multiplayer-game{--side:170px;--chrome:260px}
+  .multiplayer-game{--side:170px;--chrome:230px}
   .own-board .playfield{width:min(320px,calc((100dvh - var(--chrome))/2))}
 }
 
@@ -79,13 +84,14 @@
 @media(max-width:900px) and (orientation:landscape){
   .multiplayer-game{display:grid;grid-template-columns:minmax(0,1fr) 220px;grid-template-rows:auto auto auto 1fr auto;gap:6px 16px;padding:8px 14px;align-items:start}
   .match-bar{grid-column:1;grid-row:1;min-height:36px}
-  .match-leave{width:40px;height:40px}
   .duel-boards{grid-column:1;grid-row:2/6;justify-content:center}
   .own-board .playfield{width:min(260px,calc((100dvh - 92px)/2))}
-  .match-side{flex:0 0 auto;width:auto;flex-direction:row;align-items:flex-start}
+  .match-side{flex:0 0 auto;width:auto;display:grid;grid-template-columns:auto 76px;grid-template-rows:auto 1fr;align-items:start;gap:8px}
+  .match-side>.opponent-board{grid-row:1/3}
   .opponent-board .playfield{width:min(120px,calc((100dvh - 92px)/2.6))}
   .opponent-board{width:min(120px,calc((100dvh - 92px)/2.6))}
   .live-previews{width:76px}
+  .side-stats{margin:0;width:76px;align-self:end}
   .score-row{grid-column:2;grid-row:1}
   .score-card{padding:4px 8px}.score-card strong{font-size:17px}.score-diff strong{font-size:15px}
   .multiplayer-game>.battle-stats{grid-column:2;grid-row:2}
@@ -95,3 +101,5 @@
   .multiplayer-game .touch-row{flex-wrap:wrap;max-width:220px}
   .multiplayer-game>button{grid-column:2;grid-row:5}
 }
+
+@media (max-width:359px){.match-room .room-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}}

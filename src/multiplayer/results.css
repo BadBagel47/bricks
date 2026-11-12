@@ -1,1 +1,66 @@
-.match-results{position:fixed;inset:0;z-index:30;background:var(--bg);overflow:auto;padding:32px max(18px,calc((100vw - 1000px)/2));color:inherit}.match-results h1{font-size:clamp(32px,7vw,58px)}.match-results h2{font-size:22px;margin-top:30px}.match-results>.score-table-wrap{margin:18px 0}.match-results .score-table-wrap{max-width:100%;overflow-x:auto}.match-results .score-table{white-space:nowrap}.result-actions{display:flex;gap:12px;margin:26px 0;flex-wrap:wrap}.ranking-note{font-size:12px;color:var(--muted);line-height:1.5}.match-results button{min-height:48px}.match-results h1:focus{outline:none}
+/* Match result screen (F-015): outcome headline, player cards, Battle comparison,
+   head-to-head record and a short ranking; actions stay at the bottom. */
+.match-results{position:fixed;inset:0;z-index:30;background:var(--bg);overflow:auto;color:inherit;display:flex;flex-direction:column;gap:14px;padding:14px max(18px,calc((100vw - 560px)/2)) 22px}
+.match-results h1:focus{outline:none}
+.result-bar{display:flex;align-items:center;gap:8px;min-height:44px}
+.result-bar .match-chip{height:32px;padding:0 12px;border-radius:16px;background:var(--panel);border:1px solid var(--panel-3);display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;white-space:nowrap}
+.result-bar .match-room{margin-left:auto;color:var(--muted);font-weight:500}.result-bar .match-room b{color:var(--text);font-weight:600;letter-spacing:.04em}
+.result-head{text-align:center}
+.result-head h1{margin:0;font:700 clamp(36px,11vw,48px)/1.1 var(--display);letter-spacing:-.01em}
+.outcome-win .result-head h1{color:var(--ok)}.outcome-loss .result-head h1{color:#FF9A97}
+.result-head p{margin:6px 0 0;color:var(--muted);font-size:15px}
+.result-players{width:100%;border-collapse:separate}
+.result-players tbody{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.result-players tr{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;padding:30px 10px 22px;border-radius:20px;background:var(--panel);border:1px solid var(--panel-3)}
+.result-players tr.own{order:-1;border-color:var(--accent)}
+.result-players td{display:block;padding:0;text-align:center;min-width:0;max-width:100%}
+.result-players .player{display:flex;flex-direction:column;align-items:center;gap:8px;font-weight:600;font-size:15px;overflow-wrap:anywhere}
+.result-players .player .brand-tile{--tile:36px;transform:none}
+.result-players tr.own .brand-tile{background:#F5C443}.result-players tr.other .brand-tile{background:#A98BF5}
+.result-players tr.own .pname::after{content:' (you)';color:var(--muted);font-weight:500}
+.result-players .score{font:700 28px var(--display);font-variant-numeric:tabular-nums}
+.result-players tr.own .score{color:var(--accent)}
+.result-players .meta{color:var(--muted);font-size:12px}.result-players .meta b{color:var(--text);font-family:var(--display)}
+.result-players .outcome{position:absolute;top:-13px;left:50%;transform:translateX(-50%);height:26px;padding:0 10px;border-radius:13px;display:grid;place-items:center;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.result-players .outcome.win{background:#173326;color:var(--ok)}
+.result-players .outcome.loss,.result-players .outcome.draw{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0 0 0 0)}
+.result-compare{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--panel-3);border-radius:20px;overflow:hidden;font-variant-numeric:tabular-nums}
+.result-compare th,.result-compare td{padding:0 16px;height:40px;border-top:1px solid #222842}
+.result-compare thead th{border-top:0;height:36px;font-size:14px;font-weight:600}
+.result-compare thead th:first-child,.result-compare td:first-child{text-align:left}
+.result-compare thead th:last-child,.result-compare td:last-child{text-align:right}
+.result-compare tbody th,.result-compare .lbl{font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:center}
+.result-compare td{font:700 15px var(--display)}.result-compare td.better{color:var(--ok)}
+.result-card-box{display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-radius:20px;background:var(--panel);border:1px solid var(--panel-3)}
+.result-card-box .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.result-card-box .record{font:700 18px var(--display)}
+.result-card-box .muted{color:var(--muted);font-size:13px}
+.pills{display:flex;gap:6px}
+.pill{min-width:26px;height:26px;padding:0 8px;border-radius:13px;display:inline-grid;place-items:center;font-size:12px;font-weight:700}
+.pill.win{background:#173326;color:var(--ok)}.pill.loss{background:#2A1719;color:#FF9A97}.pill.draw{background:#262C47;color:var(--soft)}
+.result-section-title{margin:4px 0 8px;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-family:inherit}
+.result-alert{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#FF9A97}.result-alert p{margin:0}
+.result-actions{position:sticky;bottom:-22px;display:grid;grid-template-columns:1fr;gap:8px;margin:auto 0 -22px;padding:12px 0 22px;background:linear-gradient(transparent,var(--bg) 18px)}
+.result-actions .button{width:100%;min-height:56px}
+.result-actions .secondary-card{min-height:48px}
+.ranking-note{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* High score card rows (F-019), shared by High Scores, game over and match results. */
+.score-cards{width:100%;border-collapse:separate;border-spacing:0}
+.score-cards tbody{display:flex;flex-direction:column;gap:8px}
+.score-cards tr{display:grid;grid-template-columns:36px minmax(0,1fr) auto;grid-template-areas:'rank name value' 'rank meta value';column-gap:12px;row-gap:2px;align-items:center;padding:10px 14px;border-radius:16px;background:var(--panel);border:1px solid var(--panel-3)}
+.match-results .score-cards tr.own{border-color:var(--accent)}
+.score-cards td{display:block;padding:0;min-width:0}
+.score-cards .rank{grid-area:rank;width:36px;height:36px;border-radius:8px;display:grid;place-items:center;font:700 17px var(--display);color:var(--soft);background:var(--panel-2);box-shadow:inset 0 2px 0 rgba(255,255,255,.08),inset 0 -3px 0 rgba(0,0,0,.25)}
+.score-cards tr:nth-child(1) .rank{background:#F5C443;color:#10131F}.score-cards tr:nth-child(2) .rank{background:#C9D0E6;color:#10131F}.score-cards tr:nth-child(3) .rank{background:#F7964A;color:#10131F}
+.score-cards .name{grid-area:name;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.score-cards .meta{grid-area:meta;color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.score-cards .value{grid-area:value;font:700 18px var(--display);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.you-mark{color:var(--muted);font-weight:500}
+.score-cards.compact tbody{gap:2px}
+.score-cards.compact tr{grid-template-columns:22px minmax(0,1fr) auto;grid-template-areas:'rank name value';padding:6px 10px;border-radius:10px;background:none;border-color:transparent}
+.score-cards.compact tr.own{background:#2A2410;border-color:var(--accent)}
+.score-cards.compact .rank{width:auto;height:auto;background:none!important;box-shadow:none;color:var(--muted);font-size:15px}
+.score-cards.compact tr:nth-child(-n+3) .rank{color:var(--accent)}
+.score-cards.compact .meta{display:none}
+.score-cards.compact .value{font-size:15px}

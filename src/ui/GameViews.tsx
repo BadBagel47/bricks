@@ -4,7 +4,7 @@ import { dropPosition, pieceCells } from '../engine/index.ts'
 import type { Cell, GameAction, GameState, PieceType } from '../engine/index.ts'
 import { blockStyle } from './level-palettes.ts'
 import type { BlockColors } from './level-palettes.ts'
-import { previewCells } from './piece-preview.ts'
+import { previewShape } from './piece-preview.ts'
 interface SwipePoint { readonly x: number; readonly y: number }
 
 function blockVars(type: PieceType | 'G', level: number, colors: BlockColors): CSSProperties {
@@ -75,12 +75,15 @@ function TouchButton({ label, icon, action, apply, enabled, repeat = false, prim
 }
 
 export function PiecePreview({ type, level, colors = 'level' }: { type: PieceType; level: number; colors?: BlockColors }) {
-  const cells = previewCells(type)
+  const shape = previewShape(type)
+  // The 4 × 4 frame keeps its size; the piece's own grid sits exactly in its centre.
   return <div className="piece-preview" aria-label={`${type} piece`}>
-    {Array.from({ length: 16 }, (_, index) => {
-      const filled = cells.has(index)
-      return <span className={filled ? 'filled' : ''} key={index} style={filled ? blockVars(type, level, colors) : undefined} />
-    })}
+    <div className="piece-preview-grid" style={{ width: `${shape.width * 25}%`, height: `${shape.height * 25}%`, gridTemplateColumns: `repeat(${shape.width}, 1fr)`, gridTemplateRows: `repeat(${shape.height}, 1fr)` }}>
+      {Array.from({ length: shape.width * shape.height }, (_, index) => {
+        const filled = shape.cells.has(index)
+        return <span className={filled ? 'filled' : ''} key={index} style={filled ? blockVars(type, level, colors) : undefined} />
+      })}
+    </div>
   </div>
 }
 

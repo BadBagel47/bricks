@@ -92,7 +92,8 @@ export function parseHighscores(raw: string | null): HighscoreRecord[] {
     return [{ id: record.id, username: record.username, score: record.score as number, level: record.level as number, lines: record.lines as number, achievedAt: new Date(record.achievedAt).toISOString() }]
   })
   const unique = new Map<string, HighscoreRecord>()
-  for (const record of valid) if (!unique.has(record.id)) unique.set(record.id, record)
+  // Games that end without points are not highscores (B-007); older saves may still contain them.
+  for (const record of valid) if (record.score > 0 && !unique.has(record.id)) unique.set(record.id, record)
   return rankRecords([...unique.values()]).slice(0, 10)
 }
 
@@ -106,6 +107,7 @@ export function addHighscore(records: readonly HighscoreRecord[], next: Highscor
     const ranked = rankRecords(records).slice(0, 10)
     return { records: ranked, rank: ranked.findIndex((record) => record.id === next.id) + 1 || null, isNewRecord: false }
   }
+  if (next.score <= 0) return { records: rankRecords(records).slice(0, 10), rank: null, isNewRecord: false }
   const previousBest = records.reduce((best, record) => Math.max(best, record.score), -1)
   const ranked = rankRecords([...records, next]).slice(0, 10)
   const rank = ranked.findIndex((record) => record.id === next.id)

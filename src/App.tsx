@@ -1,3 +1,4 @@
+import { SubpageBar } from './ui/SubpageBar.tsx'
 import { MultiplayerHighscores } from './multiplayer/ResultViews.tsx'
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
@@ -24,7 +25,11 @@ const GAMEPAD_CONTROLS_KEY = 'bricks.gamepad-controls.v1'
 const PERSONAL_KEY = 'bricks.personal.v1'
 const SINGLE_PLAYER_KEY = 'bricks.single-player.v1'
 const HIGHSCORES_KEY = 'bricks.highscores.v1'
+const SCORE_TABS = [{ id: 'single', label: '1 Player' }, { id: 'score-duel', label: 'Score Duel' }, { id: 'battle', label: 'Battle' }] as const
 type View = 'welcome' | 'menu' | 'settings' | 'highScores' | 'game' | 'multiplayer'
+/** Presses that arrive right after game over were meant for the last piece (B-006). */
+const GAME_OVER_INPUT_GUARD_MS = 700
+
 const MultiplayerScreen = lazy(() => import('./multiplayer/MultiplayerScreen.tsx'))
 
 function readControls() {
@@ -84,9 +89,12 @@ function App() {
   const bindingsRef = useRef(bindings)
   const gamepadBindingsRef = useRef(gamepadBindings)
   const controllerStatusRef = useRef(controllerStatus)
+  const [scoreTab, setScoreTab] = useState<(typeof SCORE_TABS)[number]['id']>('single')
+  const bestScore = highscores.length ? Math.max(...highscores.map(record => record.score)) : null
   const highscoresRef = useRef(highscores)
   const usernameRef = useRef(username)
   const runIdRef = useRef('')
+  const gameOverAtRef = useRef(0)
   const audioRef = useRef<BricksAudio | null>(null)
   const checkingAccess = useRef(false)
 
@@ -184,6 +192,7 @@ function App() {
     if (announcements.length) setGameAnnouncement(announcements.join(' '))
     if (events.some((event) => event.type === 'locked' || event.type === 'linesCleared')) audioRef.current?.setDanger(next.board)
     if (previous.status !== 'gameOver' && next.status === 'gameOver') {
+      gameOverAtRef.current = performance.now()
       const result = addHighscore(highscoresRef.current, {
         id: runIdRef.current,
         username: usernameRef.current || 'Player',
@@ -405,12 +414,12 @@ function App() {
   }, [capture, view])
 
   if (view === 'welcome') return <main className="shell welcome-shell">
-    <Brand />
     <section className="welcome-card" aria-labelledby="welcome-title">
+      <Brand hero />
       <h1 id="welcome-title" tabIndex={-1}>Enter your name</h1>
       <form className="name-form" onSubmit={saveUsername}>
         <label htmlFor="username">Player name</label>
-        <input autoComplete="nickname" autoFocus id="username" maxLength={16} minLength={2} onChange={(event) => setDraft(event.target.value)} required value={draft} />
+        <div className="name-field"><input autoComplete="nickname" autoFocus id="username" maxLength={16} minLength={2} onChange={(event) => setDraft(event.target.value)} required value={draft} /><span className="name-count" aria-hidden="true">{draft.length}/16</span></div>
         <span className="field-hint">2–16 characters</span>
         {notice && <p className="notice" role="status">{notice}</p>}
         <button className="button button-primary" type="submit">Continue</button>
@@ -418,12 +427,11 @@ function App() {
     </section>
   </main>
 
-  if (view === 'multiplayer') return <Suspense fallback={<main className="shell"><p role="status">Loading…</p></main>}><MultiplayerScreen preferences={{ personal, bindings, gamepadBindings }} username={username} branding={<Brand compact />} onBack={() => setView('menu')} /></Suspense>
+  if (view === 'multiplayer') return <Suspense fallback={<main className="shell"><p role="status">Loading…</p></main>}><MultiplayerScreen preferences={{ personal, bindings, gamepadBindings }} username={username} onBack={() => setView('menu')} /></Suspense>
 
   if (view === 'settings') return <main className="shell">
-    <header className="topbar"><Brand compact /><button className="back-button" onClick={() => { setCapture(null); setGamepadCapture(null); setView('menu') }}>← Back to menu</button></header>
+    <SubpageBar title="Settings" onBack={() => { setCapture(null); setGamepadCapture(null); setView('menu') }} />
     <section className="settings-card">
-      <h1 tabIndex={-1}>Settings</h1>
       <h2 className="settings-heading">Personal</h2>
       <form className="name-form" onSubmit={saveUsername}>
         <label htmlFor="username">Player name</label>
@@ -480,13 +488,23 @@ function App() {
   </main>
 
   if (view === 'highScores') return <main className="shell">
-    <header className="topbar"><Brand compact /><button className="back-button" onClick={() => { setCapture(null); setGamepadCapture(null); setView('menu') }}>← Back to menu</button></header>
+    <SubpageBar title="High Scores" onBack={() => setView('menu')} />
     <section className="settings-card score-list-page">
-      <h1 tabIndex={-1}>High Scores</h1>
-      <h2>1 Player</h2>
-      {highscores.length === 0 ? <p className="empty-scores">No scores yet.</p> : <HighscoreTable records={highscores} />}
-      <MultiplayerHighscores mode="score-duel" />
-      <MultiplayerHighscores mode="battle" />
+      <div className="score-tabs" role="tablist" aria-label="High Scores">
+        {SCORE_TABS.map(tab => <button key={tab.id} role="tab" id={`score-tab-${tab.id}`} aria-selected={scoreTab === tab.id} aria-controls="score-panel" tabIndex={scoreTab === tab.id ? 0 : -1} className={scoreTab === tab.id ? 'active' : ''} onClick={() => setScoreTab(tab.id)} onKeyDown={event => {
+          if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return
+          event.preventDefault()
+          const next = SCORE_TABS[(SCORE_TABS.findIndex(t => t.id === tab.id) + (event.key === 'ArrowRight' ? 1 : SCORE_TABS.length - 1)) % SCORE_TABS.length]
+          setScoreTab(next.id)
+          document.getElementById(`score-tab-${next.id}`)?.focus()
+        }}>{tab.label}</button>)}
+      </div>
+      <div id="score-panel" role="tabpanel" aria-labelledby={`score-tab-${scoreTab}`}>
+        {scoreTab === 'single' ? (highscores.length === 0
+          ? <div className="empty-scores"><p>No scores yet.</p><button className="button button-primary" onClick={beginGame}>Play 1 Player</button></div>
+          : <HighscoreTable records={highscores} />)
+          : <MultiplayerHighscores mode={scoreTab} onPlay={() => setView('multiplayer')} />}
+      </div>
     </section>
   </main>
 
@@ -507,16 +525,30 @@ function App() {
     <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">{gameAnnouncement}</p>
     <p className="control-hint" aria-label="Keyboard controls">{keyLabel(bindings.moveLeft)} {keyLabel(bindings.moveRight)} Move · {keyLabel(bindings.softDrop)} Soft drop · {keyLabel(bindings.rotateCounterclockwise)} {keyLabel(bindings.rotateClockwise)} Rotate · {personal.hardDropEnabled ? `${keyLabel(bindings.hardDrop)} Hard drop` : 'Hard Drop off'}{game.holdEnabled ? ` · ${keyLabel(bindings.hold)} Hold` : ''} · {keyLabel(bindings.pause)} / Esc Pause</p>
     </main>
-    {game.status === 'paused' && createPortal(<div className="game-overlay"><section className="overlay-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title"><h1 id="overlay-title">Paused</h1><button className="button button-primary" autoFocus onClick={() => apply('resume')}>Resume</button><button className="overlay-link" onClick={() => { audioRef.current?.leaveGame(); setView('menu') }}>Main menu</button></section></div>, document.body)}
-    {game.status === 'gameOver' && createPortal(<div className="game-overlay"><section className="overlay-card result-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title"><h1 id="overlay-title">Game over</h1>{isNewRecord && <p className="record-badge">New record</p>}{notice && <p className="notice" role="status">{notice}</p>}<div className="result-stats"><div><span>Final score</span><strong>{game.score.toLocaleString()}</strong></div><div><span>Level</span><strong>{String(game.level).padStart(2, '0')}</strong></div><div><span>Lines</span><strong>{game.lines}</strong></div><div><span>Highscore</span><strong>{resultRank ? `#${resultRank}` : '—'}</strong></div></div><HighscoreTable records={highscores} compact /><button className="button button-primary" autoFocus onClick={beginGame}>Play Again</button><button className="overlay-link" onClick={() => { audioRef.current?.leaveGame(); setCapture(null); setGamepadCapture(null); setView('menu') }}>Main Menu</button></section></div>, document.body)}
+    {game.status === 'paused' && createPortal(<div className="game-overlay"><section className="overlay-card pause-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title"><h1 id="overlay-title">Paused</h1>
+      <p className="pause-stats">Score <b>{game.score.toLocaleString()}</b> · Level <b>{String(game.level).padStart(2, '0')}</b> · Lines <b>{game.lines}</b></p>
+      <button className="button button-primary" autoFocus onClick={() => apply('resume')}>Resume</button>
+      <div className="pause-audio">
+        <label className="toggle-row"><span>Music</span><input checked={personal.musicEnabled} onChange={(event) => savePersonal({ ...personal, musicEnabled: event.target.checked })} type="checkbox" /></label>
+        <label className="toggle-row"><span>Sound effects</span><input checked={personal.effectsEnabled} onChange={(event) => savePersonal({ ...personal, effectsEnabled: event.target.checked })} type="checkbox" /></label>
+      </div>
+      <div className="pause-actions"><button className="secondary-card" onClick={() => void beginGame()}>Restart</button><button className="secondary-card" onClick={() => { audioRef.current?.leaveGame(); setView('menu') }}>Main menu</button></div>
+    </section></div>, document.body)}
+    {game.status === 'gameOver' && createPortal(<div className="game-overlay"><section className="overlay-card result-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
+      <header className="result-card-head"><h1 id="overlay-title">Game over</h1>{isNewRecord ? <p className="record-badge">New record</p> : resultRank ? <p className="record-badge rank">#{resultRank} on your list</p> : null}</header>
+      {notice && <p className="notice" role="status">{notice}</p>}
+      <div className="final-score"><span>Final score</span><strong>{game.score.toLocaleString()}</strong></div>
+      <div className="result-stats"><div><span>Level</span><strong>{String(game.level).padStart(2, '0')}</strong></div><div><span>Lines</span><strong>{game.lines}</strong></div><div><span>Best</span><strong>{bestScore === null ? '—' : bestScore.toLocaleString()}</strong></div></div>
+      <HighscoreTable records={highscores.slice(0, 5)} compact highlight={runIdRef.current} />
+      <button className="button button-primary" autoFocus onClick={() => { if (performance.now() - gameOverAtRef.current >= GAME_OVER_INPUT_GUARD_MS) void beginGame() }}>Play Again</button><button className="overlay-link" onClick={() => { audioRef.current?.leaveGame(); setCapture(null); setGamepadCapture(null); setView('menu') }}>Main Menu</button></section></div>, document.body)}
   </>
 
   return <main className="shell menu-shell">
-    <header className="topbar menu-topbar"><span className="player-name">Playing as <strong>{username}</strong></span><button aria-label="Open personal settings" className="settings-button" onClick={() => { setDraft(username); setView('settings') }}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 17h16" /><circle cx="9" cy="7" r="2.2" fill="currentColor" /><circle cx="15" cy="17" r="2.2" fill="currentColor" /></svg><span>Settings</span></button></header>
+    <header className="topbar menu-topbar"><button className="player-name player-name-button" aria-label="Change player name" onClick={() => { setDraft(username); setView('settings') }}>Playing as <strong>{username}</strong></button><button aria-label="Open personal settings" className="settings-button" onClick={() => { setDraft(username); setView('settings') }}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 17h16" /><circle cx="9" cy="7" r="2.2" fill="currentColor" /><circle cx="15" cy="17" r="2.2" fill="currentColor" /></svg><span>Settings</span></button></header>
     <section className="menu-content">
       <div className="hero-copy"><Brand hero /><h1 tabIndex={-1}>Make room for one more.</h1></div>
       <div className="menu-actions" aria-label="Main menu">
-        <button className="mode-card single-player" onClick={beginGame}><span className="mode-copy"><strong>1 Player</strong></span></button>
+        <button className="mode-card single-player" aria-label="1 Player" aria-describedby={bestScore === null ? undefined : 'best-score'} onClick={beginGame}><span className="mode-copy"><strong>1 Player</strong>{bestScore !== null && <span className="mode-best" id="best-score">Best {bestScore.toLocaleString()}</span>}</span></button>
         <button className="mode-card" onClick={() => setView('multiplayer')}><span className="mode-copy"><strong>2 Players</strong></span></button>
         <button className="secondary-card" onClick={() => setView('highScores')}>High Scores</button>
         {notice && <p className="notice menu-notice" role="status">{notice}</p>}
@@ -531,12 +563,11 @@ function focusableControls(scope: HTMLElement): HTMLElement[] {
   )).filter((control) => control.offsetWidth > 0 || control.offsetHeight > 0)
 }
 
-function HighscoreTable({ records, compact = false }: { records: readonly HighscoreRecord[]; compact?: boolean }) {
-  return <div className={`score-table-wrap${compact ? ' score-table-compact' : ''}`}>
-    <table className="score-table"><thead><tr><th>#</th><th>Player</th><th>Score</th><th>Level</th><th>Lines</th></tr></thead>
-      <tbody>{records.map((record, index) => <tr key={record.id}><td>{index + 1}</td><td>{record.username}</td><td>{record.score.toLocaleString()}</td><td>{record.level}</td><td>{record.lines}</td></tr>)}</tbody>
-    </table>
-  </div>
+function HighscoreTable({ records, compact = false, highlight }: { records: readonly HighscoreRecord[]; compact?: boolean; highlight?: string }) {
+  return <table className={`score-cards${compact ? ' compact' : ''}`} aria-label="1 Player highscores">
+    <thead className="visually-hidden"><tr><th>#</th><th>Player</th><th>Level and lines</th><th>Score</th></tr></thead>
+    <tbody>{records.map((record, index) => <tr key={record.id} className={record.id === highlight ? 'own' : undefined}><td className="rank">{index + 1}</td><td className="name">{record.username}</td><td className="meta">Level {String(record.level).padStart(2, '0')} · {record.lines} lines</td><td className="value">{record.score.toLocaleString()}</td></tr>)}</tbody>
+  </table>
 }
 
 function Brand({ compact = false, hero = false }: { compact?: boolean; hero?: boolean }) {

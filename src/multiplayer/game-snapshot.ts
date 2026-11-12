@@ -43,13 +43,24 @@ export function snapshotContent(game: GameState) {
 
 /** Minimum time between board snapshots per player (B-003: about five per second). Rules enforce the same interval. */
 export const SNAPSHOT_INTERVAL_MS = 200
+/**
+ * Client spacing between snapshot writes, measured from when each write starts (B-004).
+ * The extra 50 ms absorbs network jitter so arrivals stay at least SNAPSHOT_INTERVAL_MS apart;
+ * a rare rejected write is rolled back and retried.
+ */
+export const SNAPSHOT_SPACING_MS = 250
+/** How often the publisher looks for a changed board. Local work only; no network traffic. */
+export const SNAPSHOT_POLL_MS = 40
 
 /** Call after acknowledgement; unchanged state consumes neither a sequence nor a write. */
 export class SnapshotGate {
   private previous = ''
   private sentAt = -Infinity
   private sequence = 0
-  constructor(snapshot?: GameSnapshot, now = 0) {
+  private undo: { previous: string; sequence: number } | null = null
+  private readonly spacing: number
+  constructor(snapshot?: GameSnapshot, now = 0, spacing = SNAPSHOT_INTERVAL_MS) {
+    this.spacing = spacing
     if (snapshot) {
       if (!Number.isFinite(now)) throw new RangeError('Invalid snapshot clock')
       parseGameSnapshot(snapshot)
@@ -62,9 +73,17 @@ export class SnapshotGate {
   next(game: GameState, now: number) {
     const content = snapshotContent(game)
     const fingerprint = JSON.stringify(content)
-    if (fingerprint === this.previous || now - this.sentAt < SNAPSHOT_INTERVAL_MS) return null
+    if (fingerprint === this.previous || now - this.sentAt < this.spacing) return null
+    this.undo = { previous: this.previous, sequence: this.sequence }
     this.previous = fingerprint
     this.sentAt = now
     return { ...content, seq: ++this.sequence }
+  }
+  /** Forget the last snapshot after a failed write so a retry reuses its sequence. Spacing still counts from the failed attempt. */
+  rollback() {
+    if (!this.undo) return
+    this.previous = this.undo.previous
+    this.sequence = this.undo.sequence
+    this.undo = null
   }
 }

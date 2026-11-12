@@ -20,7 +20,7 @@ import { gamepadActions } from '../input/gamepad.ts'
 import { HeldInputs } from '../input/repeat.ts'
 import { actionsForSwipe } from '../input/swipe.ts'
 import { HoldBox, PiecePreview, Playfield, TouchControls } from '../ui/GameViews.tsx'
-import { decodeBoard, parseGameSnapshot, SnapshotGate, SNAPSHOT_INTERVAL_MS } from './game-snapshot.ts'
+import { decodeBoard, parseGameSnapshot, SnapshotGate, SNAPSHOT_POLL_MS, SNAPSHOT_SPACING_MS } from './game-snapshot.ts'
 import type { GameSnapshot } from './game-snapshot.ts'
 import type { JoinedRoom } from './room-model.ts'
 import { startCatchUp } from './match-start.ts'
@@ -158,8 +158,9 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     let acknowledgedProduced = restored?.battle?.acknowledgedProduced ?? 0
     let committedSent = restored?.battle?.committedSent ?? 0
     let leaseAcquired = false
-    const gate = new SnapshotGate(restored?.snapshot, performance.now())
+    const gate = new SnapshotGate(restored?.snapshot, performance.now(), SNAPSHOT_SPACING_MS)
     let timer: ReturnType<typeof setTimeout>
+    let failures = 0
     async function publish() {
       if (!alive) return
       if (restored?.snapshot.status === 'gameOver') return
@@ -170,6 +171,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
       const savedGame = next ? structuredClone(current.current) : null
       const savedBattle = next && battleGame ? captureBattleCheckpoint(battleGame, { matchId: start.id, uid: joined.uid, epoch: joined.room.epoch }, { acknowledgedProduced, committedSent }) : null
       const finishStats = battleGame?.endedFrame !== null && battleGame ? { frame: battleGame.endedFrame!, received: battleGame.received, applied: battleGame.applied, cancelled: battleGame.cancelled } : null
+      let written = false
       try {
         if (!leaseAcquired) {
           await claimControlLease(database, joined, start, connection)
@@ -184,6 +186,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
         if (next) {
           const checkpoint = savedBattle ? { ...savedBattle, acknowledgedProduced, committedSent } : null
           await publishCheckpoint(database, joined, { ...next, matchId: start.id, connection }, savedGame!, checkpoint)
+          written = true
           if (next.status === 'gameOver' && finishStats) {
             await publishBattleFinish(database, joined, start, { ...finishStats, sent: committedSent })
             if (alive) setOwnFinishFrame(finishStats.frame)
@@ -196,13 +199,20 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
         if (alive && !interrupted) {
           try { interrupted = parseRecoverySession((await get(ref(database, recoverySessionPath(joined)))).val())?.matchId === start.id } catch { /* Report the original synchronization failure. */ }
         }
+        // A write the server refused (for example one that arrived early through network jitter)
+        // is rolled back and retried; only repeated failures end the match view (B-004).
+        if (!written) gate.rollback()
+        failures++
         if (alive && interrupted) timer = setTimeout(() => void publish(), 500)
+        else if (alive && failures < 3) timer = setTimeout(() => void publish(), SNAPSHOT_SPACING_MS)
         else if (alive) setError('Unable to synchronize. Return to the lobby.')
         return
       }
+      failures = 0
       if (next?.status === 'gameOver') return
-      // Wait after server acknowledgement: no queued writes, no per-frame traffic.
-      if (alive) timer = setTimeout(() => void publish(), SNAPSHOT_INTERVAL_MS)
+      // One write in flight at a time. The gate spaces writes from their start, so the next
+      // change goes out as soon as the previous write is acknowledged and the spacing has passed.
+      if (alive) timer = setTimeout(() => void publish(), SNAPSHOT_POLL_MS)
     }
     timer = setTimeout(() => void publish(), 0)
     return () => { alive = false; clearTimeout(timer); stop(); stopAttacks(); stopFinish() }
@@ -302,7 +312,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
         {!outcome && <button tabIndex={-1} type="button" className="match-leave" aria-label="Leave match" onClick={() => setConfirm(true)}><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 5 8 12 15 19" /></svg></button>}
         <span className="match-chip">{battle ? 'Battle' : 'Score Duel'}</span>
         <span className={`match-chip link-${link.kind}`}><i aria-hidden="true" />{link.text}</span>
-        <span className="match-room">Room {joined.code}</span>
+        <span className="match-chip match-room"><span className="room-label">Room </span><b>{joined.code}</b></span>
       </header>
       <div className="score-row">
         <div className="score-card own"><span>{ownName}</span><strong>{game.score.toLocaleString()}</strong></div>
@@ -315,12 +325,12 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
         <section className="own-board" aria-label="Your game">
           <h2 className="visually-hidden">{ownName}</h2>
           <Playfield game={game} ghost={personal.ghostPiece && !finished} colors={personal.blockColors} swipeMode={personal.mobileControlMethod === 'swipe' && !finished} onSwipe={(from, to) => actionsForSwipe(from, to).forEach(action => apply(action))} />
-          <dl className="live-stats"><div className="visually-hidden"><dt>Score</dt><dd>{game.score.toLocaleString()}</dd></div><div><dt>Level</dt><dd>{pad(game.level)}</dd></div><div><dt>Lines</dt><dd>{game.lines}</dd></div></dl>
+          <dl className="live-stats visually-hidden"><div><dt>Score</dt><dd>{game.score.toLocaleString()}</dd></div><div><dt>Level</dt><dd>{pad(game.level)}</dd></div><div><dt>Lines</dt><dd>{game.lines}</dd></div></dl>
           <p role="status" className={finished ? 'board-status' : 'visually-hidden'}>{finished ? 'Game over' : 'Playing'}</p>
         </section>
         <aside className="match-side">
           <section className="opponent-board" aria-label="Opponent game">
-            <h2>{otherName}</h2>
+            <h2 className="visually-hidden">{otherName}</h2>
             <dl className="live-stats visually-hidden"><div><dt>Score</dt><dd>{opponent?.score.toLocaleString() ?? '0'}</dd></div><div><dt>Level</dt><dd>{opponent?.level ?? start.settings.startLevel}</dd></div><div><dt>Lines</dt><dd>{opponent?.lines ?? 0}</dd></div></dl>
             <Playfield game={{ board: decodeBoard(opponent?.board ?? '0'.repeat(200)), active: null, level: opponent?.level ?? start.settings.startLevel }} colors={personal.blockColors} swipeMode={false} onSwipe={() => {}} />
           </section>
@@ -329,9 +339,10 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
             {game.holdEnabled && <div><HoldBox type={game.held} level={game.level} colors={personal.blockColors} enabled={!finished && !error && !confirm && !paused && !game.holdUsed} onHold={() => apply('hold')} /></div>}
             {battleGame && pending > 0 && <div className="incoming-badge" aria-hidden="true"><strong>+{pending}</strong><span>incoming</span></div>}
           </div>
+          <dl className="side-stats" aria-hidden="true"><div><dt>Level</dt><dd>{pad(game.level)}</dd></div><div><dt>Lines</dt><dd>{game.lines}</dd></div></dl>
         </aside>
       </div>
-      {battleGame && <p className="battle-stats" aria-label="Battle attacks">Pending: {battleGame.pending} · Sent: {sentRows} · Applied: {battleGame.applied} · Cancelled: {battleGame.cancelled}</p>}
+      {battleGame && <p className="battle-stats visually-hidden" aria-label="Battle attacks">Pending: {battleGame.pending} · Sent: {sentRows} · Applied: {battleGame.applied} · Cancelled: {battleGame.cancelled}</p>}
       {(duel || battle) && !error && duelStatus && <section className="duel-status" aria-label={battle ? "Battle status" : "Score Duel status"} role="status">{outcome ? <><h2>{outcomeTitle}</h2><p>{ownName}: {game.score.toLocaleString()} · {otherName}: {opponent!.score.toLocaleString()}</p><p>{battle ? `Survival: ${(ownFinishFrame! / 60).toFixed(2)} s · ${(otherFinish!.frame / 60).toFixed(2)} s` : `Score difference: ${Math.abs(outcome.difference).toLocaleString()}`}</p></> : <p>{duelStatus}</p>}</section>}
       {!finished && !(controller && personal.hideTouchControlsWhenController) && <TouchControls method={personal.mobileControlMethod} buttonSize={personal.touchButtonSize} leftHanded={personal.leftHandedControls} holdEnabled={game.holdEnabled} hardDropEnabled={game.hardDropEnabled} enabled={!finished && !error && !confirm && !paused} apply={apply} />}
       <p className="control-hint">Esc / {bindings.pause.replace('Key', '')}: leave match · Multiplayer keeps running while this menu is open.</p>

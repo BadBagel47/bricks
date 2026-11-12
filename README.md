@@ -3,7 +3,7 @@
 A portable React + TypeScript + Vite falling-block puzzle game with single-player,
 multiplayer Score Duel/Battle, results, rematches and bounded recovery.
 
-**Continuing development? Start with [HANDOVER.md](HANDOVER.md).** Current operating
+**Continuing development? Start with [HANDOFF.md](HANDOFF.md).** Current operating
 controls work is on `feature/operating-controls`, including the live Worker preview;
 it is not merged to main. [PROGRESS.md](PROGRESS.md) records verified checkpoints,
 and [OPERATING_SETUP.md](docs/OPERATING_SETUP.md) explains private setup and reuse.
@@ -41,8 +41,8 @@ The public address is `https://bricks.trythis.one` (custom domain on GitHub Page
 ## Project instructions
 
 - `BRICKS_SPEC.md`: complete product specification.
-- `AGENTS.md`: concise working instructions.
-- `HANDOVER.md`: start here — current checkpoint, documentation map and goals.
+- `AGENTS.md`: reference to the shared agent rules (project rules are in `HANDOFF.md`).
+- `HANDOFF.md`: start here — current checkpoint, documentation map and goals.
 - `docs/BACKLOG.md`: open features, bugs and tasks with IDs.
 - `PROGRESS.md`: implemented scope, checks, and next review checkpoint.
 - `CHANGELOG.md`: released changes (Keep a Changelog).

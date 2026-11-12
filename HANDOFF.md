@@ -1,13 +1,19 @@
-# Bricks handover
+# Bricks handoff
 
-Read this first, then `AGENTS.md`, `BRICKS_SPEC.md` and the relevant linked
+Read this first, then `AGENTS.md` (shared rules), `BRICKS_SPEC.md` and the relevant linked
 guides. Owner instructions and the specification take precedence.
+
+## Shared rules and inventory
+
+- **Shared rules version:** v1.0 (2026-11-11), https://raw.githubusercontent.com/BadBagel47/agent-rules/main/AGENTS.md . This repo was last adapted to v1.0 on 2026-11-11 (T-004).
+- **Inventory done:** 2026-11-11. Branches: `main` (integration, deploys Pages) and `feature/operating-controls` (0 commits ahead of `main`; a push-trigger for the admin Worker deploy, see below). No open pull requests or issues. Documentation existed already (this file, `docs/BACKLOG.md`, `PROGRESS.md`, `CHANGELOG.md`, ADRs); nothing needed moving.
+- **Publishing method:** GitHub Pages from `main` via `.github/workflows/pages.yml`, custom domain https://bricks.trythis.one ; admin Worker via the `feature/operating-controls` branch (see Project rules).
 
 ## Documentation map
 
 | What | Where |
 | --- | --- |
-| Agent instructions and owner working rules | `AGENTS.md` (`CLAUDE.md` imports it) |
+| Agent rules | `AGENTS.md` (reference to the shared rules; `CLAUDE.md` imports it); Bricks rules in *Project rules* below |
 | Product requirements | `BRICKS_SPEC.md` (section 5.0 = approved visual design) |
 | Current checkpoint, environments, resources | this file |
 | Goals | *Product direction* below and spec section 4 |
@@ -51,7 +57,11 @@ guides. Owner instructions and the specification take precedence.
 - Later: more music (F-006) and a second game, Stones (F-008), reusing the lobby
   (F-007).
 
-## Current checkpoint — 2026-11-10
+## Current checkpoint — 2026-11-11
+
+Latest run (5, 2026-11-12): F-015 – F-020 and B-004 – B-010 are done and on `main` (admin change deployed through `feature/operating-controls`). B-004 needs the owner's two-device check. No approved runs are waiting; ideas F-006 – F-008 remain in `docs/BACKLOG.md`.
+
+### Earlier checkpoint — 2026-11-10
 
 **Continue on `main` (since 2026-11-11; previously `feature/operating-controls`).** Work in the existing
 checkout of your environment. Verify Git status and remote heads before editing;
@@ -232,8 +242,8 @@ first-time route. Secret values and the real allowlist deliberately are not in G
 - Keep this checkpoint current and retain durable requirements in the spec.
   Operating controls are authorized; later Phase 4 work needs authorization.
 - Model choice is per run (see AGENTS.md). Tiers: a strong model with high
-  reasoning (e.g. Claude Opus, GPT-6.1 Terra High) for multiplayer, rules or
-  access work; a standard model (e.g. GPT-6.1 Sol Medium) for focused features;
+  reasoning (e.g. Claude Opus, GPT-6.1 Sol High) for multiplayer, rules or
+  access work; a standard model (e.g. Claude Sonnet, GPT-6.1 Terra Medium) for focused features;
   an economical model (e.g. GPT-6 Luna) for copy or styling only. Suggested
   models per item are in `docs/BACKLOG.md`. Do not claim a model switch happened.
 
@@ -277,3 +287,55 @@ Chromium blocks file opening; owner completed the local helper route.
 
 Further references: `docs/MULTIPLAYER.md`, `docs/FIREBASE_QUOTA.md`,
 `docs/FIREBASE_ACCESS.md`, `docs/PHASE3_REVIEW.md`, `PROGRESS.md`.
+
+## Project rules (moved from AGENTS.md, 2026-11-11)
+
+These are Bricks-specific. The shared agent rules (see `AGENTS.md`) apply on top;
+where Bricks has an explicit exception it is stated here.
+
+- Documentation map: [HANDOVER.md](HANDOVER.md) (start here), [docs/BACKLOG.md](docs/BACKLOG.md) (open work with `F-`/`B-`/`T-` IDs), [PROGRESS.md](PROGRESS.md) (done work), [CHANGELOG.md](CHANGELOG.md) (Keep a Changelog), [docs/adr/](docs/adr/) (decisions). At the end of every run update the backlog status, the changelog's *Unreleased* section, PROGRESS and the handover checkpoint; add an ADR for any significant new decision.
+- Treat [BRICKS_SPEC.md](BRICKS_SPEC.md) as the product source of truth. Keep player-facing text in English and communicate with the owner in Swedish.
+- At a new work session or milestone, read [HANDOVER.md](HANDOVER.md) first, then verify current facts in `PROGRESS.md` and follow its links to the relevant phase docs. Update the handover at each milestone checkpoint; keep durable requirements in the spec/AGENTS, not only in the handover.
+- Keep gameplay rules independent from React, rendering, input, audio, persistence, and multiplayer. Prefer small, testable modules and avoid unnecessary dependencies or rewrites.
+- Run relevant existing checks after meaningful changes and report only results actually observed. Keep `PROGRESS.md` current at milestone boundaries.
+- Work in the existing checkout; do not create a worktree. Preserve user changes and make only changes required by the approved milestone.
+- Recommend the economical suitable model at each milestone. Escalate difficult gameplay engineering only when justified; wait for approval before starting a stronger-model task if the specification requires a model switch.
+- Owner update 2026-11-06: proceed with 3.7 without requiring manual review of 3.6; consolidate owner playtesting into larger playable checkpoints and use automated two-session checks between steps. This authorizes 3.7, not all later milestones.
+- Owner subsequently authorized 3.8 Score Duel. Continue consolidating manual playtesting; no manual review is required before its checked deployment. Later milestones still require authorization.
+- Owner authorized 3.9 Battle penalties. Consolidate manual playtesting; stage rule changes and complete automated two-session/security validation before requesting owner publication of the checked rules. No later milestone is authorized by this step.
+- Owner authorized 3.10 match results and local highscores. Continue automated checks and checked publication without requiring a manual game review. Dedicated rematch coordination remains 3.11.
+- Owner authorized 3.11 rematches. Keep manual testing consolidated; stage and verify new readiness/approval rules before requesting owner rule publication. Later recovery work still requires authorization.
+- Owner authorized Phase 4 public deployment on 2026-11-10: publish at `https://bricks.trythis.one` using GitHub Pages with a custom domain for now (approved deviation from the spec's Firebase Hosting). Firebase remains the auth/database backend. See `docs/DEPLOYMENT.md`.
+- Stop at milestone review checkpoints unless the owner has waived the relevant review. Do not begin multiplayer/Firebase or a later phase without explicit approval.
+- Keep interface copy direct and functional. Retain the approved “Make room for one more.” headline; avoid decorative subheadings, slogans, menu descriptions, and footers. Keep necessary instructions, validation, and availability status.
+
+- Owner preference: include GPT-6.1 Terra alongside Sol and Luna when recommending a model and reasoning level at each checkpoint.
+- Owner direction 2026-11-08: Bricks is a hobby game for casual play with friends. Prioritize Firebase Spark quota efficiency and simple operation; advanced anti-cheat/server-authoritative competition is not a project priority. Keep normal identity and database authorization protections.
+
+- Owner approved operating controls: separate public singleplayer/multiplayer on/off/timers, administrator play while closed, and shared private room invitations that bypass public closure but remain private when public play is on. Initialize both public modes On. Existing games finish; deny new starts/rematches after closure. Stage and test the server, rules and client before a focused Terra High review and private external setup; no paid service or billing upgrade is authorized.
+
+- Owner approved 2026-11-10: visual refresh per spec section 5.0, new generated audio, optional Ghost piece (off by default) and Classic block colors. Keep player-facing text English.
+
+- Owner rule 2026-11-11: new music must keep a stable BPM; express danger urgency through intensity, not tempo. Exception (owner decision 2026-11-11, T-005): the game theme *Bricks Theme* keeps its danger tempo rise (132 → 172 BPM). Music proposals and the shared test player live in `docs/music/`.
+
+### Owner working rules
+
+- **Replies:** Keep replies to the owner fairly short without omitting important information. Leave out technical detail the owner does not need.
+- **Documentation:** Keep handoff, goals, working method, features and bugs documented and current. Follow established technical and naming standards where they exist. Documentation must be usable by any AI agent, not tied to one tool.
+- **IDs:** Use the `F-`/`B-`/`T-` IDs defined in `docs/BACKLOG.md` (approved 2026-11-10).
+- **Batching:** Register every requested feature or fix in `docs/BACKLOG.md` and wait for approval. Collect approved items for a joint run and start only on the owner's explicit go-ahead (e.g. “Kör”).
+- **Publishing (owner decision 2026-11-11):** Unless the owner explicitly says otherwise, publish after every run by pushing to `main`; CI deploys GitHub Pages at https://bricks.trythis.one (the owner is the only tester, so temporary breakage is acceptable). When `server/operating/` or `wrangler.operating.jsonc` changes, also merge into `feature/operating-controls` with `[deploy operating]` in the merge message to deploy the admin Worker. Firebase rule changes still need owner publication before the client that depends on them.
+- **Model choice:** Before every run, recommend a suitable model and reasoning level. Conserve quota without sacrificing quality; speed is not a priority unless stated. Suggest priorities and group items by suitable model and level.
+- **Language:** Write documentation on GitHub and other external services in English. Communicate with the owner in Swedish. If external text exists in Swedish, ask whether it should be translated.
+- **Sensitive data:** Publish personal or otherwise sensitive data only with the owner's explicit approval, stating why it is needed and the risks.
+- **Workstreams (owner decision 2026-11-11):** Music is composed in a separate Claude chat (the "music studio"), which also integrates approved tracks into `src/audio/` and docs (F-006). Other agents must not change `src/audio/music.ts` or music behavior unless the owner asks. Only one agent works in the repository at a time; before starting, fetch and continue from `main` (the integration branch since 2026-11-11), never from old `feature/*` or `ccr-*` branches.
+- **Owner actions:** When the owner must do something the agent cannot, provide everything needed: direct links, text to copy, exact steps. Suggest integrations that remove manual steps and flag integrations likely to be needed later.
+
+### Differences from the shared rules (owner-approved)
+
+- **IDs:** Bricks keeps `F-`/`B-`/`T-` (T = operational/owner task) instead of `D-`. Conversion to the shared format is not done unless the owner asks.
+- **Priority:** the shared scale High / Medium / Low is used in `docs/BACKLOG.md`.
+- **Publishing:** push to `main` as in the shared rules; additionally, changes to `server/operating/` or `wrangler.operating.jsonc` are merged into `feature/operating-controls` with `[deploy operating]` to deploy the admin Worker. No `auto-merge.yml` is needed because agents can push to `main`.
+- **`CLAUDE.md`:** kept as a one-line import of `AGENTS.md` because Claude Code only auto-loads `CLAUDE.md`. No rules live in it.
+- **Model advice:** include GPT-6.1 Terra alongside Sol and Luna.
+- **Rules confirmation:** the first reply of a session states the loaded rules version.
