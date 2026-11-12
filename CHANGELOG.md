@@ -29,6 +29,7 @@ not yet on the public GitHub Pages site.
 - B-009: top bars sit at the same edge on game and match screens; the match Back button has the standard size.
 
 ### Fixed (run 5, 2026-11-12)
+- B-017: the start page no longer scrolls on phones (pages follow the visible screen height).
 - B-016: pieces in the block color preview are centred; on phones the Score/Level/Lines row spans the full width again.
 - B-011: top bars line up with the content on wide screens; phones use one edge on every screen.
 - B-012: focus outlines only after Tab, never on headings or dialogs.

@@ -37,7 +37,7 @@ None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 1
 
 - Live: https://bricks.trythis.one (Pages from `main`); admin https://bricks-operating.l8p1.workers.dev/admin/ (Worker from `feature/operating-controls`).
 - Latest work, newest first:
-  - F-025 centred, larger logo on the 1 Player game screen.
+  - F-025 centred, larger logo on the 1 Player game screen; B-017 start page no longer scrolls on phones.
   - Shared agent rules v1.3 adaptation (this file, `AGENTS.md`, branch archive).
   - F-023 touch rotation both ways, F-024 Retro/Tones/Modern block colors, B-016.
   - F-021 interface animations, F-022 game effects.

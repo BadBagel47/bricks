@@ -1,6 +1,6 @@
 /* Bricks interface: dark navy panels, rounded blocks and one warm accent. */
-#root{min-height:100vh}
-.shell{width:min(100%,1440px);min-height:100vh;margin:0 auto;padding:32px clamp(20px,6vw,96px) 24px;display:flex;flex-direction:column}
+#root{min-height:100vh;min-height:100dvh}
+.shell{width:min(100%,1440px);min-height:100vh;min-height:100dvh;margin:0 auto;padding:32px clamp(20px,6vw,96px) 24px;display:flex;flex-direction:column}
 
 /* Logo: six tilted letter blocks. */
 .brand{display:inline-flex;align-items:flex-start;gap:4px;text-decoration:none}
