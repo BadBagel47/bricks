@@ -94,9 +94,11 @@ or review a hosting/backend change with the owner; never upgrade billing silentl
 
 The visible board is 200 characters; the complete 11-field payload is under
 600 UTF-8 bytes in automated tests. Each player writes changed snapshots only,
-with one request in flight and at least 200 ms after acknowledgement (500 ms
-before B-003, 2026-11-11). Rules also
-enforce the minimum interval. Unchanged gravity counters and stable final states
+with one request in flight. Since B-004 (2026-11-12) writes are spaced 250 ms
+from the start of the previous write rather than 200 ms after its acknowledgement
+(500 ms before B-003), so the real rate is closer to 4 Hz instead of roughly
+3 Hz; the 5 Hz ceiling below is unchanged. Rules also
+enforce the 200 ms minimum interval; an early arrival is rolled back and retried. Unchanged gravity counters and stable final states
 produce no writes. Each client subscribes only to the opponent's current record.
 At the 5 Hz ceiling, two active players produce at most 6 KB/s of JSON snapshot
 payload (about 3.6 MB per ten-minute match, ~22 MB per match hour; changed-only

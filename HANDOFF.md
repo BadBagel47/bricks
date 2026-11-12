@@ -59,7 +59,7 @@ guides. Owner instructions and the specification take precedence.
 
 ## Current checkpoint — 2026-11-11
 
-Latest run (A, 2026-11-12): F-010 and F-011 are done and on `main`. Earlier run B + C: F-012, F-013, F-014, T-004. Remaining proposal: D (B-004, deferred by the owner), see `docs/BACKLOG.md`. The pause dialog and the post-match result screen have not been reviewed for design.
+Latest run (5, 2026-11-12): F-015 – F-020 and B-004 – B-010 are done and on `main` (admin change deployed through `feature/operating-controls`). B-004 needs the owner's two-device check. No approved runs are waiting; ideas F-006 – F-008 remain in `docs/BACKLOG.md`.
 
 ### Earlier checkpoint — 2026-11-10
 

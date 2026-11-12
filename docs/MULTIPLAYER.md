@@ -451,9 +451,12 @@ board, preview and touch components retain the earlier focus/volume fixes.
 match ID, frozen connection, monotone sequence, server update time, 200 visible
 cells encoded as digits 0–7, Next/Hold, status, score, level and lines. Eleven
 bounded fields; no histories. Stale match IDs and sequences are ignored. The client
-publishes only changed visible state, with one request in flight and a minimum
-200 ms delay after acknowledgement; the server also enforces 200 ms between
-updates (500 ms before B-003). Checkpoints and Battle attack records use the same
+publishes only changed visible state, with one request in flight. Writes are
+spaced 250 ms from the start of the previous write (B-004; before that, 200 ms
+after acknowledgement); the publisher checks for changes every 40 ms locally. The
+server enforces 200 ms between updates (500 ms before B-003); a write rejected
+because it arrived early is rolled back and retried, and only three failures in a
+row end the match view. Checkpoints and Battle attack records use the same
 200 ms rule interval. Terminal Game Over is sent once, through the same budget.
 
 Rules restrict writes to the owning participant and the current ready session's

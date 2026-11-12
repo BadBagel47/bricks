@@ -46,3 +46,18 @@ test('a restored publisher continues after its acknowledged sequence and keeps t
   assert.equal(gate.next(moved, 1200)?.seq, 9)
   assert.throws(() => new SnapshotGate({ ...previous, seq: 0 }, 0))
 })
+
+test('a rolled-back snapshot is offered again with the same sequence once the spacing has passed', () => {
+  const game = createGame({ seed: 4 })
+  const gate = new SnapshotGate(undefined, 0, 250)
+  assert.equal(gate.next(game, 0)?.seq, 1)
+  const moved = { ...game, score: 10 }
+  assert.equal(gate.next(moved, 249), null)
+  assert.equal(gate.next(moved, 250)?.seq, 2)
+  gate.rollback()
+  assert.equal(gate.next(moved, 400), null, 'spacing counts from the failed attempt')
+  assert.equal(gate.next(moved, 500)?.seq, 2)
+  gate.rollback(); gate.rollback()
+  assert.equal(gate.next(game, 750), null, 'rolled back to the first snapshot, so the original board is unchanged')
+  assert.equal(gate.next(moved, 750)?.seq, 2)
+})

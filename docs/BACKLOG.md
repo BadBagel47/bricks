@@ -22,19 +22,19 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| B-004 | Bug | Opponent board still lags behind after B-003 | Medium | Proposed (deferred by owner) | Strong |
-| F-015 | Feature | Match result screen redesign (mockups R1/R2): winner headline, two player cards, Battle comparison rows, head-to-head record, Rematch as the main action; replaces the wide tables | High | Proposed | Strong |
-| F-016 | Feature | 1 Player game over redesign (R3): large final score, record badge, top 5 with the player's row highlighted | Medium | Proposed | Strong |
-| F-019 | Feature | High Scores as card rows instead of wide tables, own entries marked (R6) | Medium | Proposed | Strong |
-| F-017 | Feature | Pause dialog (R4): score line, Music/Sound effects switches, Restart and Main Menu | Low | Proposed | Standard |
-| F-018 | Feature | Name entry (R5): centred logo and form, character counter | Low | Proposed | Standard |
-| B-005 | Bug | Outlines appear around buttons/headings when screens and dialogs open | Medium | Proposed | Standard |
-| B-006 | Bug | Pressing Space (hard drop) at game over immediately starts a new game via the focused Play Again button | Medium | Proposed | Standard |
-| B-007 | Bug | Games ending with 0 points fill the 1 Player high score list | Low | Proposed | Standard |
-| B-009 | Bug | Top bar not in a fixed place: the 1 Player game and match screens use a narrower edge margin (14 px vs 18 px) and the match back button is smaller than on other screens | Medium | Proposed | Standard |
-| B-010 | Bug | Admin page content shifts sideways when switching between Public access and Private invitations (scrollbar appears/disappears on desktop) | Low | Proposed | Standard |
-| F-020 | Feature | Consistent outlines: every panel, card, chip, tab bar and secondary button gets a 1 px outline; room code shown as a chip everywhere | Medium | Proposed | Standard |
-| B-008 | Bug | Next/Hold previews are not truly centred: 3-wide pieces sit half a cell left, the I piece above centre | Low | Proposed | Standard |
+| B-004 | Bug | Opponent board still lags behind after B-003 | Medium | Done (2026-11-12, needs two-device check) | Strong |
+| F-015 | Feature | Match result screen redesign (mockups R1/R2): winner headline, two player cards, Battle comparison rows, head-to-head record, Rematch as the main action; replaces the wide tables | High | Done (2026-11-12) | Strong |
+| F-016 | Feature | 1 Player game over redesign (R3): large final score, record badge, top 5 with the player's row highlighted | Medium | Done (2026-11-12) | Strong |
+| F-019 | Feature | High Scores as card rows instead of wide tables, own entries marked (R6) | Medium | Done (2026-11-12) | Strong |
+| F-017 | Feature | Pause dialog (R4): score line, Music/Sound effects switches, Restart and Main Menu | Low | Done (2026-11-12) | Standard |
+| F-018 | Feature | Name entry (R5): centred logo and form, character counter | Low | Done (2026-11-12) | Standard |
+| B-005 | Bug | Outlines appear around buttons/headings when screens and dialogs open | Medium | Done (2026-11-12) | Standard |
+| B-006 | Bug | Pressing Space (hard drop) at game over immediately starts a new game via the focused Play Again button | Medium | Done (2026-11-12) | Standard |
+| B-007 | Bug | Games ending with 0 points fill the 1 Player high score list | Low | Done (2026-11-12) | Standard |
+| B-009 | Bug | Top bar not in a fixed place: the 1 Player game and match screens use a narrower edge margin (14 px vs 18 px) and the match back button is smaller than on other screens | Medium | Done (2026-11-12) | Standard |
+| B-010 | Bug | Admin page content shifts sideways when switching between Public access and Private invitations (scrollbar appears/disappears on desktop) | Low | Done (2026-11-12) | Standard |
+| F-020 | Feature | Consistent outlines: every panel, card, chip, tab bar and secondary button gets a 1 px outline; room code shown as a chip everywhere | Medium | Done (2026-11-12) | Standard |
+| B-008 | Bug | Next/Hold previews are not truly centred: 3-wide pieces sit half a cell left, the I piece above centre | Low | Done (2026-11-12) | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-007 | Feature | Extract the multiplayer lobby into a reusable module | Low | Idea | Strong |
 | F-008 | Feature | Stones: Bomberman-like game for 1–2 players | Low | Idea | Strong |
@@ -69,26 +69,13 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 ## Proposed runs (2026-11-12)
 
-Letters refer to this latest proposal; commits and reports use the IDs.
-
-- **A** – Claude Opus or GPT-6.1 Sol, high – Results and high scores
-  - F-015 – Match result screen redesign
-  - F-016 – 1 Player game over redesign
-  - F-019 – High Scores as card rows
-- **B** – Claude Sonnet or GPT-6.1 Terra, medium – Small fixes and dialogs
-  - B-005 – Outlines when screens/dialogs open
-  - B-006 – Space at game over restarts immediately
-  - B-007 – 0-point games in high scores
-  - B-008 – Centre Next/Hold previews
-  - B-009 – Same position and size for the top-bar buttons on every screen
-  - B-010 – Admin tabs shift sideways
-  - F-020 – Consistent outlines and Room chip
-  - F-017 – Pause dialog
-  - F-018 – Name entry
-- **C** – Claude Opus or GPT-6.1 Sol, high – Opponent board (deferred by owner)
-  - B-004 – Opponent board still lags
+No approved runs are waiting. Runs A (F-015, F-016, F-019), B (B-005 to B-010, F-017, F-018, F-020) and C (B-004) are done. B-004 needs the owner's two-device check.
 
 ## Details
+
+### B-004 – opponent board lag (2026-11-12)
+- Cause: the publisher waited 200 ms after each write was acknowledged, so updates came every 200 ms plus a full network round trip (roughly 300–500 ms on phones), and a change made just after a check waited for the next one.
+- Fix: writes are spaced 250 ms from the start of the previous write, changes are checked every 40 ms locally, and a write that arrives early is rolled back and retried instead of ending the match. No rule change. Battle attack sending still takes several round trips when rows are sent; revisit if the opponent board still feels slow in Battle.
 
 ### F-015 – F-019, B-005 – B-007 screen review 2026-11-12
 - Owner request: review all screens; theme colours stay as they are. Mockups R1–R6 in the design canvas (https://claude.ai/artifact/Es5mgaHFDTha7LiSz9W9Zv, row "Förslag 2026-11-12").
