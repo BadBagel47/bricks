@@ -6,6 +6,9 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Changed (repository, 2026-11-12)
+- Adapted to the shared agent rules v1.3: Bricks project rules now live in `AGENTS.md`, `HANDOFF.md` holds current state and decisions, older handoff history moved to `PROGRESS.md`, eleven old branches archived as `archive/*` tags.
+
 ### Added (2026-11-12)
 - F-023: touch rotation both ways: *Rotate buttons* One/Two (Two by default: ↺ beside ↻), *Layout* Row/Split (two-thumb layout with round rotate buttons) and a live preview in Settings. In Swipe mode a tap on the left half rotates ↺, on the right half ↻.
 - F-024: block colors *Retro* (NES style, formerly "Change by level"), *Tones* (new: every piece filled in shades of the level's colors) and *Modern* (fixed colors, formerly "Classic").

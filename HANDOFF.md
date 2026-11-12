@@ -5,14 +5,14 @@ guides. Owner instructions and the specification take precedence.
 
 ## Shared rules and inventory
 
-- **Shared rules version:** v1.2 (2026-11-12), https://raw.githubusercontent.com/BadBagel47/agent-rules/main/AGENTS.md . Adapted to v1.2 on 2026-11-12 (previously v1.0, T-004); items needing owner approval are under *Pending adaptation*.
+- **Shared rules version:** v1.3 (2026-11-12), https://raw.githubusercontent.com/BadBagel47/agent-rules/main/AGENTS.md . Adapted to v1.3 on 2026-11-12 (previously v1.0 from 2026-11-11, T-004).
 - Inventory: 2026-11-12
-  - Redone because the 2026-11-11 inventory missed branches (the cloud checkout fetched only `feature/operating-controls`). Remote branches: `main` (integration, deploys Pages); `feature/operating-controls` (kept: admin Worker deploy trigger, content equal to `main` apart from merge commits); fully merged into `main`: `ccr-308e5bf5-5nte3w`, `ccr-63fd355a-1ucin4` (its one commit, owner working rules, is already in `main`), `feature/visual-refresh`, `milestone-3.11`, `milestone-3.12`; old milestone branches `milestone-3.3` – `milestone-3.9` hold pre-squash history whose features are all in `main`. No open pull requests or issues.
+  - Redone because the 2026-11-11 inventory missed branches (the cloud checkout fetched only `feature/operating-controls`). Remote branches now: `main` (integration, deploys Pages) and `feature/operating-controls` (kept: admin Worker deploy trigger). Eleven older branches were archived as `archive/<branch>` tags and deleted on 2026-11-12: `ccr-308e5bf5-5nte3w`, `ccr-63fd355a-1ucin4` (its one commit, an early wording of the owner working rules, is superseded by the rules in `main`), `feature/visual-refresh`, `milestone-3.3` – `milestone-3.7`, `milestone-3.9`, `milestone-3.11`, `milestone-3.12`. No open pull requests or issues.
   - Sensitive information: git history on all branches scanned for keys, tokens and personal e-mail addresses; only test fixtures with fake service-account keys were found. The Firebase web config is public by design and protected by database rules. The repo is public.
   - Laws and regulations: brief review done; findings T-006 and T-007 in `docs/BACKLOG.md`.
 - **Publishing method:** GitHub Pages from `main` via `.github/workflows/pages.yml`, custom domain https://bricks.trythis.one ; admin Worker via the `feature/operating-controls` branch (see Decisions).
 - **Project language:** English for all player-facing text and the README; chat with the owner in Swedish.
-- **Environment (checked 2026-11-12):** agents can push to `main` and `feature/operating-controls`; GitHub REST works through `gh api`, GraphQL (`gh pr list`, `gh issue list`) is blocked in Claude cloud sessions; setting repository variables via `gh` is blocked (owner sets them). A fresh cloud checkout may fetch only one branch: run `git fetch origin '+refs/heads/*:refs/remotes/origin/*'` before comparing branches.
+- **Environment (checked 2026-11-12):** agents can push to `main` and `feature/operating-controls`; GitHub REST works through `gh api`, GraphQL (`gh pr list`, `gh issue list`) is blocked in Claude cloud sessions; setting repository variables via `gh` is blocked (owner sets them); pushing tags and writing refs through the REST API are blocked, so tags are created by `.github/workflows/archive-branches.yml` (list branches in `.github/archive-branches.txt`; it tags, verifies, then deletes). A fresh cloud checkout may fetch only one branch: run `git fetch origin '+refs/heads/*:refs/remotes/origin/*'` before comparing branches.
 
 ## Decisions
 
@@ -24,31 +24,35 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 - **Workstreams (2026-11-11):** music is composed in a separate "music studio" chat; other agents leave `src/audio/music.ts` and music behavior alone unless asked.
 - **Music tempo (2026-11-11, T-005):** new music keeps a stable BPM; *Bricks Theme* keeps its danger tempo rise (132 → 172 BPM).
 - **Opponent board (2026-11-12, B-004):** fix shipped; the owner checks it on two devices.
+- **Hosting (2026-11-10):** GitHub Pages with the custom domain https://bricks.trythis.one instead of the spec's Firebase Hosting; Firebase stays the auth/database backend (`docs/DEPLOYMENT.md`).
+- **Visual refresh (2026-11-10):** spec section 5.0 design, generated audio, optional Ghost piece (off by default); block colors since F-024 are Retro / Tones / Modern.
+- **Operating controls (2026-11-09):** approved as described in the project rules; public modes start On.
+- **Shared rules adaptation (2026-11-12):** model advice and translation follow the shared rules (only models in the agent's own environment; working documents are never translated); finished milestone authorizations and duplicated working rules were removed; old branches are kept as `archive/*` tags (restore: `git push origin archive/<branch>:refs/heads/<branch>`).
 
 ## Pending adaptation
 
-Adaptation plan for shared rules v1.2, waiting for the owner (approve e.g. "Kör anpassning", "Kör 1 och 2", "Kör 3.1"). ⚠️ = deletes or overwrites something.
+None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 11 old branches archived as `archive/<branch>` tags and deleted, project rules moved to `AGENTS.md` (outdated and duplicated ones removed; shared rules apply for model advice and untranslated working documents), history moved to `PROGRESS.md`.
 
-- **1 – Branches**
-  - 1.1 ⚠️ Delete the branches already merged into `main`: `ccr-308e5bf5-5nte3w`, `ccr-63fd355a-1ucin4`, `feature/visual-refresh`, `milestone-3.11`, `milestone-3.12`.
-  - 1.2 ⚠️ Delete `milestone-3.3` – `milestone-3.9` after tagging each tip (`archive/milestone-3.x`), so the old history stays reachable.
-- **2 – Project rules (outdated or duplicating the shared rules)**
-  - 2.1 ⚠️ Remove the finished milestone authorizations (3.7 – 3.11, "stop at milestone checkpoints", "do not begin multiplayer/Firebase") and the broken `HANDOVER.md` links.
-  - 2.2 ⚠️ Remove owner working rules that the shared rules now cover (replies, documentation, batching, language, sensitive data, owner actions, rules confirmation); keep the Bricks-specific ones.
-  - 2.3 Move the remaining project rules from this file into `AGENTS.md` below the reference, where the shared rules want them.
-- **3 – Project rules that conflict with the shared rules**
-  - 3.1 Model advice – project rule: name GPT-6.1 Terra, Sol and Luna; shared rule: only models in the agent's own environment, neutral levels in saved documents. Recommendation: the shared rule.
-  - 3.2 Swedish text in documents – project rule: ask whether to translate; shared rule: working documents accept Swedish and English and are never translated. Recommendation: the shared rule.
-- **4 – HANDOFF.md as current state, not a log**
-  - 4.1 ⚠️ Move dated history (checkpoints 2026-11-10/11, visual refresh, the stale "Next session" plan, repaired failures, the Phase 4 track) to `PROGRESS.md` and keep a short current state with the latest five entries.
+## Current state (2026-11-12)
+
+- Live: https://bricks.trythis.one (Pages from `main`); admin https://bricks-operating.l8p1.workers.dev/admin/ (Worker from `feature/operating-controls`).
+- Latest work, newest first:
+  - Shared agent rules v1.3 adaptation (this file, `AGENTS.md`, branch archive).
+  - F-023 touch rotation both ways, F-024 Retro/Tones/Modern block colors, B-016.
+  - F-021 interface animations, F-022 game effects.
+  - Owner feedback fixes B-011 – B-015 (aligned top bars, Tab-only focus rings, Space-safe game over, larger menu buttons).
+  - Run 5: result screens and high scores (F-015, F-016, F-019), fixes and consistent design (B-005 – B-010, F-017, F-018, F-020), opponent board timing (B-004).
+- Waiting on the owner: a two-device check of B-004 (opponent board); a real private two-player match on the live site (T-001) has not been confirmed in writing.
+- Next: no approved runs. Ideas in `docs/BACKLOG.md`: T-006 privacy notice, T-007 Tetris look check, F-006 music, F-007 reusable lobby, F-008 Stones.
+- Older checkpoints and history: `PROGRESS.md` (section *Handoff history*).
 
 ## Documentation map
 
 | What | Where |
 | --- | --- |
-| Agent rules | `AGENTS.md` (reference to the shared rules; `CLAUDE.md` imports it); Bricks rules in *Project rules* below; owner decisions in *Decisions* |
+| Agent rules | `AGENTS.md` (reference to the shared rules and the Bricks project rules; `CLAUDE.md` imports it); owner decisions in *Decisions* above |
 | Product requirements | `BRICKS_SPEC.md` (section 5.0 = approved visual design) |
-| Current checkpoint, environments, resources | this file |
+| Current state, environments, resources | this file |
 | Goals | *Product direction* below and spec section 4 |
 | Open features, bugs and tasks (`F-`/`B-`/`T-` IDs) | `docs/BACKLOG.md` |
 | Done work per milestone, with checks | `PROGRESS.md` |
@@ -56,28 +60,6 @@ Adaptation plan for shared rules v1.2, waiting for the owner (approve e.g. "Kör
 | Why things are built this way | `docs/adr/` |
 | Subsystems | `docs/ENGINE.md`, `docs/AUDIO.md`, `docs/INPUT.md`, `docs/MULTIPLAYER.md`, `docs/OPERATING_CONTROLS.md`, `docs/OPERATING_SETUP.md`, `docs/FIREBASE_QUOTA.md`, `docs/FIREBASE_ACCESS.md` |
 | Music themes and the owner test player | `docs/music/` (see its README) |
-
-## Phase 4 public deployment (parallel track)
-
-- **Phase 4:** Public deployment (authorized by the owner 2026-11-10).
-- **Target:** https://bricks.trythis.one via GitHub Pages custom domain (approved
-  deviation from Firebase Hosting, "for now"). Firebase stays the auth/database
-  backend. Setup, origin-change effects, checklist and maintenance:
-  `docs/DEPLOYMENT.md`.
-- **Current live build:** 3.12 at https://badbagel47.github.io/bricks/?v=09a7cb6 .
-  No application code changed for Phase 4; the domain is a repository setting.
-- **Waiting on owner:** DNS CNAME `bricks → badbagel47.github.io`; GitHub
-  Settings → Pages custom domain + Enforce HTTPS; Firebase Authorized domains;
-  API-key referrer list if restricted. Then a consolidated live two-device
-  playtest against the checklist (this environment cannot reach the live site).
-- **Open decisions from 3.13:** trusted competition, abuse resistance and
-  retention (`docs/PHASE3_REVIEW.md`) remain unsolved; do not represent them as solved.
-- **Next model:** GPT-6.1 Sol Medium for Phase 4 verification and any quota/abuse
-  mitigation; Terra High only for server-authoritative competition; Luna for
-  routine UI/doc changes.
-- Relation to this branch: Phase 4 publishes `main` (3.12) on the custom
-  domain. The visual refresh and operating controls reach the public site only
-  through T-002. Owner steps are tracked as T-003 in `docs/BACKLOG.md`.
 
 ## Product direction (goals)
 
@@ -89,87 +71,6 @@ Adaptation plan for shared rules v1.2, waiting for the owner (approve e.g. "Kör
   services without owner approval.
 - Later: more music (F-006) and a second game, Stones (F-008), reusing the lobby
   (F-007).
-
-## Current checkpoint — 2026-11-11
-
-Latest work (2026-11-12): F-023 touch rotation both ways, F-024 Retro/Tones/Modern block colors, B-016; before that F-021/F-022 animations and run 5. B-004 needs the owner's two-device check. Ideas F-006 – F-008 remain in `docs/BACKLOG.md`.
-
-### Earlier checkpoint — 2026-11-10
-
-**Continue on `main` (since 2026-11-11; previously `feature/operating-controls`).** Work in the existing
-checkout of your environment. Verify Git status and remote heads before editing;
-preserve user changes. Everything is merged to `main`, which deploys https://bricks.trythis.one.
-The admin Worker still deploys from `feature/operating-controls` with
-`[deploy operating]` (see AGENTS publishing rule).
-
-- Public game: https://badbagel47.github.io/bricks/?v=09a7cb6 .
-  Last verified Pages application deployment is recovery Phase 3.12, `09a7cb6`:
-  https://github.com/BadBagel47/bricks/actions/runs/42434535645 .
-  Main subsequently reached documentation-only `07383d5`; that is not a new
-  gameplay deployment.
-- Worker preview: https://bricks-operating.l8p1.workers.dev/admin/ and
-  https://bricks-operating.l8p1.workers.dev/play/ .
-  Latest verified deployed application commit: `498c293`.
-  Complete CI, Worker deployment and live read-only checks passed:
-  https://github.com/BadBagel47/bricks/actions/runs/42533876102 .
-- Owner confirmed actual Mailjet email-link login reaches the settings page.
-  First administrator exists in D1 and the Firebase subject allowlist.
-  Both public modes were initialized On; owner confirmed publication of the
-  checked operating-aware Firebase rules. Live policy reads passed from GitHub.
-- **A real private two-player match has not yet been confirmed by the owner.**
-  Public Pages operating-origin activation and rollout remain pending.
-  Do not mistake local/emulator success or owner setup reports for independently
-  verified production behavior.
-
-## Visual and audio refresh (2026-11-10)
-
-Merged into `feature/operating-controls` as `89b856c` and deployed to the Worker
-preview; full CI and the live preview check passed:
-https://github.com/BadBagel47/bricks/actions/runs/42838139082 .
-Details in `PROGRESS.md` and `CHANGELOG.md`; design rules in spec section 5.0
-and ADR 0005; audio in `docs/AUDIO.md`. The owner then approved reworking admin,
-lobby, settings and match screens to the sketch's behavior (backlog F-001 to
-F-005, B-001). Runs 1 and 2 are done (see `PROGRESS.md`). B-002 (match start
-timing) is fixed. B-003 (200 ms opponent updates) is done: the owner published the
-rules on 2026-11-11, then the client was deployed to the Worker preview.
-
-## Next session: finish the playable preview
-
-1. Create a **fresh** private invitation and open its complete link in two
-   browsers/devices with distinct anonymous identities. Earlier links may expire.
-   The first redeemer becomes host and the second becomes guest automatically;
-   enter a player name if requested. Do not separately select Host Game.
-2. Once both connect, host chooses Start Match. Close the configuration editor
-   with Apply/Cancel and obtain guest approval if required. If blocked, record
-   the exact stage and visible error before changing configuration.
-3. Check public On/Off/Until, administrator bypass, private play while public is
-   Off, admitted-game draining and denial of new starts/rematches after expiry
-   or revocation. Keep public modes On outside deliberate checks.
-4. Verify production logout, one-use/expiry and revocation, D1 schema/indexes,
-   actual usage/retention and the restored Google organization-policy status.
-   Consolidate manual checks; automate what can be reproduced locally.
-5. Only after those checks, follow the setup guide's controlled Pages activation
-   (`VITE_OPERATING_ORIGIN`), publish the checked main build and change GAME_URL
-   to the public Pages game. Never simply merge and assume rollout is complete.
-
-The owner's earlier “citaten” message meant **chatten** (ChatGPT not updating);
-there is no established quote feature bug. The last gameplay report was inability
-to start an invited game, before successful end-to-end confirmation.
-
-## Known failures already repaired
-
-- Worker returned `Service temporarily unavailable`: workerd rejects
-  `redirect: 'error'`, and native fetch failed when called through a class
-  receiver. Adapters now use manual redirects, reject 3xx and call an unbound
-  local fetch function. Actual workerd regression tests cover the adapters.
-  The corrected FIREBASE_API_KEY name alone did not resolve this failure.
-- Invitation opened Worker root and showed Not found: requesting internal
-  `/index.html` caused Static Assets to redirect to root. `498c293` requests
-  internal `/` for game HTML and redirects legacy root links to `/play/`,
-  preserving query and browser-inherited fragment. The live check now requests
-  `/play/?room=ABCD` without following redirects. Owner retry remains pending.
-- Mobile admin overflow was repaired in `7fa6133`. Do not repeat earlier failed
-  CI conclusions as the current status. Git history retains the investigation.
 
 ## Provisioned resources and private configuration
 
@@ -264,21 +165,14 @@ first-time route. Secret values and the real allowlist deliberately are not in G
 - Admitted ready games and bounded recovery/results finish after closure; a
   countdown is not admission. New starts/rematches recheck access. Offline solo
   code cannot reliably be revoked remotely.
-- Keep changed-only snapshots at 2/player/second, no heartbeat/polling. Measure
+- Keep changed-only snapshots (about 4 per player per second since B-004, at most 5), no heartbeat/polling. Measure
   retained private markers/reservations/UID grants. WebRTC/P2P is a future quota
   evaluation, not an approved migration. No paid plan/billing upgrade authorized.
-- Swedish owner communication; English direct UI copy. Retain “Make room for
-  one more.” No decorative filler. No worktrees or parallel agents unless asked.
 - Owner prefers practical handling of low-risk room-invite test links; avoid
   repeating excessive masking warnings. Real administrator tokens, secrets and
   allowlists remain private.
-- Keep this checkpoint current and retain durable requirements in the spec.
-  Operating controls are authorized; later Phase 4 work needs authorization.
-- Model choice is per run (see AGENTS.md). Tiers: a strong model with high
-  reasoning (e.g. Claude Opus, GPT-6.1 Sol High) for multiplayer, rules or
-  access work; a standard model (e.g. Claude Sonnet, GPT-6.1 Terra Medium) for focused features;
-  an economical model (e.g. GPT-6 Luna) for copy or styling only. Suggested
-  models per item are in `docs/BACKLOG.md`. Do not claim a model switch happened.
+- Keep the current state short and retain durable requirements in the spec.
+- Model choice is per run. Saved documents use neutral levels: a strong model with high reasoning for multiplayer, rules or access work; a standard model at medium level for focused features; an economical model for copy or styling only. Do not claim a model switch happened.
 
 ## Verification and environment limits
 
@@ -321,49 +215,3 @@ Chromium blocks file opening; owner completed the local helper route.
 Further references: `docs/MULTIPLAYER.md`, `docs/FIREBASE_QUOTA.md`,
 `docs/FIREBASE_ACCESS.md`, `docs/PHASE3_REVIEW.md`, `PROGRESS.md`.
 
-## Project rules (moved from AGENTS.md, 2026-11-11)
-
-These are Bricks-specific. The shared agent rules (see `AGENTS.md`) apply on top;
-where Bricks has an explicit exception it is stated here.
-
-- Documentation map: [HANDOVER.md](HANDOVER.md) (start here), [docs/BACKLOG.md](docs/BACKLOG.md) (open work with `F-`/`B-`/`T-` IDs), [PROGRESS.md](PROGRESS.md) (done work), [CHANGELOG.md](CHANGELOG.md) (Keep a Changelog), [docs/adr/](docs/adr/) (decisions). At the end of every run update the backlog status, the changelog's *Unreleased* section, PROGRESS and the handover checkpoint; add an ADR for any significant new decision.
-- Treat [BRICKS_SPEC.md](BRICKS_SPEC.md) as the product source of truth. Keep player-facing text in English and communicate with the owner in Swedish.
-- At a new work session or milestone, read [HANDOVER.md](HANDOVER.md) first, then verify current facts in `PROGRESS.md` and follow its links to the relevant phase docs. Update the handover at each milestone checkpoint; keep durable requirements in the spec/AGENTS, not only in the handover.
-- Keep gameplay rules independent from React, rendering, input, audio, persistence, and multiplayer. Prefer small, testable modules and avoid unnecessary dependencies or rewrites.
-- Run relevant existing checks after meaningful changes and report only results actually observed. Keep `PROGRESS.md` current at milestone boundaries.
-- Work in the existing checkout; do not create a worktree. Preserve user changes and make only changes required by the approved milestone.
-- Recommend the economical suitable model at each milestone. Escalate difficult gameplay engineering only when justified; wait for approval before starting a stronger-model task if the specification requires a model switch.
-- Owner update 2026-11-06: proceed with 3.7 without requiring manual review of 3.6; consolidate owner playtesting into larger playable checkpoints and use automated two-session checks between steps. This authorizes 3.7, not all later milestones.
-- Owner subsequently authorized 3.8 Score Duel. Continue consolidating manual playtesting; no manual review is required before its checked deployment. Later milestones still require authorization.
-- Owner authorized 3.9 Battle penalties. Consolidate manual playtesting; stage rule changes and complete automated two-session/security validation before requesting owner publication of the checked rules. No later milestone is authorized by this step.
-- Owner authorized 3.10 match results and local highscores. Continue automated checks and checked publication without requiring a manual game review. Dedicated rematch coordination remains 3.11.
-- Owner authorized 3.11 rematches. Keep manual testing consolidated; stage and verify new readiness/approval rules before requesting owner rule publication. Later recovery work still requires authorization.
-- Owner authorized Phase 4 public deployment on 2026-11-10: publish at `https://bricks.trythis.one` using GitHub Pages with a custom domain for now (approved deviation from the spec's Firebase Hosting). Firebase remains the auth/database backend. See `docs/DEPLOYMENT.md`.
-- Stop at milestone review checkpoints unless the owner has waived the relevant review. Do not begin multiplayer/Firebase or a later phase without explicit approval.
-- Keep interface copy direct and functional. Retain the approved “Make room for one more.” headline; avoid decorative subheadings, slogans, menu descriptions, and footers. Keep necessary instructions, validation, and availability status.
-
-- Owner preference: include GPT-6.1 Terra alongside Sol and Luna when recommending a model and reasoning level at each checkpoint.
-- Owner direction 2026-11-08: Bricks is a hobby game for casual play with friends. Prioritize Firebase Spark quota efficiency and simple operation; advanced anti-cheat/server-authoritative competition is not a project priority. Keep normal identity and database authorization protections.
-
-- Owner approved operating controls: separate public singleplayer/multiplayer on/off/timers, administrator play while closed, and shared private room invitations that bypass public closure but remain private when public play is on. Initialize both public modes On. Existing games finish; deny new starts/rematches after closure. Stage and test the server, rules and client before a focused Terra High review and private external setup; no paid service or billing upgrade is authorized.
-
-- Owner approved 2026-11-10: visual refresh per spec section 5.0, new generated audio, optional Ghost piece (off by default) and Classic block colors. Keep player-facing text English.
-
-- Owner rule 2026-11-11: new music must keep a stable BPM; express danger urgency through intensity, not tempo. Exception (owner decision 2026-11-11, T-005): the game theme *Bricks Theme* keeps its danger tempo rise (132 → 172 BPM). Music proposals and the shared test player live in `docs/music/`.
-
-### Owner working rules
-
-- **Replies:** Keep replies to the owner fairly short without omitting important information. Leave out technical detail the owner does not need.
-- **Documentation:** Keep handoff, goals, working method, features and bugs documented and current. Follow established technical and naming standards where they exist. Documentation must be usable by any AI agent, not tied to one tool.
-- **IDs:** Use the `F-`/`B-`/`T-` IDs defined in `docs/BACKLOG.md` (approved 2026-11-10).
-- **Batching:** Register every requested feature or fix in `docs/BACKLOG.md` and wait for approval. Collect approved items for a joint run and start only on the owner's explicit go-ahead (e.g. “Kör”).
-- **Publishing (owner decision 2026-11-11):** Unless the owner explicitly says otherwise, publish after every run by pushing to `main`; CI deploys GitHub Pages at https://bricks.trythis.one (the owner is the only tester, so temporary breakage is acceptable). When `server/operating/` or `wrangler.operating.jsonc` changes, also merge into `feature/operating-controls` with `[deploy operating]` in the merge message to deploy the admin Worker. Firebase rule changes still need owner publication before the client that depends on them.
-- **Model choice:** Before every run, recommend a suitable model and reasoning level. Conserve quota without sacrificing quality; speed is not a priority unless stated. Suggest priorities and group items by suitable model and level.
-- **Language:** Write documentation on GitHub and other external services in English. Communicate with the owner in Swedish. If external text exists in Swedish, ask whether it should be translated.
-- **Sensitive data:** Publish personal or otherwise sensitive data only with the owner's explicit approval, stating why it is needed and the risks.
-- **Workstreams (owner decision 2026-11-11):** Music is composed in a separate Claude chat (the "music studio"), which also integrates approved tracks into `src/audio/` and docs (F-006). Other agents must not change `src/audio/music.ts` or music behavior unless the owner asks. Only one agent works in the repository at a time; before starting, fetch and continue from `main` (the integration branch since 2026-11-11), never from old `feature/*` or `ccr-*` branches.
-- **Owner actions:** When the owner must do something the agent cannot, provide everything needed: direct links, text to copy, exact steps. Suggest integrations that remove manual steps and flag integrations likely to be needed later.
-
-### Differences from the shared rules (owner-approved)
-
-Recorded under *Decisions* at the top of this file.

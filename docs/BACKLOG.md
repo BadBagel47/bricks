@@ -81,7 +81,7 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 ## Proposed runs (2026-11-12)
 
-No approved runs are waiting. The shared-rules adaptation plan (v1.2) is in `HANDOFF.md` under *Pending adaptation*; it needs a standard model at medium level.
+No approved runs are waiting. The shared-rules adaptation (v1.3) was completed on 2026-11-12.
 
 Parked: none. Ideas not yet proposed: T-006, T-007, F-006, F-007, F-008.
 
