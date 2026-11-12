@@ -1,0 +1,14 @@
+# Branches to archive: each is tagged archive/<branch> at its tip, the tag is
+# verified, and only then is the branch deleted (agent rules v1.3 safety principle).
+# Restore a branch with: git push origin archive/<branch>:refs/heads/<branch>
+ccr-308e5bf5-5nte3w
+ccr-63fd355a-1ucin4
+feature/visual-refresh
+milestone-3.11
+milestone-3.12
+milestone-3.3
+milestone-3.4
+milestone-3.5
+milestone-3.6
+milestone-3.7
+milestone-3.9

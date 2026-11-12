@@ -1,0 +1,42 @@
+name: Archive branches
+
+# Tags each branch listed in .github/archive-branches.txt as archive/<branch>,
+# checks that the tag points at the branch tip, then deletes the branch.
+# Agents in cloud sessions cannot push tags, so this runs with the repo token.
+on:
+  push:
+    branches: [main]
+    paths: ['.github/archive-branches.txt']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Tag, verify and delete
+        run: |
+          set -euo pipefail
+          git fetch origin '+refs/heads/*:refs/remotes/origin/*' --tags
+          grep -v '^\s*#' .github/archive-branches.txt | sed '/^\s*$/d' | while read -r branch; do
+            if ! git rev-parse -q --verify "refs/remotes/origin/$branch" >/dev/null; then
+              echo "$branch: already gone"; continue
+            fi
+            sha=$(git rev-parse "refs/remotes/origin/$branch")
+            tag="archive/$branch"
+            if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+              [ "$(git rev-parse "refs/tags/$tag^{commit}")" = "$sha" ] || { echo "::error::$tag exists but points elsewhere"; exit 1; }
+            else
+              git tag "$tag" "$sha"
+              git push origin "refs/tags/$tag"
+            fi
+            remote=$(git ls-remote origin "refs/tags/$tag" | cut -f1)
+            [ "$remote" = "$sha" ] || { echo "::error::$tag not confirmed on origin"; exit 1; }
+            git push origin --delete "$branch"
+            echo "$branch -> $tag ($sha)"
+          done
