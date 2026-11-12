@@ -7,7 +7,7 @@
 }
 .multiplayer-game:has(.incoming-meter){--meter:16px}
 
-.match-bar{width:100%;display:flex;align-items:center;gap:8px;min-height:44px;padding-inline:4px}
+.match-bar{width:100%;display:flex;align-items:center;gap:8px;min-height:44px}
 .match-leave{width:44px;height:44px;flex:0 0 auto;display:grid;place-items:center;padding:0;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--soft);cursor:pointer}
 .match-chip{height:32px;padding:0 12px;border-radius:16px;background:var(--panel);border:1px solid var(--panel-3);display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;white-space:nowrap}
 .match-chip i{width:8px;height:8px;border-radius:4px;background:var(--muted)}

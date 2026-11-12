@@ -109,7 +109,8 @@ function App() {
   useLayoutEffect(() => {
     if (view !== 'game') return
     const dialog = document.querySelector<HTMLElement>('.game-overlay [role="dialog"]')
-    if (dialog && !dialog.contains(document.activeElement)) focusableControls(dialog)[0]?.focus()
+    // Game over starts on its heading so Space presses meant for the last piece do nothing (B-014).
+    if (dialog && !dialog.contains(document.activeElement)) (game.status === 'gameOver' ? dialog.querySelector<HTMLElement>('h1') : focusableControls(dialog)[0])?.focus()
 
     function containTab(event: globalThis.KeyboardEvent) {
       if (event.key !== 'Tab') return
@@ -146,6 +147,12 @@ function App() {
     usernameRef.current = cleanName
     setView(view === 'welcome' && new URL(location.href).searchParams.has('room') ? 'multiplayer' : 'menu')
     setNotice(saveFailed ? 'Your browser could not save this name. You can still continue.' : '')
+  }
+
+  /** Game over opens with focus on its heading, not on Play Again, so held or repeated
+   *  Space presses meant for the last piece cannot restart (B-006, B-014). Enter or a tap restarts. */
+  function playAgain() {
+    if (performance.now() - gameOverAtRef.current >= GAME_OVER_INPUT_GUARD_MS) void beginGame()
   }
 
   async function beginGame() {
@@ -534,13 +541,13 @@ function App() {
       </div>
       <div className="pause-actions"><button className="secondary-card" onClick={() => void beginGame()}>Restart</button><button className="secondary-card" onClick={() => { audioRef.current?.leaveGame(); setView('menu') }}>Main menu</button></div>
     </section></div>, document.body)}
-    {game.status === 'gameOver' && createPortal(<div className="game-overlay"><section className="overlay-card result-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
-      <header className="result-card-head"><h1 id="overlay-title">Game over</h1>{isNewRecord ? <p className="record-badge">New record</p> : resultRank ? <p className="record-badge rank">#{resultRank} on your list</p> : null}</header>
+    {game.status === 'gameOver' && createPortal(<div className="game-overlay"><section className="overlay-card result-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title" onKeyDown={(event) => { if (event.key === 'Enter' && event.target === event.currentTarget.querySelector('h1')) playAgain() }}>
+      <header className="result-card-head"><h1 id="overlay-title" tabIndex={-1}>Game over</h1>{isNewRecord ? <p className="record-badge">New record</p> : resultRank ? <p className="record-badge rank">#{resultRank} on your list</p> : null}</header>
       {notice && <p className="notice" role="status">{notice}</p>}
       <div className="final-score"><span>Final score</span><strong>{game.score.toLocaleString()}</strong></div>
       <div className="result-stats"><div><span>Level</span><strong>{String(game.level).padStart(2, '0')}</strong></div><div><span>Lines</span><strong>{game.lines}</strong></div><div><span>Best</span><strong>{bestScore === null ? '—' : bestScore.toLocaleString()}</strong></div></div>
       <HighscoreTable records={highscores.slice(0, 5)} compact highlight={runIdRef.current} />
-      <button className="button button-primary" autoFocus onClick={() => { if (performance.now() - gameOverAtRef.current >= GAME_OVER_INPUT_GUARD_MS) void beginGame() }}>Play Again</button><button className="overlay-link" onClick={() => { audioRef.current?.leaveGame(); setCapture(null); setGamepadCapture(null); setView('menu') }}>Main Menu</button></section></div>, document.body)}
+      <button className="button button-primary" onClick={playAgain}>Play Again</button><button className="overlay-link" onClick={() => { audioRef.current?.leaveGame(); setCapture(null); setGamepadCapture(null); setView('menu') }}>Main Menu</button></section></div>, document.body)}
   </>
 
   return <main className="shell menu-shell">
@@ -548,9 +555,9 @@ function App() {
     <section className="menu-content">
       <div className="hero-copy"><Brand hero /><h1 tabIndex={-1}>Make room for one more.</h1></div>
       <div className="menu-actions" aria-label="Main menu">
-        <button className="mode-card single-player" aria-label="1 Player" aria-describedby={bestScore === null ? undefined : 'best-score'} onClick={beginGame}><span className="mode-copy"><strong>1 Player</strong>{bestScore !== null && <span className="mode-best" id="best-score">Best {bestScore.toLocaleString()}</span>}</span></button>
+        <button className="mode-card single-player" onClick={beginGame}><span className="mode-copy"><strong>1 Player</strong></span></button>
         <button className="mode-card" onClick={() => setView('multiplayer')}><span className="mode-copy"><strong>2 Players</strong></span></button>
-        <button className="secondary-card" onClick={() => setView('highScores')}>High Scores</button>
+        <button className="secondary-card menu-secondary" onClick={() => setView('highScores')}>High Scores</button>
         {notice && <p className="notice menu-notice" role="status">{notice}</p>}
       </div>
     </section>

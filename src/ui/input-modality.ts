@@ -1,9 +1,9 @@
 /**
- * Tracks whether the player last used a pointer (touch/mouse) or the keyboard.
- * Focus rings are only drawn in keyboard mode, so screens and dialogs that move
- * focus on open do not flash outlines on phones (B-005).
+ * Tracks whether the player is navigating with Tab or not. Focus rings are only drawn
+ * after Tab, so screens and dialogs that move focus on open, and game keys such as the
+ * arrows or Space, never make outlines appear (B-005, B-012).
  */
-const NAVIGATION_KEYS = new Set(['Tab', 'Enter', ' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Escape', 'Home', 'End'])
+const NAVIGATION_KEYS = new Set(['Tab'])
 
 export function trackInputModality(root: HTMLElement = document.documentElement): void {
   root.dataset.input = 'pointer'

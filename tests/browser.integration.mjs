@@ -315,6 +315,11 @@ test('a new game clears keys held during the previous Game Over', async () => {
   await page.waitForTimeout(100)
   assert.equal(await page.getByRole('dialog', { name: 'Game over' }).count(), 1)
   await page.waitForTimeout(700)
+  // Space never restarts from the game-over dialog, however long it keeps being pressed (B-014).
+  await page.keyboard.press('Space')
+  await page.waitForTimeout(100)
+  assert.equal(await page.getByRole('dialog', { name: 'Game over' }).count(), 1)
+  assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Game over')
   await page.getByRole('button', { name: 'Play Again', exact: true }).click()
   await page.waitForTimeout(300)
   assert.equal(await minX(page), 3)

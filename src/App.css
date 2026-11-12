@@ -90,7 +90,7 @@ button.mode-card:hover{border-color:var(--accent);transform:translateY(-1px)}
 .controller-status{margin:10px 0;color:var(--muted);font-size:13px;line-height:1.5;text-align:center}
 
 @media(max-width:760px){
-  .shell{padding:20px 18px}
+  .shell{padding:20px 14px}
   .menu-content{grid-template-columns:1fr;gap:40px;width:100%;padding:48px 0 32px}
   .hero-copy{align-items:center;text-align:center}
   .hero-copy h1{font-size:clamp(24px,7vw,32px)}
@@ -291,7 +291,7 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
 .score-table tbody tr:nth-child(-n+3) td:first-child{color:var(--accent);font-weight:800}
 
 /* Main menu (F-014) */
-.player-name-button{min-height:44px;padding:0 4px;border:0;background:transparent;cursor:pointer}
+.player-name-button{min-height:44px;padding:0;border:0;background:transparent;cursor:pointer}
 .player-name-button:hover strong{text-decoration:underline}
 .mode-best{display:block;margin-top:4px;color:var(--muted);font:600 14px var(--display);font-variant-numeric:tabular-nums}
 .subpage-bar+.settings-card{margin:0 auto;padding:24px 0 56px}
@@ -320,8 +320,16 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
 .mp-join .join-idle{background:#1B2036;border:1px solid #2C3352}
 .subpage-title:focus{outline:none}
 
-/* B-009: top bars sit at the same edge (18 px) and size on every screen. */
-.game-topbar{padding-inline:4px}
+/* B-009/B-011: on phones every screen uses the same 14 px edge; on wide screens the
+   top bar spans exactly the content below it (menu, game). */
+.menu-topbar{width:min(100%,980px);margin-inline:auto}
+@media(min-width:901px){
+  .game-shell{--board:min(320px,calc((100dvh - 190px)/2))}
+  .game-layout{grid-template-columns:190px auto 190px;gap:40px;justify-content:center;max-width:none;width:auto}
+  .game-layout>.game-side{width:190px}
+  .game-shell .playfield{width:var(--board)}
+  .game-topbar{width:calc(380px + 80px + var(--board));max-width:100%;margin-inline:auto}
+}
 /* F-017: pause dialog. */
 .pause-card{display:flex;flex-direction:column;gap:12px}
 .pause-card h1{margin:0;text-align:center}
@@ -349,3 +357,8 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
 .final-score span{color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
 .final-score strong{font:700 44px/1.1 var(--display);color:var(--accent);font-variant-numeric:tabular-nums}
 .result-card .score-cards{margin-bottom:14px}
+
+/* B-015: larger menu buttons; the best score lives on the High Scores page and game over. */
+.menu-actions .mode-card{min-height:68px}
+.menu-actions .mode-copy strong{font:700 21px var(--display)}
+.menu-actions .menu-secondary{min-height:60px;font:700 19px var(--display)}

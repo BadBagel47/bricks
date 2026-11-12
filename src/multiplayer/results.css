@@ -1,6 +1,6 @@
 /* Match result screen (F-015): outcome headline, player cards, Battle comparison,
    head-to-head record and a short ranking; actions stay at the bottom. */
-.match-results{position:fixed;inset:0;z-index:30;background:var(--bg);overflow:auto;color:inherit;display:flex;flex-direction:column;gap:14px;padding:14px max(18px,calc((100vw - 560px)/2)) 22px}
+.match-results{position:fixed;inset:0;z-index:30;background:var(--bg);overflow:auto;color:inherit;display:flex;flex-direction:column;gap:14px;padding:14px max(14px,calc((100vw - 560px)/2)) 22px}
 .match-results h1:focus{outline:none}
 .result-bar{display:flex;align-items:center;gap:8px;min-height:44px}
 .result-bar .match-chip{height:32px;padding:0 12px;border-radius:16px;background:var(--panel);border:1px solid var(--panel-3);display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;white-space:nowrap}

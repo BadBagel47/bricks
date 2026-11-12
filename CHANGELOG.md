@@ -19,6 +19,10 @@ not yet on the public GitHub Pages site.
 - B-009: top bars sit at the same edge on game and match screens; the match Back button has the standard size.
 
 ### Fixed (run 5, 2026-11-12)
+- B-011: top bars line up with the content on wide screens; phones use one edge on every screen.
+- B-012: focus outlines only after Tab, never on headings or dialogs.
+- B-014: Space can no longer restart from the game-over dialog.
+- B-015: menu buttons have larger text; the best score is no longer on the 1 Player button.
 - B-004: opponent board updates more often and more evenly (writes spaced from their start, early arrivals retried).
 - B-005: focus outlines only appear after keyboard navigation.
 - B-006: pressing Space right at game over no longer starts a new game.
