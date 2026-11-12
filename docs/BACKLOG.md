@@ -23,6 +23,14 @@ records released changes.
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
 | B-004 | Bug | Opponent board still lags behind after B-003 | Medium | Proposed (deferred by owner) | Strong |
+| F-015 | Feature | Match result screen redesign (mockups R1/R2): winner headline, two player cards, Battle comparison rows, head-to-head record, Rematch as the main action; replaces the wide tables | High | Proposed | Strong |
+| F-016 | Feature | 1 Player game over redesign (R3): large final score, record badge, top 5 with the player's row highlighted | Medium | Proposed | Strong |
+| F-019 | Feature | High Scores as card rows instead of wide tables, own entries marked (R6) | Medium | Proposed | Strong |
+| F-017 | Feature | Pause dialog (R4): score line, Music/Sound effects switches, Restart and Main Menu | Low | Proposed | Standard |
+| F-018 | Feature | Name entry (R5): centred logo and form, character counter | Low | Proposed | Standard |
+| B-005 | Bug | Outlines appear around buttons/headings when screens and dialogs open | Medium | Proposed | Standard |
+| B-006 | Bug | Pressing Space (hard drop) at game over immediately starts a new game via the focused Play Again button | Medium | Proposed | Standard |
+| B-007 | Bug | Games ending with 0 points fill the 1 Player high score list | Low | Proposed | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-007 | Feature | Extract the multiplayer lobby into a reusable module | Low | Idea | Strong |
 | F-008 | Feature | Stones: Bomberman-like game for 1–2 players | Low | Idea | Strong |
@@ -59,12 +67,27 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 Letters refer to this latest proposal; commits and reports use the IDs.
 
-- **D** – Claude Opus or GPT-6.1 Sol, high – Opponent board (deferred by owner)
+- **A** – Claude Opus or GPT-6.1 Sol, high – Results and high scores
+  - F-015 – Match result screen redesign
+  - F-016 – 1 Player game over redesign
+  - F-019 – High Scores as card rows
+- **B** – Claude Sonnet or GPT-6.1 Terra, medium – Small fixes and dialogs
+  - B-005 – Outlines when screens/dialogs open
+  - B-006 – Space at game over restarts immediately
+  - B-007 – 0-point games in high scores
+  - F-017 – Pause dialog
+  - F-018 – Name entry
+- **C** – Claude Opus or GPT-6.1 Sol, high – Opponent board (deferred by owner)
   - B-004 – Opponent board still lags
 
-Runs A (F-010, F-011), B (F-012, F-013, F-014) and C (T-004) are done.
-
 ## Details
+
+### F-015 – F-019, B-005 – B-007 screen review 2026-11-12
+- Owner request: review all screens; theme colours stay as they are. Mockups R1–R6 in the design canvas (https://claude.ai/artifact/Es5mgaHFDTha7LiSz9W9Zv, row "Förslag 2026-11-12").
+- Owner: the high score list after a match needs a real review (F-015). Today it shows text lines, a 5-column table, a Battle table that overflows on phones and the full highscore table.
+- B-005: owner sees outlines around objects as they appear. Likely cause: `:focus-visible` outline on elements focused automatically (Resume, Play Again, page headings). Fix: show the ring only after keyboard navigation.
+- B-006: found in the review: the autofocused Play Again button takes Space presses meant as hard drops. Fix: short input guard or no autofocus on touch.
+- B-007: found in the review: ten 0-point games filled the list.
 
 ### F-001 Admin page with the sketch's structure and functions
 - Two tabs: *Public access* and *Private invitations*.
