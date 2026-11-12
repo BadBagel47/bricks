@@ -5,15 +5,48 @@ guides. Owner instructions and the specification take precedence.
 
 ## Shared rules and inventory
 
-- **Shared rules version:** v1.0 (2026-11-11), https://raw.githubusercontent.com/BadBagel47/agent-rules/main/AGENTS.md . This repo was last adapted to v1.0 on 2026-11-11 (T-004).
-- **Inventory done:** 2026-11-11. Branches: `main` (integration, deploys Pages) and `feature/operating-controls` (0 commits ahead of `main`; a push-trigger for the admin Worker deploy, see below). No open pull requests or issues. Documentation existed already (this file, `docs/BACKLOG.md`, `PROGRESS.md`, `CHANGELOG.md`, ADRs); nothing needed moving.
-- **Publishing method:** GitHub Pages from `main` via `.github/workflows/pages.yml`, custom domain https://bricks.trythis.one ; admin Worker via the `feature/operating-controls` branch (see Project rules).
+- **Shared rules version:** v1.2 (2026-11-12), https://raw.githubusercontent.com/BadBagel47/agent-rules/main/AGENTS.md . Adapted to v1.2 on 2026-11-12 (previously v1.0, T-004); items needing owner approval are under *Pending adaptation*.
+- Inventory: 2026-11-12
+  - Redone because the 2026-11-11 inventory missed branches (the cloud checkout fetched only `feature/operating-controls`). Remote branches: `main` (integration, deploys Pages); `feature/operating-controls` (kept: admin Worker deploy trigger, content equal to `main` apart from merge commits); fully merged into `main`: `ccr-308e5bf5-5nte3w`, `ccr-63fd355a-1ucin4` (its one commit, owner working rules, is already in `main`), `feature/visual-refresh`, `milestone-3.11`, `milestone-3.12`; old milestone branches `milestone-3.3` – `milestone-3.9` hold pre-squash history whose features are all in `main`. No open pull requests or issues.
+  - Sensitive information: git history on all branches scanned for keys, tokens and personal e-mail addresses; only test fixtures with fake service-account keys were found. The Firebase web config is public by design and protected by database rules. The repo is public.
+  - Laws and regulations: brief review done; findings T-006 and T-007 in `docs/BACKLOG.md`.
+- **Publishing method:** GitHub Pages from `main` via `.github/workflows/pages.yml`, custom domain https://bricks.trythis.one ; admin Worker via the `feature/operating-controls` branch (see Decisions).
+- **Project language:** English for all player-facing text and the README; chat with the owner in Swedish.
+- **Environment (checked 2026-11-12):** agents can push to `main` and `feature/operating-controls`; GitHub REST works through `gh api`, GraphQL (`gh pr list`, `gh issue list`) is blocked in Claude cloud sessions; setting repository variables via `gh` is blocked (owner sets them). A fresh cloud checkout may fetch only one branch: run `git fetch origin '+refs/heads/*:refs/remotes/origin/*'` before comparing branches.
+
+## Decisions
+
+Owner decisions that adjust the shared rules for this repo. Older product decisions are in `docs/adr/` and *Project rules* below.
+
+- **IDs (2026-11-10):** Bricks keeps `F-`/`B-`/`T-` (T = operational/owner task) instead of `D-`.
+- **Publishing (2026-11-11):** push to `main` after every run (temporary breakage is acceptable, the owner is the only tester); changes to `server/operating/` or `wrangler.operating.jsonc` are also merged into `feature/operating-controls` with `[deploy operating]` to deploy the admin Worker. No `auto-merge.yml` is needed because agents can push to `main`. Firebase rule changes are published by the owner before the client that depends on them.
+- **`CLAUDE.md`:** kept as a one-line import of `AGENTS.md`; no rules live in it.
+- **Workstreams (2026-11-11):** music is composed in a separate "music studio" chat; other agents leave `src/audio/music.ts` and music behavior alone unless asked.
+- **Music tempo (2026-11-11, T-005):** new music keeps a stable BPM; *Bricks Theme* keeps its danger tempo rise (132 → 172 BPM).
+- **Opponent board (2026-11-12, B-004):** fix shipped; the owner checks it on two devices.
+
+## Pending adaptation
+
+Adaptation plan for shared rules v1.2, waiting for the owner (approve e.g. "Kör anpassning", "Kör 1 och 2", "Kör 3.1"). ⚠️ = deletes or overwrites something.
+
+- **1 – Branches**
+  - 1.1 ⚠️ Delete the branches already merged into `main`: `ccr-308e5bf5-5nte3w`, `ccr-63fd355a-1ucin4`, `feature/visual-refresh`, `milestone-3.11`, `milestone-3.12`.
+  - 1.2 ⚠️ Delete `milestone-3.3` – `milestone-3.9` after tagging each tip (`archive/milestone-3.x`), so the old history stays reachable.
+- **2 – Project rules (outdated or duplicating the shared rules)**
+  - 2.1 ⚠️ Remove the finished milestone authorizations (3.7 – 3.11, "stop at milestone checkpoints", "do not begin multiplayer/Firebase") and the broken `HANDOVER.md` links.
+  - 2.2 ⚠️ Remove owner working rules that the shared rules now cover (replies, documentation, batching, language, sensitive data, owner actions, rules confirmation); keep the Bricks-specific ones.
+  - 2.3 Move the remaining project rules from this file into `AGENTS.md` below the reference, where the shared rules want them.
+- **3 – Project rules that conflict with the shared rules**
+  - 3.1 Model advice – project rule: name GPT-6.1 Terra, Sol and Luna; shared rule: only models in the agent's own environment, neutral levels in saved documents. Recommendation: the shared rule.
+  - 3.2 Swedish text in documents – project rule: ask whether to translate; shared rule: working documents accept Swedish and English and are never translated. Recommendation: the shared rule.
+- **4 – HANDOFF.md as current state, not a log**
+  - 4.1 ⚠️ Move dated history (checkpoints 2026-11-10/11, visual refresh, the stale "Next session" plan, repaired failures, the Phase 4 track) to `PROGRESS.md` and keep a short current state with the latest five entries.
 
 ## Documentation map
 
 | What | Where |
 | --- | --- |
-| Agent rules | `AGENTS.md` (reference to the shared rules; `CLAUDE.md` imports it); Bricks rules in *Project rules* below |
+| Agent rules | `AGENTS.md` (reference to the shared rules; `CLAUDE.md` imports it); Bricks rules in *Project rules* below; owner decisions in *Decisions* |
 | Product requirements | `BRICKS_SPEC.md` (section 5.0 = approved visual design) |
 | Current checkpoint, environments, resources | this file |
 | Goals | *Product direction* below and spec section 4 |
@@ -333,9 +366,4 @@ where Bricks has an explicit exception it is stated here.
 
 ### Differences from the shared rules (owner-approved)
 
-- **IDs:** Bricks keeps `F-`/`B-`/`T-` (T = operational/owner task) instead of `D-`. Conversion to the shared format is not done unless the owner asks.
-- **Priority:** the shared scale High / Medium / Low is used in `docs/BACKLOG.md`.
-- **Publishing:** push to `main` as in the shared rules; additionally, changes to `server/operating/` or `wrangler.operating.jsonc` are merged into `feature/operating-controls` with `[deploy operating]` to deploy the admin Worker. No `auto-merge.yml` is needed because agents can push to `main`.
-- **`CLAUDE.md`:** kept as a one-line import of `AGENTS.md` because Claude Code only auto-loads `CLAUDE.md`. No rules live in it.
-- **Model advice:** include GPT-6.1 Terra alongside Sol and Luna.
-- **Rules confirmation:** the first reply of a session states the loaded rules version.
+Recorded under *Decisions* at the top of this file.
