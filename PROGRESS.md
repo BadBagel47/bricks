@@ -8,6 +8,10 @@
 - **Phase 4 status:** Documentation and maintenance instructions added; no application code changed. Waiting for owner DNS, GitHub Pages custom-domain/HTTPS, Firebase Authorized domains (and API-key referrer, if restricted). Live verification checklist not yet observed; this environment cannot reach the site.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
+## F-021, F-022 — 2026-11-12
+
+Owner request ("Titta på … animationer", "Kör en inställning för effekter"). New personal settings `interfaceAnimations` and `gameEffects` (default on). Board effects via `lineClearEffect` (unit-tested) and Web Animations in `Playfield`; CSS overlay for clearing rows; view transitions through `document.startViewTransition` except into the game. Local: unit tests 176 pass (6 firebase/miniflare suites cannot run here), browser integration 15/15; animation frames checked in a harness.
+
 ## Run 5: F-015 – F-020, B-004 – B-010 — 2026-11-12
 
 Owner approved ("Vi kör A-C") after a full screen review (mockups R1–R6 in the design canvas). Group B: input-modality focus rings (`src/ui/input-modality.ts`), 700 ms Play Again guard, zero-point games dropped from high scores, bounding-box previews (`previewShape`), aligned top bars, admin `scrollbar-gutter`, new pause dialog and name entry, consistent outlines and room chip. Group A: `ResultViews.tsx`/`results.css` rewritten (player cards, Battle comparison, `headToHead`, `archiveOwner`, top 3, sticky actions); game over and High Scores use shared `score-cards` rows. Group C (B-004): snapshot writes spaced from their start (`SNAPSHOT_SPACING_MS` 250, poll 40 ms), rollback and retry of failed writes; rules unchanged. Local: unit tests 174 pass (6 firebase/miniflare suites cannot run here), browser integration 15/15; harness screenshots at 320, 390 and 844 wide. Emulator suites run in CI. B-004 still needs a two-device check by the owner.

@@ -1,4 +1,6 @@
 import { ResultCollector } from './results.ts'
+import { lineClearEffect } from '../ui/board-effects.ts'
+import type { ClearEffect } from '../ui/board-effects.ts'
 import { captureBattleCheckpoint } from './battle-checkpoint.ts'
 import { publishCheckpoint } from './checkpoint-repository.ts'
 import { MatchClock } from './match-clock.ts'
@@ -93,12 +95,24 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
   const ownName = localHost ? joined.room.players.host.name : joined.room.players.guest!.name
   const otherName = localHost ? joined.room.players.guest!.name : joined.room.players.host.name
   const base = `gameSnapshots/${joined.code}/${joined.room.epoch}`
+  const [clearFx, setClearFx] = useState<ClearEffect | null>(null)
+  const [thump, setThump] = useState(0)
+  const effectId = useRef(0)
 
   function commit(transition: Transition) {
+    const previous = current.current
     current.current = transition.state
     // Gravity counters change at 60 Hz; render only a visible engine transition.
     if (!transition.events.length) return
     setGame(transition.state)
+    if (personal.gameEffects) {
+      // F-022: same board effects as 1 Player; a Battle clear mixed with incoming rows simply skips the fall animation.
+      if (transition.events.some(event => event.type === 'linesCleared')) {
+        const effect = lineClearEffect(previous, transition.state, ++effectId.current)
+        if (effect) { setClearFx(effect); window.setTimeout(() => setClearFx(fx => fx?.id === effect.id ? null : fx), 450) }
+      }
+      if (transition.events.some(event => event.type === 'hardDropped')) setThump(++effectId.current)
+    }
     audio.handleEvents(transition.events)
     audio.setDanger(transition.state.board)
     if (battleGame) {
@@ -324,7 +338,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
         {battleGame && <div className="incoming-meter" role="img" aria-label={`Incoming garbage: ${pending} ${pending === 1 ? 'row' : 'rows'}`}><span style={{ height: `${Math.min(pending, 20) * 5}%` }} /></div>}
         <section className="own-board" aria-label="Your game">
           <h2 className="visually-hidden">{ownName}</h2>
-          <Playfield game={game} ghost={personal.ghostPiece && !finished} colors={personal.blockColors} swipeMode={personal.mobileControlMethod === 'swipe' && !finished} onSwipe={(from, to) => actionsForSwipe(from, to).forEach(action => apply(action))} />
+          <Playfield game={game} ghost={personal.ghostPiece && !finished} colors={personal.blockColors} clear={clearFx} thump={thump} swipeMode={personal.mobileControlMethod === 'swipe' && !finished} onSwipe={(from, to) => actionsForSwipe(from, to).forEach(action => apply(action))} />
           <dl className="live-stats visually-hidden"><div><dt>Score</dt><dd>{game.score.toLocaleString()}</dd></div><div><dt>Level</dt><dd>{pad(game.level)}</dd></div><div><dt>Lines</dt><dd>{game.lines}</dd></div></dl>
           <p role="status" className={finished ? 'board-status' : 'visually-hidden'}>{finished ? 'Game over' : 'Playing'}</p>
         </section>

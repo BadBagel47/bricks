@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import type { KeyboardEvent } from 'react'
 import type { PieceType } from '../engine/types.ts'
 import { blockStyle } from './level-palettes.ts'
@@ -16,7 +17,9 @@ export function Segmented<T extends string>({ label, value, options, onChange }:
     const buttons = event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role=radio]')
     buttons?.[(index + step + options.length) % options.length]?.focus()
   }
-  return <div className="segmented" role="radiogroup" aria-label={label} style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}>
+  const selected = Math.max(0, options.findIndex(option => option.value === value))
+  return <div className="segmented" role="radiogroup" aria-label={label} style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))`, '--n': options.length, '--i': selected } as CSSProperties}>
+    <span className="seg-thumb" aria-hidden="true" />
     {options.map((option, index) => <button key={option.value} type="button" role="radio" aria-checked={option.value === value} tabIndex={option.value === value ? 0 : -1} onClick={() => onChange(option.value)} onKeyDown={(event) => move(event, index)}>{option.label}</button>)}
   </div>
 }

@@ -1,7 +1,10 @@
+import { lineClearEffect } from './ui/board-effects.ts'
+import type { ClearEffect } from './ui/board-effects.ts'
 import { SubpageBar } from './ui/SubpageBar.tsx'
 import { MultiplayerHighscores } from './multiplayer/ResultViews.tsx'
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { FormEvent } from 'react'
+import type { CSSProperties, FormEvent } from 'react'
+import { flushSync } from 'react-dom'
 import { createPortal } from 'react-dom'
 import { advanceGame, createGame, dispatch } from './engine/index.ts'
 import type { GameAction, GameEvent, GameState } from './engine/index.ts'
@@ -67,7 +70,7 @@ function readUsername() {
 function App() {
   const [username, setUsername] = useState(readUsername)
   const [draft, setDraft] = useState(username)
-  const [view, setView] = useState<View>(() => username ? (new URL(location.href).searchParams.has('room') ? 'multiplayer' : 'menu') : 'welcome')
+  const [view, setViewState] = useState<View>(() => username ? (new URL(location.href).searchParams.has('room') ? 'multiplayer' : 'menu') : 'welcome')
   const [notice, setNotice] = useState('')
   const [gameAnnouncement, setGameAnnouncement] = useState('')
   const [bindings, setBindings] = useState<KeyboardBindings>(readControls)
@@ -78,6 +81,21 @@ function App() {
   const [gamepadCaptureError, setGamepadCaptureError] = useState('')
   const [controllerStatus, setControllerStatus] = useState('No controller detected')
   const [personal, setPersonal] = useState<PersonalSettings>(() => readStored(PERSONAL_KEY, parsePersonalSettings, DEFAULT_PERSONAL_SETTINGS))
+  const personalRef = useRef(personal)
+  personalRef.current = personal
+  /** F-021: screens cross-fade with the View Transitions API where the browser has it. */
+  function setView(next: View) {
+    const doc = document as Document & { startViewTransition?: (update: () => void) => unknown }
+    // The game starts instantly: a transition would briefly swallow the first taps.
+    if (next === 'game' || !personalRef.current.interfaceAnimations || !doc.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) { setViewState(next); return }
+    doc.startViewTransition(() => flushSync(() => setViewState(next)))
+  }
+  useEffect(() => { document.documentElement.dataset.motion = personal.interfaceAnimations ? 'on' : 'off' }, [personal.interfaceAnimations])
+  // F-022: board effects. Ids restart the animations; the engine never sees them.
+  const [clearFx, setClearFx] = useState<ClearEffect | null>(null)
+  const [thump, setThump] = useState(0)
+  const [levelUp, setLevelUp] = useState(0)
+  const effectIdRef = useRef(0)
   const [singlePlayer, setSinglePlayer] = useState<SinglePlayerSettings>(() => readStored(SINGLE_PLAYER_KEY, parseSinglePlayerSettings, DEFAULT_SINGLE_PLAYER_SETTINGS))
   const [highscores, setHighscores] = useState<HighscoreRecord[]>(() => readStored(HIGHSCORES_KEY, parseHighscores, []))
   const [resultRank, setResultRank] = useState<number | null>(null)
@@ -188,6 +206,14 @@ function App() {
     gameRef.current = next
     setGame(next)
     audioRef.current?.handleEvents(events)
+    if (personalRef.current.gameEffects) {
+      if (events.some((event) => event.type === 'linesCleared')) {
+        const effect = lineClearEffect(previous, next, ++effectIdRef.current)
+        if (effect) { setClearFx(effect); window.setTimeout(() => setClearFx((current) => current?.id === effect.id ? null : current), 450) }
+      }
+      if (events.some((event) => event.type === 'hardDropped')) setThump(++effectIdRef.current)
+      if (events.some((event) => event.type === 'levelChanged')) setLevelUp(++effectIdRef.current)
+    }
     const announcements = events.flatMap((event) => {
       if (event.type === 'linesCleared') return [`${event.count} ${event.count === 1 ? 'line' : 'lines'} cleared.`]
       if (event.type === 'levelChanged') return [`Level ${event.to}.`]
@@ -460,6 +486,8 @@ function App() {
       <ColorPreview colors={personal.blockColors} level={singlePlayer.startLevel} />
       <div className="setting-group">
       <label className="toggle-row"><span>Ghost piece</span><input checked={personal.ghostPiece} onChange={(event) => savePersonal({ ...personal, ghostPiece: event.target.checked })} type="checkbox" /></label>
+      <label className="toggle-row"><span>Game effects</span><input checked={personal.gameEffects} onChange={(event) => savePersonal({ ...personal, gameEffects: event.target.checked })} type="checkbox" /></label>
+      <label className="toggle-row"><span>Interface animations</span><input checked={personal.interfaceAnimations} onChange={(event) => savePersonal({ ...personal, interfaceAnimations: event.target.checked })} type="checkbox" /></label>
       </div>
       <h2 className="settings-heading">1 Player</h2>
       <div className="setting-group">
@@ -497,7 +525,8 @@ function App() {
   if (view === 'highScores') return <main className="shell">
     <SubpageBar title="High Scores" onBack={() => setView('menu')} />
     <section className="settings-card score-list-page">
-      <div className="score-tabs" role="tablist" aria-label="High Scores">
+      <div className="score-tabs" role="tablist" aria-label="High Scores" style={{ '--n': SCORE_TABS.length, '--i': Math.max(0, SCORE_TABS.findIndex(tab => tab.id === scoreTab)) } as CSSProperties}>
+        <span className="seg-thumb" aria-hidden="true" />
         {SCORE_TABS.map(tab => <button key={tab.id} role="tab" id={`score-tab-${tab.id}`} aria-selected={scoreTab === tab.id} aria-controls="score-panel" tabIndex={scoreTab === tab.id ? 0 : -1} className={scoreTab === tab.id ? 'active' : ''} onClick={() => setScoreTab(tab.id)} onKeyDown={event => {
           if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return
           event.preventDefault()
@@ -521,10 +550,10 @@ function App() {
     <section className="game-layout" aria-label="Single-player game">
       <aside className="game-side game-stats">
         <div><span>Score</span><strong>{game.score.toLocaleString()}</strong></div>
-        <div><span>Level</span><strong>{String(game.level).padStart(2, '0')}</strong></div>
+        <div className={levelUp ? 'level-up' : undefined} key={`level-${levelUp}`}><span>Level</span><strong>{String(game.level).padStart(2, '0')}</strong></div>
         <div><span>Lines</span><strong>{game.lines}</strong></div>
       </aside>
-      <Playfield game={game} ghost={personal.ghostPiece} colors={personal.blockColors} swipeMode={personal.mobileControlMethod === 'swipe'} onSwipe={(start, end) => actionsForSwipe(start, end).forEach(apply)} />
+      <Playfield game={game} ghost={personal.ghostPiece} colors={personal.blockColors} clear={clearFx} thump={thump} swipeMode={personal.mobileControlMethod === 'swipe'} onSwipe={(start, end) => actionsForSwipe(start, end).forEach(apply)} />
       <aside className="game-side next-panel"><div className="next-box"><span>Next</span><PiecePreview type={game.next} level={game.level} colors={personal.blockColors} /></div>{game.holdEnabled && <HoldBox type={game.held} level={game.level} colors={personal.blockColors} enabled={game.status === 'playing' && !game.holdUsed} onHold={() => apply('hold')} />}</aside>
     </section>
     {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={personal.touchButtonSize} leftHanded={personal.leftHandedControls} holdEnabled={game.holdEnabled} hardDropEnabled={game.hardDropEnabled} enabled={game.status === 'playing'} apply={apply} />}

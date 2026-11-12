@@ -11,6 +11,10 @@ export interface PersonalSettings {
   readonly hideTouchControlsWhenController: boolean
   readonly ghostPiece: boolean
   readonly blockColors: 'level' | 'classic'
+  /** Menu and screen transitions, switches, dialogs (F-021). */
+  readonly interfaceAnimations: boolean
+  /** Line clears, landing and level-up effects on the board (F-022). */
+  readonly gameEffects: boolean
 }
 
 export interface SinglePlayerSettings {
@@ -37,7 +41,7 @@ export interface HighscoreResult {
 export const DEFAULT_PERSONAL_SETTINGS: PersonalSettings = {
   version: 1, hardDropEnabled: true, musicEnabled: true, musicVolume: 70, effectsEnabled: true, effectsVolume: 70,
   mobileControlMethod: 'dpad', touchButtonSize: 56, leftHandedControls: false, hideTouchControlsWhenController: true,
-  ghostPiece: false, blockColors: 'level',
+  ghostPiece: false, blockColors: 'level', interfaceAnimations: true, gameEffects: true,
 }
 export const DEFAULT_SINGLE_PLAYER_SETTINGS: SinglePlayerSettings = { version: 1, startLevel: 0, holdEnabled: false }
 
@@ -67,6 +71,8 @@ export function parsePersonalSettings(raw: string | null): PersonalSettings {
     hideTouchControlsWhenController: typeof value?.hideTouchControlsWhenController === 'boolean' ? value.hideTouchControlsWhenController : true,
     ghostPiece: typeof value?.ghostPiece === 'boolean' ? value.ghostPiece : false,
     blockColors: value?.blockColors === 'classic' ? 'classic' : 'level',
+    interfaceAnimations: typeof value?.interfaceAnimations === 'boolean' ? value.interfaceAnimations : true,
+    gameEffects: typeof value?.gameEffects === 'boolean' ? value.gameEffects : true,
   }
 }
 

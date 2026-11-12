@@ -1,10 +1,13 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from 'react'
 import { dropPosition, pieceCells } from '../engine/index.ts'
 import type { Cell, GameAction, GameState, PieceType } from '../engine/index.ts'
 import { blockStyle } from './level-palettes.ts'
 import type { BlockColors } from './level-palettes.ts'
 import { previewShape } from './piece-preview.ts'
+import type { ClearEffect } from './board-effects.ts'
+
+const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 interface SwipePoint { readonly x: number; readonly y: number }
 
 function blockVars(type: PieceType | 'G', level: number, colors: BlockColors): CSSProperties {
@@ -12,22 +15,49 @@ function blockVars(type: PieceType | 'G', level: number, colors: BlockColors): C
   return { '--cell-fill': style.fill, '--cell-ring': style.ring ?? 'transparent', '--cell-color': style.ring ?? style.fill } as CSSProperties
 }
 
-export function Playfield({ game, swipeMode, onSwipe, ghost = false, colors = 'level' }: { game: Pick<GameState, 'board' | 'active' | 'level'>; swipeMode: boolean; onSwipe: (start: SwipePoint, end: SwipePoint) => void; ghost?: boolean; colors?: BlockColors }) {
+export function Playfield({ game, swipeMode, onSwipe, ghost = false, colors = 'level', clear = null, thump = 0 }: { game: Pick<GameState, 'board' | 'active' | 'level'>; swipeMode: boolean; onSwipe: (start: SwipePoint, end: SwipePoint) => void; ghost?: boolean; colors?: BlockColors; clear?: ClearEffect | null; thump?: number }) {
   const cells: Cell[] = game.board.flatMap((row) => [...row])
   const ghosts = new Set<number>()
   const swipeStart = useRef<SwipePoint | null>(null)
+  const root = useRef<HTMLDivElement>(null)
+  const activeCells = new Set<number>()
   if (game.active) {
     if (ghost) for (const [x, y] of pieceCells(dropPosition(game.board, game.active))) ghosts.add(y * 10 + x)
-    for (const [x, y] of pieceCells(game.active)) { cells[y * 10 + x] = game.active.type; ghosts.delete(y * 10 + x) }
+    for (const [x, y] of pieceCells(game.active)) { cells[y * 10 + x] = game.active.type; ghosts.delete(y * 10 + x); activeCells.add(y * 10 + x) }
   }
+  // F-022: blocks above cleared rows fall into place after the cleared rows flash away.
+  useLayoutEffect(() => {
+    const board = root.current
+    if (!clear || !board || reducedMotion()) return
+    const cellElements = board.querySelectorAll<HTMLElement>(':scope > .board-cell')
+    const step = (cellElements[10]?.offsetTop ?? 0) - (cellElements[0]?.offsetTop ?? 0)
+    clear.shifts.forEach((shift, y) => {
+      if (!shift) return
+      for (let x = 0; x < 10; x++) {
+        const element = cellElements[y * 10 + x]
+        if (!element?.classList.contains('filled') || activeCells.has(y * 10 + x)) continue
+        element.animate([{ transform: `translateY(${-shift * step}px)` }, { transform: `translateY(${-shift * step}px)`, offset: 0.45 }, { transform: 'translateY(0)' }], { duration: 330, easing: 'cubic-bezier(.5,0,.75,0)' })
+      }
+    })
+    // Only the clear id should trigger the animation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clear?.id])
+  // A hard drop lands with a small bump of the whole board.
+  useEffect(() => {
+    if (!thump || !root.current || reducedMotion()) return
+    root.current.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(4px)' }, { transform: 'translateY(0)' }], { duration: 160, easing: 'ease-out' })
+  }, [thump])
   const ghostStyle = game.active ? blockVars(game.active.type, game.level, colors) : undefined
-  return <div className={`playfield${swipeMode ? ' swipe-active' : ''}`} role="img" aria-label="Game board, 10 columns by 20 rows"
+  return <div ref={root} className={`playfield${swipeMode ? ' swipe-active' : ''}`} role="img" aria-label="Game board, 10 columns by 20 rows"
     onPointerDown={(event) => { if (swipeMode && event.pointerType !== 'mouse') { swipeStart.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId) } }}
     onPointerUp={(event) => { if (!swipeMode || !swipeStart.current) return; onSwipe(swipeStart.current, { x: event.clientX, y: event.clientY }); swipeStart.current = null }}
     onPointerCancel={() => { swipeStart.current = null }}>
     {cells.map((type, index) => type
       ? <div className="board-cell filled" key={index} style={blockVars(type, game.level, colors)} />
       : <div className={`board-cell${ghosts.has(index) ? ' ghost' : ''}`} key={index} style={ghosts.has(index) ? ghostStyle : undefined} />)}
+    {clear && <div className={`clear-overlay${clear.rows.length === 4 ? ' quad' : ''}`} key={clear.id} aria-hidden="true">
+      {clear.rows.flatMap((y) => clear.before[y].map((type, x) => <span key={`${y}-${x}`} className="clearing" style={{ gridRow: y + 1, gridColumn: x + 1, '--i': Math.abs(x - 4.5), ...(type ? blockVars(type, game.level, colors) : {}) } as CSSProperties} />))}
+    </div>}
   </div>
 }
 

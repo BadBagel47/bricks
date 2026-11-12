@@ -107,7 +107,7 @@ button.mode-card:hover{border-color:var(--accent);transform:translateY(-1px)}
 .game-stats{grid-area:stats}
 .game-layout>.playfield{grid-area:board}
 .next-panel{grid-area:side}
-.playfield{width:min(320px,calc((100dvh - 190px)/2));aspect-ratio:1/2;display:grid;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(20,1fr);gap:2px;padding:5px;background:#0A0D18;border:1px solid var(--panel-3);border-radius:14px;box-shadow:0 18px 50px #0007;--ring:3px}
+.playfield{position:relative;width:min(320px,calc((100dvh - 190px)/2));aspect-ratio:1/2;display:grid;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(20,1fr);gap:2px;padding:5px;background:#0A0D18;border:1px solid var(--panel-3);border-radius:14px;box-shadow:0 18px 50px #0007;--ring:3px}
 .board-cell{background:#161B2F;border-radius:3px;min-width:0;min-height:0}
 .board-cell.filled,.piece-preview .filled{background:var(--cell-fill,var(--cell-color));border-radius:4px;box-shadow:inset 0 0 0 var(--ring,3px) var(--cell-ring,transparent),inset 0 2px 0 rgba(255,255,255,.28),inset 0 -3px 0 rgba(0,0,0,.28)}
 .board-cell.ghost{background:transparent;border:2px dashed var(--cell-color);border-radius:4px;opacity:.55}
@@ -362,3 +362,39 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
 .menu-actions .mode-card{min-height:68px}
 .menu-actions .mode-copy strong{font:700 21px var(--display)}
 .menu-actions .menu-secondary{min-height:60px;font:700 19px var(--display)}
+
+/* F-022: game effects. */
+.clear-overlay{position:absolute;inset:5px;display:grid;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(20,1fr);gap:2px;pointer-events:none}
+.clear-overlay .clearing{border-radius:4px;background:var(--cell-fill,#fff);animation:cell-clear 190ms cubic-bezier(.4,0,.6,1) calc(var(--i) * 14ms) both}
+@keyframes cell-clear{0%{filter:brightness(1);transform:scale(1);opacity:1}35%{background:#fff;filter:brightness(1.6);transform:scale(1.08);opacity:1}100%{background:#fff;transform:scale(.2);opacity:0}}
+.clear-overlay.quad .clearing{animation-duration:240ms;box-shadow:0 0 12px #fff8}
+.game-stats .level-up{animation:level-up 600ms ease-out}
+@keyframes level-up{0%{border-color:var(--accent);box-shadow:0 0 0 0 rgba(255,181,71,.55)}40%{transform:scale(1.04)}100%{box-shadow:0 0 0 12px rgba(255,181,71,0)}}
+@media (prefers-reduced-motion:reduce){.clear-overlay .clearing{animation:none;opacity:0}.game-stats .level-up{animation:none}}
+
+/* F-021: interface animations. Off with the Interface animations setting or reduced motion. */
+::view-transition-old(root){animation:view-out 140ms ease-in both}
+::view-transition-new(root){animation:view-in 220ms cubic-bezier(.2,.8,.2,1) both}
+@keyframes view-out{to{opacity:0;transform:translateY(-6px)}}
+@keyframes view-in{from{opacity:0;transform:translateY(10px)}}
+.segmented,.score-tabs{position:relative;isolation:isolate}
+.seg-thumb{position:absolute;z-index:-1;top:4px;bottom:4px;--w:calc((100% - 8px - (var(--n) - 1) * 4px) / var(--n));width:var(--w);left:calc(4px + var(--i) * (var(--w) + 4px));border-radius:10px;background:var(--accent);transition:left 240ms cubic-bezier(.3,.9,.3,1)}
+.segmented button[aria-checked=true],.score-tabs button.active{background:transparent;transition:color 200ms}
+.toggle-row input[type=checkbox]{transition:background 200ms}
+.toggle-row input[type=checkbox]::before{transition:left 220ms cubic-bezier(.3,1.4,.5,1),background 200ms,width 160ms}
+.toggle-row input[type=checkbox]:active::before{width:28px}
+.toggle-row input[type=checkbox]:checked:active::before{left:20px}
+.game-overlay{animation:overlay-in 180ms ease-out}
+.game-overlay>.overlay-card{animation:card-in 240ms cubic-bezier(.2,.9,.3,1.2)}
+@keyframes overlay-in{from{opacity:0}}
+@keyframes card-in{from{opacity:0;transform:translateY(12px) scale(.96)}}
+.button,.mode-card,.secondary-card,.icon-back,.match-leave,.settings-button{transition:transform 120ms,background 150ms,border-color 150ms}
+.button:active,.mode-card:active,.secondary-card:active,.icon-back:active{transform:scale(.98)}
+.score-cards tbody tr{animation:row-in 260ms cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--row, 0) * 35ms)}
+.score-cards tbody tr:nth-child(2){--row:1}.score-cards tbody tr:nth-child(3){--row:2}.score-cards tbody tr:nth-child(4){--row:3}.score-cards tbody tr:nth-child(5){--row:4}.score-cards tbody tr:nth-child(n+6){--row:5}
+@keyframes row-in{from{opacity:0;transform:translateY(8px)}}
+.menu-actions>*{animation:row-in 300ms cubic-bezier(.2,.8,.2,1) both}
+.menu-actions>*:nth-child(2){animation-delay:50ms}.menu-actions>*:nth-child(3){animation-delay:100ms}
+html[data-motion=off] :not(.clearing,.level-up),html[data-motion=off] ::before,html[data-motion=off] ::after{animation:none!important;transition:none!important}
+html[data-motion=off]::view-transition-old(root),html[data-motion=off]::view-transition-new(root){animation:none}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:1ms!important;transition-duration:1ms!important}.clear-overlay .clearing{opacity:0}}
