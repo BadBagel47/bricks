@@ -23,8 +23,6 @@ records released changes.
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
 | B-004 | Bug | Opponent board still lags behind after B-003 | Medium | Proposed (deferred by owner) | Strong |
-| F-010 | Feature | Match screen cleanup: hide the Battle debug line, show the opponent name once, larger board, level/lines in the side column | High | Proposed | Strong |
-| F-011 | Feature | New 2 Players start screen: Host and Join cards, room code as letter tiles | High | Proposed | Strong |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-007 | Feature | Extract the multiplayer lobby into a reusable module | Low | Idea | Strong |
 | F-008 | Feature | Stones: Bomberman-like game for 1–2 players | Low | Idea | Strong |
@@ -50,22 +48,21 @@ records released changes.
 | F-012 | Feature | High Scores with tabs (1 Player / Score Duel / Battle), ranked rows and empty states with an action | Medium | Done (2026-11-11) | Standard |
 | F-013 | Feature | Consistent top bar on all subpages: back icon + title (replaces the "Back to menu" pill) | Medium | Done (2026-11-11) | Standard |
 | F-014 | Feature | Main menu: tap "Playing as" to change name; show best 1 Player score | Low | Done (2026-11-11) | Standard |
+| F-010 | Feature | Match screen cleanup: hide the Battle debug line, show the opponent name once, larger board, level/lines in the side column | High | Done (2026-11-12) | Strong |
+| F-011 | Feature | New 2 Players start screen: Host and Join cards, room code as letter tiles | High | Done (2026-11-12) | Strong |
 
 The approved High items come from the owner's request of 2026-11-10: use the
 sketch's layout **and behavior**, not only its look. Design reference:
 "Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
 
-## Proposed runs (2026-11-11)
+## Proposed runs (2026-11-12)
 
 Letters refer to this latest proposal; commits and reports use the IDs.
 
-- **A** – Claude Opus or GPT-6.1 Sol, high – Multiplayer screens
-  - F-010 – Match screen cleanup
-  - F-011 – New 2 Players start screen
 - **D** – Claude Opus or GPT-6.1 Sol, high – Opponent board (deferred by owner)
   - B-004 – Opponent board still lags
 
-Run B (F-012, F-013, F-014) and run C (T-004) were completed on 2026-11-11.
+Runs A (F-010, F-011), B (F-012, F-013, F-014) and C (T-004) are done.
 
 ## Details
 

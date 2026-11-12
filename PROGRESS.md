@@ -8,6 +8,10 @@
 - **Phase 4 status:** Documentation and maintenance instructions added; no application code changed. Waiting for owner DNS, GitHub Pages custom-domain/HTTPS, Firebase Authorized domains (and API-key referrer, if restricted). Live verification checklist not yet observed; this environment cannot reach the site.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
+## F-010, F-011 — 2026-11-12
+
+Owner approved ("Kör A"). Match screen (`LiveGame.tsx`, `live-game.css`): Battle debug line visually hidden, opponent board heading visually hidden (name stays in the score row), level/lines in a new side-column block (`side-stats`), own stats row hidden, `--chrome` reduced so the board grows on short screens (320×667: 184 → 194 px). 2 Players start (`MultiplayerScreen.tsx`, `App.css`): Host/Join cards, tile-based room-code entry over a transparent real input (label "Room code" kept), `SubpageBar` gained `headingRef` and `aside` ("Playing as"). Local: unit tests unchanged (170 pass; 6 firebase/miniflare suites cannot run here); harness screenshots at 390×844, 320×667, 844×390, 1280×800 — no overflow, touch targets ≥ 48 px. Emulator suites run in CI.
+
 ## F-012, F-013, F-014, T-004 — 2026-11-11
 
 Owner approved ("Kör b och c"). UI: new `SubpageBar` (back icon + title) on Settings, High Scores and 2 Players; High Scores tabs with empty-state actions (the match result screen keeps its own headings); menu "Playing as" opens settings and shows the best 1 Player score. Tests updated for the new accessible names ("Back to menu", score tabs). Local: browser suite 15/15; unit tests unchanged (firebase-dependent suites cannot run here); emulator suites run in CI. T-004: `HANDOVER.md` → `HANDOFF.md`, `AGENTS.md` reduced to a reference to the shared rules v1.0, Bricks rules moved to HANDOFF.md, backlog priorities High/Medium/Low, Done table, ADR 0007.

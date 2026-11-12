@@ -59,7 +59,7 @@ guides. Owner instructions and the specification take precedence.
 
 ## Current checkpoint — 2026-11-11
 
-Latest run (B + C): F-012, F-013, F-014 and T-004 are done and on `main`. Remaining proposals: A (F-010, F-011) and D (B-004), see `docs/BACKLOG.md`. The pause dialog and the post-match result screen have not been reviewed for design.
+Latest run (A, 2026-11-12): F-010 and F-011 are done and on `main`. Earlier run B + C: F-012, F-013, F-014, T-004. Remaining proposal: D (B-004, deferred by the owner), see `docs/BACKLOG.md`. The pause dialog and the post-match result screen have not been reviewed for design.
 
 ### Earlier checkpoint — 2026-11-10
 

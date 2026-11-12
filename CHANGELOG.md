@@ -9,6 +9,10 @@ not publish version numbers yet; entries are grouped by deployment.
 Deployed to the Worker preview (`feature/operating-controls`, merge `89b856c`);
 not yet on the public GitHub Pages site.
 
+### Changed (run 4)
+- F-010: match screen: the Battle debug line is hidden (kept for screen readers and tests), the opponent's name appears once (score row), level and lines moved to the side column, larger own board.
+- F-011: 2 Players start screen with *Host a game* and *Join a game* cards; the room code is typed into letter tiles; "Playing as" in the top bar.
+
 ### Changed (run 3)
 - F-012: High Scores has tabs (1 Player / Score Duel / Battle); empty tabs offer a Play button; top three ranks are highlighted.
 - F-013: Settings, High Scores and 2 Players share a top bar with a back icon and the page title (replaces the "Back to menu" pill).
