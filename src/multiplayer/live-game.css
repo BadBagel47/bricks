@@ -7,13 +7,14 @@
 }
 .multiplayer-game:has(.incoming-meter){--meter:16px}
 
-.match-bar{width:100%;display:flex;align-items:center;gap:8px;min-height:44px}
-.match-leave{width:44px;height:44px;flex:0 0 auto;display:grid;place-items:center;padding:0;border:0;border-radius:12px;background:var(--panel);color:var(--soft);cursor:pointer}
-.match-chip{height:32px;padding:0 12px;border-radius:16px;background:var(--panel);display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;white-space:nowrap}
+.match-bar{width:100%;display:flex;align-items:center;gap:8px;min-height:44px;padding-inline:4px}
+.match-leave{width:44px;height:44px;flex:0 0 auto;display:grid;place-items:center;padding:0;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--soft);cursor:pointer}
+.match-chip{height:32px;padding:0 12px;border-radius:16px;background:var(--panel);border:1px solid var(--panel-3);display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;white-space:nowrap}
 .match-chip i{width:8px;height:8px;border-radius:4px;background:var(--muted)}
 .match-chip.link-ok{color:var(--soft);font-weight:500}.match-chip.link-ok i{background:var(--ok)}
 .match-chip.link-wait i{background:var(--accent)}.match-chip.link-done i{background:var(--muted)}
-.match-room{margin-left:auto;font-size:14px;color:var(--muted);white-space:nowrap}
+.match-room{margin-left:auto;color:var(--muted);font-weight:500;min-width:0}
+.match-room b{color:var(--text);font-weight:600;letter-spacing:.04em}
 
 .score-row{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px}
 .score-card{min-width:0;display:flex;flex-direction:column;padding:6px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--panel-3)}
@@ -48,7 +49,7 @@
 .opponent-board .playfield{width:100%;padding:3px;gap:1px;border-radius:8px;--ring:1px;box-shadow:none}
 .live-previews{display:flex;flex-direction:column;gap:8px}
 .live-previews>div{min-width:0}
-.preview-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 6px;border-radius:12px;background:var(--panel)}
+.preview-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 6px;border-radius:12px;background:var(--panel);border:1px solid var(--line-soft)}
 .live-previews .piece-preview{width:min(48px,100%)}
 .live-previews .hold-box{width:100%;padding:8px 6px;gap:6px;border-radius:12px}
 .live-previews .empty-hold{width:min(40px,100%)}
@@ -83,7 +84,6 @@
 @media(max-width:900px) and (orientation:landscape){
   .multiplayer-game{display:grid;grid-template-columns:minmax(0,1fr) 220px;grid-template-rows:auto auto auto 1fr auto;gap:6px 16px;padding:8px 14px;align-items:start}
   .match-bar{grid-column:1;grid-row:1;min-height:36px}
-  .match-leave{width:40px;height:40px}
   .duel-boards{grid-column:1;grid-row:2/6;justify-content:center}
   .own-board .playfield{width:min(260px,calc((100dvh - 92px)/2))}
   .match-side{flex:0 0 auto;width:auto;display:grid;grid-template-columns:auto 76px;grid-template-rows:auto 1fr;align-items:start;gap:8px}
@@ -101,3 +101,5 @@
   .multiplayer-game .touch-row{flex-wrap:wrap;max-width:220px}
   .multiplayer-game>button{grid-column:2;grid-row:5}
 }
+
+@media (max-width:359px){.match-room .room-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}}

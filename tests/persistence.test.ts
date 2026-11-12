@@ -46,3 +46,11 @@ test('scores outside the top ten are not assigned a rank', () => {
   assert.equal(result.rank, null)
   assert.equal(result.isNewRecord, false)
 })
+
+test('games without points are not recorded and old zero-point entries are dropped', () => {
+  const result = addHighscore([score('run-1', 300)], score('run-zero', 0))
+  assert.deepEqual(result.records.map(({ id }) => id), ['run-1'])
+  assert.equal(result.rank, null)
+  assert.equal(result.isNewRecord, false)
+  assert.deepEqual(parseHighscores(JSON.stringify({ version: 1, records: [score('a', 0), score('b', 40)] })).map(({ id }) => id), ['b'])
+})

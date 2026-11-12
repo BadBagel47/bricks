@@ -302,7 +302,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
         {!outcome && <button tabIndex={-1} type="button" className="match-leave" aria-label="Leave match" onClick={() => setConfirm(true)}><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 5 8 12 15 19" /></svg></button>}
         <span className="match-chip">{battle ? 'Battle' : 'Score Duel'}</span>
         <span className={`match-chip link-${link.kind}`}><i aria-hidden="true" />{link.text}</span>
-        <span className="match-room">Room {joined.code}</span>
+        <span className="match-chip match-room"><span className="room-label">Room </span><b>{joined.code}</b></span>
       </header>
       <div className="score-row">
         <div className="score-card own"><span>{ownName}</span><strong>{game.score.toLocaleString()}</strong></div>

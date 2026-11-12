@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { PIECE_TYPES } from '../src/engine/types.ts'
-import { previewCells } from '../src/ui/piece-preview.ts'
+import { previewCells, previewShape } from '../src/ui/piece-preview.ts'
 import { blockStyle, colorForPiece } from '../src/ui/level-palettes.ts'
 
 test('all seven previews show exactly four distinct cells within the 4 × 4 frame', () => {
@@ -10,6 +10,17 @@ test('all seven previews show exactly four distinct cells within the 4 × 4 fram
     assert.equal(cells.size, 4, type)
     assert.ok([...cells].every((cell) => cell >= 0 && cell < 16), type)
   }
+})
+
+test('preview shapes are trimmed to the piece bounding box', () => {
+  for (const type of PIECE_TYPES) {
+    const shape = previewShape(type)
+    assert.equal(shape.cells.size, 4, type)
+    assert.ok([...shape.cells].every((cell) => cell >= 0 && cell < shape.width * shape.height), type)
+  }
+  assert.deepEqual([previewShape('I').width, previewShape('I').height], [4, 1])
+  assert.deepEqual([previewShape('O').width, previewShape('O').height], [2, 2])
+  assert.deepEqual([previewShape('T').width, previewShape('T').height], [3, 2])
 })
 
 test('the level palette changes on every level transition', () => {
