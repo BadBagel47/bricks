@@ -31,6 +31,7 @@ records released changes.
 | B-005 | Bug | Outlines appear around buttons/headings when screens and dialogs open | Medium | Proposed | Standard |
 | B-006 | Bug | Pressing Space (hard drop) at game over immediately starts a new game via the focused Play Again button | Medium | Proposed | Standard |
 | B-007 | Bug | Games ending with 0 points fill the 1 Player high score list | Low | Proposed | Standard |
+| B-009 | Bug | Top bar not in a fixed place: the 1 Player game and match screens use a narrower edge margin (14 px vs 18 px) and the match back button is smaller than on other screens | Medium | Proposed | Standard |
 | B-008 | Bug | Next/Hold previews are not truly centred: 3-wide pieces sit half a cell left, the I piece above centre | Low | Proposed | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-007 | Feature | Extract the multiplayer lobby into a reusable module | Low | Idea | Strong |
@@ -77,6 +78,7 @@ Letters refer to this latest proposal; commits and reports use the IDs.
   - B-006 – Space at game over restarts immediately
   - B-007 – 0-point games in high scores
   - B-008 – Centre Next/Hold previews
+  - B-009 – Same position and size for the top-bar buttons on every screen
   - F-017 – Pause dialog
   - F-018 – Name entry
 - **C** – Claude Opus or GPT-6.1 Sol, high – Opponent board (deferred by owner)
@@ -90,6 +92,7 @@ Letters refer to this latest proposal; commits and reports use the IDs.
 - B-005: owner sees outlines around objects as they appear. Likely cause: `:focus-visible` outline on elements focused automatically (Resume, Play Again, page headings). Fix: show the ring only after keyboard navigation.
 - B-006: found in the review: the autofocused Play Again button takes Space presses meant as hard drops. Fix: short input guard or no autofocus on touch.
 - B-007: found in the review: ten 0-point games filled the list.
+- B-009: owner noted the back button and title move between screens (seen in the canvas mockups). In the game, Settings, High Scores, 2 Players and Lobby already share `SubpageBar` (18 px edge, 44 px button, title left-aligned next to Back). The 1 Player game (logo + pause) and the match bar (smaller back button) use 14 px edges. Fix: same edge and button size everywhere; the title stays left-aligned next to Back.
 - B-008: owner noted uneven spacing in the Next queue mockup (fixed in the canvas). In the game, `previewCells` snaps pieces to a 4×4 grid, so odd widths/heights cannot centre; render each piece's own bounding box centred in a fixed slot.
 
 ### F-001 Admin page with the sketch's structure and functions
