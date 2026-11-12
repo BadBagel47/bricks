@@ -37,11 +37,11 @@ None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 1
 
 - Live: https://bricks.trythis.one (Pages from `main`); admin https://bricks-operating.l8p1.workers.dev/admin/ (Worker from `feature/operating-controls`).
 - Latest work, newest first:
+  - F-025 centred, larger logo on the 1 Player game screen.
   - Shared agent rules v1.3 adaptation (this file, `AGENTS.md`, branch archive).
   - F-023 touch rotation both ways, F-024 Retro/Tones/Modern block colors, B-016.
   - F-021 interface animations, F-022 game effects.
   - Owner feedback fixes B-011 – B-015 (aligned top bars, Tab-only focus rings, Space-safe game over, larger menu buttons).
-  - Run 5: result screens and high scores (F-015, F-016, F-019), fixes and consistent design (B-005 – B-010, F-017, F-018, F-020), opponent board timing (B-004).
 - Waiting on the owner: a two-device check of B-004 (opponent board); a real private two-player match on the live site (T-001) has not been confirmed in writing.
 - Next: no approved runs. Ideas in `docs/BACKLOG.md`: T-006 privacy notice, T-007 Tetris look check, F-006 music, F-007 reusable lobby, F-008 Stones.
 - Older checkpoints and history: `PROGRESS.md` (section *Handoff history*).

@@ -435,3 +435,10 @@ html[data-motion=off]::view-transition-old(root),html[data-motion=off]::view-tra
 .touch-preview .touch-rotate.two .primary{right:0;top:0;width:42px;height:42px}
 .touch-preview.left-handed .touch-rotate.two .secondary{left:auto;right:0}
 .touch-preview.left-handed .touch-rotate.two .primary{right:auto;left:0}
+
+/* F-025: the game logo is centred and a little larger. It is positioned on top of the
+   top bar, so the bar keeps its height and nothing below moves. */
+.game-topbar{position:relative;justify-content:flex-end}
+.game-topbar>.brand{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding-bottom:0;pointer-events:none}
+.game-topbar>.brand .brand-tile{--tile:28px}
+@media(max-width:900px) and (max-height:720px) and (orientation:landscape){.game-topbar>.brand .brand-tile{--tile:24px}}
