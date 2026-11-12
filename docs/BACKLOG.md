@@ -51,10 +51,6 @@ records released changes.
 | F-014 | Feature | Main menu: tap "Playing as" to change name; show best 1 Player score | Low | Done (2026-11-11) | Standard |
 | F-010 | Feature | Match screen cleanup: hide the Battle debug line, show the opponent name once, larger board, level/lines in the side column | High | Done (2026-11-12) | Strong |
 | F-011 | Feature | New 2 Players start screen: Host and Join cards, room code as letter tiles | High | Done (2026-11-12) | Strong |
-
-The approved High items come from the owner's request of 2026-11-10: use the
-sketch's layout **and behavior**, not only its look. Design reference:
-"Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
 | B-004 | Bug | Opponent board still lags behind after B-003 | Medium | Done (2026-11-12, needs two-device check) | Strong |
 | F-015 | Feature | Match result screen redesign (mockups R1/R2): winner headline, two player cards, Battle comparison rows, head-to-head record, Rematch as the main action; replaces the wide tables | High | Done (2026-11-12) | Strong |
 | F-016 | Feature | 1 Player game over redesign (R3): large final score, record badge, top 5 with the player's row highlighted | Medium | Done (2026-11-12) | Strong |
@@ -78,6 +74,10 @@ sketch's layout **and behavior**, not only its look. Design reference:
 | F-023 | Feature | Touch rotation both ways: optional second rotate button (counterclockwise), Row or Split layout, preview in Settings; Swipe: tap left half ↺, right half ↻ (mockups T1–T3) | Medium | Done (2026-11-12) | Standard |
 | F-024 | Feature | Block colors: three modes – Retro (NES style by level, today's "Change by level"), Modern (fixed colors, today's "Classic") and new Tones (all filled, shades of the level's two colors) | Medium | Done (2026-11-12) | Standard |
 | B-016 | Bug | Block color preview in Settings: the I piece sits at the top of its slot instead of centred | Low | Done (2026-11-12) | Standard |
+
+The approved High items come from the owner's request of 2026-11-10: use the
+sketch's layout **and behavior**, not only its look. Design reference:
+"Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
 
 ## Proposed runs (2026-11-12)
 
