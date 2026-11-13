@@ -268,6 +268,23 @@ Parked: none. Ideas not yet proposed: T-006, T-007, F-006, F-007, F-008.
     stay; optional expiry; QR code for the link.
   - Covers Buzzy #348 (secret, renewable viewer link) and relates to Buzzy
     #331 (host sign-in).
+- Administration (2026-11-13): one admin page for all games, extending today's
+  Bricks admin Worker.
+  - One row per game (Bricks, Stones, Buzzy, …) with On / Off / Until, plus a
+    "private rooms only" mode where only invitation links work.
+  - Off: the server refuses new rooms and joins for that game at the first
+    step, before any room is created, and the game shows "closed" instead of
+    the button. Running games finish, as in Bricks today.
+  - Emergency stop: also closes running rooms of that game at once.
+  - An Off game costs almost nothing (one small refused request per attempt).
+    Fully zero needs the game's route switched off in Cloudflare (manual).
+  - Admin sign-in as today (email links for approved addresses, no
+    passwords); only the owner to begin with.
+- Proposal: automatic per-game budget (2026-11-13). All games share one
+  Cloudflare account's daily free limits, so each game gets a share of the
+  daily budget; a game that exceeds its share closes itself for the rest of
+  the day, so one runaway game cannot take the others down. The admin page
+  shows each game's usage today.
 
 ### F-008 Stones: Bomberman-like game
 - Separate game, 1 and 2 players. Real-time shared arena: use Firebase (or the
