@@ -25,8 +25,8 @@ records released changes.
 | T-006 | Task | Privacy notice: short page/section on what the game stores (name, settings and scores on the device; anonymous Firebase sign-in, room data and IP addresses at Google Firebase and Cloudflare) and why | Low | Idea | Standard |
 | T-007 | Task | Check the falling-block look against Tetris trademark/trade dress: no "Tetris" name, logo or exact original visuals in product text or assets | Low | Idea | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
-| F-007 | Feature | Shared room server on Cloudflare, reusable by Bricks, Stones and Buzzy | Low | Idea | Strong |
-| F-008 | Feature | Stones: Bomberman-like game for 1–2 players | Low | Idea | Strong |
+| F-007 | Feature | Shared room server on Cloudflare, reusable by Bricks, Boomers and Buzzy | Low | Idea | Strong |
+| F-008 | Feature | Boomers (formerly Stones): Bomberman-like game for 1–4 players, co-op and versus | Low | Idea; design proposal 2026-11-13 | Strong |
 
 ## Done
 
@@ -286,7 +286,7 @@ Parked: none. Ideas not yet proposed: T-006, T-007, F-006, F-007, F-008.
   the day, so one runaway game cannot take the others down. The admin page
   shows each game's usage today.
 
-### F-008 Stones: Bomberman-like game
+### F-008 Boomers (formerly Stones): Bomberman-like game
 - Separate game, 1 and 2 players. Real-time shared arena: use Firebase (or the
   F-007 module) only for lobby/signaling and WebRTC data channels for gameplay.
   Own name and graphics; no Bomberman names or assets.
@@ -296,3 +296,22 @@ Parked: none. Ideas not yet proposed: T-006, T-007, F-006, F-007, F-008.
   gameplay through the F-007 room server instead of direct player-to-player
   links), a safe spawn point, a few seconds of spawn protection and a player
   cap. Scoring for late joiners is decided in Stones.
+- Owner decisions 2026-11-13:
+  - Renamed Stones → Boomers. Own repository proposed by the owner (see HANDOFF).
+  - Co-op with monsters is the main mode; versus (PvP) is also offered, with
+    monsters as an option there.
+  - Rules: 2–4 players, breakable blocks, power-ups extra bomb, longer blast
+    and speed, best of three rounds (versus), late join into the running
+    round when the room allows it, touch controls with a direction pad on the
+    left and a bomb button on the right.
+  - Maps: random and symmetric (mirrored in all four corners), generated from
+    a number so everyone in the room gets the same map.
+  - Look: inspired by the 1990s PC game Boom (Factor Software): chunky 16-bit
+    pixel art, bevelled side panels, themed worlds with bosses. Own name,
+    characters, tiles and logo; no assets or names from Boom or Bomberman.
+- Design proposal (2026-11-13): canvas "Boomers – design"
+  (https://claude.ai/artifact/6jdehV1gN7iN65U2uJC5Ri): main menu, lobby,
+  co-op and versus screens, phone layout, round result, sprite and tile
+  sheet (four worlds: Quarry, Frost, Jungle, Temple; monsters Slime, Spark,
+  Ghost and a Rock golem boss) and the map generator. Waiting for the
+  owner's feedback.

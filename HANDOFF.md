@@ -43,7 +43,7 @@ None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 1
   - F-021 interface animations, F-022 game effects.
   - Owner feedback fixes B-011 – B-015 (aligned top bars, Tab-only focus rings, Space-safe game over, larger menu buttons).
 - Waiting on the owner: a two-device check of B-004 (opponent board); a real private two-player match on the live site (T-001) has not been confirmed in writing.
-- Next: no approved runs. Ideas in `docs/BACKLOG.md`: T-006 privacy notice, T-007 Tetris look check, F-006 music, F-007 reusable lobby, F-008 Stones.
+- Next: no approved runs. Ideas in `docs/BACKLOG.md`: T-006 privacy notice, T-007 Tetris look check, F-006 music, F-007 reusable lobby, F-008 Boomers (formerly Stones).
 - Older checkpoints and history: `PROGRESS.md` (section *Handoff history*).
 
 ## Documentation map
@@ -69,7 +69,7 @@ None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 1
 - Owner-controlled access: public on/off/timer and private invitations.
 - Free to run: Firebase Spark, Cloudflare free tier, GitHub Pages; no paid
   services without owner approval.
-- Later: more music (F-006) and a second game, Stones (F-008), reusing the lobby
+- Later: more music (F-006) and a second game, Boomers (F-008, formerly Stones), reusing the lobby
   (F-007).
 
 ## Provisioned resources and private configuration
