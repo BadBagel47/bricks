@@ -25,7 +25,7 @@ records released changes.
 | T-006 | Task | Privacy notice: short page/section on what the game stores (name, settings and scores on the device; anonymous Firebase sign-in, room data and IP addresses at Google Firebase and Cloudflare) and why | Low | Idea | Standard |
 | T-007 | Task | Check the falling-block look against Tetris trademark/trade dress: no "Tetris" name, logo or exact original visuals in product text or assets | Low | Idea | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
-| F-007 | Feature | Extract the multiplayer lobby into a reusable module | Low | Idea | Strong |
+| F-007 | Feature | Shared room server on Cloudflare, reusable by Bricks, Stones and Buzzy | Low | Idea | Strong |
 | F-008 | Feature | Stones: Bomberman-like game for 1–2 players | Low | Idea | Strong |
 
 ## Done
@@ -220,10 +220,20 @@ Parked: none. Ideas not yet proposed: T-006, T-007, F-006, F-007, F-008.
 - Owner liked the new theme and wants more tracks later (e.g. per level range or
   for menus/results). Same four-channel style; see `docs/AUDIO.md`.
 
-### F-007 Extract the multiplayer lobby into a reusable module
+### F-007 Shared room server on Cloudflare (updated 2026-11-13)
 - Rooms, codes, presence, host transfer, countdown/seed, rematch, recovery,
   admin and invitations are reusable; Bricks snapshots/Battle rules are not.
   Prerequisite for F-008 lobbies.
+- Owner prefers Cloudflare over Google. Plan: one room = one Durable Object
+  (free Workers plan), with a shared core (rooms, codes, joining, presence,
+  reconnection, opening hours, player identity) and game-specific rules as
+  plug-ins per game. The core is shared code; each game keeps its own rules
+  and can update on its own schedule.
+- Users: Stones (F-008), later Bricks itself, and Buzzy (Buzzy backlog #408,
+  a future move off Firebase that should reuse this instead of its own build).
+  Should also fit a turn-based game such as a memory game.
+- Free-plan limits apply per Cloudflare account, so all games share one daily
+  budget; fine for hobby use, but track usage once several games use it.
 
 ### F-008 Stones: Bomberman-like game
 - Separate game, 1 and 2 players. Real-time shared arena: use Firebase (or the
