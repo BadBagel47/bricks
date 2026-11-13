@@ -27,6 +27,7 @@ records released changes.
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-007 | Feature | Shared room server on Cloudflare, reusable by Bricks, Boomers and Buzzy | Low | Idea | Strong |
 | F-008 | Feature | Boomers (formerly Stones): Bomberman-like game for 1–4 players, co-op and versus | Low | Idea; design proposal 2026-11-13 | Strong |
+| F-026 | Feature | Boomers campaign: fixed stages per world with checkpoints (after F-008) | Low | Idea, parked 2026-11-13 | Standard |
 
 ## Done
 
@@ -310,6 +311,13 @@ Parked: none. Ideas not yet proposed: T-006, T-007, F-006, F-007, F-008.
     the menu without a room. Runs entirely in the browser, so it works without
     the room server and uses none of its daily budget. Main menu: Solo, Co-op,
     Versus, Join room, Settings.
+  - Solo and co-op play an endless mode (2026-11-13): a new random map every
+    stage, difficulty rising until all lives are gone (more and faster
+    monsters, Spark then Ghost added over time, fewer power-ups, shorter
+    time), a boss when the world changes about every fourth stage, and a high
+    score list of how far you got. Leaving mid-stage saves automatically and
+    offers "Continue where you were"; the save is deleted once used or the
+    stage ends. The campaign idea is parked as F-026.
   - Look: inspired by the 1990s PC game Boom (Factor Software): chunky 16-bit
     pixel art, bevelled side panels, themed worlds with bosses. Own name,
     characters, tiles and logo; no assets or names from Boom or Bomberman.
@@ -319,3 +327,11 @@ Parked: none. Ideas not yet proposed: T-006, T-007, F-006, F-007, F-008.
   sheet (four worlds: Quarry, Frost, Jungle, Temple; monsters Slime, Spark,
   Ghost and a Rock golem boss) and the map generator. Waiting for the
   owner's feedback.
+
+### F-026 Boomers campaign (parked 2026-11-13)
+- Four worlds with four stages each, the last one a boss. Each stage has its
+  own fixed map number, so maps come from the same generator but are the same
+  for everyone, which makes high scores comparable.
+- Checkpoint per stage: progress, lives, score and power-ups at stage start.
+- Parked by the owner in favour of the endless mode in F-008; revisit after
+  the first Boomers version.
