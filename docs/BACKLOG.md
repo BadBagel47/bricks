@@ -306,6 +306,10 @@ Parked: none. Ideas not yet proposed: T-006, T-007, F-006, F-007, F-008.
     left and a bomb button on the right.
   - Maps: random and symmetric (mirrored in all four corners), generated from
     a number so everyone in the room gets the same map.
+  - Solo (2026-11-13): the co-op stages for one player, started straight from
+    the menu without a room. Runs entirely in the browser, so it works without
+    the room server and uses none of its daily budget. Main menu: Solo, Co-op,
+    Versus, Join room, Settings.
   - Look: inspired by the 1990s PC game Boom (Factor Software): chunky 16-bit
     pixel art, bevelled side panels, themed worlds with bosses. Own name,
     characters, tiles and logo; no assets or names from Boom or Bomberman.
