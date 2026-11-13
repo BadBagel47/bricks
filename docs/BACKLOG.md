@@ -234,8 +234,48 @@ Parked: none. Ideas not yet proposed: T-006, T-007, F-006, F-007, F-008.
   Should also fit a turn-based game such as a memory game.
 - Free-plan limits apply per Cloudflare account, so all games share one daily
   budget; fine for hobby use, but track usage once several games use it.
+- Take from Buzzy (proven there, 2026-11-13 review):
+  - Connection recovery (network change such as wifi → 5G, tab back from the
+    background, network back online, growing retry delay). Independent of
+    Firebase and can move almost as is.
+  - Seats with limits per role (Buzzy: 12 players, 4 viewer screens; a viewer
+    never becomes a player). Bricks has no spectators today.
+  - Kick and ban players.
+  - Late join: a new player waits and is admitted at the next safe point, and
+    each game decides when that is (Buzzy: next question; Stones: next round
+    or straight into the running round, see F-008; Bricks: next rematch;
+    memory: before start only). Room setting: admit now or at the next round,
+    where the game allows both.
+  - Host leaving: leaving on purpose closes the room for everyone with a
+    message; a lost connection does not. Bricks instead hands the host role
+    over. The core supports both.
+  - Duplicate protection: a command resent after a network glitch counts once.
+  - Patterns to reuse: QR share screen with code and link, code entry field,
+    leave confirmation, clear errors ("Room not found"), waiting state on
+    reload.
+  - Privacy groundwork (Buzzy #332, #405): what is stored, for how long, and
+    cleanup of old rooms applies to the shared server too.
+- Take from Bricks: opening hours, private invitations and the admin page
+  (already on Cloudflare).
+- Secure share links (room code + key):
+  - Bricks already has private invitation links: a long random key in the part
+    of the link the browser never sends to servers, expiry, revoke from admin,
+    and the room code alone grants no access to a private room.
+  - The core generalizes this: one key per role (player, viewer/big screen,
+    host), so a viewer link cannot play; each room chooses whether the code is
+    enough (open room) or the key is required (private room); the host can
+    renew a key, which stops old links at once while people already inside
+    stay; optional expiry; QR code for the link.
+  - Covers Buzzy #348 (secret, renewable viewer link) and relates to Buzzy
+    #331 (host sign-in).
 
 ### F-008 Stones: Bomberman-like game
 - Separate game, 1 and 2 players. Real-time shared arena: use Firebase (or the
   F-007 module) only for lobby/signaling and WebRTC data channels for gameplay.
   Own name and graphics; no Bomberman names or assets.
+- Late join (2026-11-13): a player who joins mid-game may enter the running
+  round directly if the room allows it. Needs the full arena state on join
+  (easy when the room server holds the state, which favours running Stones
+  gameplay through the F-007 room server instead of direct player-to-player
+  links), a safe spawn point, a few seconds of spawn protection and a player
+  cap. Scoring for late joiners is decided in Stones.
