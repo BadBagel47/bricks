@@ -6,6 +6,9 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Changed (repository, 2026-11-13)
+- Adapted to the shared agent rules v1.6: the branch-archive workflow now uses the shared template, which never archives or deletes the default branch.
+
 ### Changed (repository, 2026-11-12)
 - Adapted to the shared agent rules v1.3: Bricks project rules now live in `AGENTS.md`, `HANDOFF.md` holds current state and decisions, older handoff history moved to `PROGRESS.md`, eleven old branches archived as `archive/*` tags.
 

@@ -1,8 +1,11 @@
 name: Archive branches
 
-# Tags each branch listed in .github/archive-branches.txt as archive/<branch>,
-# checks that the tag points at the branch tip, then deletes the branch.
-# Agents in cloud sessions cannot push tags, so this runs with the repo token.
+# Template from BadBagel47/agent-rules (based on the bricks workflow).
+# Use when the agent cannot push tags itself. List the branches to archive,
+# one per line, in .github/archive-branches.txt and push that file to main.
+# Each listed branch is tagged as archive/<branch>, the tag is verified on
+# origin, and only then is the branch deleted. The default branch is never
+# touched. A branch can be restored from its archive/<branch> tag.
 on:
   push:
     branches: [main]
@@ -20,10 +23,15 @@ jobs:
         with:
           fetch-depth: 0
       - name: Tag, verify and delete
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
           git fetch origin '+refs/heads/*:refs/remotes/origin/*' --tags
           grep -v '^\s*#' .github/archive-branches.txt | sed '/^\s*$/d' | while read -r branch; do
+            if [ "$branch" = "$DEFAULT_BRANCH" ]; then
+              echo "::warning::$branch is the default branch and is never archived or deleted"; continue
+            fi
             if ! git rev-parse -q --verify "refs/remotes/origin/$branch" >/dev/null; then
               echo "$branch: already gone"; continue
             fi

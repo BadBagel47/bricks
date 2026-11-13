@@ -5,7 +5,7 @@ guides. Owner instructions and the specification take precedence.
 
 ## Shared rules and inventory
 
-- **Shared rules version:** v1.3 (2026-11-12), https://raw.githubusercontent.com/BadBagel47/agent-rules/main/AGENTS.md . Adapted to v1.3 on 2026-11-12 (previously v1.0 from 2026-11-11, T-004).
+- **Shared rules version:** v1.6 (2026-11-13), https://raw.githubusercontent.com/BadBagel47/agent-rules/main/AGENTS.md . Adapted to v1.6 on 2026-11-13 (previously v1.3 from 2026-11-12; v1.0 before that, T-004). v1.4–v1.6 needed no approval: the branch-archive workflow now follows the shared template (never touches the default branch).
 - Inventory: 2026-11-12
   - Redone because the 2026-11-11 inventory missed branches (the cloud checkout fetched only `feature/operating-controls`). Remote branches now: `main` (integration, deploys Pages) and `feature/operating-controls` (kept: admin Worker deploy trigger). Eleven older branches were archived as `archive/<branch>` tags and deleted on 2026-11-12: `ccr-308e5bf5-5nte3w`, `ccr-63fd355a-1ucin4` (its one commit, an early wording of the owner working rules, is superseded by the rules in `main`), `feature/visual-refresh`, `milestone-3.3` – `milestone-3.7`, `milestone-3.9`, `milestone-3.11`, `milestone-3.12`. No open pull requests or issues.
   - Sensitive information: git history on all branches scanned for keys, tokens and personal e-mail addresses; only test fixtures with fake service-account keys were found. The Firebase web config is public by design and protected by database rules. The repo is public.
