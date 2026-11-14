@@ -305,6 +305,13 @@ Parked: none. Ideas not yet proposed: T-006, T-007, F-006, F-007, F-008.
     they change, and the per-game budget in the admin page matters most here.
   - Design the core so these fit later without rework; build them only when
     this game needs them.
+- Plan decision (owner, 2026-11-14): start on the Cloudflare Workers Free
+  plan. Move to Workers Paid (5 USD/month per account, small pay-as-you-go
+  beyond what is included, no shutdown when limits are reached) only when a
+  game, most likely the space game, actually hits the free limits, and only
+  with the owner's approval. Same code on both plans. Guards against surprise
+  costs: rooms close and sleep when nobody plays, the per-game budget, and
+  usage notifications in Cloudflare.
 
 ### F-008 Boomers (formerly Stones): Bomberman-like game
 - Separate game, 1 and 2 players. Real-time shared arena: use Firebase (or the
