@@ -286,6 +286,25 @@ Parked: none. Ideas not yet proposed: T-006, T-007, F-006, F-007, F-008.
   daily budget; a game that exceeds its share closes itself for the rest of
   the day, so one runaway game cannot take the others down. The admin page
   shows each game's usage today.
+- Future user (owner brief 2026-11-14): a top-down co-op space game, already
+  started by the owner (repo and name not yet recorded here). Several players
+  crew one ship together (steering, systems, shooting), upgrade it in a shop,
+  board other ships and take over bases. Boarding switches to a top-down
+  on-foot view where several players loot together against enemies and
+  turrets. What this asks of the room server:
+  - Roles on a shared object: players take stations (pilot, gunner, systems)
+    on one ship; the server decides who controls what.
+  - Several areas in one session: some players on the ship while others board
+    another ship or base. Each player only receives updates for the area they
+    are in, which also saves the daily budget.
+  - Many moving things (enemies, turrets, shots): the server runs the
+    simulation and sends compact changes, not full state.
+  - Progress that outlives a room: credits, upgrades and captured bases saved
+    per crew between sessions.
+  - Heaviest user of the daily free budget: inputs must be sent only when
+    they change, and the per-game budget in the admin page matters most here.
+  - Design the core so these fit later without rework; build them only when
+    this game needs them.
 
 ### F-008 Boomers (formerly Stones): Bomberman-like game
 - Separate game, 1 and 2 players. Real-time shared arena: use Firebase (or the
