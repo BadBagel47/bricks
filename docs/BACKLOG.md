@@ -22,6 +22,7 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| B-018 | Bug | Pressing buttons in the game shows a blue background (mobile tap highlight) | Medium | Proposed | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit | Low | Idea; after network-kit is proven (Critical ST8 first, then Boomers) | Strong |
@@ -85,7 +86,8 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 ## Proposed runs (2026-11-15)
 
-None. Run A (T-006, T-007) was done 2026-11-15.
+- **A** – standard model, medium level – Tap highlight
+  - B-018 – Turn off the browser's blue tap highlight on all buttons and touch controls, so pressing a button only shows the game's own pressed style.
 
 Not proposed: F-006 (made in the separate music studio chat), F-007 (waits until network-kit is proven).
 
@@ -94,6 +96,10 @@ Waiting for the owner: B-004 two-device check of the opponent board; check B-017
 Parked: F-027 (alternative Modern piece colors).
 
 ## Details
+
+### B-018 blue background on button press (2026-11-15)
+- Owner: pressing buttons in the game shows a blue background.
+- Likely cause: mobile browsers draw a tap highlight unless `-webkit-tap-highlight-color: transparent` is set. The music test player sets it (`src/music-player/style.css`); the game's CSS does not. Fix: set it globally for the game.
 
 ### B-017 start page scrolls on phones (2026-11-12)
 - Cause: pages used `min-height: 100vh`; on phones that is the height with the address bar hidden, so the page was taller than the visible area.
