@@ -10,7 +10,7 @@ not publish version numbers yet; entries are grouped by deployment.
 - T-006: a *Privacy* section at the bottom of Settings says what is saved on the device and what Google Firebase, Cloudflare and GitHub Pages receive.
 
 ### Changed (2026-11-15)
-- T-007: *Modern* block colors use a different color per piece than the Tetris guideline (for example I is orange, not cyan). Review of text, names and assets found no "Tetris" name or logo in the game; the Retro level palettes are original.
+- T-007: review of text, names and assets found no "Tetris" name or logo in the game; the Retro level palettes are original. A change of the Modern piece colors was made and reverted at the owner's request (parked as F-027).
 
 ### Changed (repository, 2026-11-15)
 - Adapted to the shared agent rules v1.7 (no change needed).

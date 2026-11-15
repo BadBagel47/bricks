@@ -10,7 +10,7 @@
 
 ## T-006, T-007 — 2026-11-15
 
-Owner approved ("Kör A"). T-006: *Privacy* section at the end of Settings (`App.tsx`, `.privacy-list`). T-007: searched player-facing text, assets and metadata for "Tetris"/"NES" (none; only code comments and the music test player's Swedish category names); Modern block colors in `level-palettes.ts` reassigned so no piece keeps its guideline color. Spec still says "tetrominoes" (generic shape name, left). Local: lint, 193 unit tests, build, browser integration 15/15.
+Owner approved ("Kör A"). T-006: *Privacy* section at the end of Settings (`App.tsx`, `.privacy-list`). T-007: searched player-facing text, assets and metadata for "Tetris"/"NES" (none; only code comments and the music test player's Swedish category names); Modern block colors were reassigned and then reverted at the owner's request (parked as F-027). Spec still says "tetrominoes" (generic shape name, left). Local: lint, 193 unit tests, build, browser integration 15/15.
 
 ## F-023, F-024, B-016 — 2026-11-12
 

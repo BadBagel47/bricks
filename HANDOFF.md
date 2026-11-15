@@ -24,6 +24,7 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 - **Workstreams (2026-11-11):** music is composed in a separate "music studio" chat; other agents leave `src/audio/music.ts` and music behavior alone unless asked.
 - **Music tempo (2026-11-11, T-005):** new music keeps a stable BPM; *Bricks Theme* keeps its danger tempo rise (132 → 172 BPM).
 - **Opponent board (2026-11-12, B-004):** fix shipped; the owner checks it on two devices.
+- **Modern block colors (2026-11-15, T-007):** keep the current per-piece colors; a guideline-avoiding assignment is parked as F-027.
 - **Hosting (2026-11-10):** GitHub Pages with the custom domain https://bricks.trythis.one instead of the spec's Firebase Hosting; Firebase stays the auth/database backend (`docs/DEPLOYMENT.md`).
 - **Visual refresh (2026-11-10):** spec section 5.0 design, generated audio, optional Ghost piece (off by default); block colors since F-024 are Retro / Tones / Modern.
 - **Operating controls (2026-11-09):** approved as described in the project rules; public modes start On.
@@ -37,7 +38,7 @@ None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 1
 
 - Live: https://bricks.trythis.one (Pages from `main`); admin https://bricks-operating.l8p1.workers.dev/admin/ (Worker from `feature/operating-controls`).
 - Latest work, newest first:
-  - 2026-11-15: T-006 privacy section in Settings and T-007 trademark check (Modern piece colors changed). Needs the owner's look on the live site.
+  - 2026-11-15: T-006 privacy section in Settings and T-007 trademark check (Modern piece colors unchanged; alternative parked as F-027). Needs the owner's look on the live site.
   - 2026-11-15: Boomers planning moved to https://github.com/BadBagel47/boomers and the shared room server plan to https://github.com/BadBagel47/network-kit (first real user: https://github.com/BadBagel47/critical); shared rules v1.9. No game code changed since F-025/B-017.
   - F-025 centred, larger logo on the 1 Player game screen; B-017 start page no longer scrolls on phones.
   - Shared agent rules v1.3 adaptation (this file, `AGENTS.md`, branch archive).
