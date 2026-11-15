@@ -38,6 +38,7 @@ None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 1
 
 - Live: https://bricks.trythis.one (Pages from `main`); admin https://bricks-operating.l8p1.workers.dev/admin/ (Worker from `feature/operating-controls`).
 - Latest work, newest first:
+  - 2026-11-15: B-018 blue tap highlight on buttons removed; needs a phone check.
   - 2026-11-15: T-006 privacy section in Settings and T-007 trademark check (Modern piece colors unchanged; alternative parked as F-027). Needs the owner's look on the live site.
   - 2026-11-15: Boomers planning moved to https://github.com/BadBagel47/boomers and the shared room server plan to https://github.com/BadBagel47/network-kit (first real user: https://github.com/BadBagel47/critical); shared rules v1.9. No game code changed since F-025/B-017.
   - F-025 centred, larger logo on the 1 Player game screen; B-017 start page no longer scrolls on phones.

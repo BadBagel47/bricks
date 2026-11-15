@@ -9,6 +9,9 @@ not publish version numbers yet; entries are grouped by deployment.
 ### Added (2026-11-15)
 - T-006: a *Privacy* section at the bottom of Settings says what is saved on the device and what Google Firebase, Cloudflare and GitHub Pages receive.
 
+### Fixed (2026-11-15)
+- B-018: pressing buttons and touch controls on phones no longer shows the browser's blue tap highlight.
+
 ### Changed (2026-11-15)
 - T-007: review of text, names and assets found no "Tetris" name or logo in the game; the Retro level palettes are original. A change of the Modern piece colors was made and reverted at the owner's request (parked as F-027).
 
