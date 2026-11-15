@@ -22,7 +22,7 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| B-018 | Bug | Pressing buttons in the game shows a blue background (mobile tap highlight) | Medium | Proposed | Standard |
+| B-018 | Bug | Pressing buttons in the game shows a blue background (mobile tap highlight) | Medium | Pågår 2026-11-15 | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit | Low | Idea; after network-kit is proven (Critical ST8 first, then Boomers) | Strong |
