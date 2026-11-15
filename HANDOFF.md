@@ -5,7 +5,7 @@ guides. Owner instructions and the specification take precedence.
 
 ## Shared rules and inventory
 
-- **Shared rules version:** v1.6 (2026-11-13), https://raw.githubusercontent.com/BadBagel47/agent-rules/main/AGENTS.md . Adapted to v1.6 on 2026-11-13 (previously v1.3 from 2026-11-12; v1.0 before that, T-004). v1.4–v1.6 needed no approval: the branch-archive workflow now follows the shared template (never touches the default branch).
+- **Shared rules version:** v1.7 (2026-11-14), https://raw.githubusercontent.com/BadBagel47/agent-rules/main/AGENTS.md . Adapted to v1.7 on 2026-11-15 (previously v1.6 from 2026-11-13; v1.3 and v1.0 before that, T-004). v1.7 needed no change: no branch with a lasting purpose uses the `claude/` prefix. v1.4–v1.6 needed no approval: the branch-archive workflow follows the shared template (never touches the default branch).
 - Inventory: 2026-11-12
   - Redone because the 2026-11-11 inventory missed branches (the cloud checkout fetched only `feature/operating-controls`). Remote branches now: `main` (integration, deploys Pages) and `feature/operating-controls` (kept: admin Worker deploy trigger). Eleven older branches were archived as `archive/<branch>` tags and deleted on 2026-11-12: `ccr-308e5bf5-5nte3w`, `ccr-63fd355a-1ucin4` (its one commit, an early wording of the owner working rules, is superseded by the rules in `main`), `feature/visual-refresh`, `milestone-3.3` – `milestone-3.7`, `milestone-3.9`, `milestone-3.11`, `milestone-3.12`. No open pull requests or issues.
   - Sensitive information: git history on all branches scanned for keys, tokens and personal e-mail addresses; only test fixtures with fake service-account keys were found. The Firebase web config is public by design and protected by database rules. The repo is public.
@@ -43,7 +43,7 @@ None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 1
   - F-021 interface animations, F-022 game effects.
   - Owner feedback fixes B-011 – B-015 (aligned top bars, Tab-only focus rings, Space-safe game over, larger menu buttons).
 - Waiting on the owner: a two-device check of B-004 (opponent board); a real private two-player match on the live site (T-001) has not been confirmed in writing.
-- Next: no approved runs. Ideas in `docs/BACKLOG.md`: T-006 privacy notice, T-007 Tetris look check, F-006 music, F-007 reusable lobby, F-008 Boomers (formerly Stones).
+- Next: no approved runs. Ideas in `docs/BACKLOG.md`: T-006 privacy notice, T-007 Tetris look check, F-006 music, F-007 move 2 Players to network-kit. Boomers and the shared room server moved on 2026-11-15 to their own repositories: https://github.com/BadBagel47/boomers and https://github.com/BadBagel47/network-kit .
 - Older checkpoints and history: `PROGRESS.md` (section *Handoff history*).
 
 ## Documentation map
@@ -69,8 +69,8 @@ None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 1
 - Owner-controlled access: public on/off/timer and private invitations.
 - Free to run: Firebase Spark, Cloudflare free tier, GitHub Pages; no paid
   services without owner approval.
-- Later: more music (F-006) and a second game, Boomers (F-008, formerly Stones), reusing the lobby
-  (F-007).
+- Later: more music (F-006) and moving 2 Players to the shared room server in
+  `BadBagel47/network-kit` (F-007) once it is proven with Boomers (`BadBagel47/boomers`).
 
 ## Provisioned resources and private configuration
 

@@ -6,6 +6,10 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Changed (repository, 2026-11-15)
+- Adapted to the shared agent rules v1.7 (no change needed).
+- Boomers planning moved to https://github.com/BadBagel47/boomers and the shared room server plan to https://github.com/BadBagel47/network-kit ; F-007 now covers moving 2 Players there later.
+
 ### Changed (repository, 2026-11-13)
 - Adapted to the shared agent rules v1.6: the branch-archive workflow now uses the shared template, which never archives or deletes the default branch.
 

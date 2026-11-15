@@ -25,14 +25,14 @@ records released changes.
 | T-006 | Task | Privacy notice: short page/section on what the game stores (name, settings and scores on the device; anonymous Firebase sign-in, room data and IP addresses at Google Firebase and Cloudflare) and why | Low | Idea | Standard |
 | T-007 | Task | Check the falling-block look against Tetris trademark/trade dress: no "Tetris" name, logo or exact original visuals in product text or assets | Low | Idea | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
-| F-007 | Feature | Shared room server on Cloudflare, reusable by Bricks, Boomers and Buzzy | Low | Idea | Strong |
-| F-008 | Feature | Boomers (formerly Stones): Bomberman-like game for 1–4 players, co-op and versus | Low | Idea; design proposal 2026-11-13 | Strong |
-| F-026 | Feature | Boomers campaign: fixed stages per world with checkpoints (after F-008) | Low | Idea, parked 2026-11-13 | Standard |
+| F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit | Low | Idea; after network-kit is proven with Boomers | Strong |
 
 ## Done
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| F-008 | Feature | Boomers (formerly Stones) | Low | Moved 2026-11-15 to BadBagel47/boomers (F-001, F-002, D-004 there) | Strong |
+| F-026 | Feature | Boomers campaign | Low | Moved 2026-11-15 to BadBagel47/boomers (F-003 there, parked) | Standard |
 | F-001 | Feature | Admin page with the sketch's structure and functions | High | Done (run 1, 2026-11-10) | Standard |
 | F-002 | Feature | Lobby with the sketch's structure and functions | High | Done (run 2, 2026-11-10) | Strong |
 | F-003 | Feature | Settings with the sketch's structure and functions | High | Done (run 1, 2026-11-10) | Standard |
@@ -86,7 +86,7 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 No approved runs are waiting. The shared-rules adaptation (v1.3) was completed on 2026-11-12.
 
-Parked: none. Ideas not yet proposed: T-006, T-007, F-006, F-007, F-008.
+Parked: none. Ideas not yet proposed: T-006, T-007, F-006, F-007.
 
 ## Details
 
@@ -221,143 +221,12 @@ Parked: none. Ideas not yet proposed: T-006, T-007, F-006, F-007, F-008.
 - Owner liked the new theme and wants more tracks later (e.g. per level range or
   for menus/results). Same four-channel style; see `docs/AUDIO.md`.
 
-### F-007 Shared room server on Cloudflare (updated 2026-11-13)
-- Rooms, codes, presence, host transfer, countdown/seed, rematch, recovery,
-  admin and invitations are reusable; Bricks snapshots/Battle rules are not.
-  Prerequisite for F-008 lobbies.
-- Owner prefers Cloudflare over Google. Plan: one room = one Durable Object
-  (free Workers plan), with a shared core (rooms, codes, joining, presence,
-  reconnection, opening hours, player identity) and game-specific rules as
-  plug-ins per game. The core is shared code; each game keeps its own rules
-  and can update on its own schedule.
-- Users: Stones (F-008), later Bricks itself, and Buzzy (Buzzy backlog #408,
-  a future move off Firebase that should reuse this instead of its own build).
-  Should also fit a turn-based game such as a memory game.
-- Free-plan limits apply per Cloudflare account, so all games share one daily
-  budget; fine for hobby use, but track usage once several games use it.
-- Take from Buzzy (proven there, 2026-11-13 review):
-  - Connection recovery (network change such as wifi → 5G, tab back from the
-    background, network back online, growing retry delay). Independent of
-    Firebase and can move almost as is.
-  - Seats with limits per role (Buzzy: 12 players, 4 viewer screens; a viewer
-    never becomes a player). Bricks has no spectators today.
-  - Kick and ban players.
-  - Late join: a new player waits and is admitted at the next safe point, and
-    each game decides when that is (Buzzy: next question; Stones: next round
-    or straight into the running round, see F-008; Bricks: next rematch;
-    memory: before start only). Room setting: admit now or at the next round,
-    where the game allows both.
-  - Host leaving: leaving on purpose closes the room for everyone with a
-    message; a lost connection does not. Bricks instead hands the host role
-    over. The core supports both.
-  - Duplicate protection: a command resent after a network glitch counts once.
-  - Patterns to reuse: QR share screen with code and link, code entry field,
-    leave confirmation, clear errors ("Room not found"), waiting state on
-    reload.
-  - Privacy groundwork (Buzzy #332, #405): what is stored, for how long, and
-    cleanup of old rooms applies to the shared server too.
-- Take from Bricks: opening hours, private invitations and the admin page
-  (already on Cloudflare).
-- Secure share links (room code + key):
-  - Bricks already has private invitation links: a long random key in the part
-    of the link the browser never sends to servers, expiry, revoke from admin,
-    and the room code alone grants no access to a private room.
-  - The core generalizes this: one key per role (player, viewer/big screen,
-    host), so a viewer link cannot play; each room chooses whether the code is
-    enough (open room) or the key is required (private room); the host can
-    renew a key, which stops old links at once while people already inside
-    stay; optional expiry; QR code for the link.
-  - Covers Buzzy #348 (secret, renewable viewer link) and relates to Buzzy
-    #331 (host sign-in).
-- Administration (2026-11-13): one admin page for all games, extending today's
-  Bricks admin Worker.
-  - One row per game (Bricks, Stones, Buzzy, …) with On / Off / Until, plus a
-    "private rooms only" mode where only invitation links work.
-  - Off: the server refuses new rooms and joins for that game at the first
-    step, before any room is created, and the game shows "closed" instead of
-    the button. Running games finish, as in Bricks today.
-  - Emergency stop: also closes running rooms of that game at once.
-  - An Off game costs almost nothing (one small refused request per attempt).
-    Fully zero needs the game's route switched off in Cloudflare (manual).
-  - Admin sign-in as today (email links for approved addresses, no
-    passwords); only the owner to begin with.
-- Proposal: automatic per-game budget (2026-11-13). All games share one
-  Cloudflare account's daily free limits, so each game gets a share of the
-  daily budget; a game that exceeds its share closes itself for the rest of
-  the day, so one runaway game cannot take the others down. The admin page
-  shows each game's usage today.
-- Future user (owner brief 2026-11-14): a top-down co-op space game, already
-  started by the owner (repo and name not yet recorded here). Several players
-  crew one ship together (steering, systems, shooting), upgrade it in a shop,
-  board other ships and take over bases. Boarding switches to a top-down
-  on-foot view where several players loot together against enemies and
-  turrets. What this asks of the room server:
-  - Roles on a shared object: players take stations (pilot, gunner, systems)
-    on one ship; the server decides who controls what.
-  - Several areas in one session: some players on the ship while others board
-    another ship or base. Each player only receives updates for the area they
-    are in, which also saves the daily budget.
-  - Many moving things (enemies, turrets, shots): the server runs the
-    simulation and sends compact changes, not full state.
-  - Progress that outlives a room: credits, upgrades and captured bases saved
-    per crew between sessions.
-  - Heaviest user of the daily free budget: inputs must be sent only when
-    they change, and the per-game budget in the admin page matters most here.
-  - Design the core so these fit later without rework; build them only when
-    this game needs them.
-- Plan decision (owner, 2026-11-14): start on the Cloudflare Workers Free
-  plan. Move to Workers Paid (5 USD/month per account, small pay-as-you-go
-  beyond what is included, no shutdown when limits are reached) only when a
-  game, most likely the space game, actually hits the free limits, and only
-  with the owner's approval. Same code on both plans. Guards against surprise
-  costs: rooms close and sleep when nobody plays, the per-game budget, and
-  usage notifications in Cloudflare.
+### F-007 Move Bricks 2 Players to network-kit
+- The shared room server plan that used to live here (2026-11-13 – 2026-11-14) moved on 2026-11-15 to https://github.com/BadBagel47/network-kit (its F-001 – F-005). Earlier text is in git history.
+- What stays here: moving Bricks Score Duel and Battle from Firebase to network-kit once it is proven with Boomers. Bricks then keeps its own rules (snapshots, Battle garbage) as its plug-in and reuses network-kit for rooms, codes, invitations, reconnection and the admin page.
 
-### F-008 Boomers (formerly Stones): Bomberman-like game
-- Separate game, 1 and 2 players. Real-time shared arena: use Firebase (or the
-  F-007 module) only for lobby/signaling and WebRTC data channels for gameplay.
-  Own name and graphics; no Bomberman names or assets.
-- Late join (2026-11-13): a player who joins mid-game may enter the running
-  round directly if the room allows it. Needs the full arena state on join
-  (easy when the room server holds the state, which favours running Stones
-  gameplay through the F-007 room server instead of direct player-to-player
-  links), a safe spawn point, a few seconds of spawn protection and a player
-  cap. Scoring for late joiners is decided in Stones.
-- Owner decisions 2026-11-13:
-  - Renamed Stones → Boomers. Own repository proposed by the owner (see HANDOFF).
-  - Co-op with monsters is the main mode; versus (PvP) is also offered, with
-    monsters as an option there.
-  - Rules: 2–4 players, breakable blocks, power-ups extra bomb, longer blast
-    and speed, best of three rounds (versus), late join into the running
-    round when the room allows it, touch controls with a direction pad on the
-    left and a bomb button on the right.
-  - Maps: random and symmetric (mirrored in all four corners), generated from
-    a number so everyone in the room gets the same map.
-  - Solo (2026-11-13): the co-op stages for one player, started straight from
-    the menu without a room. Runs entirely in the browser, so it works without
-    the room server and uses none of its daily budget. Main menu: Solo, Co-op,
-    Versus, Join room, Settings.
-  - Solo and co-op play an endless mode (2026-11-13): a new random map every
-    stage, difficulty rising until all lives are gone (more and faster
-    monsters, Spark then Ghost added over time, fewer power-ups, shorter
-    time), a boss when the world changes about every fourth stage, and a high
-    score list of how far you got. Leaving mid-stage saves automatically and
-    offers "Continue where you were"; the save is deleted once used or the
-    stage ends. The campaign idea is parked as F-026.
-  - Look: inspired by the 1990s PC game Boom (Factor Software): chunky 16-bit
-    pixel art, bevelled side panels, themed worlds with bosses. Own name,
-    characters, tiles and logo; no assets or names from Boom or Bomberman.
-- Design proposal (2026-11-13): canvas "Boomers – design"
-  (https://claude.ai/artifact/6jdehV1gN7iN65U2uJC5Ri): main menu, lobby,
-  co-op and versus screens, phone layout, round result, sprite and tile
-  sheet (four worlds: Quarry, Frost, Jungle, Temple; monsters Slime, Spark,
-  Ghost and a Rock golem boss) and the map generator. Waiting for the
-  owner's feedback.
+### F-008 Boomers (moved)
+- Moved on 2026-11-15 to https://github.com/BadBagel47/boomers (F-001 solo endless mode, F-002 online play, D-004 design proposal). Earlier text is in git history.
 
-### F-026 Boomers campaign (parked 2026-11-13)
-- Four worlds with four stages each, the last one a boss. Each stage has its
-  own fixed map number, so maps come from the same generator but are the same
-  for everyone, which makes high scores comparable.
-- Checkpoint per stage: progress, lives, score and power-ups at stage start.
-- Parked by the owner in favour of the endless mode in F-008; revisit after
-  the first Boomers version.
+### F-026 Boomers campaign (moved)
+- Moved on 2026-11-15 to https://github.com/BadBagel47/boomers (F-003 there, parked).
