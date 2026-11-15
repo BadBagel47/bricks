@@ -8,6 +8,10 @@
 - **Phase 4 status:** Documentation and maintenance instructions added; no application code changed. Waiting for owner DNS, GitHub Pages custom-domain/HTTPS, Firebase Authorized domains (and API-key referrer, if restricted). Live verification checklist not yet observed; this environment cannot reach the site.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
+## T-006, T-007 — 2026-11-15
+
+Owner approved ("Kör A"). T-006: *Privacy* section at the end of Settings (`App.tsx`, `.privacy-list`). T-007: searched player-facing text, assets and metadata for "Tetris"/"NES" (none; only code comments and the music test player's Swedish category names); Modern block colors in `level-palettes.ts` reassigned so no piece keeps its guideline color. Spec still says "tetrominoes" (generic shape name, left). Local: lint, 193 unit tests, build, browser integration 15/15.
+
 ## F-023, F-024, B-016 — 2026-11-12
 
 Owner approved ("Kör"). Personal settings `rotateButtons` ('one' | 'two', default two), `touchLayout` ('row' | 'split') and block colors value `tones`; `TouchControls` renders row or split layouts, `TouchPreview` in Settings; `actionsForSwipe` takes board bounds for left/right-half taps; Tones palette computed in `level-palettes.ts` (HSL, short way round the hue circle). Touch buttons may shrink to 44 px so six fit at 320 px. Local: unit tests 176 pass (6 firebase/miniflare suites cannot run here), browser integration 15/15; screenshots of row/split at 390 and 320.

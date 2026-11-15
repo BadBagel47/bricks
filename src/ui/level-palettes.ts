@@ -4,8 +4,8 @@ import type { PieceType } from '../engine/types.ts'
 export type BlockColors = 'level' | 'classic' | 'tones'
 export interface BlockStyle { readonly fill: string; readonly ring: string | null }
 
-/** Fixed per-piece colors, used when the player chooses Classic block colors. */
-const CLASSIC: Record<PieceType, string> = { I: '#38D1E8', O: '#F5C443', T: '#A98BF5', S: '#4FD98A', Z: '#F2706D', J: '#5B9CF6', L: '#F7964A' }
+/** Fixed per-piece colors for Modern block colors. Deliberately not the colour-per-piece assignment of the Tetris guideline (T-007). */
+const CLASSIC: Record<PieceType, string> = { I: '#F7964A', O: '#4FD98A', T: '#F2706D', S: '#5B9CF6', Z: '#A98BF5', J: '#F5C443', L: '#38D1E8' }
 
 /**
  * Original NES-inspired level palettes: each level has two colors. T, O and I

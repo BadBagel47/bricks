@@ -525,6 +525,13 @@ function App() {
       {gamepadCaptureError && <p className="notice" role="status">{gamepadCaptureError}</p>}
       {gamepadCapture && <button className="back-button cancel-capture" onClick={() => { setGamepadCapture(null); setGamepadCaptureError('') }}>Cancel</button>}
       <button className="reset-button" onClick={resetGamepadBindings}>Reset controller controls</button>
+      <h2 className="settings-heading">Privacy</h2>
+      <ul className="privacy-list">
+        <li>Saved on this device only: player name, settings, high scores, match results and the last room code. Nothing is used for ads or tracking, and there is no analytics.</li>
+        <li>Online features (2 Players, and the check whether play is open) use an anonymous sign-in at Google Firebase. Your player name and game data are shared with the other player in the room and stored at Firebase while the room exists.</li>
+        <li>Google Firebase, Cloudflare and GitHub Pages see your IP address when you connect.</li>
+        <li>Clear your browser data to remove what is saved on this device.</li>
+      </ul>
       {notice && <p className="notice" role="status">{notice}</p>}
     </section>
   </main>

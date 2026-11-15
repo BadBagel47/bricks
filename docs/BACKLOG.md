@@ -22,8 +22,6 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| T-006 | Task | Privacy notice: short page/section on what the game stores (name, settings and scores on the device; anonymous Firebase sign-in, room data and IP addresses at Google Firebase and Cloudflare) and why | Low | Pågår 2026-11-15 | Standard |
-| T-007 | Task | Check the falling-block look against Tetris trademark/trade dress: no "Tetris" name, logo or exact original visuals in product text or assets | Low | Pågår 2026-11-15 | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit | Low | Idea; after network-kit is proven (Critical ST8 first, then Boomers) | Strong |
 
@@ -31,6 +29,8 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| T-006 | Task | Privacy notice in Settings (what is stored on the device, at Firebase and Cloudflare, and why) | Low | Done (2026-11-15) | Standard |
+| T-007 | Task | Check the falling-block look against Tetris trademark/trade dress | Low | Done (2026-11-15): Modern piece colors changed away from the guideline assignment; no "Tetris" text or assets found | Standard |
 | F-008 | Feature | Boomers (formerly Stones) | Low | Moved 2026-11-15 to BadBagel47/boomers (F-001, F-002, D-004 there) | Strong |
 | F-026 | Feature | Boomers campaign | Low | Moved 2026-11-15 to BadBagel47/boomers (F-003 there, parked) | Standard |
 | F-001 | Feature | Admin page with the sketch's structure and functions | High | Done (run 1, 2026-11-10) | Standard |
@@ -84,13 +84,11 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 ## Proposed runs (2026-11-15)
 
-- **A** – standard model, medium level – Privacy and look
-  - T-006 – Add a short privacy notice in the game that says what is stored on the device and at Firebase and Cloudflare and why, so players know and the game follows GDPR and the Swedish cookie rules.
-  - T-007 – Check names, texts and visuals against the Tetris trademark and look, and adjust anything too close, so the game stays clear of trademark problems.
+None. Run A (T-006, T-007) was done 2026-11-15.
 
 Not proposed: F-006 (made in the separate music studio chat), F-007 (waits until network-kit is proven).
 
-Waiting for the owner: B-004 two-device check of the opponent board.
+Waiting for the owner: B-004 two-device check of the opponent board; check B-017 on a real phone; decide whether the privacy text in Settings is enough (not legal advice).
 
 Parked: none.
 
