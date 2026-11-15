@@ -33,10 +33,11 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 
 None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 11 old branches archived as `archive/<branch>` tags and deleted, project rules moved to `AGENTS.md` (outdated and duplicated ones removed; shared rules apply for model advice and untranslated working documents), history moved to `PROGRESS.md`.
 
-## Current state (2026-11-12)
+## Current state (2026-11-15)
 
 - Live: https://bricks.trythis.one (Pages from `main`); admin https://bricks-operating.l8p1.workers.dev/admin/ (Worker from `feature/operating-controls`).
 - Latest work, newest first:
+  - 2026-11-15: Boomers planning moved to https://github.com/BadBagel47/boomers and the shared room server plan to https://github.com/BadBagel47/network-kit (first real user: https://github.com/BadBagel47/critical); shared rules v1.9. No game code changed since F-025/B-017.
   - F-025 centred, larger logo on the 1 Player game screen; B-017 start page no longer scrolls on phones.
   - Shared agent rules v1.3 adaptation (this file, `AGENTS.md`, branch archive).
   - F-023 touch rotation both ways, F-024 Retro/Tones/Modern block colors, B-016.
