@@ -22,8 +22,8 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| T-006 | Task | Privacy notice: short page/section on what the game stores (name, settings and scores on the device; anonymous Firebase sign-in, room data and IP addresses at Google Firebase and Cloudflare) and why | Low | Idea | Standard |
-| T-007 | Task | Check the falling-block look against Tetris trademark/trade dress: no "Tetris" name, logo or exact original visuals in product text or assets | Low | Idea | Standard |
+| T-006 | Task | Privacy notice: short page/section on what the game stores (name, settings and scores on the device; anonymous Firebase sign-in, room data and IP addresses at Google Firebase and Cloudflare) and why | Low | Pågår 2026-11-15 | Standard |
+| T-007 | Task | Check the falling-block look against Tetris trademark/trade dress: no "Tetris" name, logo or exact original visuals in product text or assets | Low | Pågår 2026-11-15 | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit | Low | Idea; after network-kit is proven (Critical ST8 first, then Boomers) | Strong |
 
