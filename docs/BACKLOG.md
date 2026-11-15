@@ -25,7 +25,7 @@ records released changes.
 | T-006 | Task | Privacy notice: short page/section on what the game stores (name, settings and scores on the device; anonymous Firebase sign-in, room data and IP addresses at Google Firebase and Cloudflare) and why | Low | Idea | Standard |
 | T-007 | Task | Check the falling-block look against Tetris trademark/trade dress: no "Tetris" name, logo or exact original visuals in product text or assets | Low | Idea | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
-| F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit | Low | Idea; after network-kit is proven with Boomers | Strong |
+| F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit | Low | Idea; after network-kit is proven (Critical ST8 first, then Boomers) | Strong |
 
 ## Done
 
@@ -82,11 +82,17 @@ The approved High items come from the owner's request of 2026-11-10: use the
 sketch's layout **and behavior**, not only its look. Design reference:
 "Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
 
-## Proposed runs (2026-11-12)
+## Proposed runs (2026-11-15)
 
-No approved runs are waiting. The shared-rules adaptation (v1.3) was completed on 2026-11-12.
+- **A** – standard model, medium level – Privacy and look
+  - T-006 – Add a short privacy notice in the game that says what is stored on the device and at Firebase and Cloudflare and why, so players know and the game follows GDPR and the Swedish cookie rules.
+  - T-007 – Check names, texts and visuals against the Tetris trademark and look, and adjust anything too close, so the game stays clear of trademark problems.
 
-Parked: none. Ideas not yet proposed: T-006, T-007, F-006, F-007.
+Not proposed: F-006 (made in the separate music studio chat), F-007 (waits until network-kit is proven).
+
+Waiting for the owner: B-004 two-device check of the opponent board.
+
+Parked: none.
 
 ## Details
 
