@@ -102,7 +102,7 @@ Prioritised for: the owner's newest request first, then small fixes.
 - **A** – standard model, medium level – Drop choice
   - F-034 – Replace the Hard Drop switch in Settings with Drop / Hard Drop / Both, so players choose which drop buttons they get.
   - Question: does the choice also apply to keyboard, controller and swipe, as today's switch does for hard drop? Recommendation: yes, Drop turns off hard drop and Hard Drop turns off soft drop for every kind of control.
-  - Question: with Hard Drop only, where does its button go in the Split layout? Recommendation: in the down arrow's place, so the arrows and the drop button form one row.
+  - Decided (owner 2026-11-18): Both is the default. With Drop or Hard Drop only, the arrows and the one drop button form one row; in the Split layout that row is moved up so it sits vertically centred beside the rotate buttons.
 - **B** – standard model, medium level – Sideways scroll on small phones
   - B-020 – Keep the tilted logo tiles on the main menu inside the screen at 320 px, so the menu cannot be nudged sideways.
 - **C** – strong model, high level – Unstable multiplayer test
