@@ -89,10 +89,12 @@ The approved High items come from the owner's request of 2026-11-10: use the
 sketch's layout **and behavior**, not only its look. Design reference:
 "Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
 
-## Proposed runs (2026-11-15)
+## Proposed runs (2026-11-18)
 
 - **A** – standard model, medium level – No copyable text
   - F-030 – Turn off text selection and the long-press text menu in the whole game (not the admin page), keeping text fields and the copy fallback usable, so taps and swipes never select text.
+- **B** – standard model, medium level – Larger logo and touch controls
+  - F-031 – Make the logo on the phone game screen larger and let the touch controls fill the free space below the board, without making the board smaller (prototype below; needs the owner's choice about the Button size setting).
 
 Not proposed yet: F-028 (move 2 Players to network-kit; strong model, high level) waits for network-kit F-059 (a lobby made on the admin page with a host link and a guest link, network-kit's next run B; replaces Bricks' private invitations). F-006 is made in the separate music studio chat.
 
@@ -101,6 +103,21 @@ Waiting for the owner: B-018 check on a phone; B-004 two-device check of the opp
 Parked: F-027 (alternative Modern piece colors).
 
 ## Details
+
+### F-031 larger logo and touch controls (2026-11-18)
+- Owner screenshot (Brave on Android, about 412×720 CSS px, Split layout): small logo, empty space below and between the control groups.
+- Prototype (local only, shown to the owner as a before/after sheet at 320×568, 375×667, 412×720, 412×800 and 430×860): board size unchanged at every size, no overflow. At 412×720 the arrow buttons go from 55 to 66 px and the main rotate button from 69 to 83 px; logo tiles from 28 to 40 px (28 px kept at 320 wide, where there is no room beside Pause). Row layout grows the same way.
+- Open choice for the owner: the Settings *Button size* slider (44–72, default 56) currently caps the buttons; with the prototype the buttons fill the space on phones in portrait, so either remove the slider (recommended) or keep it with a higher range and the largest size as default.
+- Prototype CSS, appended to `src/App.css`:
+```css
+.game-topbar>.brand .brand-tile{--tile:max(28px,min(40px,calc((100vw - 28px - 2 * 60px) / 6.6)))}
+@media(max-width:760px) and (orientation:portrait){
+  .game-shell{--board-w:min(calc(100vw - 28px - 86px),300px,calc((100dvh - 270px)/2));--controls-h:calc(100dvh - 159px - 2 * var(--board-w))}
+  .game-shell:has(.touch-split){--board-w:min(calc(100vw - 28px - 86px),300px,calc((100dvh - 270px - 56px)/2))}
+  .game-shell .touch-controls{--touch-size:max(44px,min(84px,calc((100vw - 28px - 4 * clamp(5px, 2vw, 12px)) / 5.15),calc(var(--controls-h) / 1.15)))}
+  .game-shell .touch-split{--touch-size:max(44px,min(84px,calc((100vw - 28px - 32px) / 5.3),calc((var(--controls-h) - 8px) / 2.1)))}
+}
+```
 
 ### B-018 blue background on button press (2026-11-15)
 - Owner: pressing buttons in the game shows a blue background.

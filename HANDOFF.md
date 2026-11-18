@@ -12,6 +12,7 @@ guides. Owner instructions and the specification take precedence.
   - Laws and regulations: brief review done; findings T-006 and T-007 in `docs/BACKLOG.md`.
 - **Publishing method:** GitHub Pages from `main` via `.github/workflows/pages.yml`, custom domain https://bricks.trythis.one ; admin Worker via the `feature/operating-controls` branch (see Decisions).
 - **Project language:** English for all player-facing text and the README; chat with the owner in Swedish.
+- **Environment (2026-11-18):** a Bricks session can message the network-kit session (cross-session messages) and read `BadBagel47/network-kit` when it is added to the session; the network-kit agent answers questions and records needs on its own (its Decisions). Pushes that go beyond what the owner asked for in the current message may be stopped by the session's safety check; the owner then confirms in chat.
 - **Environment (checked 2026-11-12):** agents can push to `main` and `feature/operating-controls`; GitHub REST works through `gh api`, GraphQL (`gh pr list`, `gh issue list`) is blocked in Claude cloud sessions; setting repository variables via `gh` is blocked (owner sets them); pushing tags and writing refs through the REST API are blocked, so tags are created by `.github/workflows/archive-branches.yml` (list branches in `.github/archive-branches.txt`; it tags, verifies, then deletes). A fresh cloud checkout may fetch only one branch: run `git fetch origin '+refs/heads/*:refs/remotes/origin/*'` before comparing branches.
 
 ## Decisions
@@ -37,22 +38,18 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 
 None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 11 old branches archived as `archive/<branch>` tags and deleted, project rules moved to `AGENTS.md` (outdated and duplicated ones removed; shared rules apply for model advice and untranslated working documents), history moved to `PROGRESS.md`.
 
-## Current state (2026-11-15)
+## Current state (2026-11-18)
 
 - Live: https://bricks.trythis.one (Pages from `main`); admin https://bricks-operating.l8p1.workers.dev/admin/ (Worker from `feature/operating-controls`).
 - Latest work, newest first:
-  - 2026-11-18: the move of 2 Players to network-kit is in the backlog (F-007 with T-008, F-028, T-009); may come sooner than planned; waits for the owner's decisions in T-008.
+  - 2026-11-18: F-030 (no copyable text) and F-031 (larger logo and touch controls, prototype shown to the owner) proposed; not built.
+  - 2026-11-18: the move of 2 Players to network-kit planned (F-007 with T-008 done, F-028, T-009); waits for network-kit F-059. Proposals sent to network-kit and recorded there: F-057, F-058 (shipped), F-059, F-061, D-062, F-063, F-064.
   - 2026-11-15: B-018 blue tap highlight on buttons removed; needs a phone check.
-  - 2026-11-15: T-006 privacy section in Settings and T-007 trademark check (Modern piece colors unchanged; alternative parked as F-027). Needs the owner's look on the live site.
-  - 2026-11-15: Boomers planning moved to https://github.com/BadBagel47/boomers and the shared room server plan to https://github.com/BadBagel47/network-kit (first real user: https://github.com/BadBagel47/critical); shared rules v1.9. No game code changed since F-025/B-017.
-  - F-025 centred, larger logo on the 1 Player game screen; B-017 start page no longer scrolls on phones.
-  - Shared agent rules v1.3 adaptation (this file, `AGENTS.md`, branch archive).
-  - F-023 touch rotation both ways, F-024 Retro/Tones/Modern block colors, B-016.
-  - F-021 interface animations, F-022 game effects.
-  - Owner feedback fixes B-011 – B-015 (aligned top bars, Tab-only focus rings, Space-safe game over, larger menu buttons).
-- Waiting on the owner: a two-device check of B-004 (opponent board); a real private two-player match on the live site (T-001) has not been confirmed in writing.
-- Next: no approved runs. Ideas in `docs/BACKLOG.md`: F-006 music, F-007 move 2 Players to network-kit. Boomers and the shared room server moved on 2026-11-15 to their own repositories: https://github.com/BadBagel47/boomers and https://github.com/BadBagel47/network-kit .
-- Older checkpoints and history: `PROGRESS.md` (section *Handoff history*).
+  - 2026-11-15: T-006 privacy section in Settings and T-007 trademark check (Modern piece colors unchanged; alternative parked as F-027).
+  - 2026-11-15: Boomers and the shared room server plan moved to their own repositories; shared rules v1.9.
+- Waiting on the owner: answers for F-031 (Button size setting) and go-ahead for runs in `docs/BACKLOG.md`; phone checks of B-018 and B-017; a two-device check of B-004; whether the privacy text is enough.
+- Next: *Proposed runs* in `docs/BACKLOG.md` (F-030, F-031). F-028 when network-kit has F-059. F-006 music in the music studio chat.
+- Older checkpoints and history: `PROGRESS.md` (section *Handoff history*) and git history.
 
 ## Documentation map
 
