@@ -14,6 +14,7 @@ import { DEFAULT_GAMEPAD_BINDINGS, gamepadActions, gamepadButtonLabel, parseGame
 import type { GamepadBindings } from './input/gamepad.ts'
 import { HeldInputs } from './input/repeat.ts'
 import { actionsForSwipe } from './input/swipe.ts'
+import { actionAllowed, hardDropAllowed, softDropAllowed } from './input/drop-mode.ts'
 import { HoldBox, Playfield, PiecePreview, TouchControls, TouchPreview } from './ui/GameViews.tsx'
 import { ColorPreview, Segmented, Stepper } from './ui/SettingsControls.tsx'
 import { addHighscore, DEFAULT_PERSONAL_SETTINGS, DEFAULT_SINGLE_PLAYER_SETTINGS, parseHighscores, parsePersonalSettings, parseSinglePlayerSettings, serializeHighscores } from './persistence.ts'
@@ -258,6 +259,7 @@ function App() {
   }
 
   function apply(action: GameAction) {
+    if (!actionAllowed(action, personal.dropMode)) return
     const transition = dispatch(gameRef.current, action)
     commitGame(transition.state, transition.events)
   }
@@ -493,10 +495,11 @@ function App() {
         <Segmented label="Rotate buttons" value={personal.rotateButtons} options={[{ value: 'one', label: 'One' }, { value: 'two', label: 'Two' }]} onChange={(rotateButtons) => savePersonal({ ...personal, rotateButtons })} />
         <span className="setting-label">Layout</span>
         <Segmented label="Button layout" value={personal.touchLayout} options={[{ value: 'row', label: 'Row' }, { value: 'split', label: 'Split' }]} onChange={(touchLayout) => savePersonal({ ...personal, touchLayout })} />
-        <TouchPreview rotateButtons={personal.rotateButtons} layout={personal.touchLayout} hardDrop={personal.hardDropEnabled} leftHanded={personal.leftHandedControls} />
+        <TouchPreview rotateButtons={personal.rotateButtons} layout={personal.touchLayout} dropMode={personal.dropMode} leftHanded={personal.leftHandedControls} />
       </>}
+      <span className="setting-label">Drop</span>
+      <Segmented label="Drop" value={personal.dropMode} options={[{ value: 'drop', label: 'Drop' }, { value: 'hard', label: 'Hard Drop' }, { value: 'both', label: 'Both' }]} onChange={(dropMode) => savePersonal({ ...personal, dropMode, hardDropEnabled: hardDropAllowed(dropMode) })} />
       <div className="setting-group">
-      <label className="toggle-row"><span>Hard Drop</span><input checked={personal.hardDropEnabled} onChange={(event) => savePersonal({ ...personal, hardDropEnabled: event.target.checked })} type="checkbox" /></label>
       <label className="toggle-row"><span>Left-handed layout</span><input checked={personal.leftHandedControls} onChange={(event) => savePersonal({ ...personal, leftHandedControls: event.target.checked })} type="checkbox" /></label>
       <label className="toggle-row"><span>Hide touch controls when a controller is connected</span><input checked={personal.hideTouchControlsWhenController} onChange={(event) => savePersonal({ ...personal, hideTouchControlsWhenController: event.target.checked })} type="checkbox" /></label>
       </div>
@@ -583,10 +586,10 @@ function App() {
       <Playfield game={game} ghost={personal.ghostPiece} colors={personal.blockColors} clear={clearFx} thump={thump} swipeMode={personal.mobileControlMethod === 'swipe'} onSwipe={(start, end, board) => actionsForSwipe(start, end, board).forEach(apply)} />
       <aside className="game-side next-panel"><div className="next-box"><span>Next</span><PiecePreview type={game.next} level={game.level} colors={personal.blockColors} /></div>{game.holdEnabled && <HoldBox type={game.held} level={game.level} colors={personal.blockColors} enabled={game.status === 'playing' && !game.holdUsed} onHold={() => apply('hold')} />}</aside>
     </section>
-    {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={72} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdEnabled={game.holdEnabled} hardDropEnabled={game.hardDropEnabled} enabled={game.status === 'playing'} apply={apply} />}
+    {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={72} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdEnabled={game.holdEnabled} dropMode={personal.dropMode} enabled={game.status === 'playing'} apply={apply} />}
     <p className="controller-status" aria-live="polite">{controllerStatus}</p>
     <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">{gameAnnouncement}</p>
-    <p className="control-hint" aria-label="Keyboard controls">{keyLabel(bindings.moveLeft)} {keyLabel(bindings.moveRight)} Move · {keyLabel(bindings.softDrop)} Soft drop · {keyLabel(bindings.rotateCounterclockwise)} {keyLabel(bindings.rotateClockwise)} Rotate · {personal.hardDropEnabled ? `${keyLabel(bindings.hardDrop)} Hard drop` : 'Hard Drop off'}{game.holdEnabled ? ` · ${keyLabel(bindings.hold)} Hold` : ''} · {keyLabel(bindings.pause)} / Esc Pause</p>
+    <p className="control-hint" aria-label="Keyboard controls">{keyLabel(bindings.moveLeft)} {keyLabel(bindings.moveRight)} Move · {softDropAllowed(personal.dropMode) ? `${keyLabel(bindings.softDrop)} Soft drop · ` : ''}{keyLabel(bindings.rotateCounterclockwise)} {keyLabel(bindings.rotateClockwise)} Rotate · {hardDropAllowed(personal.dropMode) ? `${keyLabel(bindings.hardDrop)} Hard drop` : 'Hard Drop off'}{game.holdEnabled ? ` · ${keyLabel(bindings.hold)} Hold` : ''} · {keyLabel(bindings.pause)} / Esc Pause</p>
     </main>
     {game.status === 'paused' && createPortal(<div className="game-overlay"><section className="overlay-card pause-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title"><h1 id="overlay-title">Paused</h1>
       <p className="pause-stats">Score <b>{game.score.toLocaleString()}</b> · Level <b>{String(game.level).padStart(2, '0')}</b> · Lines <b>{game.lines}</b></p>

@@ -14,7 +14,7 @@
 .brand-compact .brand-tile{--tile:22px}
 .brand-compact{gap:3px;padding-bottom:4px}
 .brand-hero{gap:6px;padding-bottom:12px}
-.brand-hero .brand-tile{--tile:clamp(46px,7vw,64px)}
+.brand-hero .brand-tile{--tile:min(clamp(46px,7vw,64px),calc((100vw - 28px - 30px) / 6.6))} /* B-020: the tilted tiles stay inside narrow screens */
 
 .welcome-shell{align-items:center}
 .welcome-shell>.brand{align-self:flex-start}
@@ -459,3 +459,8 @@ html[data-motion=off]::view-transition-old(root),html[data-motion=off]::view-tra
 /* F-033: fullscreen button beside Settings on the main menu. */
 .menu-tools{display:flex;gap:8px;align-items:center}
 .fullscreen-button{width:44px;padding:0}
+
+/* F-034: with one drop button the pad is one row of three, centred beside the rotate buttons. */
+.touch-split.single-drop{align-items:center!important}
+.touch-pad.single>:nth-child(1){grid-area:1/1}.touch-pad.single>:nth-child(2){grid-area:1/2}.touch-pad.single>:nth-child(3){grid-area:1/3}
+.touch-preview.split.single-drop{align-items:center}

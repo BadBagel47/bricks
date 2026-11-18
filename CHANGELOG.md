@@ -7,9 +7,13 @@ not publish version numbers yet; entries are grouped by deployment.
 ## [Unreleased]
 
 ### Added (2026-11-18)
+- F-034: Settings has Drop / Hard Drop / Both instead of the Hard Drop switch (default Both); the choice applies to touch buttons, swipe, keyboard and controller, and with one drop button the three buttons form one row centred beside the rotate buttons.
+- F-035: new browser tab and home screen icon: the logo's B tile in orange, tilted as in the logo.
 - F-033: a fullscreen button next to Settings on the main menu; the choice is remembered and restored at the first tap next time. The game can be added to the home screen and then opens as an app without browser bars.
 
 ### Changed (2026-11-18)
+- B-020: the main menu logo fits narrow phones, so the menu can no longer be nudged sideways.
+- B-021: the Score Duel reconnect test keeps dropping until Game over and explains what it saw if it fails.
 - F-032: the logo on the phone game screen is a little smaller and centred vertically on the Pause button.
 - B-019: more room (32 px) between the counterclockwise rotate button and the right arrow in the Split layout.
 - F-030: text in the game can no longer be selected or copied, and phones show no text menu on long press; text fields stay editable (the admin page is unchanged).

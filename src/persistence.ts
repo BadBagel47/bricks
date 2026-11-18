@@ -1,7 +1,12 @@
 import type { BlockColors } from './ui/level-palettes.ts'
+import { hardDropAllowed, parseDropMode } from './input/drop-mode.ts'
+import type { DropMode } from './input/drop-mode.ts'
 export interface PersonalSettings {
   readonly version: 1
+  /** Kept in step with dropMode (true unless dropMode is 'drop'); the engine and older code read it. */
   readonly hardDropEnabled: boolean
+  /** F-034: Drop / Hard Drop / Both for every kind of control. */
+  readonly dropMode: DropMode
   readonly musicEnabled: boolean
   readonly musicVolume: number
   readonly effectsEnabled: boolean
@@ -44,7 +49,7 @@ export interface HighscoreResult {
 }
 
 export const DEFAULT_PERSONAL_SETTINGS: PersonalSettings = {
-  version: 1, hardDropEnabled: true, musicEnabled: true, musicVolume: 70, effectsEnabled: true, effectsVolume: 70,
+  version: 1, hardDropEnabled: true, dropMode: 'both', musicEnabled: true, musicVolume: 70, effectsEnabled: true, effectsVolume: 70,
   mobileControlMethod: 'dpad', touchButtonSize: 56, leftHandedControls: false, rotateButtons: 'two', touchLayout: 'row', hideTouchControlsWhenController: true,
   ghostPiece: false, blockColors: 'level', interfaceAnimations: true, gameEffects: true,
 }
@@ -65,7 +70,8 @@ export function parsePersonalSettings(raw: string | null): PersonalSettings {
   const volume = (key: string, fallback: number) => typeof value?.[key] === 'number' && Number.isInteger(value[key]) && (value[key] as number) >= 0 && (value[key] as number) <= 100 ? value[key] as number : fallback
   return {
     version: 1,
-    hardDropEnabled: typeof value?.hardDropEnabled === 'boolean' ? value.hardDropEnabled : true,
+    hardDropEnabled: hardDropAllowed(parseDropMode(value?.dropMode, value?.hardDropEnabled)),
+    dropMode: parseDropMode(value?.dropMode, value?.hardDropEnabled),
     musicEnabled: typeof value?.musicEnabled === 'boolean' ? value.musicEnabled : true,
     musicVolume: volume('musicVolume', 70),
     effectsEnabled: typeof value?.effectsEnabled === 'boolean' ? value.effectsEnabled : true,

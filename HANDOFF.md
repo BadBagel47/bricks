@@ -12,7 +12,7 @@ guides. Owner instructions and the specification take precedence.
   - Laws and regulations: brief review done; findings T-006 and T-007 in `docs/BACKLOG.md`.
 - **Publishing method:** GitHub Pages from `main` via `.github/workflows/pages.yml`, custom domain https://bricks.trythis.one ; admin Worker via the `feature/operating-controls` branch (see Decisions).
 - **Project language:** English for all player-facing text and the README; chat with the owner in Swedish.
-- **Environment (2026-11-18):** a Bricks session can message the network-kit session (cross-session messages) and read `BadBagel47/network-kit` when it is added to the session; the network-kit agent answers questions and records needs on its own (its Decisions). Pushes that go beyond what the owner asked for in the current message may be stopped by the session's safety check; the owner then confirms in chat.
+- **Environment (2026-11-18):** a Bricks session can message the network-kit session (cross-session messages) and read `BadBagel47/network-kit` when it is added to the session; the network-kit agent answers questions and records needs on its own (its Decisions). Pushes that go beyond what the owner asked for in the current message may be stopped by the session's safety check; the owner then confirms in chat. The Firebase emulator suite can run locally with proxies unset (database emulator jar downloaded to `.firebase/`), but `tests/firebase.rooms.mjs` alone stops after 60 s for the whole file here, so CI is the gate for it.
 - **Environment (checked 2026-11-12):** agents can push to `main` and `feature/operating-controls`; GitHub REST works through `gh api`, GraphQL (`gh pr list`, `gh issue list`) is blocked in Claude cloud sessions; setting repository variables via `gh` is blocked (owner sets them); pushing tags and writing refs through the REST API are blocked, so tags are created by `.github/workflows/archive-branches.yml` (list branches in `.github/archive-branches.txt`; it tags, verifies, then deletes). A fresh cloud checkout may fetch only one branch: run `git fetch origin '+refs/heads/*:refs/remotes/origin/*'` before comparing branches.
 
 ## Decisions
@@ -46,13 +46,13 @@ None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 1
 
 - Live: https://bricks.trythis.one (Pages from `main`); admin https://bricks-operating.l8p1.workers.dev/admin/ (Worker from `feature/operating-controls`).
 - Latest work, newest first:
+  - 2026-11-18: F-034 Drop / Hard Drop / Both, F-035 orange B icon, B-020 menu fits narrow phones, B-021 steadier emulator test.
   - 2026-11-18: F-033 fullscreen button on the main menu (remembered) and home screen app mode. Needs a phone check.
   - 2026-11-18: F-032 smaller, centred logo and B-019 more room between the touch buttons. Needs a phone check.
   - 2026-11-18: F-030 no copyable text in the game; F-031 larger logo and touch controls on phones (Button size slider removed). Needs a phone check.
   - 2026-11-18: the move of 2 Players to network-kit planned (F-007 with T-008 done, F-028, T-009); waits for network-kit F-059. Proposals sent to network-kit and recorded there: network-kit F-057, network-kit F-058 (shipped), network-kit F-059, network-kit F-061, network-kit D-062, network-kit F-063, network-kit F-064.
-  - 2026-11-15: B-018 blue tap highlight on buttons removed; needs a phone check.
-- Waiting on the owner: phone checks of F-030, F-031, F-032, F-033 (also adding the game to the home screen), B-019, B-018 and B-017; a two-device check of B-004; whether the privacy text is enough.
-- Next: proposed run B-020 (1 px sideways scroll on the menu at 320 px). F-028 when network-kit has network-kit F-059. F-006 music in the music studio chat.
+- Waiting on the owner: phone checks of F-030 – F-035 (also adding the game to the home screen), B-019, B-018 and B-017; a two-device check of B-004; whether the privacy text is enough.
+- Next: no proposed runs. F-028 when network-kit has network-kit F-059. F-006 music in the music studio chat.
 - Older checkpoints and history: `PROGRESS.md` (section *Handoff history*) and git history.
 
 ## Documentation map

@@ -528,9 +528,26 @@ test('Score Duel retains a finished player through reconnect, settles by points 
       const original = Storage.prototype.setItem; let fail = true
       Storage.prototype.setItem = function(key, value) { if (key === 'bricks.multiplayer-results.v1' && fail) { fail = false; throw new DOMException('Test quota', 'QuotaExceededError') } return original.call(this, key, value) }
     })
+    // B-021: hard drops sent while the match is briefly paused (for example a second presence
+    // blip right after a reconnect) are ignored by design, so keep dropping until Game over and
+    // report what the page showed if it never comes.
     async function finish(page) {
-      for (let i = 0; i < 40; i++) await page.keyboard.press('Space')
-      await page.getByLabel('Your game', { exact: true }).getByText('Game over', { exact: true }).waitFor()
+      const over = page.getByLabel('Your game', { exact: true }).getByText('Game over', { exact: true })
+      const pausedNote = page.getByText('Match paused. Waiting for reconnection…', { exact: true })
+      for (let round = 0; round < 5 && !(await over.isVisible()); round++) {
+        await pausedNote.waitFor({ state: 'hidden' })
+        for (let i = 0; i < 40 && !(await over.isVisible()); i++) await page.keyboard.press('Space')
+      }
+      try { await over.waitFor() }
+      catch (error) {
+        const state = await page.evaluate(() => ({
+          status: document.querySelector('[aria-label="Your game"] .board-status, [aria-label="Your game"] [role=status]')?.textContent,
+          duel: document.querySelector('[aria-label="Score Duel status"]')?.textContent,
+          paused: document.body.innerText.includes('Match paused'),
+          focus: document.activeElement?.tagName,
+        }))
+        throw new Error(`Game over never shown: ${JSON.stringify(state)}`, { cause: error })
+      }
     }
     async function start() {
       await host.getByRole('button', { name: 'Start Match', exact: true }).click()
