@@ -22,8 +22,8 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| F-032 | Feature | 1 Player game screen on phones: logo a little smaller (40 px tiles feel too big) and truly centred vertically on the Pause button (measured about 3 px low because of the tiles' stagger) | Low | Proposed (2026-11-18) | Standard |
-| B-019 | Bug | Split touch layout after F-031: too little space between the counterclockwise rotate button and the right arrow (16 px) | Low | Proposed (2026-11-18) | Standard |
+| F-032 | Feature | 1 Player game screen on phones: logo a little smaller (40 px tiles feel too big) and truly centred vertically on the Pause button (measured about 3 px low because of the tiles' stagger) | Low | Pågår 2026-11-18 (session ccr-fca4d5ae-ka315n) | Standard |
+| B-019 | Bug | Split touch layout after F-031: too little space between the counterclockwise rotate button and the right arrow (16 px) | Low | Pågår 2026-11-18 (session ccr-fca4d5ae-ka315n) | Standard |
 | F-033 | Feature | Fullscreen mode while playing | Medium | Proposed (2026-11-18); questions: where it is turned on, and whether iPhone gets an "Add to Home Screen" app mode | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
