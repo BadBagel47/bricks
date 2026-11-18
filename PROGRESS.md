@@ -8,6 +8,10 @@
 - **Phase 4 status:** Documentation and maintenance instructions added; no application code changed. Waiting for owner DNS, GitHub Pages custom-domain/HTTPS, Firebase Authorized domains (and API-key referrer, if restricted). Live verification checklist not yet observed; this environment cannot reach the site.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
+## F-034, F-035, B-020, B-021 — 2026-11-18
+
+Owner approved ("Kör alla"). F-034: `src/input/drop-mode.ts` (`DropMode`, `actionAllowed`, legacy parsing) with unit tests; `PersonalSettings.dropMode` with `hardDropEnabled` kept in step for the engine and checkpoints (no engine or rules change); both apply paths filter disabled drops; touch row/split and the Settings preview show one drop button as a centred row; swipe instructions and the keyboard hint follow the mode; browser test updated. F-035: favicon SVG and 192/512/180 px PNG icons with the tilted orange B tile on the dark background. B-020: hero tile size also limited by the width. B-021: robust `finish()` with diagnostics. Local: lint, unit tests, build, browser integration 15/15, the Score Duel emulator test passed 3/3 locally (the whole rooms file stops at 60 s locally, also on unchanged main; CI is the gate).
+
 ## F-033 — 2026-11-18
 
 Owner approved ("Kör rek a"). `src/ui/fullscreen.ts` (support check, enter/exit with webkit fallbacks, remembered choice, restore on first input except on the button) with unit tests; icon button `data-fullscreen-toggle` in `.menu-tools` beside Settings, hidden without browser support; `public/manifest.webmanifest` (relative paths, `display: fullscreen`), 192/512 px icons and a 180 px Apple touch icon rendered from the favicon; Apple web app meta tags. Local: lint, unit tests, build, browser integration 15/15; emulated phone: button toggles fullscreen and the stored choice, manifest served; menu fits at 320 px (a pre-existing 1 px overflow from the hero logo recorded as B-020).

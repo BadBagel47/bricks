@@ -22,10 +22,6 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| B-020 | Bug | Main menu at 320 px wide: the rotated last logo tile reaches 1 px past the screen edge, so the page can scroll sideways by 1 px (found 2026-11-18 while checking F-033; also on the live site before F-033) | Low | Pågår 2026-11-18 (session ccr-fca4d5ae-ka315n) | Standard |
-| B-021 | Bug | CI: the Firebase emulator test "Score Duel retains a finished player through reconnect…" timed out once waiting for the guest's Game over after reconnect (run for F-033, 2026-11-18); passed on re-run, so likely timing-dependent | Low | Pågår 2026-11-18 (session ccr-fca4d5ae-ka315n) | Strong |
-| F-034 | Feature | Settings: replace the Hard Drop on/off switch with a three-way choice Drop / Hard Drop / Both | Medium | Pågår 2026-11-18 (session ccr-fca4d5ae-ka315n) | Standard |
-| F-035 | Feature | App icon and favicon: the B tile from the logo in the orange of the S tile (#F7964A) | Low | Pågår 2026-11-18 (session ccr-fca4d5ae-ka315n) | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
@@ -37,6 +33,10 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| F-034 | Feature | Settings: replace the Hard Drop on/off switch with a three-way choice Drop / Hard Drop / Both | Medium | Done (2026-11-18; needs check on a phone) | Standard |
+| F-035 | Feature | App icon and favicon: the B tile from the logo in the orange of the S tile (#F7964A) | Low | Done (2026-11-18; needs a look in the browser tab and on the home screen) | Standard |
+| B-020 | Bug | Main menu at 320 px wide: the rotated last logo tile reaches 1 px past the screen edge, so the page can scroll sideways by 1 px (found 2026-11-18 while checking F-033; also on the live site before F-033) | Low | Done (2026-11-18) | Standard |
+| B-021 | Bug | CI: the Firebase emulator test "Score Duel retains a finished player through reconnect…" timed out once waiting for the guest's Game over after reconnect (run for F-033, 2026-11-18); passed on re-run, so likely timing-dependent | Low | Done (2026-11-18): test made robust and gives diagnostics; cause not reproduced locally | Strong |
 | F-033 | Feature | Fullscreen mode while playing | Medium | Done (2026-11-18; fullscreen not possible in iPhone's browser, there the home screen app is used; needs check on a phone) | Standard |
 | F-032 | Feature | 1 Player game screen on phones: logo a little smaller (40 px tiles feel too big) and truly centred vertically on the Pause button (measured about 3 px low because of the tiles' stagger) | Low | Done (2026-11-18, needs check on a phone) | Standard |
 | B-019 | Bug | Split touch layout after F-031: too little space between the counterclockwise rotate button and the right arrow (16 px) | Low | Done (2026-11-18, needs check on a phone) | Standard |
@@ -98,27 +98,19 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 ## Proposed runs (2026-11-18)
 
-Prioritised for: the owner's newest request first, then small fixes.
-
-- **A** – standard model, medium level – Drop choice
-  - F-034 – Replace the Hard Drop switch in Settings with Drop / Hard Drop / Both, so players choose which drop buttons they get.
-  - Decided (owner 2026-11-18): the choice applies to every kind of control (keyboard, controller, swipe, touch buttons): Drop turns off hard drop, Hard Drop turns off soft drop.
-  - Decided (owner 2026-11-18): Both is the default. With Drop or Hard Drop only, the arrows and the one drop button form one row; in the Split layout that row is moved up so it sits vertically centred beside the rotate buttons.
-- **B** – standard model, medium level – New icon
-  - F-035 – Use the logo's B tile in orange as the browser tab icon and the home screen app icon, so the game is recognisable by its own letter.
-  - Decided (owner 2026-11-18): option 3, the tile tilted like in the logo on the dark background (app icon), and the tilted tile alone in the browser tab.
-- **C** – standard model, medium level – Sideways scroll on small phones
-  - B-020 – Keep the tilted logo tiles on the main menu inside the screen at 320 px, so the menu cannot be nudged sideways.
-- **D** – strong model, high level – Unstable multiplayer test
-  - B-021 – Find out why the Score Duel reconnect test sometimes stops waiting for Game over and make it reliable, so publishing is not stopped by chance.
+None. F-034, F-035, B-020 and B-021 were done 2026-11-18.
 
 Not proposed yet: F-028 (move 2 Players to network-kit; strong model, high level) waits for network-kit F-059 (a lobby made on the admin page with a host link and a guest link, network-kit's next run B; replaces Bricks' private invitations). F-006 is made in the separate music studio chat.
 
-Waiting for the owner: F-030, F-031, F-032, F-033 and B-019 check on a phone (F-033 also: add the game to the home screen); B-018 check on a phone; B-004 two-device check of the opponent board; check B-017 on a real phone; decide whether the privacy text in Settings is enough (not legal advice).
+Waiting for the owner: F-030 – F-035 and B-019 check on a phone (F-033 also: add the game to the home screen); B-018 check on a phone; B-004 two-device check of the opponent board; check B-017 on a real phone; decide whether the privacy text in Settings is enough (not legal advice).
 
 Parked: F-027 (alternative Modern piece colors).
 
 ## Details
+
+### B-021 Score Duel emulator test timed out once (2026-11-18)
+- The guest's 40 quick hard drops after the reconnect did not reach Game over within 12 s in one CI run; the same test passed on re-run and three times locally. Likely cause: inputs during a short pause right after the reconnect are ignored by design.
+- Fix (test only): `finish()` waits for the pause note to be hidden and keeps dropping until Game over (bounded), and on failure reports the board status, duel status, pause note and focus. Local note: running `tests/firebase.rooms.mjs` alone with Node 22.23 here stops after 60 s for the whole file (also on unchanged main), so the full rooms file is checked in CI.
 
 ### F-033 fullscreen (2026-11-18)
 - Owner decisions: button next to Settings on the main menu (icon only); the choice is remembered (`bricks.fullscreen.v1`) and restored at the first tap or key press after the page opens (browsers allow fullscreen only after a user gesture; a tap on the button itself is left to the button); the game can be added to the home screen as an app (`manifest.webmanifest`, `display: fullscreen`, icons from the favicon, Apple meta tags with a black status bar).
