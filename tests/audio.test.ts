@@ -48,20 +48,17 @@ test('danger music is faster and drives every sixteenth step', () => {
   assert.ok(danger.noises.length > calm.noises.length)
 })
 
-test('danger begins in the top six rows and ends with hysteresis below row nine', () => {
+test('danger begins in the top six rows and ends as soon as they are empty, as in the NES', () => {
   const board = createBoard().map((row) => [...row])
   assert.equal(isDangerStack(board), false)
   board[5][0] = 'T'
   assert.equal(isDangerStack(board), true)
   assert.equal(nextDangerState(board, false), true)
   board[5][0] = null
-  board[7][0] = 'T'
+  board[6][0] = 'T'
   assert.equal(isDangerStack(board), false)
-  assert.equal(nextDangerState(board, false), false, 'calm music stays calm at row 7')
-  assert.equal(nextDangerState(board, true), true, 'danger music stays urgent at row 7')
-  board[7][0] = null
-  board[9][0] = 'T'
-  assert.equal(nextDangerState(board, true), false)
+  assert.equal(nextDangerState(board, false), false, 'calm music stays calm below the top six rows')
+  assert.equal(nextDangerState(board, true), false, 'danger music ends as soon as the top six rows are empty')
 })
 
 test('every effect schedules finite sounds that start at or after the requested time', () => {

@@ -1,9 +1,12 @@
 import type { Board } from '../engine/types.ts'
 
-/** Danger music starts when locked blocks reach the top six rows. */
+/**
+ * Danger music, as in NES Tetris (F-037): fast music while a locked block is in the
+ * top six rows (the stack is 15 rows or higher), normal music as soon as it is not.
+ * The NES checks the sixth row from the top when a piece locks; a block above that
+ * row with the sixth row empty is practically impossible, so the top six rows are checked.
+ */
 export const DANGER_ROW = 6
-/** Hysteresis: danger ends only once the stack is below the top nine rows. */
-export const SAFE_ROW = 9
 
 function highestFilledRow(board: Board): number {
   const index = board.findIndex((row) => row.some((cell) => cell !== null))
@@ -14,8 +17,7 @@ export function isDangerStack(board: Board): boolean {
   return highestFilledRow(board) < DANGER_ROW
 }
 
-/** Next danger state with hysteresis, so the tempo does not flicker around one row. */
-export function nextDangerState(board: Board, current: boolean): boolean {
-  const top = highestFilledRow(board)
-  return current ? top < SAFE_ROW : top < DANGER_ROW
+/** Next danger state. No margin before switching back, as in the NES (F-037 replaced the earlier hysteresis). */
+export function nextDangerState(board: Board, _current: boolean): boolean {
+  return isDangerStack(board)
 }

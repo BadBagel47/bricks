@@ -12,6 +12,7 @@ not publish version numbers yet; entries are grouped by deployment.
 - F-033: a fullscreen button next to Settings on the main menu; the choice is remembered and restored at the first tap next time. The game can be added to the home screen and then opens as an app without browser bars.
 
 ### Fixed (2026-11-18)
+- F-037: danger music now ends as soon as the top six rows are empty again, as in NES Tetris, instead of staying until the stack is below the top nine rows.
 - B-022: the home screen icon fills the phone's icon shape (maskable icons) instead of a small square in a white shape.
 - B-023: tapped buttons no longer keep the hover outline on phones; hover effects only apply with a mouse.
 

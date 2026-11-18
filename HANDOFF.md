@@ -34,6 +34,7 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 - **Touch button size (2026-11-18, F-031, Q1 with recommendation):** the Settings *Button size* slider is removed; on phones the touch controls are as large as fits below the board.
 - **Room codes after the move (2026-11-18, T-008):** 6 characters, network-kit's default, from the move to network-kit; until then Bricks keeps 4.
 - **Restore point before F-028 (2026-11-18):** tag `archive/restore-before-f028` marks the published game before the move to network-kit (made by the archive workflow; restore with `git push origin archive/restore-before-f028:refs/heads/<branch>` or revert `main` to it).
+- **Danger music (2026-11-18, F-037):** as in NES Tetris: fast music while a locked block is in the top six rows, normal music as soon as they are empty (no margin).
 - **Hosting (2026-11-10):** GitHub Pages with the custom domain https://bricks.trythis.one instead of the spec's Firebase Hosting; Firebase stays the auth/database backend (`docs/DEPLOYMENT.md`).
 - **Visual refresh (2026-11-10):** spec section 5.0 design, generated audio, optional Ghost piece (off by default); block colors since F-024 are Retro / Tones / Modern.
 - **Operating controls (2026-11-09):** approved as described in the project rules; public modes start On.
@@ -47,11 +48,11 @@ None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 1
 
 - Live: https://bricks.trythis.one (Pages from `main`); admin https://bricks-operating.l8p1.workers.dev/admin/ (Worker from `feature/operating-controls`).
 - Latest work, newest first:
+  - 2026-11-18: F-037 danger music ends as in NES; restore point tag before F-028; F-028 proposal with questions.
   - 2026-11-18: B-022 home screen icon fills the shape; B-023 no hover outline after taps on phones.
   - 2026-11-18: F-034 Drop / Hard Drop / Both, F-035 orange B icon, B-020 menu fits narrow phones, B-021 steadier emulator test.
   - 2026-11-18: F-033 fullscreen button on the main menu (remembered) and home screen app mode. Needs a phone check.
   - 2026-11-18: F-032 smaller, centred logo and B-019 more room between the touch buttons. Needs a phone check.
-  - 2026-11-18: F-030 no copyable text in the game; F-031 larger logo and touch controls on phones (Button size slider removed). Needs a phone check.
 - Waiting on the owner: phone checks of F-030 – F-035 (also adding the game to the home screen), B-019, B-018 and B-017; a two-device check of B-004; whether the privacy text is enough.
 - Next: no proposed runs. F-028 when network-kit has network-kit F-059. F-006 music in the music studio chat.
 - Older checkpoints and history: `PROGRESS.md` (section *Handoff history*) and git history.

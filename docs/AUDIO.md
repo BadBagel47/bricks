@@ -10,7 +10,7 @@ Four NES-style voices are synthesized in `src/audio/synth.ts`: two band-limited 
 
 `src/audio/music.ts` holds an original 16-bar theme in A minor (sections A and B). The loop plays it twice; the second pass adds an arpeggio layer and a lead doubling. Normal tempo is 132 BPM. A look-ahead scheduler queues notes about 120 ms ahead of the audio clock so timing stays steady.
 
-Danger music starts when locked blocks reach the top six rows and ends once the stack is below the top nine rows (hysteresis in `src/audio/tempo.ts`). In danger the tempo rises to 172 BPM, the bass and hi-hats move to sixteenth notes and the arpeggio plays continuously. The switch happens on the next beat. Gameplay speed is never affected. In multiplayer each player's own board drives their music.
+Danger music starts when locked blocks reach the top six rows and ends as soon as the top six rows are empty again, as in NES Tetris (F-037, `src/audio/tempo.ts`; the earlier hysteresis down to the top nine rows was removed at the owner's request). In danger the tempo rises to 172 BPM, the bass and hi-hats move to sixteenth notes and the arpeggio plays continuously. The switch happens on the next beat. Gameplay speed is never affected. In multiplayer each player's own board drives their music.
 
 ## Effects
 

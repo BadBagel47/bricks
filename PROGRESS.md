@@ -8,6 +8,10 @@
 - **Phase 4 status:** Documentation and maintenance instructions added; no application code changed. Waiting for owner DNS, GitHub Pages custom-domain/HTTPS, Firebase Authorized domains (and API-key referrer, if restricted). Live verification checklist not yet observed; this environment cannot reach the site.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
+## F-037 — 2026-11-18
+
+Owner chose "as in NES" after a comparison with community analysis of NES Tetris (the game checks the sixth row from the top at each lock, no margin). `nextDangerState` now equals `isDangerStack` (top six rows); `SAFE_ROW` removed; test updated. Owner asked for this change in the Bricks chat, so it was made here rather than in the music studio chat. Local: lint, unit tests, build, browser integration 15/15.
+
 ## B-022, B-023 — 2026-11-18
 
 Owner approved ("Kör A"). B-022: `icon-maskable-192/512.png` (dark background to the edges, tilted tile at 66 %) with `purpose: maskable` in the manifest; the existing icons are `purpose: any`. B-023: every `:hover` rule in `App.css` wrapped in `@media(hover:hover)`; on an emulated phone the fullscreen button keeps its normal border after hover. Local: lint, unit tests, build, browser integration 15/15.
