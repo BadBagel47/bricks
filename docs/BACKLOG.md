@@ -98,7 +98,8 @@ Prioritised for: the owner's newest request.
 
 - **A** – standard model, medium level – Fullscreen
   - F-033 – Add fullscreen while playing, so the browser's address bar and buttons disappear and the game gets more room.
-  - Question: where is it turned on? Recommendation: a fullscreen button in the game's top bar next to Pause (hidden where the browser cannot do it); it stays on until pressed again or the player leaves the game.
+  - Decided (owner 2026-11-18): the fullscreen button sits next to the Settings button on the main menu.
+  - Question: browsers never let a page open in fullscreen by itself; it needs a tap. Remember the choice as a setting, so the game goes back to fullscreen at the first tap on the page next time? Recommendation: yes.
   - Question: iPhone's browser cannot make a page fullscreen. Add an app mode instead (the game can be added to the home screen and then opens without browser bars, also on Android)? Recommendation: yes.
 
 Not proposed yet: F-028 (move 2 Players to network-kit; strong model, high level) waits for network-kit F-059 (a lobby made on the admin page with a host link and a guest link, network-kit's next run B; replaces Bricks' private invitations). F-006 is made in the separate music studio chat.

@@ -28,6 +28,7 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 - **Modern block colors (2026-11-15, T-007):** keep the current per-piece colors; a guideline-avoiding assignment is parked as F-027.
 - **Admin after the move to network-kit (2026-11-18, F-007):** Bricks will use network-kit's admin page and its sign-in as they are; Bricks' own admin Worker is retired then. Gaps recorded in network-kit: network-kit F-057 (separate 1 Player On/Off/Until) and network-kit F-058 (administrators playing while closed).
 - **Timing of the move (2026-11-18, T-008):** Bricks may move before network-kit is proven in another game, once network-kit has network-kit F-057 (1 Player On/Off/Until) and network-kit F-058 (administrators play while closed), both in v0.9.0, and network-kit F-059 (admin-issued invitations, not built), and has been tested more.
+- **Fullscreen button (2026-11-18, F-033):** next to the Settings button on the main menu.
 - **Touch button size (2026-11-18, F-031, Q1 with recommendation):** the Settings *Button size* slider is removed; on phones the touch controls are as large as fits below the board.
 - **Room codes after the move (2026-11-18, T-008):** 6 characters, network-kit's default, from the move to network-kit; until then Bricks keeps 4.
 - **Hosting (2026-11-10):** GitHub Pages with the custom domain https://bricks.trythis.one instead of the spec's Firebase Hosting; Firebase stays the auth/database backend (`docs/DEPLOYMENT.md`).
