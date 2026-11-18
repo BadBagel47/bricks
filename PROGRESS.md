@@ -8,6 +8,10 @@
 - **Phase 4 status:** Documentation and maintenance instructions added; no application code changed. Waiting for owner DNS, GitHub Pages custom-domain/HTTPS, Firebase Authorized domains (and API-key referrer, if restricted). Live verification checklist not yet observed; this environment cannot reach the site.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
+## F-030, F-031 — 2026-11-18
+
+Owner approved ("Kör A och B rek"). F-030: `user-select:none` and `-webkit-touch-callout:none` on `body` in `src/index.css`, text fields re-enabled. F-031: logo tiles up to 40 px; on portrait phones `--touch-size` follows the free height below the board (`--board-w`, `--controls-h`) and the width, capped at 84 px; the Settings slider is gone, the game passes 72 px (landscape/tablet cap) and the match screen 56 px. Local: lint, unit tests, build, browser integration 15/15 (after fixing a row overflow with Hold and a landscape logo overflow); board size unchanged at 320×568 – 430×860; full-page select-all selects no text. Needs the owner's check on a phone.
+
 ## B-018 — 2026-11-15
 
 Owner approved ("Kör A"). `-webkit-tap-highlight-color: transparent` on `:root` in `src/index.css` (inherited by every button). Local: lint, unit tests, build; emulated Pixel 7 shows a transparent tap highlight on all menu buttons. Needs the owner's check on a real phone.

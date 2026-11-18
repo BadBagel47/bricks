@@ -443,3 +443,13 @@ html[data-motion=off]::view-transition-old(root),html[data-motion=off]::view-tra
 .game-topbar>.brand{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding-bottom:0;pointer-events:none}
 .game-topbar>.brand .brand-tile{--tile:28px}
 @media(max-width:900px) and (max-height:720px) and (orientation:landscape){.game-topbar>.brand .brand-tile{--tile:24px}}
+
+/* F-031: larger logo; on phones in portrait the touch controls fill the free space below the board without changing its size. */
+.game-topbar>.brand .brand-tile{--tile:max(28px,min(40px,calc((100vw - 28px - 2 * 60px) / 6.6)))}
+@media(max-width:760px) and (orientation:portrait){
+  .game-shell{--board-w:min(calc(100vw - 28px - 86px),300px,calc((100dvh - 270px)/2));--controls-h:calc(100dvh - 159px - 2 * var(--board-w))}
+  .game-shell:has(.touch-split){--board-w:min(calc(100vw - 28px - 86px),300px,calc((100dvh - 270px - 56px)/2))}
+  .game-shell .touch-controls{--touch-size:max(44px,min(84px,calc((100vw - 28px - (var(--touch-count, 5) - 1) * clamp(5px, 2vw, 12px)) / (var(--touch-count, 5) + .3)),calc(var(--controls-h) / 1.15)))}
+  .game-shell .touch-split{--touch-size:max(44px,min(84px,calc((100vw - 28px - 32px) / 5.3),calc((var(--controls-h) - 8px) / 2.1)))}
+}
+@media(max-width:900px) and (max-height:720px) and (orientation:landscape){.game-topbar>.brand .brand-tile{--tile:24px}}

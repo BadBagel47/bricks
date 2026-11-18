@@ -22,8 +22,6 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| F-030 | Feature | No selectable or copyable text anywhere in the game (owner 2026-11-18: the whole game, but not the admin page): every screen players see, including menus, game, lobby, results, high scores and settings; text fields stay editable and the read-only copy fallback field stays selectable; no long-press text menu on phones. The music test player (music studio workstream) is not included. (F-029 skipped to avoid confusion with network-kit F-029 in this file.) | Low | Pågår 2026-11-18 (session ccr-fca4d5ae-ka315n) | Standard |
-| F-031 | Feature | 1 Player game screen on phones: larger logo, and larger touch controls that use the empty space below and beside them, without making the board smaller; owner wants to see it in several screen sizes first | Medium | Pågår 2026-11-18 (session ccr-fca4d5ae-ka315n) | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
@@ -35,6 +33,8 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| F-030 | Feature | No selectable or copyable text anywhere in the game (owner 2026-11-18: the whole game, but not the admin page): every screen players see, including menus, game, lobby, results, high scores and settings; text fields stay editable and the read-only copy fallback field stays selectable; no long-press text menu on phones. The music test player (music studio workstream) is not included. (F-029 skipped to avoid confusion with network-kit F-029 in this file.) | Low | Done (2026-11-18, needs check on a phone) | Standard |
+| F-031 | Feature | 1 Player game screen on phones: larger logo, and larger touch controls that use the empty space below and beside them, without making the board smaller; owner wants to see it in several screen sizes first | Medium | Done (2026-11-18, Button size slider removed; needs check on a phone) | Standard |
 | B-018 | Bug | Pressing buttons in the game shows a blue background (mobile tap highlight) | Medium | Done (2026-11-15, needs check on a phone) | Standard |
 | T-006 | Task | Privacy notice in Settings (what is stored on the device, at Firebase and Cloudflare, and why) | Low | Done (2026-11-15) | Standard |
 | T-007 | Task | Check the falling-block look against Tetris trademark/trade dress | Low | Done (2026-11-15): no "Tetris" text or assets found; Modern piece colors kept after owner decision (see F-027) | Standard |
@@ -91,17 +91,11 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 ## Proposed runs (2026-11-18)
 
-Prioritised for: the owner's newest requests first (both small).
-
-- **A** – standard model, medium level – No copyable text
-  - F-030 – Turn off text selection and the long-press text menu in the whole game (not the admin page), keeping text fields and the copy fallback usable, so taps and swipes never select text.
-- **B** – standard model, medium level – Larger logo and touch controls
-  - F-031 – Make the logo on the phone game screen larger and let the touch controls fill the free space below the board, without making the board smaller (prototype under Details).
-  - Question: what happens to the Settings *Button size* slider, which today caps the buttons? Recommendation: remove it, so the buttons are always as large as fits.
+None. F-030 and F-031 were done 2026-11-18.
 
 Not proposed yet: F-028 (move 2 Players to network-kit; strong model, high level) waits for network-kit F-059 (a lobby made on the admin page with a host link and a guest link, network-kit's next run B; replaces Bricks' private invitations). F-006 is made in the separate music studio chat.
 
-Waiting for the owner: B-018 check on a phone; B-004 two-device check of the opponent board; check B-017 on a real phone; decide whether the privacy text in Settings is enough (not legal advice).
+Waiting for the owner: F-030 and F-031 check on a phone; B-018 check on a phone; B-004 two-device check of the opponent board; check B-017 on a real phone; decide whether the privacy text in Settings is enough (not legal advice).
 
 Parked: F-027 (alternative Modern piece colors).
 
@@ -111,6 +105,7 @@ Parked: F-027 (alternative Modern piece colors).
 - Owner screenshot (Brave on Android, about 412×720 CSS px, Split layout): small logo, empty space below and between the control groups.
 - Prototype (local only, shown to the owner as a before/after sheet at 320×568, 375×667, 412×720, 412×800 and 430×860): board size unchanged at every size, no overflow. At 412×720 the arrow buttons go from 55 to 66 px and the main rotate button from 69 to 83 px; logo tiles from 28 to 40 px (28 px kept at 320 wide, where there is no room beside Pause). Row layout grows the same way.
 - Open choice for the owner: the Settings *Button size* slider (44–72, default 56) currently caps the buttons; with the prototype the buttons fill the space on phones in portrait, so either remove the slider (recommended) or keep it with a higher range and the largest size as default.
+- Built 2026-11-18 as prototyped (owner: "Kör A och B rek"); the slider is removed (Q1 recommendation). Row layout divides by the button count plus 0.3 so rows with a Hold button fit; short landscape keeps the 24 px logo and a 72 px cap; the match screen keeps its old 56 px size.
 - Prototype CSS, appended to `src/App.css`:
 ```css
 .game-topbar>.brand .brand-tile{--tile:max(28px,min(40px,calc((100vw - 28px - 2 * 60px) / 6.6)))}

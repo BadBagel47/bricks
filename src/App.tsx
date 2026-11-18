@@ -483,7 +483,6 @@ function App() {
       </>}
       <div className="setting-group">
       <label className="toggle-row"><span>Hard Drop</span><input checked={personal.hardDropEnabled} onChange={(event) => savePersonal({ ...personal, hardDropEnabled: event.target.checked })} type="checkbox" /></label>
-      <label className="audio-volume"><span>Button size</span><input aria-label="Touch button size" max="72" min="44" onChange={(event) => savePersonal({ ...personal, touchButtonSize: Number(event.target.value) })} step="4" type="range" value={personal.touchButtonSize} /><output>{personal.touchButtonSize}px</output></label>
       <label className="toggle-row"><span>Left-handed layout</span><input checked={personal.leftHandedControls} onChange={(event) => savePersonal({ ...personal, leftHandedControls: event.target.checked })} type="checkbox" /></label>
       <label className="toggle-row"><span>Hide touch controls when a controller is connected</span><input checked={personal.hideTouchControlsWhenController} onChange={(event) => savePersonal({ ...personal, hideTouchControlsWhenController: event.target.checked })} type="checkbox" /></label>
       </div>
@@ -570,7 +569,7 @@ function App() {
       <Playfield game={game} ghost={personal.ghostPiece} colors={personal.blockColors} clear={clearFx} thump={thump} swipeMode={personal.mobileControlMethod === 'swipe'} onSwipe={(start, end, board) => actionsForSwipe(start, end, board).forEach(apply)} />
       <aside className="game-side next-panel"><div className="next-box"><span>Next</span><PiecePreview type={game.next} level={game.level} colors={personal.blockColors} /></div>{game.holdEnabled && <HoldBox type={game.held} level={game.level} colors={personal.blockColors} enabled={game.status === 'playing' && !game.holdUsed} onHold={() => apply('hold')} />}</aside>
     </section>
-    {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={personal.touchButtonSize} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdEnabled={game.holdEnabled} hardDropEnabled={game.hardDropEnabled} enabled={game.status === 'playing'} apply={apply} />}
+    {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={72} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdEnabled={game.holdEnabled} hardDropEnabled={game.hardDropEnabled} enabled={game.status === 'playing'} apply={apply} />}
     <p className="controller-status" aria-live="polite">{controllerStatus}</p>
     <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">{gameAnnouncement}</p>
     <p className="control-hint" aria-label="Keyboard controls">{keyLabel(bindings.moveLeft)} {keyLabel(bindings.moveRight)} Move · {keyLabel(bindings.softDrop)} Soft drop · {keyLabel(bindings.rotateCounterclockwise)} {keyLabel(bindings.rotateClockwise)} Rotate · {personal.hardDropEnabled ? `${keyLabel(bindings.hardDrop)} Hard drop` : 'Hard Drop off'}{game.holdEnabled ? ` · ${keyLabel(bindings.hold)} Hold` : ''} · {keyLabel(bindings.pause)} / Esc Pause</p>

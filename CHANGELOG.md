@@ -6,6 +6,10 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Changed (2026-11-18)
+- F-030: text in the game can no longer be selected or copied, and phones show no text menu on long press; text fields stay editable (the admin page is unchanged).
+- F-031: on phones the logo on the 1 Player game screen is larger and the touch controls fill the free space below the board; the board keeps its size. The *Button size* setting is removed.
+
 ### Added (2026-11-15)
 - T-006: a *Privacy* section at the bottom of Settings says what is saved on the device and what Google Firebase, Cloudflare and GitHub Pages receive.
 
