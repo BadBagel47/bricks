@@ -25,7 +25,7 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 - **Music tempo (2026-11-11, T-005):** new music keeps a stable BPM; *Bricks Theme* keeps its danger tempo rise (132 → 172 BPM).
 - **Opponent board (2026-11-12, B-004):** fix shipped; the owner checks it on two devices.
 - **Modern block colors (2026-11-15, T-007):** keep the current per-piece colors; a guideline-avoiding assignment is parked as F-027.
-- **Admin after the move to network-kit (2026-11-18, F-007):** Bricks will use network-kit's admin page and its sign-in as they are; Bricks' own admin Worker is retired then. Open questions sent to network-kit: separate 1 Player On/Off/Until (a mode without a room) and administrators playing while closed.
+- **Admin after the move to network-kit (2026-11-18, F-007):** Bricks will use network-kit's admin page and its sign-in as they are; Bricks' own admin Worker is retired then. Gaps recorded in network-kit: F-057 (separate 1 Player On/Off/Until) and F-058 (administrators playing while closed).
 - **Hosting (2026-11-10):** GitHub Pages with the custom domain https://bricks.trythis.one instead of the spec's Firebase Hosting; Firebase stays the auth/database backend (`docs/DEPLOYMENT.md`).
 - **Visual refresh (2026-11-10):** spec section 5.0 design, generated audio, optional Ghost piece (off by default); block colors since F-024 are Retro / Tones / Modern.
 - **Operating controls (2026-11-09):** approved as described in the project rules; public modes start On.
