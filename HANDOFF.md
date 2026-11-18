@@ -33,6 +33,7 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 - **Fullscreen (2026-11-18, F-033):** button next to the Settings button on the main menu; the choice is remembered and the game returns to fullscreen at the first tap next time (recommendation approved); the game can be added to the home screen as an app (recommendation approved).
 - **Touch button size (2026-11-18, F-031, Q1 with recommendation):** the Settings *Button size* slider is removed; on phones the touch controls are as large as fits below the board.
 - **Room codes after the move (2026-11-18, T-008):** 6 characters, network-kit's default, from the move to network-kit; until then Bricks keeps 4.
+- **Restore point before F-028 (2026-11-18):** tag `archive/restore-before-f028` marks the published game before the move to network-kit (made by the archive workflow; restore with `git push origin archive/restore-before-f028:refs/heads/<branch>` or revert `main` to it).
 - **Hosting (2026-11-10):** GitHub Pages with the custom domain https://bricks.trythis.one instead of the spec's Firebase Hosting; Firebase stays the auth/database backend (`docs/DEPLOYMENT.md`).
 - **Visual refresh (2026-11-10):** spec section 5.0 design, generated audio, optional Ghost piece (off by default); block colors since F-024 are Retro / Tones / Modern.
 - **Operating controls (2026-11-09):** approved as described in the project rules; public modes start On.
