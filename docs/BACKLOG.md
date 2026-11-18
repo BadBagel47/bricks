@@ -22,8 +22,6 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| F-032 | Feature | 1 Player game screen on phones: logo a little smaller (40 px tiles feel too big) and truly centred vertically on the Pause button (measured about 3 px low because of the tiles' stagger) | Low | Pågår 2026-11-18 (session ccr-fca4d5ae-ka315n) | Standard |
-| B-019 | Bug | Split touch layout after F-031: too little space between the counterclockwise rotate button and the right arrow (16 px) | Low | Pågår 2026-11-18 (session ccr-fca4d5ae-ka315n) | Standard |
 | F-033 | Feature | Fullscreen mode while playing | Medium | Proposed (2026-11-18); questions: where it is turned on, and whether iPhone gets an "Add to Home Screen" app mode | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
@@ -36,6 +34,8 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| F-032 | Feature | 1 Player game screen on phones: logo a little smaller (40 px tiles feel too big) and truly centred vertically on the Pause button (measured about 3 px low because of the tiles' stagger) | Low | Done (2026-11-18, needs check on a phone) | Standard |
+| B-019 | Bug | Split touch layout after F-031: too little space between the counterclockwise rotate button and the right arrow (16 px) | Low | Done (2026-11-18, needs check on a phone) | Standard |
 | F-030 | Feature | No selectable or copyable text anywhere in the game (owner 2026-11-18: the whole game, but not the admin page): every screen players see, including menus, game, lobby, results, high scores and settings; text fields stay editable and the read-only copy fallback field stays selectable; no long-press text menu on phones. The music test player (music studio workstream) is not included. (F-029 skipped to avoid confusion with network-kit F-029 in this file.) | Low | Done (2026-11-18, needs check on a phone) | Standard |
 | F-031 | Feature | 1 Player game screen on phones: larger logo, and larger touch controls that use the empty space below and beside them, without making the board smaller; owner wants to see it in several screen sizes first | Medium | Done (2026-11-18, Button size slider removed; needs check on a phone) | Standard |
 | B-018 | Bug | Pressing buttons in the game shows a blue background (mobile tap highlight) | Medium | Done (2026-11-15, needs check on a phone) | Standard |
@@ -94,19 +94,16 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 ## Proposed runs (2026-11-18)
 
-Prioritised for: fix the owner's feedback on F-031 first, then the new feature.
+Prioritised for: the owner's newest request.
 
-- **A** – standard model, medium level – Logo and button spacing
-  - F-032 – Make the logo on the phone game screen a little smaller and centre it vertically on the Pause button.
-  - B-019 – Give the counterclockwise rotate button more room from the right arrow, so they are not pressed by mistake.
-- **B** – standard model, medium level – Fullscreen
+- **A** – standard model, medium level – Fullscreen
   - F-033 – Add fullscreen while playing, so the browser's address bar and buttons disappear and the game gets more room.
   - Question: where is it turned on? Recommendation: a fullscreen button in the game's top bar next to Pause (hidden where the browser cannot do it); it stays on until pressed again or the player leaves the game.
   - Question: iPhone's browser cannot make a page fullscreen. Add an app mode instead (the game can be added to the home screen and then opens without browser bars, also on Android)? Recommendation: yes.
 
 Not proposed yet: F-028 (move 2 Players to network-kit; strong model, high level) waits for network-kit F-059 (a lobby made on the admin page with a host link and a guest link, network-kit's next run B; replaces Bricks' private invitations). F-006 is made in the separate music studio chat.
 
-Waiting for the owner: F-030 and F-031 check on a phone; B-018 check on a phone; B-004 two-device check of the opponent board; check B-017 on a real phone; decide whether the privacy text in Settings is enough (not legal advice).
+Waiting for the owner: F-030, F-031, F-032 and B-019 check on a phone; B-018 check on a phone; B-004 two-device check of the opponent board; check B-017 on a real phone; decide whether the privacy text in Settings is enough (not legal advice).
 
 Parked: F-027 (alternative Modern piece colors).
 
