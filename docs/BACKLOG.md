@@ -23,6 +23,7 @@ records released changes.
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
 | F-036 | Feature | Compare connection performance between Firebase and network-kit (Cloudflare) 2 Players: how long a move takes to show on the other screen, how even the updates are, reconnect time | Medium | Proposed (2026-11-18, owner) | Strong |
+| F-037 | Feature | Danger music feels like it starts a little early (owner 2026-11-18): adjust when it starts and ends | Low | Proposed; needs the owner's choice | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
@@ -122,6 +123,11 @@ Waiting for the owner: F-030 – F-035 and B-019 check on a phone (F-033 also: a
 Parked: F-027 (alternative Modern piece colors).
 
 ## Details
+
+### F-037 danger music timing (2026-11-18)
+- Bricks today (`src/audio/tempo.ts`): danger starts when a locked block reaches the 6th row from the top of the 20-row board (stack 15 rows high) and ends only when the stack is below the top nine rows (11 rows high or lower); checked when a piece locks or lines clear, switched on the next beat.
+- NES Tetris (1989), from community analysis of the game's code (meatfighter.com; not read directly here, the site is blocked in the agent's network): when a piece locks, the game checks the 6th row from the top; any block there gives fast music, an empty row gives normal music again. So the start is the same as Bricks; the NES has no extra margin before switching back, so its danger music ends sooner. NES tempo 150 → 225 BPM (vgmpf.com).
+- Options for the owner: keep the NES start and drop the margin; start later (for example the 4th row from the top, stack 17 high), with or without the margin.
 
 ### B-021 Score Duel emulator test timed out once (2026-11-18)
 - The guest's 40 quick hard drops after the reconnect did not reach Game over within 12 s in one CI run; the same test passed on re-run and three times locally. Likely cause: inputs during a short pause right after the reconnect are ignored by design.
