@@ -46,11 +46,11 @@ None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 1
 
 - Live: https://bricks.trythis.one (Pages from `main`); admin https://bricks-operating.l8p1.workers.dev/admin/ (Worker from `feature/operating-controls`).
 - Latest work, newest first:
+  - 2026-11-18: B-022 home screen icon fills the shape; B-023 no hover outline after taps on phones.
   - 2026-11-18: F-034 Drop / Hard Drop / Both, F-035 orange B icon, B-020 menu fits narrow phones, B-021 steadier emulator test.
   - 2026-11-18: F-033 fullscreen button on the main menu (remembered) and home screen app mode. Needs a phone check.
   - 2026-11-18: F-032 smaller, centred logo and B-019 more room between the touch buttons. Needs a phone check.
   - 2026-11-18: F-030 no copyable text in the game; F-031 larger logo and touch controls on phones (Button size slider removed). Needs a phone check.
-  - 2026-11-18: the move of 2 Players to network-kit planned (F-007 with T-008 done, F-028, T-009); waits for network-kit F-059. Proposals sent to network-kit and recorded there: network-kit F-057, network-kit F-058 (shipped), network-kit F-059, network-kit F-061, network-kit D-062, network-kit F-063, network-kit F-064.
 - Waiting on the owner: phone checks of F-030 – F-035 (also adding the game to the home screen), B-019, B-018 and B-017; a two-device check of B-004; whether the privacy text is enough.
 - Next: no proposed runs. F-028 when network-kit has network-kit F-059. F-006 music in the music studio chat.
 - Older checkpoints and history: `PROGRESS.md` (section *Handoff history*) and git history.

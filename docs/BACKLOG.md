@@ -22,8 +22,6 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| B-022 | Bug | Home screen app icon (F-035) shows as a small square: Android puts icons that are not marked as maskable, dark background included, shrunk inside a white shape | Medium | Pågår 2026-11-18 (session ccr-fca4d5ae-ka315n) | Standard |
-| B-023 | Bug | The fullscreen button (F-033) keeps an orange outline after a tap: phones keep the hover style on the last tapped element (sticky hover); the same can happen to other buttons that stay on screen, e.g. Hold | Low | Pågår 2026-11-18 (session ccr-fca4d5ae-ka315n) | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
@@ -35,6 +33,8 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| B-022 | Bug | Home screen app icon (F-035) shows as a small square: Android puts icons that are not marked as maskable, dark background included, shrunk inside a white shape | Medium | Done (2026-11-18; re-add the app to the home screen to see it) | Standard |
+| B-023 | Bug | The fullscreen button (F-033) keeps an orange outline after a tap: phones keep the hover style on the last tapped element (sticky hover); the same can happen to other buttons that stay on screen, e.g. Hold | Low | Done (2026-11-18; needs check on a phone) | Standard |
 | F-034 | Feature | Settings: replace the Hard Drop on/off switch with a three-way choice Drop / Hard Drop / Both | Medium | Done (2026-11-18; needs check on a phone) | Standard |
 | F-035 | Feature | App icon and favicon: the B tile from the logo in the orange of the S tile (#F7964A) | Low | Done (2026-11-18; needs a look in the browser tab and on the home screen) | Standard |
 | B-020 | Bug | Main menu at 320 px wide: the rotated last logo tile reaches 1 px past the screen edge, so the page can scroll sideways by 1 px (found 2026-11-18 while checking F-033; also on the live site before F-033) | Low | Done (2026-11-18) | Standard |
@@ -100,11 +100,7 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 ## Proposed runs (2026-11-18)
 
-Prioritised for: the owner's report.
-
-- **A** – standard model, medium level – Icon and tap outline
-  - B-022 – Add a maskable version of the icon (dark background to the edges, the orange tile about two thirds of the icon), so Android fills the whole icon shape instead of shrinking it into a white circle.
-  - B-023 – Show hover effects only on devices with a mouse, so a tapped button (fullscreen, Hold and others) no longer stays outlined.
+None. B-022 and B-023 were done 2026-11-18.
 
 Not proposed yet: F-028 (move 2 Players to network-kit; strong model, high level) waits for network-kit F-059 (a lobby made on the admin page with a host link and a guest link, network-kit's next run B; replaces Bricks' private invitations). F-006 is made in the separate music studio chat.
 

@@ -8,6 +8,10 @@
 - **Phase 4 status:** Documentation and maintenance instructions added; no application code changed. Waiting for owner DNS, GitHub Pages custom-domain/HTTPS, Firebase Authorized domains (and API-key referrer, if restricted). Live verification checklist not yet observed; this environment cannot reach the site.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
+## B-022, B-023 — 2026-11-18
+
+Owner approved ("Kör A"). B-022: `icon-maskable-192/512.png` (dark background to the edges, tilted tile at 66 %) with `purpose: maskable` in the manifest; the existing icons are `purpose: any`. B-023: every `:hover` rule in `App.css` wrapped in `@media(hover:hover)`; on an emulated phone the fullscreen button keeps its normal border after hover. Local: lint, unit tests, build, browser integration 15/15.
+
 ## F-034, F-035, B-020, B-021 — 2026-11-18
 
 Owner approved ("Kör alla"). F-034: `src/input/drop-mode.ts` (`DropMode`, `actionAllowed`, legacy parsing) with unit tests; `PersonalSettings.dropMode` with `hardDropEnabled` kept in step for the engine and checkpoints (no engine or rules change); both apply paths filter disabled drops; touch row/split and the Settings preview show one drop button as a centred row; swipe instructions and the keyboard hint follow the mode; browser test updated. F-035: favicon SVG and 192/512/180 px PNG icons with the tilted orange B tile on the dark background. B-020: hero tile size also limited by the width. B-021: robust `finish()` with diagnostics. Local: lint, unit tests, build, browser integration 15/15, the Score Duel emulator test passed 3/3 locally (the whole rooms file stops at 60 s locally, also on unchanged main; CI is the gate).

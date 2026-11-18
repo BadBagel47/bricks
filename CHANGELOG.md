@@ -11,6 +11,10 @@ not publish version numbers yet; entries are grouped by deployment.
 - F-035: new browser tab and home screen icon: the logo's B tile in orange, tilted as in the logo.
 - F-033: a fullscreen button next to Settings on the main menu; the choice is remembered and restored at the first tap next time. The game can be added to the home screen and then opens as an app without browser bars.
 
+### Fixed (2026-11-18)
+- B-022: the home screen icon fills the phone's icon shape (maskable icons) instead of a small square in a white shape.
+- B-023: tapped buttons no longer keep the hover outline on phones; hover effects only apply with a mouse.
+
 ### Changed (2026-11-18)
 - B-020: the main menu logo fits narrow phones, so the menu can no longer be nudged sideways.
 - B-021: the Score Duel reconnect test keeps dropping until Game over and explains what it saw if it fails.

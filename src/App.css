@@ -30,11 +30,11 @@ h2{font-family:var(--display)}
 .field-hint{color:var(--muted);font-size:14px}
 .button{min-height:54px;border:0;border-radius:16px;cursor:pointer;font-weight:700;font-size:17px}
 .button-primary{margin-top:12px;background:var(--accent);color:var(--accent-ink);padding:0 22px;display:flex;align-items:center;justify-content:center;transition:transform .15s,background .15s}
-.button-primary:hover{background:var(--accent-hover);transform:translateY(-1px)}
+@media(hover:hover){.button-primary:hover{background:var(--accent-hover);transform:translateY(-1px)}}
 .topbar{min-height:44px;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .settings-button,.back-button{min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:0 14px;background:var(--panel);color:var(--soft);cursor:pointer;font-size:15px;font-weight:600}
 .settings-button svg{width:20px;height:20px}
-.settings-button:hover,.back-button:hover{border-color:var(--accent);color:var(--text)}
+@media(hover:hover){.settings-button:hover,.back-button:hover{border-color:var(--accent);color:var(--text)}}
 .player-name{color:var(--muted);font-size:15px}
 .player-name strong{color:var(--text)}
 button:disabled{cursor:default;opacity:.5}
@@ -46,12 +46,12 @@ button:disabled{cursor:default;opacity:.5}
 .menu-actions{display:flex;flex-direction:column;gap:12px}
 .mode-card{min-height:62px;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 18px;border:1px solid var(--line);border-radius:16px;background:var(--panel-2);color:var(--text);font-size:17px}
 button.mode-card{cursor:pointer;transition:border-color .15s,transform .15s,background .15s}
-button.mode-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+@media(hover:hover){button.mode-card:hover{border-color:var(--accent);transform:translateY(-1px)}}
 .mode-card.single-player{border-color:transparent;background:var(--accent);color:var(--accent-ink)}
-.mode-card.single-player:hover{background:var(--accent-hover)}
+@media(hover:hover){.mode-card.single-player:hover{background:var(--accent-hover)}}
 .mode-copy strong{font-size:17px;font-weight:700}
 .secondary-card{min-height:56px;display:flex;justify-content:center;align-items:center;padding:0 18px;border:1px solid var(--line);border-radius:16px;color:var(--text);background:var(--panel);font-size:16px;font-weight:600;cursor:pointer}
-.secondary-card:hover{background:var(--panel-3)}
+@media(hover:hover){.secondary-card:hover{background:var(--panel-3)}}
 .notice{color:var(--accent);font-size:15px;line-height:1.5}
 .menu-notice{margin:4px 2px 0}
 
@@ -68,10 +68,10 @@ button.mode-card:hover{border-color:var(--accent);transform:translateY(-1px)}
 .binding-row{min-height:50px;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:0 14px;border-bottom:1px solid #222842;font-size:15px}
 .binding-row:last-child{border-bottom:0}
 .key-button{min-width:56px;min-height:40px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);color:var(--accent);font:600 14px var(--display);cursor:pointer}
-.key-button:hover{border-color:var(--accent)}
+@media(hover:hover){.key-button:hover{border-color:var(--accent)}}
 .cancel-capture{margin-top:12px}
 .reset-button{margin:8px 0 0;border:0;padding:8px 0;background:none;color:var(--soft);font-size:14px;text-align:left;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-.reset-button:hover{color:var(--accent)}
+@media(hover:hover){.reset-button:hover{color:var(--accent)}}
 .audio-volume{min-height:56px;display:grid;grid-template-columns:8.5em 1fr 46px;align-items:center;gap:12px;padding:6px 16px;margin-top:-1px;background:var(--panel);border:1px solid var(--line-soft);color:var(--text);font-size:16px}
 .audio-volume input{width:100%;accent-color:var(--accent)}
 .audio-volume output{color:var(--muted);font:600 14px var(--display);text-align:right}
@@ -120,7 +120,7 @@ button.mode-card:hover{border-color:var(--accent);transform:translateY(-1px)}
 .next-panel{align-items:stretch}
 .next-box,.hold-box{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 10px;border-radius:14px;background:var(--panel);border:1px solid var(--line-soft)}
 .hold-box{border-color:var(--line);color:var(--text);cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none}
-.hold-box:not(:disabled):hover{border-color:var(--accent)}
+@media(hover:hover){.hold-box:not(:disabled):hover{border-color:var(--accent)}}
 .piece-preview{width:96px;aspect-ratio:1;display:grid;place-items:center;--ring:2px}
 .piece-preview-grid{display:grid;gap:2px}
 .piece-preview span{border-radius:3px}
@@ -137,7 +137,7 @@ button.mode-card:hover{border-color:var(--accent);transform:translateY(-1px)}
 .overlay-card p{color:var(--muted);font-size:16px;line-height:1.5}
 .overlay-card .button{width:100%}
 .overlay-link{display:block;min-height:44px;margin:10px auto 0;padding:0 16px;border:0;background:none;color:var(--soft);font-size:16px;font-weight:600;cursor:pointer}
-.overlay-link:hover{color:var(--accent)}
+@media(hover:hover){.overlay-link:hover{color:var(--accent)}}
 .result-card{max-height:min(94dvh,780px);overflow:auto;padding:24px}
 .result-card h1{margin-bottom:12px}
 .result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 14px;text-align:center}
@@ -278,7 +278,7 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
 .subpage-bar{justify-content:flex-start;gap:10px;margin-bottom:8px}
 .icon-back{width:44px;height:44px;flex:none;display:inline-grid;place-items:center;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--soft);cursor:pointer}
 .icon-back svg{width:22px;height:22px}
-.icon-back:hover:not(:disabled){border-color:var(--accent);color:var(--text)}
+@media(hover:hover){.icon-back:hover:not(:disabled){border-color:var(--accent);color:var(--text)}}
 .icon-back:disabled{opacity:.5;cursor:default}
 .subpage-title{margin:0;font-size:clamp(22px,4vw,30px)}
 .settings-card>:first-child{margin-top:0}
@@ -294,7 +294,7 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
 
 /* Main menu (F-014) */
 .player-name-button{min-height:44px;padding:0;border:0;background:transparent;cursor:pointer}
-.player-name-button:hover strong{text-decoration:underline}
+@media(hover:hover){.player-name-button:hover strong{text-decoration:underline}}
 .mode-best{display:block;margin-top:4px;color:var(--muted);font:600 14px var(--display);font-variant-numeric:tabular-nums}
 .subpage-bar+.settings-card{margin:0 auto;padding:24px 0 56px}
 
