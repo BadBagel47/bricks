@@ -25,8 +25,8 @@ records released changes.
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
-| T-008 | Task | Owner decisions before the move: when to start (before network-kit runs in another game?), room code length (decided 2026-11-18: 6 characters, network-kit's default), 1 Player On/Off until network-kit F-057 exists, administrators playing while closed until network-kit F-058 exists | Medium | Waiting for the owner | — (owner) |
-| F-028 | Feature | Build the move: a small Bricks game Worker with a network-kit room (host-run relay, EU rooms, Private only for invitation links); Score Duel and Battle snapshots and Battle rows as room messages; lobby, countdown with seed, reconnection, results and rematch on network-kit; connect to network-kit's admin page; update the privacy text in Settings; Firebase stays as fallback until the owner has played a real match | Medium | Proposed; needs T-008 | Strong |
+| T-008 | Task | Owner decisions before the move | Medium | Done (2026-11-18): start before another game is fully proven, after network-kit F-057/F-058 and more testing; 6-character codes; 1 Player On/Off and administrator play come from network-kit (F-057, F-058) | — (owner) |
+| F-028 | Feature | (waits for network-kit F-057, F-058 and admin invitations) Build the move: a small Bricks game Worker with a network-kit room (host-run relay, EU rooms, Private only for invitation links); Score Duel and Battle snapshots and Battle rows as room messages; lobby, countdown with seed, reconnection, results and rematch on network-kit; connect to network-kit's admin page; update the privacy text in Settings; Firebase stays as fallback until the owner has played a real match | Medium | Proposed; waits for network-kit | Strong |
 | T-009 | Task | After F-028 is confirmed on two devices: retire Bricks' admin Worker (`feature/operating-controls`, D1) and the Firebase project, and remove the Firebase code | Low | Idea; deleting external services needs the owner's explicit yes | Standard |
 
 ## Done
@@ -91,7 +91,7 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 None. B-018 was done 2026-11-15.
 
-Not proposed yet: F-028 (move 2 Players to network-kit; strong model, high level) waits for the owner's decisions in T-008. F-006 is made in the separate music studio chat.
+Not proposed yet: F-028 (move 2 Players to network-kit; strong model, high level) waits for network-kit F-057, F-058 and admin-issued invitations. F-006 is made in the separate music studio chat.
 
 Waiting for the owner: B-018 check on a phone; B-004 two-device check of the opponent board; check B-017 on a real phone; decide whether the privacy text in Settings is enough (not legal advice).
 
@@ -235,6 +235,8 @@ Parked: F-027 (alternative Modern piece colors).
   for menus/results). Same four-channel style; see `docs/AUDIO.md`.
 
 ### F-007 Move Bricks 2 Players to network-kit
+- 2026-11-18 (T-008): owner's answers: the move may start before network-kit is proven in another game (Vättigt works well), but only after network-kit has the missing support and more testing; network-kit builds separate 1 Player On/Off/Until (its F-057) and administrators playing while closed (its F-058).
+- Needs check 2026-11-18 (network-kit v0.8.0 against `docs/MULTIPLAYER.md`): covered by network-kit: two player seats in a host-run relay room, host handover in the lobby, `ownerLeave: 'pass'`, grace period and auto pause for dropped players, 5 s countdown with shared seed and start time, server time for Battle's frame clock, newest-only sends for board snapshots, reliable numbered sends for Battle rows and finishes, `start()` again for rematch, invitation keys in the link, Private only, Off refuses new starts and rematches while admitted games finish, EU rooms. Missing in network-kit: F-057, F-058 (in progress) and admin-issued private invitations with expiry, list and revoke (asked 2026-11-18). Moves into Bricks game code: settings approval and the host-editing wait (room data and messages), rematch consent, results and history, a stable local player id for head-to-head history (network-kit ids are per room), the guest's own engine checkpoint for reload (stored in its browser unless network-kit adds a per-participant kept state). Server-side snapshot validation from the Firebase rules goes away; accepted (hobby game, project rule). Decide during F-028: what *Reopen Previous Room* becomes (network-kit rooms live 24 h after the last player left).
 - 2026-11-18 (T-008): owner decided that room codes become 6 characters (network-kit's default) with the move; Bricks' four-letter codes and the reopen-previous-room code change with it.
 - 2026-11-18: owner put the move in the backlog and said it may come sooner than planned. Split into T-008 (decisions), F-028 (build) and T-009 (retire Firebase and the admin Worker).
 - The shared room server plan that used to live here (2026-11-13 – 2026-11-14) moved on 2026-11-15 to https://github.com/BadBagel47/network-kit (its F-001 – F-005). Earlier text is in git history.
