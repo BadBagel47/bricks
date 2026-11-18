@@ -25,6 +25,7 @@ records released changes.
 | B-020 | Bug | Main menu at 320 px wide: the rotated last logo tile reaches 1 px past the screen edge, so the page can scroll sideways by 1 px (found 2026-11-18 while checking F-033; also on the live site before F-033) | Low | Proposed | Standard |
 | B-021 | Bug | CI: the Firebase emulator test "Score Duel retains a finished player through reconnect…" timed out once waiting for the guest's Game over after reconnect (run for F-033, 2026-11-18); passed on re-run, so likely timing-dependent | Low | Proposed | Strong |
 | F-034 | Feature | Settings: replace the Hard Drop on/off switch with a three-way choice Drop / Hard Drop / Both | Medium | Proposed (2026-11-18) | Standard |
+| F-035 | Feature | App icon and favicon: the B tile from the logo in the orange of the S tile (#F7964A) | Low | Proposed (2026-11-18) | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
@@ -103,9 +104,12 @@ Prioritised for: the owner's newest request first, then small fixes.
   - F-034 – Replace the Hard Drop switch in Settings with Drop / Hard Drop / Both, so players choose which drop buttons they get.
   - Question: does the choice also apply to keyboard, controller and swipe, as today's switch does for hard drop? Recommendation: yes, Drop turns off hard drop and Hard Drop turns off soft drop for every kind of control.
   - Decided (owner 2026-11-18): Both is the default. With Drop or Hard Drop only, the arrows and the one drop button form one row; in the Split layout that row is moved up so it sits vertically centred beside the rotate buttons.
-- **B** – standard model, medium level – Sideways scroll on small phones
+- **B** – standard model, medium level – New icon
+  - F-035 – Use the logo's B tile in orange as the browser tab icon and the home screen app icon, so the game is recognisable by its own letter.
+  - Question: which look? Options shown to the owner: 1 straight, orange fills the whole app icon; 2 straight tile on the dark background; 3 tilted like in the logo on the dark background. Recommendation: 2, it looks like the tiles in the logo and fits the game's dark colours; the browser tab shows the tile alone.
+- **C** – standard model, medium level – Sideways scroll on small phones
   - B-020 – Keep the tilted logo tiles on the main menu inside the screen at 320 px, so the menu cannot be nudged sideways.
-- **C** – strong model, high level – Unstable multiplayer test
+- **D** – strong model, high level – Unstable multiplayer test
   - B-021 – Find out why the Score Duel reconnect test sometimes stops waiting for Game over and make it reliable, so publishing is not stopped by chance.
 
 Not proposed yet: F-028 (move 2 Players to network-kit; strong model, high level) waits for network-kit F-059 (a lobby made on the admin page with a host link and a guest link, network-kit's next run B; replaces Bricks' private invitations). F-006 is made in the separate music studio chat.
