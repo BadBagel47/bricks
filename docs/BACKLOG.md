@@ -102,11 +102,11 @@ Prioritised for: the owner's newest request first, then small fixes.
 
 - **A** – standard model, medium level – Drop choice
   - F-034 – Replace the Hard Drop switch in Settings with Drop / Hard Drop / Both, so players choose which drop buttons they get.
-  - Question: does the choice also apply to keyboard, controller and swipe, as today's switch does for hard drop? Recommendation: yes, Drop turns off hard drop and Hard Drop turns off soft drop for every kind of control.
+  - Decided (owner 2026-11-18): the choice applies to every kind of control (keyboard, controller, swipe, touch buttons): Drop turns off hard drop, Hard Drop turns off soft drop.
   - Decided (owner 2026-11-18): Both is the default. With Drop or Hard Drop only, the arrows and the one drop button form one row; in the Split layout that row is moved up so it sits vertically centred beside the rotate buttons.
 - **B** – standard model, medium level – New icon
   - F-035 – Use the logo's B tile in orange as the browser tab icon and the home screen app icon, so the game is recognisable by its own letter.
-  - Question: which look? Options shown to the owner: 1 straight, orange fills the whole app icon; 2 straight tile on the dark background; 3 tilted like in the logo on the dark background. Recommendation: 2, it looks like the tiles in the logo and fits the game's dark colours; the browser tab shows the tile alone.
+  - Decided (owner 2026-11-18): option 3, the tile tilted like in the logo on the dark background (app icon), and the tilted tile alone in the browser tab.
 - **C** – standard model, medium level – Sideways scroll on small phones
   - B-020 – Keep the tilted logo tiles on the main menu inside the screen at 320 px, so the menu cannot be nudged sideways.
 - **D** – strong model, high level – Unstable multiplayer test
