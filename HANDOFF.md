@@ -5,7 +5,7 @@ guides. Owner instructions and the specification take precedence.
 
 ## Shared rules and inventory
 
-- **Shared rules version:** v1.9 (2026-11-15), https://raw.githubusercontent.com/BadBagel47/agent-rules/main/AGENTS.md . Adapted to v1.9 on 2026-11-15 (previously v1.7 from 2026-11-15; v1.6, v1.3 and v1.0 before that, T-004). v1.8–v1.9 needed no repo change: Bricks has no `auto-merge.yml` (agents push to `main`, see Decisions), and the new working steps ("Pågår" marks, [wip] commits, restoring a broken site at once) apply from now on.
+- **Shared rules version:** v1.12 (2026-11-17), https://raw.githubusercontent.com/BadBagel47/agent-rules/main/AGENTS.md . Adapted to v1.12 on 2026-11-18 (previously v1.9 from 2026-11-15, v1.7 before that; v1.6, v1.3 and v1.0 before that, T-004). v1.10–v1.12 changed the reply format, run proposals (priority line, dependencies, questions with recommendations) and IDs from other repos (written as e.g. "network-kit F-059"); the current documents were updated accordingly. v1.8–v1.9 needed no repo change: Bricks has no `auto-merge.yml` (agents push to `main`, see Decisions), and the new working steps ("Pågår" marks, [wip] commits, restoring a broken site at once) apply from now on.
 - Inventory: 2026-11-12
   - Redone because the 2026-11-11 inventory missed branches (the cloud checkout fetched only `feature/operating-controls`). Remote branches now: `main` (integration, deploys Pages) and `feature/operating-controls` (kept: admin Worker deploy trigger). Eleven older branches were archived as `archive/<branch>` tags and deleted on 2026-11-12: `ccr-308e5bf5-5nte3w`, `ccr-63fd355a-1ucin4` (its one commit, an early wording of the owner working rules, is superseded by the rules in `main`), `feature/visual-refresh`, `milestone-3.3` – `milestone-3.7`, `milestone-3.9`, `milestone-3.11`, `milestone-3.12`. No open pull requests or issues.
   - Sensitive information: git history on all branches scanned for keys, tokens and personal e-mail addresses; only test fixtures with fake service-account keys were found. The Firebase web config is public by design and protected by database rules. The repo is public.
@@ -26,8 +26,8 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 - **Music tempo (2026-11-11, T-005):** new music keeps a stable BPM; *Bricks Theme* keeps its danger tempo rise (132 → 172 BPM).
 - **Opponent board (2026-11-12, B-004):** fix shipped; the owner checks it on two devices.
 - **Modern block colors (2026-11-15, T-007):** keep the current per-piece colors; a guideline-avoiding assignment is parked as F-027.
-- **Admin after the move to network-kit (2026-11-18, F-007):** Bricks will use network-kit's admin page and its sign-in as they are; Bricks' own admin Worker is retired then. Gaps recorded in network-kit: F-057 (separate 1 Player On/Off/Until) and F-058 (administrators playing while closed).
-- **Timing of the move (2026-11-18, T-008):** Bricks may move before network-kit is proven in another game, once network-kit has F-057 (1 Player On/Off/Until) and F-058 (administrators play while closed), both in v0.9.0, and F-059 (admin-issued invitations, not built), and has been tested more.
+- **Admin after the move to network-kit (2026-11-18, F-007):** Bricks will use network-kit's admin page and its sign-in as they are; Bricks' own admin Worker is retired then. Gaps recorded in network-kit: network-kit F-057 (separate 1 Player On/Off/Until) and network-kit F-058 (administrators playing while closed).
+- **Timing of the move (2026-11-18, T-008):** Bricks may move before network-kit is proven in another game, once network-kit has network-kit F-057 (1 Player On/Off/Until) and network-kit F-058 (administrators play while closed), both in v0.9.0, and network-kit F-059 (admin-issued invitations, not built), and has been tested more.
 - **Room codes after the move (2026-11-18, T-008):** 6 characters, network-kit's default, from the move to network-kit; until then Bricks keeps 4.
 - **Hosting (2026-11-10):** GitHub Pages with the custom domain https://bricks.trythis.one instead of the spec's Firebase Hosting; Firebase stays the auth/database backend (`docs/DEPLOYMENT.md`).
 - **Visual refresh (2026-11-10):** spec section 5.0 design, generated audio, optional Ghost piece (off by default); block colors since F-024 are Retro / Tones / Modern.
@@ -43,12 +43,12 @@ None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 1
 - Live: https://bricks.trythis.one (Pages from `main`); admin https://bricks-operating.l8p1.workers.dev/admin/ (Worker from `feature/operating-controls`).
 - Latest work, newest first:
   - 2026-11-18: F-030 (no copyable text) and F-031 (larger logo and touch controls, prototype shown to the owner) proposed; not built.
-  - 2026-11-18: the move of 2 Players to network-kit planned (F-007 with T-008 done, F-028, T-009); waits for network-kit F-059. Proposals sent to network-kit and recorded there: F-057, F-058 (shipped), F-059, F-061, D-062, F-063, F-064.
+  - 2026-11-18: the move of 2 Players to network-kit planned (F-007 with T-008 done, F-028, T-009); waits for network-kit F-059. Proposals sent to network-kit and recorded there: network-kit F-057, network-kit F-058 (shipped), network-kit F-059, network-kit F-061, network-kit D-062, network-kit F-063, network-kit F-064.
   - 2026-11-15: B-018 blue tap highlight on buttons removed; needs a phone check.
   - 2026-11-15: T-006 privacy section in Settings and T-007 trademark check (Modern piece colors unchanged; alternative parked as F-027).
   - 2026-11-15: Boomers and the shared room server plan moved to their own repositories; shared rules v1.9.
 - Waiting on the owner: answers for F-031 (Button size setting) and go-ahead for runs in `docs/BACKLOG.md`; phone checks of B-018 and B-017; a two-device check of B-004; whether the privacy text is enough.
-- Next: *Proposed runs* in `docs/BACKLOG.md` (F-030, F-031). F-028 when network-kit has F-059. F-006 music in the music studio chat.
+- Next: *Proposed runs* in `docs/BACKLOG.md` (F-030, F-031). F-028 when network-kit has network-kit F-059. F-006 music in the music studio chat.
 - Older checkpoints and history: `PROGRESS.md` (section *Handoff history*) and git history.
 
 ## Documentation map
