@@ -23,7 +23,7 @@ records released changes.
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
 | F-036 | Feature | Compare connection performance between Firebase and network-kit (Cloudflare) 2 Players: how long a move takes to show on the other screen, how even the updates are, reconnect time | Medium | Proposed (2026-11-18, owner) | Strong |
-| F-037 | Feature | Danger music feels like it starts a little early (owner 2026-11-18): adjust when it starts and ends | Low | Proposed; needs the owner's choice | Standard |
+| F-037 | Feature | Danger music feels like it starts a little early (owner 2026-11-18): adjust when it starts and ends | Low | Pågår 2026-11-18 (session ccr-fca4d5ae-ka315n); owner chose "as in NES" | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
