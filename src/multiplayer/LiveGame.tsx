@@ -21,6 +21,7 @@ import { actionForCode } from '../input/keyboard.ts'
 import { gamepadActions } from '../input/gamepad.ts'
 import { HeldInputs } from '../input/repeat.ts'
 import { actionsForSwipe } from '../input/swipe.ts'
+import { actionAllowed } from '../input/drop-mode.ts'
 import { HoldBox, PiecePreview, Playfield, TouchControls } from '../ui/GameViews.tsx'
 import { decodeBoard, parseGameSnapshot, SnapshotGate, SNAPSHOT_POLL_MS, SNAPSHOT_SPACING_MS } from './game-snapshot.ts'
 import type { GameSnapshot } from './game-snapshot.ts'
@@ -124,7 +125,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     if (transition.events.some(event => event.type === 'linesCleared' || event.type === 'gameOver')) setAnnouncement(transition.state.status === 'gameOver' ? 'Game over.' : `${transition.state.score} points. ${transition.state.lines} lines.`)
   }
   function apply(action: GameAction) {
-    if (controlsBlocked.current || action === 'pause' || action === 'resume') return
+    if (controlsBlocked.current || action === 'pause' || action === 'resume' || !actionAllowed(action, personal.dropMode)) return
     if (battleGame) {
       commit(battleGame.advanceTo(battleFrame()))
       commit(battleGame.action(action))
@@ -358,7 +359,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
       </div>
       {battleGame && <p className="battle-stats visually-hidden" aria-label="Battle attacks">Pending: {battleGame.pending} · Sent: {sentRows} · Applied: {battleGame.applied} · Cancelled: {battleGame.cancelled}</p>}
       {(duel || battle) && !error && duelStatus && <section className="duel-status" aria-label={battle ? "Battle status" : "Score Duel status"} role="status">{outcome ? <><h2>{outcomeTitle}</h2><p>{ownName}: {game.score.toLocaleString()} · {otherName}: {opponent!.score.toLocaleString()}</p><p>{battle ? `Survival: ${(ownFinishFrame! / 60).toFixed(2)} s · ${(otherFinish!.frame / 60).toFixed(2)} s` : `Score difference: ${Math.abs(outcome.difference).toLocaleString()}`}</p></> : <p>{duelStatus}</p>}</section>}
-      {!finished && !(controller && personal.hideTouchControlsWhenController) && <TouchControls method={personal.mobileControlMethod} buttonSize={56} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdEnabled={game.holdEnabled} hardDropEnabled={game.hardDropEnabled} enabled={!finished && !error && !confirm && !paused} apply={apply} />}
+      {!finished && !(controller && personal.hideTouchControlsWhenController) && <TouchControls method={personal.mobileControlMethod} buttonSize={56} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdEnabled={game.holdEnabled} dropMode={personal.dropMode} enabled={!finished && !error && !confirm && !paused} apply={apply} />}
       <p className="control-hint">Esc / {bindings.pause.replace('Key', '')}: leave match · Multiplayer keeps running while this menu is open.</p>
       <p className="visually-hidden" role="status">{announcement}</p>
       {error && <p role="alert">{error}</p>}
