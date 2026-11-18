@@ -22,6 +22,7 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| F-036 | Feature | Compare connection performance between Firebase and network-kit (Cloudflare) 2 Players: how long a move takes to show on the other screen, how even the updates are, reconnect time | Medium | Proposed (2026-11-18, owner) | Strong |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
@@ -102,10 +103,13 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 Prioritised for: the move the owner wants sooner, now that network-kit has everything it needs.
 
-- **A** – strong model, high level – Move 2 Players to network-kit
+- **A** – strong model, high level – Move 2 Players to network-kit, side by side with Firebase
   - F-028 – Run Score Duel and Battle on network-kit rooms through a small Bricks Worker (EU rooms), with lobbies from network-kit's admin page instead of Bricks' private invitations and 1 Player / 2 Players controlled on network-kit's admin page, so Bricks no longer depends on Firebase for play.
   - Question: what happens to *Reopen Previous Room*? Recommendation: becomes *Rejoin last room*, shown only while network-kit still keeps that room (up to 24 hours after the last player left).
-  - Question: keep the Firebase version reachable for a short time? Recommendation: network-kit becomes the normal 2 Players; the Firebase version stays reachable through a hidden link until the owner has played a real match on two devices, then T-009 removes it.
+  - Decided (owner 2026-11-18): Firebase stays playable side by side until everything on Cloudflare is ready, so the two can be compared (F-036). T-009 removes Firebase only after that.
+  - Question: how does a player pick Firebase or Cloudflare while both exist? Recommendation: a choice on the 2 Players screen (Firebase / Cloudflare, Firebase first until Cloudflare is ready); the room code and invitation link carry the choice, so both players always use the same.
+  - F-036 – Measure both versions the same way during a match: how long a move takes to show on the opponent's screen, how even the updates are, and how long a reconnect takes, so the owner can compare them.
+  - Question: where are the measurements shown? Recommendation: a short line on the match result screen, and a comparison of the latest matches per version in Settings under a new *Connection* section.
   - Question: where does Bricks' room server run? Recommendation: a new Worker on the same Cloudflare account as the admin Worker and network-kit's admin page, deployed from `main` by GitHub Actions with the existing token.
   - Question: the project rule on operating controls in `AGENTS.md` changes with the move (network-kit's states On / No new players / Timer per mode, game links, admin lobbies; admitted games finish). Recommendation: approve rewriting it that way when F-028 is published.
   - Question: peer replay verification against cheating (network-kit D-062) as part of the move? Recommendation: later, as its own item; the move is big already.
