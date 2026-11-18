@@ -22,7 +22,7 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| F-033 | Feature | Fullscreen mode while playing | Medium | Pågår 2026-11-18 (session ccr-fca4d5ae-ka315n) | Standard |
+| B-020 | Bug | Main menu at 320 px wide: the rotated last logo tile reaches 1 px past the screen edge, so the page can scroll sideways by 1 px (found 2026-11-18 while checking F-033; also on the live site before F-033) | Low | Proposed | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
@@ -34,6 +34,7 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| F-033 | Feature | Fullscreen mode while playing | Medium | Done (2026-11-18; fullscreen not possible in iPhone's browser, there the home screen app is used; needs check on a phone) | Standard |
 | F-032 | Feature | 1 Player game screen on phones: logo a little smaller (40 px tiles feel too big) and truly centred vertically on the Pause button (measured about 3 px low because of the tiles' stagger) | Low | Done (2026-11-18, needs check on a phone) | Standard |
 | B-019 | Bug | Split touch layout after F-031: too little space between the counterclockwise rotate button and the right arrow (16 px) | Low | Done (2026-11-18, needs check on a phone) | Standard |
 | F-030 | Feature | No selectable or copyable text anywhere in the game (owner 2026-11-18: the whole game, but not the admin page): every screen players see, including menus, game, lobby, results, high scores and settings; text fields stay editable and the read-only copy fallback field stays selectable; no long-press text menu on phones. The music test player (music studio workstream) is not included. (F-029 skipped to avoid confusion with network-kit F-029 in this file.) | Low | Done (2026-11-18, needs check on a phone) | Standard |
@@ -94,21 +95,22 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 ## Proposed runs (2026-11-18)
 
-Prioritised for: the owner's newest request.
+Prioritised for: small fixes first.
 
-- **A** – standard model, medium level – Fullscreen
-  - F-033 – Add fullscreen while playing, so the browser's address bar and buttons disappear and the game gets more room.
-  - Decided (owner 2026-11-18): the fullscreen button sits next to the Settings button on the main menu.
-  - Question: browsers never let a page open in fullscreen by itself; it needs a tap. Remember the choice as a setting, so the game goes back to fullscreen at the first tap on the page next time? Recommendation: yes.
-  - Question: iPhone's browser cannot make a page fullscreen. Add an app mode instead (the game can be added to the home screen and then opens without browser bars, also on Android)? Recommendation: yes.
+- **A** – standard model, medium level – Sideways scroll on small phones
+  - B-020 – Keep the tilted logo tiles on the main menu inside the screen at 320 px, so the menu cannot be nudged sideways.
 
 Not proposed yet: F-028 (move 2 Players to network-kit; strong model, high level) waits for network-kit F-059 (a lobby made on the admin page with a host link and a guest link, network-kit's next run B; replaces Bricks' private invitations). F-006 is made in the separate music studio chat.
 
-Waiting for the owner: F-030, F-031, F-032 and B-019 check on a phone; B-018 check on a phone; B-004 two-device check of the opponent board; check B-017 on a real phone; decide whether the privacy text in Settings is enough (not legal advice).
+Waiting for the owner: F-030, F-031, F-032, F-033 and B-019 check on a phone (F-033 also: add the game to the home screen); B-018 check on a phone; B-004 two-device check of the opponent board; check B-017 on a real phone; decide whether the privacy text in Settings is enough (not legal advice).
 
 Parked: F-027 (alternative Modern piece colors).
 
 ## Details
+
+### F-033 fullscreen (2026-11-18)
+- Owner decisions: button next to Settings on the main menu (icon only); the choice is remembered (`bricks.fullscreen.v1`) and restored at the first tap or key press after the page opens (browsers allow fullscreen only after a user gesture; a tap on the button itself is left to the button); the game can be added to the home screen as an app (`manifest.webmanifest`, `display: fullscreen`, icons from the favicon, Apple meta tags with a black status bar).
+- iPhone's browser has no page fullscreen, so the button is hidden there; the home screen app is the iPhone route. Android browsers support both. Not verified on real devices; installability prompts depend on the browser (no service worker was added).
 
 ### F-031 larger logo and touch controls (2026-11-18)
 - Owner screenshot (Brave on Android, about 412×720 CSS px, Split layout): small logo, empty space below and between the control groups.

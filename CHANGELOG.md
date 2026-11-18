@@ -6,6 +6,9 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Added (2026-11-18)
+- F-033: a fullscreen button next to Settings on the main menu; the choice is remembered and restored at the first tap next time. The game can be added to the home screen and then opens as an app without browser bars.
+
 ### Changed (2026-11-18)
 - F-032: the logo on the phone game screen is a little smaller and centred vertically on the Pause button.
 - B-019: more room (32 px) between the counterclockwise rotate button and the right arrow in the Split layout.

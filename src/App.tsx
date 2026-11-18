@@ -21,6 +21,7 @@ import type { HighscoreRecord, PersonalSettings, SinglePlayerSettings } from './
 import { BricksAudio } from './audio/synth.ts'
 import './App.css'
 import { checkSolo } from './access/client.ts'
+import { enterFullscreen, exitFullscreen, fullscreenActive, fullscreenSupported, rememberFullscreen, restoreFullscreenOnFirstInput } from './ui/fullscreen.ts'
 
 const USERNAME_KEY = 'bricks.username'
 const CONTROLS_KEY = 'bricks.controls.v1'
@@ -91,6 +92,19 @@ function App() {
     doc.startViewTransition(() => flushSync(() => setViewState(next)))
   }
   useEffect(() => { document.documentElement.dataset.motion = personal.interfaceAnimations ? 'on' : 'off' }, [personal.interfaceAnimations])
+  const [canFullscreen] = useState(() => fullscreenSupported(document))
+  const [isFullscreen, setIsFullscreen] = useState(() => fullscreenActive(document))
+  useEffect(() => {
+    const update = () => setIsFullscreen(fullscreenActive(document))
+    document.addEventListener('fullscreenchange', update)
+    document.addEventListener('webkitfullscreenchange', update)
+    const stopRestore = restoreFullscreenOnFirstInput(document, localStorage)
+    return () => { document.removeEventListener('fullscreenchange', update); document.removeEventListener('webkitfullscreenchange', update); stopRestore() }
+  }, [])
+  async function toggleFullscreen() {
+    if (fullscreenActive(document)) { rememberFullscreen(localStorage, false); await exitFullscreen(document) }
+    else if (await enterFullscreen(document)) rememberFullscreen(localStorage, true)
+  }
   // F-022: board effects. Ids restart the animations; the engine never sees them.
   const [clearFx, setClearFx] = useState<ClearEffect | null>(null)
   const [thump, setThump] = useState(0)
@@ -593,7 +607,7 @@ function App() {
   </>
 
   return <main className="shell menu-shell">
-    <header className="topbar menu-topbar"><button className="player-name player-name-button" aria-label="Change player name" onClick={() => { setDraft(username); setView('settings') }}>Playing as <strong>{username}</strong></button><button aria-label="Open personal settings" className="settings-button" onClick={() => { setDraft(username); setView('settings') }}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 17h16" /><circle cx="9" cy="7" r="2.2" fill="currentColor" /><circle cx="15" cy="17" r="2.2" fill="currentColor" /></svg><span>Settings</span></button></header>
+    <header className="topbar menu-topbar"><button className="player-name player-name-button" aria-label="Change player name" onClick={() => { setDraft(username); setView('settings') }}>Playing as <strong>{username}</strong></button><div className="menu-tools">{canFullscreen && <button aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'} aria-pressed={isFullscreen} className="settings-button fullscreen-button" data-fullscreen-toggle onClick={() => void toggleFullscreen()}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{isFullscreen ? <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" /> : <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />}</svg></button>}<button aria-label="Open personal settings" className="settings-button" onClick={() => { setDraft(username); setView('settings') }}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 17h16" /><circle cx="9" cy="7" r="2.2" fill="currentColor" /><circle cx="15" cy="17" r="2.2" fill="currentColor" /></svg><span>Settings</span></button></div></header>
     <section className="menu-content">
       <div className="hero-copy"><Brand hero /><h1 tabIndex={-1}>Make room for one more.</h1></div>
       <div className="menu-actions" aria-label="Main menu">
