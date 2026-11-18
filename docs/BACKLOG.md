@@ -24,6 +24,7 @@ records released changes.
 | --- | --- | --- | --- | --- | --- |
 | B-020 | Bug | Main menu at 320 px wide: the rotated last logo tile reaches 1 px past the screen edge, so the page can scroll sideways by 1 px (found 2026-11-18 while checking F-033; also on the live site before F-033) | Low | Proposed | Standard |
 | B-021 | Bug | CI: the Firebase emulator test "Score Duel retains a finished player through reconnect…" timed out once waiting for the guest's Game over after reconnect (run for F-033, 2026-11-18); passed on re-run, so likely timing-dependent | Low | Proposed | Strong |
+| F-034 | Feature | Settings: replace the Hard Drop on/off switch with a three-way choice Drop / Hard Drop / Both | Medium | Proposed (2026-11-18) | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
@@ -96,11 +97,15 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 ## Proposed runs (2026-11-18)
 
-Prioritised for: small fixes first.
+Prioritised for: the owner's newest request first, then small fixes.
 
-- **A** – standard model, medium level – Sideways scroll on small phones
+- **A** – standard model, medium level – Drop choice
+  - F-034 – Replace the Hard Drop switch in Settings with Drop / Hard Drop / Both, so players choose which drop buttons they get.
+  - Question: does the choice also apply to keyboard, controller and swipe, as today's switch does for hard drop? Recommendation: yes, Drop turns off hard drop and Hard Drop turns off soft drop for every kind of control.
+  - Question: with Hard Drop only, where does its button go in the Split layout? Recommendation: in the down arrow's place, so the arrows and the drop button form one row.
+- **B** – standard model, medium level – Sideways scroll on small phones
   - B-020 – Keep the tilted logo tiles on the main menu inside the screen at 320 px, so the menu cannot be nudged sideways.
-- **B** – strong model, high level – Unstable multiplayer test
+- **C** – strong model, high level – Unstable multiplayer test
   - B-021 – Find out why the Score Duel reconnect test sometimes stops waiting for Game over and make it reliable, so publishing is not stopped by chance.
 
 Not proposed yet: F-028 (move 2 Players to network-kit; strong model, high level) waits for network-kit F-059 (a lobby made on the admin page with a host link and a guest link, network-kit's next run B; replaces Bricks' private invitations). F-006 is made in the separate music studio chat.
