@@ -110,6 +110,8 @@ Prioritised for: the move the owner wants sooner, now that network-kit has every
   - Question: the project rule on operating controls in `AGENTS.md` changes with the move (network-kit's states On / No new players / Timer per mode, game links, admin lobbies; admitted games finish). Recommendation: approve rewriting it that way when F-028 is published.
   - Question: peer replay verification against cheating (network-kit D-062) as part of the move? Recommendation: later, as its own item; the move is big already.
 
+Not proposed: F-006 (made in the separate music studio chat); T-009 (after F-028 is confirmed on two devices).
+
 
 Waiting for the owner: F-030 – F-035 and B-019 check on a phone (F-033 also: add the game to the home screen); B-018 check on a phone; B-004 two-device check of the opponent board; check B-017 on a real phone; decide whether the privacy text in Settings is enough (not legal advice).
 
