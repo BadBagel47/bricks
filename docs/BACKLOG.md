@@ -23,6 +23,7 @@ records released changes.
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
 | B-020 | Bug | Main menu at 320 px wide: the rotated last logo tile reaches 1 px past the screen edge, so the page can scroll sideways by 1 px (found 2026-11-18 while checking F-033; also on the live site before F-033) | Low | Proposed | Standard |
+| B-021 | Bug | CI: the Firebase emulator test "Score Duel retains a finished player through reconnect…" timed out once waiting for the guest's Game over after reconnect (run for F-033, 2026-11-18); passed on re-run, so likely timing-dependent | Low | Proposed | Strong |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
@@ -99,6 +100,8 @@ Prioritised for: small fixes first.
 
 - **A** – standard model, medium level – Sideways scroll on small phones
   - B-020 – Keep the tilted logo tiles on the main menu inside the screen at 320 px, so the menu cannot be nudged sideways.
+- **B** – strong model, high level – Unstable multiplayer test
+  - B-021 – Find out why the Score Duel reconnect test sometimes stops waiting for Game over and make it reliable, so publishing is not stopped by chance.
 
 Not proposed yet: F-028 (move 2 Players to network-kit; strong model, high level) waits for network-kit F-059 (a lobby made on the admin page with a host link and a guest link, network-kit's next run B; replaces Bricks' private invitations). F-006 is made in the separate music studio chat.
 
