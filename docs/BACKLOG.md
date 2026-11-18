@@ -22,6 +22,9 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| F-032 | Feature | 1 Player game screen on phones: logo a little smaller (40 px tiles feel too big) and truly centred vertically on the Pause button (measured about 3 px low because of the tiles' stagger) | Low | Proposed (2026-11-18) | Standard |
+| B-019 | Bug | Split touch layout after F-031: too little space between the counterclockwise rotate button and the right arrow (16 px) | Low | Proposed (2026-11-18) | Standard |
+| F-033 | Feature | Fullscreen mode while playing | Medium | Proposed (2026-11-18); questions: where it is turned on, and whether iPhone gets an "Add to Home Screen" app mode | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
@@ -91,7 +94,15 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 ## Proposed runs (2026-11-18)
 
-None. F-030 and F-031 were done 2026-11-18.
+Prioritised for: fix the owner's feedback on F-031 first, then the new feature.
+
+- **A** – standard model, medium level – Logo and button spacing
+  - F-032 – Make the logo on the phone game screen a little smaller and centre it vertically on the Pause button.
+  - B-019 – Give the counterclockwise rotate button more room from the right arrow, so they are not pressed by mistake.
+- **B** – standard model, medium level – Fullscreen
+  - F-033 – Add fullscreen while playing, so the browser's address bar and buttons disappear and the game gets more room.
+  - Question: where is it turned on? Recommendation: a fullscreen button in the game's top bar next to Pause (hidden where the browser cannot do it); it stays on until pressed again or the player leaves the game.
+  - Question: iPhone's browser cannot make a page fullscreen. Add an app mode instead (the game can be added to the home screen and then opens without browser bars, also on Android)? Recommendation: yes.
 
 Not proposed yet: F-028 (move 2 Players to network-kit; strong model, high level) waits for network-kit F-059 (a lobby made on the admin page with a host link and a guest link, network-kit's next run B; replaces Bricks' private invitations). F-006 is made in the separate music studio chat.
 
