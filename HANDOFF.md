@@ -38,6 +38,8 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 - **Restore point before F-028 (2026-11-18):** tag `archive/restore-before-f028` marks the published game before the move to network-kit (made by the archive workflow; restore with `git push origin archive/restore-before-f028:refs/heads/<branch>` or revert `main` to it).
 - **Danger music (2026-11-18, F-037):** as in NES Tetris: fast music while a locked block is in the top six rows, normal music as soon as they are empty (no margin).
 - **network-kit feedback (2026-11-19):** improvements for network-kit found while working in Bricks are raised with the owner as they come up, recorded as `T-` items in the backlog, and sent to the network-kit session only after the owner's yes (project rule in `AGENTS.md`).
+- **Room caps (2026-11-19, T-012):** Bricks keeps network-kit's default caps per room and day (from 0.16: about 4 hours with activity, 150,000 messages).
+- **Invitation QR code (2026-11-19, F-039):** a QR Code button next to Copy Invite Link in both 2 Players versions.
 - **Hosting (2026-11-10):** GitHub Pages with the custom domain https://bricks.trythis.one instead of the spec's Firebase Hosting; Firebase stays the auth/database backend (`docs/DEPLOYMENT.md`).
 - **Visual refresh (2026-11-10):** spec section 5.0 design, generated audio, optional Ghost piece (off by default); block colors since F-024 are Retro / Tones / Modern.
 - **Operating controls (2026-11-09):** approved as described in the project rules; public modes start On.
