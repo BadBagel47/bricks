@@ -45,7 +45,7 @@ after(async () => {
 async function player(name) {
   const context = await browser.newContext({ viewport: { width: 1100, height: 900 } })
   await context.addInitScript(([n]) => {
-    localStorage.setItem('bricks.username', n)
+    localStorage.setItem('bricks.username', n); window.__netlog = []
     localStorage.setItem('bricks.net-backend.v1', 'cloudflare')
     localStorage.setItem('bricks.personal.v1', JSON.stringify({ musicEnabled: false, effectsEnabled: false }))
   }, [name])
@@ -82,7 +82,7 @@ async function topOut(page) {
     await page.keyboard.press('Space')
     if (await page.getByText('Game over', { exact: true }).first().isVisible()) return
   }
-  const state = await page.evaluate(() => ({ status: [...document.querySelectorAll('.multiplayer-game [role=status], .multiplayer-game .match-note')].map(e => e.textContent), focus: document.activeElement?.tagName, text: document.body.innerText.slice(0, 300) }))
+  const state = await page.evaluate(() => ({ status: [...document.querySelectorAll('.multiplayer-game [role=status], .multiplayer-game .match-note')].map(e => e.textContent), focus: document.activeElement?.tagName, text: document.body.innerText.slice(-200), log: window.__netlog }))
   assert.fail(`Game over never came: ${JSON.stringify(state)}`)
 }
 

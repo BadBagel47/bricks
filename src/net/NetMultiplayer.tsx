@@ -113,7 +113,7 @@ export default function NetMultiplayer({ username, onBack, preferences, backendS
           if (msg.revision === data.settings.revision) room.setData({ ...data, approved: msg.revision })
         }
       }),
-      room.on('closed', closed => { setRoom(null); setState(null); setLive(null); setError(closed.text || 'The room has closed.') }),
+      room.on('closed', closed => { ;(window as any).__netlog?.push('closed ' + JSON.stringify(closed)); setRoom(null); setState(null); setLive(null); setError(closed.text || 'The room has closed.') }),
       room.on('error', failure => { if (failure.text) setError(failure.text); else if (failure.code === 'game-closed') setError('2 Players is not taking new players right now.') }),
     ]
     hello()
@@ -136,6 +136,7 @@ export default function NetMultiplayer({ username, onBack, preferences, backendS
 
   // A round starting (countdown) mounts the live game; a reload during a round cannot restore it.
   useEffect(() => {
+    ;(window as any).__netlog?.push(`mount? phase=${state?.phase} round=${state?.round} seed=${state?.seed} startsAt=${state?.startsAt} me=${!!me} other=${!!other} live=${live?.round} completed=${!!completed}`)
     if (!room || !state || !me || !other) return
     if ((state.phase !== 'countdown' && state.phase !== 'playing') || state.seed === null || state.startsAt === null) return
     if (live?.round === state.round || completed) return
@@ -166,6 +167,7 @@ export default function NetMultiplayer({ username, onBack, preferences, backendS
   const options = { preferences, audio, onPlaying: setPlaying, completedId: completed?.result.id ?? null, lastCompletedId: null, onCompleted }
 
   function toLobby() {
+    ;(window as any).__netlog?.push('toLobby ' + new Error().stack?.split('\n').slice(1,4).join('|'))
     setLive(null); setCompleted(null); setInLobby(true)
     if (room && isHost && state?.phase === 'playing') room.end()
   }
