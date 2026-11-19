@@ -56,7 +56,7 @@ None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 1
   - 2026-11-18: B-022 home screen icon fills the shape; B-023 no hover outline after taps on phones.
   - 2026-11-18: F-034 Drop / Hard Drop / Both, F-035 orange B icon, B-020 menu fits narrow phones, B-021 steadier emulator test.
 - Waiting on the owner: a real Cloudflare 2 Players match on two devices and a look at Settings → Connection (F-028, F-036); phone checks of F-030 – F-035 (also adding the game to the home screen), B-019, B-018 and B-017; a two-device check of B-004; whether the privacy text is enough.
-- Next: no proposed runs; T-010 (network-kit feedback) waits for the owner's yes; T-009 only on the owner's explicit yes. F-006 music in the music studio chat.
+- Next: no proposed runs; T-010 (network-kit feedback) sent, waiting for network-kit IDs; T-009 only on the owner's explicit yes. F-006 music in the music studio chat.
 - Older checkpoints and history: `PROGRESS.md` (section *Handoff history*) and git history.
 
 ## Documentation map
