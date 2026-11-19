@@ -475,3 +475,8 @@ html[data-motion=off]::view-transition-old(root),html[data-motion=off]::view-tra
 .connection-table thead th{color:var(--muted);font-weight:600}
 .match-settings .setting-group{margin-top:10px}
 @media(max-width:420px){.connection-table th:nth-child(5),.connection-table td:nth-child(5){display:none}}
+
+/* F-039: invitation QR code in the 2 Players lobby. */
+.invite-qr{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:8px}
+.invite-qr-code{width:min(260px,70vw);aspect-ratio:1;padding:10px;border-radius:14px;background:#fff}
+.invite-qr-code svg{display:block;width:100%;height:100%}

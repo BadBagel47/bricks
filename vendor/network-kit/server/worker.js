@@ -18,6 +18,7 @@ import { VERSION } from '../version.js';
 import { RoomCore, resolveOptions } from './room-core.js';
 import { cleanSummary } from './measure-check.js';
 import { newRoomCode } from './random.js';
+import { visitorKey } from '../shared/visitor.js';
 
 const SERVER_OPTIONS = {
   binding: 'ROOMS', // Durable Object namespace binding name in the wrangler config
@@ -135,14 +136,16 @@ export function createRoomServer(gameOptions = {}) {
     return made.body;
   }
 
-  // Counters per address, kept in this Worker instance's memory: cheap, and
-  // enough to make guessing codes or creating rooms in bulk pointless (F-053).
+  // Counters per visitor, kept in this Worker instance's memory: a cheap brake
+  // on accidents and simple scripts (F-053), not a guarantee: each instance
+  // counts on its own. IPv6 counts per /64 (F-100). The admin page counts the
+  // rooms a game creates across instances (F-098).
   const visitors = new Map();
   function overLimit(request, env, kind) {
     const limits = typeof opts.limits === 'function' ? opts.limits(env) : opts.limits;
     const max = limits?.[kind === 'create' ? 'createsPerMinute' : 'attemptsPerMinute'];
     if (!max) return false;
-    const address = request.headers.get('cf-connecting-ip') || 'unknown';
+    const address = visitorKey(request.headers.get('cf-connecting-ip'));
     const minute = Math.floor(Date.now() / 60_000);
     let v = visitors.get(address);
     if (!v || v.minute !== minute) {
@@ -199,6 +202,17 @@ export function createRoomServer(gameOptions = {}) {
     return valid;
   }
 
+  /** { ok, reason } from the admin page's count of this game's new rooms (F-098), or null. */
+  async function roomCount(env, request) {
+    const found = adminLink(env);
+    if (!found?.api.roomCreated) return null;
+    try {
+      return await found.api.roomCreated(found.link.game, visitorKey(request.headers.get('cf-connecting-ip')));
+    } catch {
+      return null;
+    }
+  }
+
   async function gate(request, env, action) {
     if (!opts.gate) return { open: true };
     const result = await opts.gate({ request, env, action });
@@ -235,6 +249,12 @@ export function createRoomServer(gameOptions = {}) {
       }
       const open = await gate(request, env, 'create');
       if (!open.open) return json({ error: open.reason }, 503, cors);
+      // The admin page counts the game's new rooms across Worker instances (F-098);
+      // the owner's game links are not counted. Fails open, like the status.
+      if (!(status && !status.open) && !(await passValid(env, body.adminPass))) {
+        const counted = await roomCount(env, request);
+        if (counted && counted.ok === false) return json({ error: counted.reason ?? 'too-many-rooms' }, 429, { ...cors, 'retry-after': '600' });
+      }
       const made = await makeRoom(env, { settings: body.settings ?? {} });
       return json(made.body, made.status, cors);
     }

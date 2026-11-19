@@ -14,6 +14,8 @@ import { NetworkRoom } from './room.js';
 
 const SEEN_KEY = 'nk-notices-seen';
 const CHECK_MS = 60_000;
+const IDLE_AFTER_MS = 30 * 60_000; // no touch or key this long: ask seldom (F-107)
+const IDLE_CHECK_MS = 10 * 60_000;
 
 /** "{until}" in a notice's text becomes the local time of its `until`. */
 export function noticeText(notice) {
@@ -293,10 +295,14 @@ export class NoticeBoard {
 export function watchNotices(server, {
   basePath = '/rooms', mode = null, everyMs = CHECK_MS, board = null, sound = true, onNotice = null,
   fetchStatus = null, document: doc = globalThis.document, window: win = globalThis,
+  idleAfterMs = IDLE_AFTER_MS, idleEveryMs = IDLE_CHECK_MS,
 } = {}) {
   board ??= new NoticeBoard({ document: doc, sound });
   let timer = null;
   let stopped = false;
+  // A page nobody has touched for a while asks seldom (F-107): a screen left
+  // on all night would otherwise ask 1,440 times a day.
+  let touchedAt = Date.now();
   const ask = fetchStatus ?? (() => NetworkRoom.status(server, { basePath, mode, window: win }));
   const check = async () => {
     if (stopped || doc?.hidden) return;
@@ -312,19 +318,41 @@ export function watchNotices(server, {
     }
     board.keepOnly(new Set(notices.map((n) => n.id)));
   };
+  const schedule = () => {
+    clearTimeout(timer);
+    if (stopped) return;
+    const idle = idleAfterMs && Date.now() - touchedAt > idleAfterMs;
+    timer = setTimeout(async () => {
+      await check();
+      schedule();
+    }, idle ? idleEveryMs : everyMs);
+  };
   const onVisible = () => {
-    if (!doc.hidden) check();
+    if (!doc.hidden) {
+      check();
+      schedule();
+    }
+  };
+  const onTouch = () => {
+    const wasIdle = idleAfterMs && Date.now() - touchedAt > idleAfterMs;
+    touchedAt = Date.now();
+    if (wasIdle) {
+      check();
+      schedule();
+    }
   };
   doc?.addEventListener?.('visibilitychange', onVisible);
-  timer = setInterval(check, everyMs);
+  for (const type of ['pointerdown', 'keydown']) win?.addEventListener?.(type, onTouch, { capture: true, passive: true });
   check();
+  schedule();
   return {
     board,
     check,
     stop() {
       stopped = true;
-      clearInterval(timer);
+      clearTimeout(timer);
       doc?.removeEventListener?.('visibilitychange', onVisible);
+      for (const type of ['pointerdown', 'keydown']) win?.removeEventListener?.(type, onTouch, { capture: true });
     },
   };
 }

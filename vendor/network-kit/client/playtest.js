@@ -201,8 +201,8 @@ export class ReportSender {
   }
 
   async image(blob) {
-    const res = await this.fetch(`${this.admin}/playtest/v1/image?token=${encodeURIComponent(this.token)}`, {
-      method: 'POST', headers: { 'content-type': blob.type || 'image/jpeg' }, body: blob,
+    const res = await this.fetch(`${this.admin}/playtest/v1/image`, {
+      method: 'POST', headers: { 'content-type': blob.type || 'image/jpeg', 'x-playtest-token': this.token }, body: blob,
     });
     if (!res.ok) throw Object.assign(new Error('image'), { status: res.status });
     return (await res.json()).id;

@@ -24,6 +24,7 @@ import { onValue, ref } from 'firebase/database'
 import { summaryLine } from './connection-stats.ts'
 import type { Backend, ConnectionSummary } from './connection-stats.ts'
 import { BackendChoice } from '../net/BackendChoice.tsx'
+import { InviteQr } from '../net/InviteQr.tsx'
 
 function configured() { try { return readFirebaseConfig(import.meta.env) !== null } catch { return false } }
 function setInvite(code: string | null) {
@@ -235,6 +236,7 @@ export default function MultiplayerScreen({ username, onBack, preferences, backe
         <div className="room-copy">
           {sharingURL && <button className="button button-primary" onClick={() => void copy(sharingURL, 'Invite link copied.')}>Copy Invite Link</button>}
           <button className="back-button" onClick={() => void copy(joined.code, 'Code copied.')}>Copy Code</button>
+          {sharingURL && <InviteQr url={sharingURL} />}
         </div>
         {sharingURL ? <label className="invite-field">Invite link<input readOnly value={sharingURL} onFocus={event => event.currentTarget.select()} /></label> : <p className="notice">Share the original private invitation link. The room code alone does not grant access.</p>}
       </div> : null}

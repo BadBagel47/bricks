@@ -8,6 +8,10 @@
 - **Phase 4 status:** Documentation and maintenance instructions added; no application code changed. Waiting for owner DNS, GitHub Pages custom-domain/HTTPS, Firebase Authorized domains (and API-key referrer, if restricted). Live verification checklist not yet observed; this environment cannot reach the site.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
+## T-011, T-012, F-039 — 2026-11-19
+
+Owner approved ("Kör A", then Q1 both versions, Q2 keep the caps). T-011: network-kit's update template as `.github/workflows/update-network-kit.yml` (Bricks' room options for the smoke test; lint, unit, build, browser and Cloudflare tests); a first manual run found no 0.15 fix and announced 0.17 with an issue. T-012: network-kit 0.17.0 vendored (no code changes needed; caps per room now 150,000 messages and 240 active minutes a day). F-039: `src/net/InviteQr.tsx` uses network-kit's `qrSvg`, in both lobbies. Local: kit smoke test, lint, unit tests, build, browser 15/15, `npm run test:net` 3/3; QR checked on an emulated phone.
+
 ## B-025 — 2026-11-19
 
 Owner approved ("Kör a"). network-kit 0.13.4 → 0.15.1 vendored (changelog: Playtest is optional, nothing to change in Bricks; does not close live rooms). Local: kit smoke test with Bricks' options, lint, unit tests, build, browser 15/15, `npm run test:net` 2 of 2; local workerd answers the status preflight from https://bricks.trythis.one with `x-admin-pass` allowed.

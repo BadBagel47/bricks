@@ -53,11 +53,11 @@ None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 1
 
 - Live: https://bricks.trythis.one (Pages from `main`); admin https://bricks-operating.l8p1.workers.dev/admin/ (Worker from `feature/operating-controls`).
 - Latest work, newest first:
+  - 2026-11-19: F-039 invitation QR code; T-012 network-kit 0.17.0; T-011 network-kit update workflow.
   - 2026-11-19: B-025 network-kit 0.15.1 (status check and notices with a game link); T-010 feedback recorded there as network-kit F-112, F-113.
   - 2026-11-19: F-038 a reload during a Cloudflare match continues it; network-kit feedback rule (T-010 waits for the owner's yes).
   - 2026-11-19: F-028 Cloudflare 2 Players side by side with Firebase (switch on the 2 Players screen) and F-036 connection comparison. Needs a real match on two devices.
   - 2026-11-18: F-037 danger music ends as in NES; restore point tag before F-028; F-028 proposal with questions.
-  - 2026-11-18: B-022 home screen icon fills the shape; B-023 no hover outline after taps on phones.
 - Waiting on the owner: a real Cloudflare 2 Players match on two devices and a look at Settings → Connection (F-028, F-036); phone checks of F-030 – F-035 (also adding the game to the home screen), B-019, B-018 and B-017; a two-device check of B-004; whether the privacy text is enough.
 - Next: no proposed runs; T-009 only on the owner's explicit yes. F-006 music in the music studio chat.
 - Older checkpoints and history: `PROGRESS.md` (section *Handoff history*) and git history.

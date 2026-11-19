@@ -7,6 +7,8 @@ not publish version numbers yet; entries are grouped by deployment.
 ## [Unreleased]
 
 ### Added (2026-11-19)
+- F-039: a QR Code button next to Copy Invite Link in the 2 Players lobby (Firebase and Cloudflare) shows the invite link as a QR code.
+- T-012: network-kit 0.17.0 (quota protection, quieter notices on untouched pages); network-kit's default room caps are kept.
 - T-011: network-kit's update workflow proposes new network-kit fix versions as a tested branch with an issue.
 - F-038: reloading the page during a Cloudflare match continues the match instead of ending it.
 - F-028: 2 Players can run on Cloudflare (network-kit rooms in the EU) next to Firebase: a *Server* switch on the 2 Players screen (Firebase first), six-character room codes, invite links and lobbies made on network-kit's admin page, *Rejoin Last Room*, Score Duel and Battle with results, rematch and pause on a lost connection. Received data is checked in the browser. The privacy text in Settings mentions the Cloudflare rooms.

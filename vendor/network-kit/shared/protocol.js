@@ -91,6 +91,7 @@ export const GAME_CLOSED_TEXT = Object.freeze({
   off: 'The game is not taking new players right now.',
   until: 'The game is closed until {until}.',
   budget: "The game has used up today's free quota. It opens again at {until}.",
+  'too-many-rooms': 'Too many new rooms right now. Try again in a while.',
   stopped: 'The game was stopped by its owner.',
   'too-many-attempts': 'Too many tries in a short time. Wait a minute and try again.',
   'too-many-requests': 'Too many tries in a short time. Wait a minute and try again.',
