@@ -22,7 +22,7 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| F-038 | Feature | Cloudflare 2 Players: restore a player's game after a page reload during a match (today the match ends without a result) | Medium | Idea (2026-11-19, from F-028) | Strong |
+| F-038 | Feature | Cloudflare 2 Players: restore a player's game after a page reload during a match (today the match ends without a result) | Medium | Pågår 2026-11-19 (session ccr-fca4d5ae-ka315n) | Strong |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |

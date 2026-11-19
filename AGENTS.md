@@ -30,6 +30,9 @@ These add to the shared agent rules. Owner decisions behind them are recorded un
 - Music is composed in a separate "music studio" chat, which also integrates approved tracks into `src/audio/` and the docs (F-006). Other agents leave `src/audio/music.ts` and music behavior alone unless the owner asks.
 - Publishing: push to `main` after every run (CI deploys https://bricks.trythis.one; temporary breakage is acceptable because the owner is the only tester). When `server/operating/` or `wrangler.operating.jsonc` changes, also merge `main` into `feature/operating-controls` with `[deploy operating]` in the merge message to deploy the admin Worker. Firebase rule changes are published by the owner before the client that depends on them. The Cloudflare room Worker (`server/rooms/`, `vendor/network-kit/`, `wrangler.rooms.jsonc`) deploys itself from `main` (`.github/workflows/rooms.yml`); network-kit updates are taken in as a new vendored copy of a tagged version, never by editing the copy.
 
+### network-kit feedback
+- When work in Bricks shows something network-kit could do better, tell the owner in the chat and ask whether to send it to the network-kit session; also record it in `docs/BACKLOG.md` as a `T-` item ("network-kit feedback") so it is not lost if the owner does not answer. Send only after the owner says yes (owner, 2026-11-19).
+
 ### Documentation
 - At the end of every run, update the backlog status, the *Unreleased* section of `CHANGELOG.md`, `PROGRESS.md` and the current state in `HANDOFF.md`; add an ADR in `docs/adr/` for any significant new decision.
 - IDs are `F-` (feature), `B-` (bug) and `T-` (operational or owner task), see `docs/BACKLOG.md`.
