@@ -28,6 +28,8 @@ records released changes.
 | B-027 | Bug | Phone: in the 2 Players lobby the QR Code button wraps to its own row and sits to the left; it should be centred | Low | Proposed (2026-11-19, owner) | Standard |
 | F-040 | Feature | Touch controls in the Row layout (game and Settings preview): a gap between left/right and the other buttons | Low | Proposed (2026-11-19, owner) | Standard |
 | F-041 | Feature | Settings → Layout: Split first (left of Row) and Split as the default | Low | Proposed (2026-11-19, owner) | Standard |
+| B-028 | Bug | Cloudflare 2 Players: when one player returns to the lobby, the other's game keeps running (pieces keep falling, music plays) behind the "opponent left" note; the abandoned game should stop. Cause: the game loop in `NetLiveGame` does not stop when the match is abandoned, only the controls do | High | Proposed (2026-11-19, owner) | Standard |
+| F-042 | Feature | Invitation QR code (both versions): close it automatically when the lobby is full | Low | Proposed (2026-11-19, owner) | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
