@@ -7,6 +7,7 @@ not publish version numbers yet; entries are grouped by deployment.
 ## [Unreleased]
 
 ### Added (2026-11-19)
+- F-038: reloading the page during a Cloudflare match continues the match instead of ending it.
 - F-028: 2 Players can run on Cloudflare (network-kit rooms in the EU) next to Firebase: a *Server* switch on the 2 Players screen (Firebase first), six-character room codes, invite links and lobbies made on network-kit's admin page, *Rejoin Last Room*, Score Duel and Battle with results, rematch and pause on a lost connection. Received data is checked in the browser. The privacy text in Settings mentions the Cloudflare rooms.
 - F-036: both 2 Players versions measure the connection the same way; the result screen shows a line and Settings → Connection compares the latest matches.
 

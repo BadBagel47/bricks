@@ -22,7 +22,7 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| F-038 | Feature | Cloudflare 2 Players: restore a player's game after a page reload during a match (today the match ends without a result) | Medium | Pågår 2026-11-19 (session ccr-fca4d5ae-ka315n) | Strong |
+| T-010 | Task | network-kit feedback (from F-028/F-038): (1) the first deploy of a new game Worker failed with Cloudflare's "This Worker does not exist" right after the upload and passed on a re-run: the deploy guide or workflow template could retry once; (2) a guide section on continuing a game after a page reload (identity per device, room code kept in the address, the game's own state in the tab, everyone sends their current state again on `peer back`) would help other games | Low | Proposed (2026-11-19): ask the owner whether to send | — (owner) |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
@@ -33,6 +33,7 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| F-038 | Feature | Cloudflare 2 Players: restore a player's game after a page reload during a match (today the match ends without a result) | Medium | Done (2026-11-19): the game is kept in the tab and the address names the room, so a reload continues the match; needs a check on a phone | Strong |
 | F-028 | Feature | Build the move: a small Bricks game Worker with a network-kit room (host-run relay, EU rooms, private rooms with invitation keys; public Off with working invitations needs network-kit F-059); Score Duel and Battle snapshots and Battle rows as room messages; lobby, countdown with seed, reconnection, results and rematch on network-kit; connect to network-kit's admin page; validate received boards, Battle rows and finishes in the receiving browser (format, value ranges, sequence order, no revival after Game Over, Battle totals only increase) and ignore what fails, replacing the content checks the Firebase rules do today; update the privacy text in Settings; Firebase stays as fallback until the owner has played a real match | Medium | Done (2026-11-19): Cloudflare 2 Players side by side with Firebase; needs a real match on two devices | Strong |
 | F-036 | Feature | Compare connection performance between Firebase and network-kit (Cloudflare) 2 Players: how long a move takes to show on the other screen, how even the updates are, reconnect time | Medium | Done (2026-11-19): measured in both versions; result line and Settings → Connection | Strong |
 | B-024 | Bug | Cloudflare end-to-end test sometimes lost the guest's match view | Low | Done (2026-11-19): same cause as B-021, a race in the test: the last player to finish goes straight to the result screen before "Game over" can be seen; the tests now accept either | Strong |
@@ -104,10 +105,7 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 ## Proposed runs (2026-11-18)
 
-Prioritised for: the owner's check of the move first.
-
-- **A** – strong model, high level – After the move
-  - F-038 – Restore a player's Cloudflare match after a page reload, so a reload no longer ends the match.
+None. F-038 was done 2026-11-19.
 
 Not proposed: F-006 (made in the separate music studio chat); T-009 (retire Firebase and the old admin; waits for the owner's comparison and explicit yes).
 
