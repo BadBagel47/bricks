@@ -10,7 +10,9 @@ const ROOMS = 'http://127.0.0.1:8790'
 const PAGE = 'http://127.0.0.1:4173/'
 const OUT = 'dist-net-test'
 const children = []
-let browser
+// Each player gets its own browser: in one shared headless browser, key presses sent to one
+// page sometimes reach the other (seen 2026-11-19: the guest topped out from the host's Space presses; B-021, B-024).
+let browser, browser2
 
 async function waitFor(url, label, child, headers = {}) {
   const deadline = Date.now() + 90000
@@ -33,19 +35,21 @@ before(async () => {
   await waitFor(`${ROOMS}/rooms`, 'Room server', rooms, { Origin: 'http://127.0.0.1:4173' })
   await waitFor(PAGE, 'Preview', preview)
   const executablePath = process.env.BRICKS_CHROMIUM_EXECUTABLE || ['/usr/bin/chromium', '/usr/bin/google-chrome', '/opt/pw-browsers/chromium'].find(existsSync)
-  browser = await chromium.launch({ ...(executablePath && !executablePath.endsWith('pw-browsers/chromium') ? { executablePath } : {}), args: ['--no-sandbox'] })
+  const launch = () => chromium.launch({ ...(executablePath && !executablePath.endsWith('pw-browsers/chromium') ? { executablePath } : {}), args: ['--no-sandbox'] })
+  ;[browser, browser2] = await Promise.all([launch(), launch()])
 }, { timeout: 180000 })
 
 after(async () => {
   await browser?.close()
+  await browser2?.close()
   for (const child of children) child.kill('SIGTERM')
   rmSync(OUT, { recursive: true, force: true })
 })
 
-async function player(name) {
-  const context = await browser.newContext({ viewport: { width: 1100, height: 900 } })
+async function player(name, second = false) {
+  const context = await (second ? browser2 : browser).newContext({ viewport: { width: 1100, height: 900 } })
   await context.addInitScript(([n]) => {
-    localStorage.setItem('bricks.username', n); window.__netlog = []
+    localStorage.setItem('bricks.username', n)
     localStorage.setItem('bricks.net-backend.v1', 'cloudflare')
     localStorage.setItem('bricks.personal.v1', JSON.stringify({ musicEnabled: false, effectsEnabled: false }))
   }, [name])
@@ -56,7 +60,7 @@ async function player(name) {
 }
 
 async function lobby() {
-  const host = await player('Host One'), guest = await player('Guest Two')
+  const host = await player('Host One'), guest = await player('Guest Two', true)
   await host.page.goto(PAGE)
   await host.page.getByRole('button', { name: '2 Players', exact: true }).click()
   await host.page.getByRole('button', { name: 'Host Game', exact: true }).click()
@@ -82,7 +86,7 @@ async function topOut(page) {
     await page.keyboard.press('Space')
     if (await page.getByText('Game over', { exact: true }).first().isVisible()) return
   }
-  const state = await page.evaluate(() => ({ status: [...document.querySelectorAll('.multiplayer-game [role=status], .multiplayer-game .match-note')].map(e => e.textContent), focus: document.activeElement?.tagName, text: document.body.innerText.slice(-200), log: window.__netlog }))
+  const state = await page.evaluate(() => ({ status: [...document.querySelectorAll('.multiplayer-game [role=status], .multiplayer-game .match-note')].map(e => e.textContent), focus: document.activeElement?.tagName, text: document.body.innerText.slice(-200) }))
   assert.fail(`Game over never came: ${JSON.stringify(state)}`)
 }
 

@@ -23,7 +23,6 @@ records released changes.
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
 | F-038 | Feature | Cloudflare 2 Players: restore a player's game after a page reload during a match (today the match ends without a result) | Medium | Idea (2026-11-19, from F-028) | Strong |
-| B-024 | Bug | Cloudflare end-to-end test: once in five local runs the host's match view was gone during the first Score Duel (no error shown); the test now prints the page when it happens; the CI job does not hold back deploys | Low | Idea (2026-11-19) | Strong |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
@@ -36,6 +35,7 @@ records released changes.
 | --- | --- | --- | --- | --- | --- |
 | F-028 | Feature | Build the move: a small Bricks game Worker with a network-kit room (host-run relay, EU rooms, private rooms with invitation keys; public Off with working invitations needs network-kit F-059); Score Duel and Battle snapshots and Battle rows as room messages; lobby, countdown with seed, reconnection, results and rematch on network-kit; connect to network-kit's admin page; validate received boards, Battle rows and finishes in the receiving browser (format, value ranges, sequence order, no revival after Game Over, Battle totals only increase) and ignore what fails, replacing the content checks the Firebase rules do today; update the privacy text in Settings; Firebase stays as fallback until the owner has played a real match | Medium | Done (2026-11-19): Cloudflare 2 Players side by side with Firebase; needs a real match on two devices | Strong |
 | F-036 | Feature | Compare connection performance between Firebase and network-kit (Cloudflare) 2 Players: how long a move takes to show on the other screen, how even the updates are, reconnect time | Medium | Done (2026-11-19): measured in both versions; result line and Settings → Connection | Strong |
+| B-024 | Bug | Cloudflare end-to-end test sometimes lost the guest's match view | Low | Done (2026-11-19): same cause as B-021, key presses leaking between players in one test browser; each player now has its own browser | Strong |
 | F-037 | Feature | Danger music feels like it starts a little early (owner 2026-11-18): adjust when it starts and ends | Low | Done (2026-11-18): as in NES, no margin before normal music; needs the owner's ear | Standard |
 | B-022 | Bug | Home screen app icon (F-035) shows as a small square: Android puts icons that are not marked as maskable, dark background included, shrunk inside a white shape | Medium | Done (2026-11-18; re-add the app to the home screen to see it) | Standard |
 | B-023 | Bug | The fullscreen button (F-033) keeps an orange outline after a tap: phones keep the hover style on the last tapped element (sticky hover); the same can happen to other buttons that stay on screen, e.g. Hold | Low | Done (2026-11-18; needs check on a phone) | Standard |
@@ -108,7 +108,6 @@ Prioritised for: the owner's check of the move first.
 
 - **A** – strong model, high level – After the move
   - F-038 – Restore a player's Cloudflare match after a page reload, so a reload no longer ends the match.
-  - B-024 – Find why the Cloudflare test once lost the match view, so the test can hold back deploys like the others.
 
 Not proposed: F-006 (made in the separate music studio chat); T-009 (retire Firebase and the old admin; waits for the owner's comparison and explicit yes).
 
@@ -125,6 +124,7 @@ Parked: F-027 (alternative Modern piece colors).
 - Options for the owner: keep the NES start and drop the margin; start later (for example the 4th row from the top, stack 17 high), with or without the margin. Owner chose "as in NES" (2026-11-18): same start, normal music as soon as the top six rows are empty.
 
 ### B-021 Score Duel emulator test timed out once (2026-11-18)
+- Root cause found 2026-11-19 (B-024): with both players in one headless browser, Space presses sent to the host page sometimes also reached the guest page (logged as trusted key events at the same moments), so the guest topped out early and was already on the result screen. Fix: the second player of every pair runs in its own browser (`browser2`) in `tests/firebase.rooms.mjs` and `tests/net.e2e.mjs`. Not a game bug.
 - The guest's 40 quick hard drops after the reconnect did not reach Game over within 12 s in one CI run; the same test passed on re-run and three times locally. Likely cause: inputs during a short pause right after the reconnect are ignored by design.
 - Fix (test only): `finish()` waits for the pause note to be hidden and keeps dropping until Game over (bounded), and on failure reports the board status, duel status, pause note and focus. Local note: running `tests/firebase.rooms.mjs` alone with Node 22.23 here stops after 60 s for the whole file (also on unchanged main), so the full rooms file is checked in CI.
 

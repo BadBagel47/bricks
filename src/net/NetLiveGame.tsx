@@ -115,7 +115,6 @@ export default function NetLiveGame({ room, round, options, paused, onExit, onCo
       }
       if (transition.events.some(event => event.type === 'hardDropped')) setThump(++effectId.current)
     }
-    if (transition.events.some(e => e.type === 'gameOver')) (window as any).__netlog?.push(`own gameOver t=${room.serverNow() - round.startsAt} score=${transition.state.score} events=${transition.events.map(e => e.type).join(',')}`)
     audio.handleEvents(transition.events)
     audio.setDanger(transition.state.board)
     if (battleGame) {
@@ -208,7 +207,7 @@ export default function NetLiveGame({ room, round, options, paused, onExit, onCo
       if (controlsBlocked.current && action !== 'pause') return
       event.preventDefault()
       if (event.repeat) return
-      if (action === 'pause') { ;(window as any).__netlog?.push('pause key ' + event.code); held.current.clear(); setConfirm(value => !value); return }
+      if (action === 'pause') { held.current.clear(); setConfirm(value => !value); return }
       audio.unlock()
       applyRef.current(action)
       held.current.press(event.code, action, performance.now())
@@ -271,7 +270,6 @@ export default function NetLiveGame({ room, round, options, paused, onExit, onCo
   useEffect(() => {
     if (!result || completed) return
     setCompleted(true)
-    ;(window as any).__netlog?.push(`completed t=${room.serverNow() - round.startsAt}`)
     const summary = stats.summary(result.playedAt)
     if (summary) saveConnectionStats(summary)
     onConnection(summary)
@@ -280,7 +278,6 @@ export default function NetLiveGame({ room, round, options, paused, onExit, onCo
   }, [result, completed, stats, onConnection, options, round.ownUid, audio])
 
   function leave() {
-    ;(window as any).__netlog?.push('leave confirm=' + confirm + ' abandoned=' + abandoned + ' finished=' + (current.current.status))
     if (!completed && !abandoned) room.send({ t: 'quit', round: round.round })
     onExit()
   }
