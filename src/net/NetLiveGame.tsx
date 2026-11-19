@@ -22,6 +22,8 @@ import type { ConnectionSummary } from '../multiplayer/connection-stats.ts'
 import { matchId, OpponentStream, parseMessage } from './protocol.ts'
 import type { BoardMessage, FinishMessage, NetSettings } from './protocol.ts'
 import type { KitRoom } from './kit.ts'
+import { clearNetCheckpoint, restoreBattle, restoreCatchUp, saveNetCheckpoint } from './checkpoint.ts'
+import type { NetCheckpoint } from './checkpoint.ts'
 import '../multiplayer/live-game.css'
 
 /** Everything both players know about one round when it starts. */
@@ -58,23 +60,25 @@ export function netResult(round: NetRound, own: Final, other: Final, ownBattle: 
   return { version: 1, id: matchId(round.code, round.round, round.seed), mode: round.settings.mode, roomCode: round.code, epoch: round.round, playedAt: new Date(round.startsAt).toISOString(), players: round.host ? [mine, theirs] : [theirs, mine] }
 }
 
-export default function NetLiveGame({ room, round, options, paused, onExit, onConnection }: { room: KitRoom; round: NetRound; options: LiveOptions; paused: boolean; onExit: () => void; onConnection: (summary: ConnectionSummary | null) => void }) {
+export default function NetLiveGame({ room, round, options, paused, onExit, onConnection, restored = null }: { room: KitRoom; round: NetRound; options: LiveOptions; paused: boolean; onExit: () => void; onConnection: (summary: ConnectionSummary | null) => void; restored?: NetCheckpoint | null }) {
   const { preferences: { personal, bindings, gamepadBindings }, audio, onPlaying } = options
   const battle = round.settings.mode === 'battle'
   const [initial] = useState(() => {
+    if (restored) return { game: restored.game, battleGame: restoreBattle(restored, round.host ? 'guest' : 'host') }
     const game = createGame({ seed: round.seed, startLevel: round.settings.startLevel, holdEnabled: round.settings.hold, hardDropEnabled: personal.hardDropEnabled })
     return { game, battleGame: battle ? new BattleGame(game, round.seed, round.host ? 'guest' : 'host') : null }
   })
   const [battleGame] = useState(initial.battleGame)
   const [game, setGame] = useState<GameState>(initial.game)
   const current = useRef(initial.game)
-  const [clock] = useState(() => new MatchClock(room.serverNow() - round.startsAt, performance.now()))
+  // A restored Battle continues from its saved frame plus the reload time (at most 3 s), like a fresh start.
+  const [clock] = useState(() => new MatchClock(restored?.battle ? restored.battle.frame * 1000 / 60 + restoreCatchUp(restored.savedAt, room.serverNow()) + 0.0001 : room.serverNow() - round.startsAt, performance.now()))
   const [stats] = useState(() => new ConnectionStats('cloudflare'))
-  const [stream] = useState(() => new OpponentStream(round.round))
-  const [opponent, setOpponent] = useState<BoardMessage | null>(null)
-  const [otherFinish, setOtherFinish] = useState<FinishMessage | null>(null)
-  const [ownFinish, setOwnFinish] = useState<Stats | null>(null)
-  const [sentRows, setSentRows] = useState(0)
+  const [stream] = useState(() => { const value = new OpponentStream(round.round); if (restored) value.restore(restored.opponent, restored.otherAttacks, restored.otherFinish); return value })
+  const [opponent, setOpponent] = useState<BoardMessage | null>(restored?.opponent ?? null)
+  const [otherFinish, setOtherFinish] = useState<FinishMessage | null>(restored?.otherFinish ?? null)
+  const [ownFinish, setOwnFinish] = useState<Stats | null>(restored?.ownFinish ?? null)
+  const [sentRows, setSentRows] = useState(restored?.sentAttacks ?? 0)
   const [, refreshBattle] = useState(0)
   const [abandoned, setAbandoned] = useState('')
   const [confirm, setConfirm] = useState(false)
@@ -89,7 +93,9 @@ export default function NetLiveGame({ room, round, options, paused, onExit, onCo
   const controlsBlocked = useRef(false)
   const pausedRef = useRef(paused)
   const started = useRef(false)
-  const battleSounds = useRef({ produced: 0, applied: 0, received: 0 })
+  const battleSounds = useRef({ produced: initial.battleGame?.produced ?? 0, applied: initial.battleGame?.applied ?? 0, received: initial.battleGame?.received ?? 0 })
+  // Own stream counters, kept for a reload (F-038) and to send everything again when the opponent comes back.
+  const sent = useRef({ seq: restored?.seq ?? 0, attacks: restored?.sentAttacks ?? 0, final: restored?.sentFinal ?? false, fingerprint: '' })
   const screen = useRef<HTMLElement>(null)
   const dialog = useRef<HTMLDivElement>(null)
 
@@ -166,24 +172,24 @@ export default function NetLiveGame({ room, round, options, paused, onExit, onCo
 
   // Sending: board on change (newest only), attacks and the final result reliably.
   useEffect(() => {
-    let fingerprint = '', seq = 0, last = -Infinity, sentFinal = false, sentAttacks = 0
+    let last = -Infinity
     const timer = setInterval(() => {
       if (pausedRef.current || room.serverNow() < round.startsAt) return
-      const now = performance.now()
-      if (battleGame && battleGame.produced > sentAttacks) {
-        sentAttacks = battleGame.produced
-        room.send({ t: 'attack', round: round.round, total: sentAttacks })
-        setSentRows(sentAttacks)
+      const now = performance.now(), own = sent.current
+      if (battleGame && battleGame.produced > own.attacks) {
+        own.attacks = battleGame.produced
+        room.send({ t: 'attack', round: round.round, total: own.attacks })
+        setSentRows(own.attacks)
       }
-      if (sentFinal) return
+      if (own.final) return
       const content = snapshotContent(current.current)
       const next = JSON.stringify(content)
       const final = content.status === 'gameOver'
-      if (next === fingerprint || (!final && now - last < NET_BOARD_SPACING_MS)) return
-      fingerprint = next; last = now
-      const message: BoardMessage = { t: 'board', round: round.round, seq: ++seq, ...content }
+      if (next === own.fingerprint || (!final && now - last < NET_BOARD_SPACING_MS)) return
+      own.fingerprint = next; last = now
+      const message: BoardMessage = { t: 'board', round: round.round, seq: ++own.seq, ...content }
       if (final) {
-        sentFinal = true
+        own.final = true
         room.send(message)
         if (battleGame) {
           const finish: Stats = { frame: battleGame.endedFrame ?? clock.frame(now), sent: battleGame.produced, received: battleGame.received, applied: battleGame.applied, cancelled: battleGame.cancelled }
@@ -194,6 +200,35 @@ export default function NetLiveGame({ room, round, options, paused, onExit, onCo
     }, POLL_MS)
     return () => clearInterval(timer)
   }, [room, round, battleGame, clock])
+
+  // F-038: when the opponent comes back (a reload or a new connection), send the current state again.
+  const ownFinishRef = useRef(ownFinish)
+  ownFinishRef.current = ownFinish
+  useEffect(() => room.on('peer', peer => {
+    if (peer.id !== round.otherId || (peer.event !== 'back' && peer.event !== 'join')) return
+    const own = sent.current
+    if (own.seq > 0) room.send({ t: 'board', round: round.round, seq: ++own.seq, ...snapshotContent(current.current) } satisfies BoardMessage)
+    if (own.attacks > 0) room.send({ t: 'attack', round: round.round, total: own.attacks })
+    if (ownFinishRef.current) room.send({ t: 'finish', round: round.round, ...ownFinishRef.current })
+  }), [room, round])
+
+  // F-038: keep this player's game in the tab so a reload can continue the match.
+  const opponentRef = useRef(opponent), otherFinishRef = useRef(otherFinish)
+  opponentRef.current = opponent; otherFinishRef.current = otherFinish
+  useEffect(() => {
+    const save = () => {
+      const b = battleGame
+      saveNetCheckpoint({
+        v: 1, code: round.code, round: round.round, seed: round.seed, savedAt: room.serverNow(), game: current.current,
+        battle: b ? { received: b.received, applied: b.applied, cancelled: b.cancelled, produced: b.produced, frame: b.frame, endedFrame: b.endedFrame, opponentEnded: b.opponentEnded } : null,
+        seq: sent.current.seq, sentAttacks: sent.current.attacks, sentFinal: sent.current.final, ownFinish: ownFinishRef.current,
+        opponent: opponentRef.current, otherAttacks: stream.attackTotal, otherFinish: otherFinishRef.current, otherUid: round.otherUid,
+      })
+    }
+    const timer = setInterval(save, 500)
+    window.addEventListener('pagehide', save)
+    return () => { clearInterval(timer); window.removeEventListener('pagehide', save) }
+  }, [room, round, battleGame, stream])
 
   // Game loop: gravity only while both are connected and after the shared start.
   useEffect(() => {
@@ -222,7 +257,9 @@ export default function NetLiveGame({ room, round, options, paused, onExit, onCo
       if (!started.current) {
         started.current = true
         // A view mounted a little after the shared start catches up (B-002), at most 3 s.
-        if (!battleGame) commitRef.current(advanceGame(current.current, Math.min(MAX_START_CATCH_UP_MS, Math.max(0, room.serverNow() - round.startsAt))))
+        // A restored game catches up for the reload instead (F-038), also at most 3 s.
+        const catchUp = restored ? restoreCatchUp(restored.savedAt, room.serverNow()) : Math.min(MAX_START_CATCH_UP_MS, Math.max(0, room.serverNow() - round.startsAt))
+        if (!battleGame && current.current.status !== 'gameOver') commitRef.current(advanceGame(current.current, catchUp))
       }
       let pad: Gamepad | undefined
       try { pad = Array.from(navigator.getGamepads?.() ?? []).find((value): value is Gamepad => Boolean(value?.connected)) } catch { /* Keyboard and touch still work. */ }
@@ -245,7 +282,7 @@ export default function NetLiveGame({ room, round, options, paused, onExit, onCo
     window.addEventListener('blur', clear)
     document.addEventListener('visibilitychange', clear)
     return () => { cancelAnimationFrame(frame); clear(); window.removeEventListener('keydown', keydown); window.removeEventListener('keyup', keyup); window.removeEventListener('blur', clear); document.removeEventListener('visibilitychange', clear) }
-  }, [bindings, gamepadBindings, audio, battleGame, clock, room, round.startsAt, completed])
+  }, [bindings, gamepadBindings, audio, battleGame, clock, room, round.startsAt, completed, restored])
 
   useLayoutEffect(() => {
     if (completed) return
@@ -270,6 +307,7 @@ export default function NetLiveGame({ room, round, options, paused, onExit, onCo
   useEffect(() => {
     if (!result || completed) return
     setCompleted(true)
+    clearNetCheckpoint()
     const summary = stats.summary(result.playedAt)
     if (summary) saveConnectionStats(summary)
     onConnection(summary)
@@ -278,6 +316,7 @@ export default function NetLiveGame({ room, round, options, paused, onExit, onCo
   }, [result, completed, stats, onConnection, options, round.ownUid, audio])
 
   function leave() {
+    clearNetCheckpoint()
     if (!completed && !abandoned) room.send({ t: 'quit', round: round.round })
     onExit()
   }

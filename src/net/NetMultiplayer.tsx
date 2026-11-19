@@ -15,6 +15,8 @@ import type { KitRoom, KitRoomState } from './kit.ts'
 import { localPlayerId, parseMessage, parseRoomData } from './protocol.ts'
 import type { NetSettings, RoomData } from './protocol.ts'
 import NetLiveGame from './NetLiveGame.tsx'
+import { readNetCheckpoint } from './checkpoint.ts'
+import type { NetCheckpoint } from './checkpoint.ts'
 import type { NetRound } from './NetLiveGame.tsx'
 import type { Backend } from '../multiplayer/connection-stats.ts'
 
@@ -44,6 +46,7 @@ export default function NetMultiplayer({ username, onBack, preferences, backendS
   const [hellos, setHellos] = useState<Record<string, string>>({})
   const [otherLobbyRound, setOtherLobbyRound] = useState(-1)
   const [live, setLive] = useState<NetRound | null>(null)
+  const [restored, setRestored] = useState<NetCheckpoint | null>(null)
   const [playing, setPlaying] = useState(false)
   const [completed, setCompleted] = useState<{ result: MatchResult; uid: string } | null>(null)
   const [connection, setConnection] = useState<ConnectionSummary | null>(null)
@@ -77,6 +80,8 @@ export default function NetMultiplayer({ username, onBack, preferences, backendS
       const joined = await open()
       if (!alive.current) { joined.disconnect(); return }
       store.set(LAST_ROOM_KEY, joined.code)
+      // While in a room the address names it, so a reload comes straight back (F-038); no key is kept.
+      history.replaceState(null, '', `${location.pathname}${location.search}#room=${joined.code}`)
       setRoom(joined); setState(joined.room); setInLobby(true); setOtherLobbyRound(-1); setHellos({})
     } catch (reason) {
       if (alive.current) setError(message(reason, 'Unable to connect. Check your connection and try again.'))
@@ -113,7 +118,7 @@ export default function NetMultiplayer({ username, onBack, preferences, backendS
           if (msg.revision === data.settings.revision) room.setData({ ...data, approved: msg.revision })
         }
       }),
-      room.on('closed', closed => { setRoom(null); setState(null); setLive(null); setError(closed.text || 'The room has closed.') }),
+      room.on('closed', closed => { history.replaceState(null, '', `${location.pathname}${location.search}`); setRoom(null); setState(null); setLive(null); setError(closed.text || 'The room has closed.') }),
       room.on('error', failure => { if (failure.text) setError(failure.text); else if (failure.code === 'game-closed') setError('2 Players is not taking new players right now.') }),
     ]
     hello()
@@ -134,26 +139,31 @@ export default function NetMultiplayer({ username, onBack, preferences, backendS
   // Tell the other player when this device is in the lobby (rematch consent).
   useEffect(() => { if (room && inLobby && !live) room.send({ t: 'lobby', round }) }, [room, inLobby, live, round, other?.id, other?.status])
 
-  // A round starting (countdown) mounts the live game; a reload during a round cannot restore it.
+  // A round starting (countdown) mounts the live game; after a reload the saved game continues (F-038).
   useEffect(() => {
     if (!room || !state || !me || !other) return
     if ((state.phase !== 'countdown' && state.phase !== 'playing') || state.seed === null || state.startsAt === null) return
     if (live?.round === state.round || completed) return
     const marker = `${room.code}:${state.round}`
+    let saved: NetCheckpoint | null = null
     if (store.get(ROUND_KEY, sessionStorage) === marker) {
-      // This page took part in this round before a reload: its game is gone.
-      room.send({ t: 'quit', round: state.round })
-      if (isHost) room.end()
-      setNotice('The match could not continue after the page reloaded. No result is recorded.')
-      return
+      // This page took part in this round before a reload: continue its saved game, if any.
+      saved = readNetCheckpoint({ code: room.code, round: state.round, seed: state.seed, startLevel: data.settings.startLevel, hold: data.settings.hold, battle: data.settings.mode === 'battle' })
+      if (!saved) {
+        room.send({ t: 'quit', round: state.round })
+        if (isHost) room.end()
+        setNotice('The match could not continue after the page reloaded. No result is recorded.')
+        return
+      }
     }
     store.set(ROUND_KEY, marker, sessionStorage)
     const host = state.hostId === me
     setInLobby(false)
+    setRestored(saved)
     setLive({
       code: room.code, round: state.round, seed: state.seed, startsAt: state.startsAt, settings: data.settings,
       ownId: me, otherId: other.id, host, ownName: username, otherName: other.name,
-      ownUid: `nk:${player}`, otherUid: `nk:${hellos[other.id] ?? other.id.replace(/[^a-z0-9]/gi, '').slice(0, 16)}`,
+      ownUid: `nk:${player}`, otherUid: saved?.otherUid ?? `nk:${hellos[other.id] ?? other.id.replace(/[^a-z0-9]/gi, '').slice(0, 16)}`,
     })
     // Mount once per round; settings are frozen at the start.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -170,6 +180,7 @@ export default function NetMultiplayer({ username, onBack, preferences, backendS
     if (room && isHost && state?.phase === 'playing') room.end()
   }
   function leaveRoom() {
+    history.replaceState(null, '', `${location.pathname}${location.search}`)
     room?.leave(); setRoom(null); setState(null); setLive(null); setCompleted(null)
   }
   function back() { leaveRoom(); onBack() }
@@ -249,7 +260,7 @@ export default function NetMultiplayer({ username, onBack, preferences, backendS
       </>}
     </section>
   </main>
-    {room && live && <NetLiveGame key={`${live.code}:${live.round}`} room={room} round={live} options={options} paused={Boolean(state?.paused)} onExit={toLobby} onConnection={setConnection} />}
+    {room && live && <NetLiveGame key={`${live.code}:${live.round}`} room={room} round={live} options={options} paused={Boolean(state?.paused)} onExit={toLobby} onConnection={setConnection} restored={restored} />}
     {completed && <MatchResults result={completed.result} uid={completed.uid} saving={saving} saveError={saveError} actionError="" busy={false} connection={connection ? summaryLine(connection) : undefined} onRetrySave={() => onCompleted(completed.result, completed.uid)} onLobby={toLobby} onMenu={back} />}
   </>
 }

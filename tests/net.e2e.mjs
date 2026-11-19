@@ -129,3 +129,24 @@ test('Battle settles by survival; a lost connection pauses both games; leaving e
   assert.deepEqual([...host.errors, ...guest.errors], [])
   await host.context.close(); await guest.context.close()
 }, { timeout: 150000 })
+
+test('F-038: a page reload during a match continues the same game and the match still settles', async () => {
+  const { host, guest } = await lobby()
+  await startMatch(host)
+  // A few moves so the guest's board is not empty, then a reload.
+  for (let i = 0; i < 3; i++) await guest.page.keyboard.press('Space')
+  await guest.page.waitForTimeout(800)
+  const before = await guest.page.getByLabel('Your game', { exact: true }).locator('.playfield').innerHTML()
+  await guest.page.reload()
+  await guest.page.getByLabel('Your game', { exact: true }).waitFor({ timeout: 20000 })
+  const after = await guest.page.getByLabel('Your game', { exact: true }).locator('.playfield').innerHTML()
+  const filled = html => (html.match(/board-cell filled/g) ?? []).length
+  assert.ok(filled(after) >= filled(before) - 4, 'the locked pieces are still on the board after the reload')
+  await topOut(host.page); await topOut(guest.page)
+  for (const p of [host.page, guest.page]) await p.getByRole('button', { name: 'Rematch', exact: true }).waitFor({ timeout: 20000 })
+  const saved = await host.page.evaluate(() => JSON.parse(localStorage.getItem('bricks.multiplayer-results.v1')).matches)
+  const theirs = await guest.page.evaluate(() => JSON.parse(localStorage.getItem('bricks.multiplayer-results.v1')).matches)
+  assert.deepEqual(saved.at(-1), theirs.at(-1), 'both devices store the same match after the reload')
+  assert.deepEqual([...host.errors, ...guest.errors], [])
+  await host.context.close(); await guest.context.close()
+}, { timeout: 150000 })

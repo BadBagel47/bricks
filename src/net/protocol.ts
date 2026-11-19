@@ -110,6 +110,13 @@ export class OpponentStream {
     this.attacks = message.total
     return true
   }
+  /** F-038: continue a stream known before a page reload. */
+  restore(last: BoardMessage | null, attacks: number, finish: FinishMessage | null) {
+    if (last && last.round === this.round) { this.seq = last.seq; this.finished = last.status === 'gameOver' }
+    this.attacks = attacks
+    if (finish && finish.round === this.round) this.finish = finish
+  }
+  get attackTotal() { return this.attacks }
   final(message: FinishMessage): boolean {
     if (message.round !== this.round || this.finish) return false
     this.finish = message
