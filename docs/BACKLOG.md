@@ -23,8 +23,8 @@ records released changes.
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
 | T-010 | Task | network-kit feedback (from F-028/F-038): (1) the first deploy of a new game Worker failed with Cloudflare's "This Worker does not exist" right after the upload and passed on a re-run: the deploy guide or workflow template could retry once; (2) a guide section on continuing a game after a page reload (identity per device, room code kept in the address, the game's own state in the tab, everyone sends their current state again on `peer back`) would help other games | Low | Done (2026-11-19): sent with the owner's yes; recorded as network-kit F-112 (retry on error 10007) and network-kit F-113 (guide section on continuing after a reload) | — (owner) |
-| T-011 | Task | Install network-kit's update workflow (network-kit `templates/update-network-kit.yml`) in `.github/workflows/`: it proposes new network-kit fix versions by itself on a branch of its own, runs network-kit's smoke test and Bricks' tests, and opens an issue with the result; the agent then brings the branch in. Origin: network-kit, owner's decision there (network-kit Q13, 2026-11-19) | Medium | Pågår 2026-11-19 (session ccr-fca4d5ae-ka315n) | Standard |
-| T-012 | Task | Take network-kit 0.17.0 (Bricks has 0.15.1 since B-025): per network-kit no code changes are needed for 0.16–0.17; 0.16.0 protects the quota (network-kit F-098); does not close live rooms | Medium | Pågår 2026-11-19 (session ccr-fca4d5ae-ka315n) | Standard |
+| T-012 | Task | Take network-kit 0.17.0 (Bricks has 0.15.1 since B-025): per network-kit no code changes are needed for 0.16–0.17; 0.16.0 protects the quota (network-kit F-098); does not close live rooms | Medium | Paused (2026-11-19): needs the owner's choice of room caps (network-kit 0.16 lowers them) | Standard |
+| F-039 | Feature | QR code for the invitation in the 2 Players lobby (owner 2026-11-19) | Medium | Proposed (2026-11-19) | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
@@ -36,6 +36,7 @@ records released changes.
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
 | B-025 | Bug | With a game link in the browser, the page's status check and notices from network-kit were refused by the browser (CORS) because Bricks' page and room Worker are on different addresses (network-kit B-104, fixed in network-kit 0.15.1); the check then read as open and notices did not show. Fix: take network-kit 0.15.1 | Medium | Done (2026-11-19): network-kit 0.15.1 taken in; preflight with a game link allowed | Standard |
+| T-011 | Task | Install network-kit's update workflow (network-kit `templates/update-network-kit.yml`) in `.github/workflows/`: it proposes new network-kit fix versions by itself on a branch of its own, runs network-kit's smoke test and Bricks' tests, and opens an issue with the result; the agent then brings the branch in. Origin: network-kit, owner's decision there (network-kit Q13, 2026-11-19) | Medium | Done (2026-11-19): `.github/workflows/update-network-kit.yml` (network-kit's template, set for Bricks: smoke test with Bricks' room options; lint, unit, build, browser and Cloudflare tests); runs daily, first result shows when network-kit releases a fix | Standard |
 | F-038 | Feature | Cloudflare 2 Players: restore a player's game after a page reload during a match (today the match ends without a result) | Medium | Done (2026-11-19): the game is kept in the tab and the address names the room, so a reload continues the match; needs a check on a phone | Strong |
 | F-028 | Feature | Build the move: a small Bricks game Worker with a network-kit room (host-run relay, EU rooms, private rooms with invitation keys; public Off with working invitations needs network-kit F-059); Score Duel and Battle snapshots and Battle rows as room messages; lobby, countdown with seed, reconnection, results and rematch on network-kit; connect to network-kit's admin page; validate received boards, Battle rows and finishes in the receiving browser (format, value ranges, sequence order, no revival after Game Over, Battle totals only increase) and ignore what fails, replacing the content checks the Firebase rules do today; update the privacy text in Settings; Firebase stays as fallback until the owner has played a real match | Medium | Done (2026-11-19): Cloudflare 2 Players side by side with Firebase; needs a real match on two devices | Strong |
 | F-036 | Feature | Compare connection performance between Firebase and network-kit (Cloudflare) 2 Players: how long a move takes to show on the other screen, how even the updates are, reconnect time | Medium | Done (2026-11-19): measured in both versions; result line and Settings → Connection | Strong |
@@ -108,11 +109,13 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 ## Proposed runs (2026-11-18)
 
-Prioritised for: keeping network-kit current, first by hand, then by itself.
+Prioritised for: the owner's newest request and the paused network-kit update.
 
-- **A** – standard model, medium level – network-kit updates
-  - T-012 – Take network-kit 0.17.0 and run every test, so Bricks gets the quota protection and the latest fixes.
-  - T-011 – Install network-kit's update workflow, so new fix versions arrive as a tested branch with an issue instead of by hand.
+- **A** – standard model, medium level – QR code and network-kit 0.17.0
+  - F-039 – Show a QR code of the invite link in the lobby, so a friend can join by pointing the phone camera at the screen.
+  - Question: where and in which version? Recommendation: a *QR Code* button next to *Copy Invite Link* that shows the code large, in both the Firebase and the Cloudflare version.
+  - T-012 – Take network-kit 0.17.0 (from 0.15.1) with its lower room caps handled.
+  - Question: network-kit 0.16 lowers the caps per room and day to about 4 hours with activity and 150,000 messages; a room that reaches them closes, also mid-match. Recommendation: raise them for Bricks to 6 hours and 300,000 messages (an evening fits; one room can use at most about a seventh of the account's free daily budget).
 
 Not proposed: F-006 (made in the separate music studio chat); T-009 (retire Firebase and the old admin; waits for the owner's comparison and explicit yes).
 

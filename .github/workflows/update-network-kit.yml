@@ -1,0 +1,247 @@
+# network-kit updates for Bricks (T-011; template from network-kit v0.17.0, network-kit D-009 and D-021).
+# Values under `env` are set for Bricks; the rest is network-kit's template unchanged.
+#
+# Once a day it looks for a newer network-kit bug-fix release: the same
+# MAJOR.MINOR as the copy in VENDOR_DIR, a higher PATCH, released at least
+# WAIT_DAYS ago. It copies that version onto a branch `network-kit/vX.Y.Z`,
+# runs the kit's smoke test and the game's own tests, and opens an issue with
+# the result. Nothing is pushed to the game's main branch: the owner (or an
+# agent) merges the branch when it looks good. A version that already has an
+# issue, open or closed, is not proposed again.
+#
+# A new MINOR or MAJOR version is only announced, once, with an issue. To
+# prepare it, start the workflow by hand with the version; it may need changes
+# in the game (see the upgrade guide in the kit's changelog).
+#
+# The kit's code and the game's tests run in a job that can only read the
+# repository; a second job, which runs none of that code, pushes the branch
+# and opens the issue.
+#
+# network-kit is public, so no token is needed. GitHub may pause scheduled
+# workflows in a repository that has had no activity for a long time; start it
+# by hand then.
+name: Update network-kit
+
+on:
+  schedule:
+    - cron: '23 3 * * *'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to prepare, e.g. 0.3.0 (empty: the latest bug fix)'
+        required: false
+
+permissions: {}
+
+env:
+  VENDOR_DIR: vendor/network-kit
+  # The game's room options file, for the kit's smoke test (empty: the kit's defaults).
+  SMOKE_OPTIONS: server/rooms/rooms-options.js
+  # The game's own set-up and tests (each may be several commands joined with &&; empty: skip).
+  SETUP_COMMAND: npm ci
+  TEST_COMMAND: npm run lint && npm test && npm run build && npm run test:browser && npm run test:net
+  # A bug fix is taken only when it has been out for this many days.
+  WAIT_DAYS: 3
+  NETWORK_KIT: https://github.com/BadBagel47/network-kit.git
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
+    outputs:
+      current: ${{ steps.find.outputs.current }}
+      target: ${{ steps.find.outputs.target }}
+      kind: ${{ steps.find.outputs.kind }}
+      announce: ${{ steps.find.outputs.announce }}
+      edits: ${{ steps.edits.outputs.found }}
+      smoke: ${{ steps.smoke.outcome }}
+      tests: ${{ steps.tests.outcome }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Find a newer version
+        id: find
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WANTED: ${{ github.event.inputs.version }}
+        run: |
+          newer() { [ "$1" != "$2" ] && [ "$(printf '%s\n%s\n' "$1" "$2" | sort -V | tail -1)" = "$1" ]; }
+          seen() { [ "$(gh issue list --state all --search "\"$1\" in:title" --json number --jq 'length')" != "0" ]; }
+
+          if [ ! -s "$VENDOR_DIR/VERSION" ]; then
+            echo "::error::$VENDOR_DIR/VERSION is missing or empty: take a first copy with network-kit's scripts/vendor.mjs"
+            exit 1
+          fi
+          current=$(tr -d '[:space:]' < "$VENDOR_DIR/VERSION")
+          tags=$(git ls-remote --tags --refs "$NETWORK_KIT" 'v*' | sed 's#.*refs/tags/v##' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V || true)
+          if [ -z "$tags" ]; then
+            echo "::error::could not read network-kit's releases from $NETWORK_KIT"
+            exit 1
+          fi
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          line=$(echo "$current" | cut -d. -f1,2)
+
+          # A newer feature version is only announced, once.
+          newest=$(echo "$tags" | tail -1)
+          newest_line=$(echo "$newest" | cut -d. -f1,2)
+          if [ "$newest_line" != "$line" ] && newer "$newest" "$current" && ! seen "network-kit v$newest_line is available"; then
+            echo "announce=$newest_line" >> "$GITHUB_OUTPUT"
+          fi
+
+          target=""
+          if [ -n "$WANTED" ]; then
+            echo "$tags" | grep -qx "$WANTED" || { echo "::error::network-kit v$WANTED does not exist"; exit 1; }
+            newer "$WANTED" "$current" || { echo "::error::v$WANTED is not newer than v$current"; exit 1; }
+            target="$WANTED"
+            git clone --quiet --depth 1 --branch "v$target" "$NETWORK_KIT" "$RUNNER_TEMP/network-kit"
+          else
+            # The newest bug fix of this line that has been out long enough.
+            for v in $(echo "$tags" | grep -E "^${line//./\\.}\.[0-9]+$" | sort -rV); do
+              newer "$v" "$current" || break
+              rm -rf "$RUNNER_TEMP/network-kit"
+              git clone --quiet --depth 1 --branch "v$v" "$NETWORK_KIT" "$RUNNER_TEMP/network-kit"
+              age_days=$(( ( $(date +%s) - $(git -C "$RUNNER_TEMP/network-kit" log -1 --format=%ct) ) / 86400 ))
+              if [ "$age_days" -ge "$WAIT_DAYS" ]; then target="$v"; break; fi
+              echo "network-kit v$v is $age_days day(s) old; not taken until it is $WAIT_DAYS"
+            done
+          fi
+          if [ -z "$target" ]; then
+            echo "network-kit $current: nothing to take in now"
+            exit 0
+          fi
+          if [ -z "$WANTED" ] && seen "network-kit v$target is ready"; then
+            echo "network-kit v$target has been proposed before; not proposing it again"
+            exit 0
+          fi
+          kind="bug-fix"
+          [ "$(echo "$target" | cut -d. -f1,2)" != "$line" ] && kind="feature"
+          echo "target=$target" >> "$GITHUB_OUTPUT"
+          echo "kind=$kind" >> "$GITHUB_OUTPUT"
+
+      - name: Look for local edits in the copy
+        id: edits
+        if: steps.find.outputs.target
+        env:
+          CURRENT: ${{ steps.find.outputs.current }}
+        run: |
+          # The copy must be untouched; edits would be lost by the update.
+          if git clone --quiet --depth 1 --branch "v$CURRENT" "$NETWORK_KIT" "$RUNNER_TEMP/network-kit-current" 2>/dev/null; then
+            node "$RUNNER_TEMP/network-kit-current/scripts/vendor.mjs" "$RUNNER_TEMP/pristine" >/dev/null
+            if ! diff -rq "$RUNNER_TEMP/pristine" "$VENDOR_DIR"; then
+              echo "found=true" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Copy the new version
+        if: steps.find.outputs.target
+        run: node "$RUNNER_TEMP/network-kit/scripts/vendor.mjs" "$VENDOR_DIR"
+
+      - name: Run the kit's smoke test
+        id: smoke
+        if: steps.find.outputs.target
+        continue-on-error: true
+        run: |
+          if [ -n "$SMOKE_OPTIONS" ]; then
+            node "$VENDOR_DIR/smoke.mjs" --options "$SMOKE_OPTIONS"
+          else
+            node "$VENDOR_DIR/smoke.mjs"
+          fi
+
+      - name: Run the game's tests
+        id: tests
+        if: steps.find.outputs.target
+        continue-on-error: true
+        run: |
+          if [ -n "$SETUP_COMMAND" ]; then bash -c "$SETUP_COMMAND"; fi
+          if [ -n "$TEST_COMMAND" ]; then bash -c "$TEST_COMMAND"; else echo "no game tests configured"; fi
+
+      - name: Hand the copy to the next job
+        if: steps.find.outputs.target
+        uses: actions/upload-artifact@v4
+        with:
+          name: network-kit-copy
+          path: ${{ env.VENDOR_DIR }}
+          include-hidden-files: true
+          retention-days: 1
+
+  propose:
+    needs: prepare
+    if: needs.prepare.outputs.target
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+    env:
+      CURRENT: ${{ needs.prepare.outputs.current }}
+      TARGET: ${{ needs.prepare.outputs.target }}
+      KIND: ${{ needs.prepare.outputs.kind }}
+      SMOKE: ${{ needs.prepare.outputs.smoke }}
+      TESTS: ${{ needs.prepare.outputs.tests }}
+      EDITS: ${{ needs.prepare.outputs.edits }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Replace the copy
+        run: git rm -r -q --ignore-unmatch "$VENDOR_DIR" && rm -rf "$VENDOR_DIR"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: network-kit-copy
+          path: ${{ env.VENDOR_DIR }}
+
+      - name: Push the branch and tell the owner
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          branch="network-kit/v$TARGET"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add -A "$VENDOR_DIR"
+          git commit -m "Update network-kit to v$TARGET" -m "Update proposal made by the update-network-kit workflow. Not merged automatically."
+          git push --force origin "$branch"
+          {
+            echo "network-kit v$TARGET ($KIND update; the game now has v$CURRENT) is ready on the branch \`$branch\`."
+            echo
+            echo "- Kit smoke test: **$SMOKE**"
+            echo "- Game tests: **$TESTS**"
+            if [ "$EDITS" = "true" ]; then
+              echo "- **The copy in \`$VENDOR_DIR\` had local edits, which this update removes.** Fix them in network-kit instead."
+            fi
+            if [ "$KIND" = "feature" ]; then
+              echo "- A feature update may need changes in the game: read the upgrade guide in the changelog first."
+            fi
+            echo
+            echo "Changes: https://github.com/BadBagel47/network-kit/blob/v$TARGET/CHANGELOG.md"
+            echo
+            echo "To take it in: merge \`$branch\` into the main branch and deploy the game's room server together with its pages."
+            echo "To skip this version: delete the branch and close this issue; it will not be proposed again."
+          } > "$RUNNER_TEMP/issue.md"
+          gh issue create --title "network-kit v$TARGET is ready to take in" --body-file "$RUNNER_TEMP/issue.md"
+
+  announce:
+    needs: prepare
+    if: needs.prepare.outputs.announce
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Tell the owner about a new feature version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          LINE: ${{ needs.prepare.outputs.announce }}
+          CURRENT: ${{ needs.prepare.outputs.current }}
+        run: |
+          {
+            echo "network-kit v$LINE is out; this game has v$CURRENT."
+            echo
+            echo "A feature version may need changes in the game. Read the upgrade guide: https://github.com/BadBagel47/network-kit/blob/main/CHANGELOG.md"
+            echo
+            echo "To prepare it on a branch, start the \"Update network-kit\" workflow by hand with the version to take. Bug fixes for v${CURRENT%.*} keep being proposed as long as they are released."
+          } > "$RUNNER_TEMP/issue.md"
+          gh issue create --title "network-kit v$LINE is available" --body-file "$RUNNER_TEMP/issue.md"
