@@ -6,9 +6,7 @@ import { chromium } from 'playwright-core'
 import { seedOperating } from './fixtures/seed-operating.mjs'
 
 let server
-// Two browsers: in one shared headless browser, key presses sent to one page sometimes reach
-// the other page (found 2026-11-19, B-021). The second player of a pair uses browser2.
-let browser, browser2
+let browser
 const baseURL = 'http://127.0.0.1:4241'
 before(async () => {
   assert.ok(process.env.FIREBASE_DATABASE_EMULATOR_HOST && process.env.FIREBASE_AUTH_EMULATOR_HOST)
@@ -28,9 +26,9 @@ before(async () => {
   }
   const executablePath = process.env.BRICKS_CHROMIUM_EXECUTABLE || ['/usr/bin/chromium', '/usr/bin/google-chrome'].find(existsSync)
   assert.ok(executablePath)
-  ;[browser, browser2] = await Promise.all([chromium.launch({ executablePath, args: ['--no-sandbox'] }), chromium.launch({ executablePath, args: ['--no-sandbox'] })])
+  browser = await chromium.launch({ executablePath, args: ['--no-sandbox'] })
 }, { timeout: 60000 })
-after(async () => { await browser?.close(); await browser2?.close(); server?.kill('SIGTERM') })
+after(async () => { await browser?.close(); server?.kill('SIGTERM') })
 
 async function name(page, value) {
   await page.getByLabel('Player name', { exact: true }).fill(value)
@@ -136,7 +134,7 @@ test('real room UI: host, four-character codes, invite onboarding, join/reload, 
 })
 
 test('lobby presence, explicit host transfer, automatic handover on leave and socket release', { timeout: 60000 }, async () => {
-  const contexts = await Promise.all([browser.newContext(), browser2.newContext()])
+  const contexts = await Promise.all([browser.newContext(), browser.newContext()])
   try {
     const [host, guest] = await Promise.all(contexts.map(context => context.newPage()))
     let socketClosed = false
@@ -210,7 +208,7 @@ test('closing a guest tab frees its slot after the grace period for another iden
 })
 
 test('shared settings: private drafts, cancel, approval invalidation and host transfer', { timeout: 60000 }, async () => {
-  const contexts = await Promise.all([browser.newContext(), browser2.newContext()])
+  const contexts = await Promise.all([browser.newContext(), browser.newContext()])
   try {
     const [host, guest] = await Promise.all(contexts.map(context => context.newPage()))
     for (const page of [host, guest]) page.setDefaultTimeout(12000)
@@ -250,7 +248,7 @@ test('shared settings: private drafts, cancel, approval invalidation and host tr
 })
 
 test('host configuration waiting handles cancel, apply, transfer, disconnect, editing-tab close and leave', { timeout: 60000 }, async () => {
-  const contexts = await Promise.all([browser.newContext(), browser2.newContext()])
+  const contexts = await Promise.all([browser.newContext(), browser.newContext()])
   try {
     const [host, guest] = await Promise.all(contexts.map(context => context.newPage()))
     for (const page of [host, guest]) page.setDefaultTimeout(12000)
@@ -300,7 +298,7 @@ test('host configuration waiting handles cancel, apply, transfer, disconnect, ed
 })
 
 test('countdown freezes approved settings, produces identical starts despite clock skew, cancels on lost connection and leave', { timeout: 60000 }, async () => {
-  const contexts = await Promise.all([browser.newContext(), browser2.newContext()])
+  const contexts = await Promise.all([browser.newContext(), browser.newContext()])
   try {
     const [host, guest] = await Promise.all(contexts.map(context => context.newPage()))
     for (const page of [host, guest]) page.setDefaultTimeout(12000)
@@ -362,7 +360,7 @@ test('countdown freezes approved settings, produces identical starts despite clo
 })
 
 test('two sessions recover twice from confirmed snapshots without a false result', { timeout: 100000 }, async () => {
-  const contexts = await Promise.all([browser.newContext(), browser2.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true })])
+  const contexts = await Promise.all([browser.newContext(), browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true })])
   try {
     const [host, guest] = await Promise.all(contexts.map(context => context.newPage()))
     for (const page of [host, guest]) page.setDefaultTimeout(12000)
@@ -471,7 +469,7 @@ test('two sessions recover twice from confirmed snapshots without a false result
 })
 
 test('the host can reconnect while the guest coordinates recovery', { timeout: 50000 }, async () => {
-  const contexts = await Promise.all([browser.newContext(), browser2.newContext()])
+  const contexts = await Promise.all([browser.newContext(), browser.newContext()])
   try {
     const [host, guest] = await Promise.all(contexts.map(context => context.newPage()))
     for (const page of [host, guest]) page.setDefaultTimeout(12000)
@@ -499,7 +497,7 @@ test('the host can reconnect while the guest coordinates recovery', { timeout: 5
 })
 
 test('a disconnected player who does not return leads to abandonment without a result', { timeout: 65000 }, async () => {
-  const contexts = await Promise.all([browser.newContext(), browser2.newContext()])
+  const contexts = await Promise.all([browser.newContext(), browser.newContext()])
   try {
     const [host, guest] = await Promise.all(contexts.map(context => context.newPage()))
     for (const page of [host, guest]) page.setDefaultTimeout(12000)
@@ -519,7 +517,7 @@ test('a disconnected player who does not return leads to abandonment without a r
 })
 
 test('Score Duel retains a finished player through reconnect, settles by points and supports a zero draw', { timeout: 80000 }, async () => {
-  const contexts = await Promise.all([browser.newContext(), browser2.newContext()])
+  const contexts = await Promise.all([browser.newContext(), browser.newContext()])
   try {
     const [host, guest] = await Promise.all(contexts.map(context => context.newPage()))
     for (const page of [host, guest]) page.setDefaultTimeout(12000)
@@ -534,13 +532,17 @@ test('Score Duel retains a finished player through reconnect, settles by points 
     // blip right after a reconnect) are ignored by design, so keep dropping until Game over and
     // report what the page showed if it never comes.
     async function finish(page) {
+      // The last player to finish goes straight to the result screen, often before
+      // "Game over" can be seen (the real cause of B-021, found 2026-11-19).
       const over = page.getByLabel('Your game', { exact: true }).getByText('Game over', { exact: true })
+      const results = page.getByRole('main', { name: 'Match results', exact: true })
+      const done = async () => await over.isVisible() || await results.isVisible()
       const pausedNote = page.getByText('Match paused. Waiting for reconnection…', { exact: true })
-      for (let round = 0; round < 5 && !(await over.isVisible()); round++) {
+      for (let round = 0; round < 5 && !(await done()); round++) {
         await pausedNote.waitFor({ state: 'hidden' })
-        for (let i = 0; i < 40 && !(await over.isVisible()); i++) await page.keyboard.press('Space')
+        for (let i = 0; i < 40 && !(await done()); i++) await page.keyboard.press('Space')
       }
-      try { await over.waitFor() }
+      try { await over.or(results).first().waitFor() }
       catch (error) {
         const state = await page.evaluate(() => ({
           status: document.querySelector('[aria-label="Your game"] .board-status, [aria-label="Your game"] [role=status]')?.textContent,
@@ -651,7 +653,7 @@ test('Score Duel retains a finished player through reconnect, settles by points 
 })
 
 test('Battle restores queued attacks after reconnect, applies them once and settles by shared survival', { timeout: 80000 }, async () => {
-  const contexts = await Promise.all([browser.newContext(), browser2.newContext()])
+  const contexts = await Promise.all([browser.newContext(), browser.newContext()])
   try {
     const [host, guest] = await Promise.all(contexts.map(context => context.newPage()))
     for (const page of [host, guest]) page.setDefaultTimeout(12000)
@@ -732,7 +734,7 @@ test('Battle restores queued attacks after reconnect, applies them once and sett
 })
 
 test('Battle rematch needs both players, fresh approval and current host; reuses settings and resets all play state', { timeout: 60000 }, async () => {
-  const contexts = await Promise.all([browser.newContext(), browser2.newContext()])
+  const contexts = await Promise.all([browser.newContext(), browser.newContext()])
   try {
     const [host, guest] = await Promise.all(contexts.map(context => context.newPage()))
     for (const page of [host, guest]) page.setDefaultTimeout(12000)
