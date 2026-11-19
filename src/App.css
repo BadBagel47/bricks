@@ -478,8 +478,9 @@ html[data-motion=off]::view-transition-old(root),html[data-motion=off]::view-tra
 
 /* F-039: invitation QR code in the 2 Players lobby. */
 .invite-qr{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:8px}
-.invite-qr-code{width:min(260px,70vw);aspect-ratio:1;padding:10px;border-radius:14px;background:#fff}
-.invite-qr-code svg{display:block;width:100%;height:100%}
+/* B-031: the code's own width sets its height, so the white box stays square in Safari too. */
+.invite-qr-code{width:min(260px,70vw);padding:10px;border-radius:14px;background:#fff;line-height:0}
+.invite-qr-code svg{display:block;width:100%;height:auto;aspect-ratio:1}
 
 /* F-040: in the Row layout, a gap between the move buttons (left, right) and the rest. */
 .touch-controls:not(.touch-split){--touch-group-gap:clamp(6px,(100vw - 300px) / 4,22px)}
@@ -518,4 +519,16 @@ html[data-motion=off]::view-transition-old(root),html[data-motion=off]::view-tra
 @media(max-width:900px) and (max-height:720px) and (orientation:landscape){
   .game-shell .touch-split{position:fixed;left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));width:auto;margin:0;pointer-events:none;--touch-size:max(40px,min(64px,calc((100dvh - 250px) / 2.1)))}
   .game-shell .touch-split>*{pointer-events:auto}
+}
+
+/* F-045: on the start screen the logo and the menu buttons are equally wide: on phones the
+   buttons follow the logo, on tablets in portrait the logo grows to the buttons' width. */
+.menu-content{--hero-tile:min(clamp(46px,7vw,64px),calc((100vw - 28px - 30px) / 6.6))}
+.menu-content .brand-hero .brand-tile{--tile:var(--hero-tile)}
+@media(max-width:760px){
+  .menu-content .menu-actions{max-width:calc(6 * var(--hero-tile) + 5 * 6px)}
+}
+@media(orientation:portrait) and (min-width:761px) and (max-width:1100px){
+  .menu-content{--hero-tile:calc((min(560px,100vw - 80px) - 5 * 6px) / 6)}
+  .menu-content .menu-actions{max-width:calc(6 * var(--hero-tile) + 5 * 6px)}
 }

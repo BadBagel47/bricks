@@ -212,7 +212,7 @@ export default function NetMultiplayer({ username, onBack, preferences, backendS
         <span className="room-code-label" aria-hidden="true">Room code</span>
         <h1 ref={heading} tabIndex={-1} aria-label={`Room ${room.code}`} className="code-tiles" style={{ '--count': room.code.length } as CSSProperties}>{[...room.code].map((letter, index) => <span aria-hidden="true" className="brand-tile" key={index}>{letter}</span>)}</h1>
         <div className="room-copy">
-          <button className="button button-primary" onClick={() => void copy(inviteLink, 'Invite link copied.')}>Copy Invite Link</button>
+          <button className="back-button" onClick={() => void copy(inviteLink, 'Invite link copied.')}>Copy Invite Link</button>
           <button className="back-button" onClick={() => void copy(room.code, 'Code copied.')}>Copy Code</button>
           <InviteQr url={inviteLink} full={Boolean(other)} />
         </div>

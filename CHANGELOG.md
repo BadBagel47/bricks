@@ -6,6 +6,14 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Changed (2026-11-19, run B)
+- F-045: on the start screen the logo and the menu buttons are equally wide: narrower buttons on phones, a larger logo on tablets in portrait.
+- F-044: Copy Invite Link has the outlined style of Copy Code and QR Code; orange is kept for Start Match and selected options.
+- F-043: switching between Firebase and Cloudflare on the 2 Players screen cross-fades like other screen changes.
+
+### Fixed (2026-11-19, run B)
+- B-031: the invitation QR code's white box stays square (it could be taller than wide on iPad).
+
 ### Changed (2026-11-19, run A)
 - B-029: a Cloudflare match counts down with large bricks under "First brick in": each second a new brick with the remaining seconds drops onto a pile, in the logo's colours and tilts, over the dimmed match screen.
 - F-041: Split is the default touch layout and comes first in Settings; earlier saved Row choices move to Split once. On short landscape screens the Split buttons sit in the bottom corners beside the board; in a landscape match the pad sits above the rotate buttons.

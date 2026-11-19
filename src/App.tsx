@@ -90,16 +90,17 @@ function App() {
   const personalRef = useRef(personal)
   personalRef.current = personal
   /** F-021: screens cross-fade with the View Transitions API where the browser has it. */
-  function setView(next: View) {
+  function crossFade(update: () => void, instant = false) {
     const doc = document as Document & { startViewTransition?: (update: () => void) => unknown }
-    // The game starts instantly: a transition would briefly swallow the first taps.
-    if (next === 'game' || !personalRef.current.interfaceAnimations || !doc.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) { setViewState(next); return }
-    doc.startViewTransition(() => flushSync(() => setViewState(next)))
+    if (instant || !personalRef.current.interfaceAnimations || !doc.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) { update(); return }
+    doc.startViewTransition(() => flushSync(update))
   }
+  // The game starts instantly: a transition would briefly swallow the first taps.
+  function setView(next: View) { crossFade(() => setViewState(next), next === 'game') }
   useEffect(() => { document.documentElement.dataset.motion = personal.interfaceAnimations ? 'on' : 'off' }, [personal.interfaceAnimations])
   // F-028: Firebase or Cloudflare 2 Players while both exist; a Cloudflare link opens Cloudflare.
   const [backend, setBackend] = useState<Backend>(() => cloudflareLink() ? 'cloudflare' : new URL(location.href).searchParams.has('room') ? 'firebase' : savedBackend())
-  function chooseBackend(value: Backend) { saveBackend(value); setBackend(value) }
+  function chooseBackend(value: Backend) { saveBackend(value); crossFade(() => setBackend(value)) } // F-043: cross-fades like other screen changes
   const [canFullscreen] = useState(() => fullscreenSupported(document))
   const [isFullscreen, setIsFullscreen] = useState(() => fullscreenActive(document))
   useEffect(() => {

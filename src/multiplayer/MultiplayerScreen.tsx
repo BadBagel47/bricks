@@ -234,7 +234,7 @@ export default function MultiplayerScreen({ username, onBack, preferences, backe
         <span className="room-code-label" aria-hidden="true">Room code</span>
         <h1 ref={heading} tabIndex={-1} aria-label={`Room ${joined.code}`} className="code-tiles" style={{ '--count': joined.code.length } as CSSProperties}>{[...joined.code].map((letter, index) => <span aria-hidden="true" className="brand-tile" key={index}>{letter}</span>)}</h1>
         <div className="room-copy">
-          {sharingURL && <button className="button button-primary" onClick={() => void copy(sharingURL, 'Invite link copied.')}>Copy Invite Link</button>}
+          {sharingURL && <button className="back-button" onClick={() => void copy(sharingURL, 'Invite link copied.')}>Copy Invite Link</button>}
           <button className="back-button" onClick={() => void copy(joined.code, 'Code copied.')}>Copy Code</button>
           {sharingURL && <InviteQr url={sharingURL} full={Boolean(guestUid)} />}
         </div>
