@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "test:browser": "node --test tests/browser.integration.mjs",
     "test:operating": "node --test tests/operating.browser.mjs",
+    "test:net": "node --test --test-concurrency=1 tests/net.e2e.mjs",
     "emulators": "node scripts/firebase-emulators.mjs",
     "test:firebase": "node scripts/firebase-emulators.mjs --test",
     "test:firebase:auth": "node scripts/firebase-emulators.mjs --auth-only",

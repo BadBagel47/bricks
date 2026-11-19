@@ -41,7 +41,7 @@ export function MultiplayerHighscores({ mode, onPlay, limit = 10, heading = true
   </section>
 }
 
-export function MatchResults({ result, uid, saving, saveError, actionError, busy, onRetrySave, onLobby, onMenu }: { result: MatchResult; uid: string; saving: boolean; saveError: string; actionError: string; busy: boolean; onRetrySave: () => void; onLobby: () => void; onMenu: () => void }) {
+export function MatchResults({ result, uid, saving, saveError, actionError, busy, onRetrySave, onLobby, onMenu, connection }: { result: MatchResult; uid: string; saving: boolean; saveError: string; actionError: string; busy: boolean; onRetrySave: () => void; onLobby: () => void; onMenu: () => void; connection?: string }) {
   const screen = useRef<HTMLElement>(null)
   const heading = useRef<HTMLHeadingElement>(null)
   const [archive, setArchive] = useState<MatchResult[]>([])
@@ -98,6 +98,7 @@ export function MatchResults({ result, uid, saving, saveError, actionError, busy
     {saving && <p role="status">Saving results…</p>}
     {saveError && <div role="alert" className="result-alert"><p>{saveError}</p><button className="secondary-card" onClick={onRetrySave}>Retry saving</button></div>}
     <MultiplayerHighscores mode={result.mode} limit={3} ownUid={uid} currentMatch={result.id} />
+    {connection && <p className="connection-line">{connection}</p>}
     {actionError && <p role="alert">{actionError}</p>}
     <div className="result-actions"><button className="button button-primary" disabled={busy} onClick={onLobby}>Rematch</button><button className="secondary-card" disabled={busy} onClick={onMenu}>Main Menu</button></div>
   </main>, document.body)

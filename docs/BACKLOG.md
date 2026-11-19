@@ -22,18 +22,20 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| F-036 | Feature | Compare connection performance between Firebase and network-kit (Cloudflare) 2 Players: how long a move takes to show on the other screen, how even the updates are, reconnect time | Medium | Pågår 2026-11-19 (session ccr-fca4d5ae-ka315n) | Strong |
+| F-038 | Feature | Cloudflare 2 Players: restore a player's game after a page reload during a match (today the match ends without a result) | Medium | Idea (2026-11-19, from F-028) | Strong |
+| B-024 | Bug | Cloudflare end-to-end test: once in five local runs the host's match view was gone during the first Score Duel (no error shown); the test now prints the page when it happens; the CI job does not hold back deploys | Low | Idea (2026-11-19) | Strong |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
 | T-008 | Task | Owner decisions before the move | Medium | Done (2026-11-18): start before another game is fully proven, after network-kit F-057/network-kit F-058 and more testing; 6-character codes; 1 Player On/Off and administrator play come from network-kit (network-kit F-057, network-kit F-058) | — (owner) |
-| F-028 | Feature | Build the move: a small Bricks game Worker with a network-kit room (host-run relay, EU rooms, private rooms with invitation keys; public Off with working invitations needs network-kit F-059); Score Duel and Battle snapshots and Battle rows as room messages; lobby, countdown with seed, reconnection, results and rematch on network-kit; connect to network-kit's admin page; validate received boards, Battle rows and finishes in the receiving browser (format, value ranges, sequence order, no revival after Game Over, Battle totals only increase) and ignore what fails, replacing the content checks the Firebase rules do today; update the privacy text in Settings; Firebase stays as fallback until the owner has played a real match | Medium | Pågår 2026-11-19 (session ccr-fca4d5ae-ka315n) | Strong |
 | T-009 | Task | After F-028 is confirmed on two devices: retire Bricks' admin Worker (`feature/operating-controls`, D1) and the Firebase project, and remove the Firebase code | Low | Idea; deleting external services needs the owner's explicit yes | Standard |
 
 ## Done
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| F-028 | Feature | Build the move: a small Bricks game Worker with a network-kit room (host-run relay, EU rooms, private rooms with invitation keys; public Off with working invitations needs network-kit F-059); Score Duel and Battle snapshots and Battle rows as room messages; lobby, countdown with seed, reconnection, results and rematch on network-kit; connect to network-kit's admin page; validate received boards, Battle rows and finishes in the receiving browser (format, value ranges, sequence order, no revival after Game Over, Battle totals only increase) and ignore what fails, replacing the content checks the Firebase rules do today; update the privacy text in Settings; Firebase stays as fallback until the owner has played a real match | Medium | Done (2026-11-19): Cloudflare 2 Players side by side with Firebase; needs a real match on two devices | Strong |
+| F-036 | Feature | Compare connection performance between Firebase and network-kit (Cloudflare) 2 Players: how long a move takes to show on the other screen, how even the updates are, reconnect time | Medium | Done (2026-11-19): measured in both versions; result line and Settings → Connection | Strong |
 | F-037 | Feature | Danger music feels like it starts a little early (owner 2026-11-18): adjust when it starts and ends | Low | Done (2026-11-18): as in NES, no margin before normal music; needs the owner's ear | Standard |
 | B-022 | Bug | Home screen app icon (F-035) shows as a small square: Android puts icons that are not marked as maskable, dark background included, shrunk inside a white shape | Medium | Done (2026-11-18; re-add the app to the home screen to see it) | Standard |
 | B-023 | Bug | The fullscreen button (F-033) keeps an orange outline after a tap: phones keep the hover style on the last tapped element (sticky hover); the same can happen to other buttons that stay on screen, e.g. Hold | Low | Done (2026-11-18; needs check on a phone) | Standard |
@@ -102,23 +104,16 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 ## Proposed runs (2026-11-18)
 
-Prioritised for: the move the owner wants sooner, now that network-kit has everything it needs.
+Prioritised for: the owner's check of the move first.
 
-- **A** – strong model, high level – Move 2 Players to network-kit, side by side with Firebase
-  - F-028 – Run Score Duel and Battle on network-kit rooms through a small Bricks Worker (EU rooms), with lobbies from network-kit's admin page instead of Bricks' private invitations and 1 Player / 2 Players controlled on network-kit's admin page, so Bricks no longer depends on Firebase for play.
-  - Question: what happens to *Reopen Previous Room*? Recommendation: becomes *Rejoin last room*, shown only while network-kit still keeps that room (up to 24 hours after the last player left).
-  - Decided (owner 2026-11-18): Firebase stays playable side by side until everything on Cloudflare is ready, so the two can be compared (F-036). T-009 removes Firebase only after that.
-  - Question: how does a player pick Firebase or Cloudflare while both exist? Recommendation: a choice on the 2 Players screen (Firebase / Cloudflare, Firebase first until Cloudflare is ready); the room code and invitation link carry the choice, so both players always use the same.
-  - F-036 – Measure both versions the same way during a match: how long a move takes to show on the opponent's screen, how even the updates are, and how long a reconnect takes, so the owner can compare them.
-  - Question: where are the measurements shown? Recommendation: a short line on the match result screen, and a comparison of the latest matches per version in Settings under a new *Connection* section.
-  - Question: where does Bricks' room server run? Recommendation: a new Worker on the same Cloudflare account as the admin Worker and network-kit's admin page, deployed from `main` by GitHub Actions with the existing token.
-  - Question: the project rule on operating controls in `AGENTS.md` changes with the move (network-kit's states On / No new players / Timer per mode, game links, admin lobbies; admitted games finish). Recommendation: approve rewriting it that way when F-028 is published.
-  - Question: peer replay verification against cheating (network-kit D-062) as part of the move? Recommendation: later, as its own item; the move is big already.
+- **A** – strong model, high level – After the move
+  - F-038 – Restore a player's Cloudflare match after a page reload, so a reload no longer ends the match.
+  - B-024 – Find why the Cloudflare test once lost the match view, so the test can hold back deploys like the others.
 
-Not proposed: F-006 (made in the separate music studio chat); T-009 (after F-028 is confirmed on two devices).
+Not proposed: F-006 (made in the separate music studio chat); T-009 (retire Firebase and the old admin; waits for the owner's comparison and explicit yes).
 
 
-Waiting for the owner: F-030 – F-035 and B-019 check on a phone (F-033 also: add the game to the home screen); B-018 check on a phone; B-004 two-device check of the opponent board; check B-017 on a real phone; decide whether the privacy text in Settings is enough (not legal advice).
+Waiting for the owner: a real Cloudflare 2 Players match on two devices (F-028) and the comparison in Settings → Connection (F-036); F-030 – F-035 and B-019 check on a phone (F-033 also: add the game to the home screen); B-018 check on a phone; B-004 two-device check of the opponent board; check B-017 on a real phone; decide whether the privacy text in Settings is enough (not legal advice).
 
 Parked: F-027 (alternative Modern piece colors).
 
@@ -289,6 +284,7 @@ Parked: F-027 (alternative Modern piece colors).
   for menus/results). Same four-channel style; see `docs/AUDIO.md`.
 
 ### F-007 Move Bricks 2 Players to network-kit
+- 2026-11-19, F-028/F-036 done: `server/rooms/` (room Worker `bricks`, https://bricks.l8p1.workers.dev, EU rooms, admin game `bricks` mode `duo`), `vendor/network-kit/` (0.13.4), `src/net/` (protocol with receiver checks, lobby, live game), *Server* switch on the 2 Players screen (Firebase first), Cloudflare links `#room=CODE` and admin lobbies `#nk-lobby=…` open Cloudflare, *Rejoin Last Room* while network-kit keeps the room, connection measurements in both versions. Tested locally with the room Worker in workerd and two browsers (`npm run test:net`): Score Duel, Battle, invite link, settings approval, a lost connection, leaving, rematch, rejoin. See ADR 0008.
 - 2026-11-18 (T-008): owner's answers: the move may start before network-kit is proven in another game (Vättigt works well), but only after network-kit has the missing support and more testing; network-kit builds separate 1 Player On/Off/Until (network-kit F-057) and administrators playing while closed (network-kit F-058).
 - Readiness check 2026-11-19 (asked by network-kit for the owner): network-kit 0.13.4 has everything F-028 needs (owner's device test of the admin features passed); answered "ready". Bricks will likely use `identity: 'device'` so a returning player is the same participant after closing the tab, as with the Firebase UID today. Remaining: the owner's answers to the F-028 questions.
 - Network-kit 0.13.0 (2026-11-18): network-kit F-059 is done: the admin page makes a lobby per game (1 hour to 7 days, a name and the game's page) with a host link and a guest link (`#nk-lobby=…`); `NetworkRoom.joinLobby(SERVER, { name, … })` joins it (host link as owner and host, guest link with a player key, guests wait for the host); works while 2 Players takes no new players, never after an emergency stop; replaces Bricks' private invitations. Relayed messages now carry `at` (server arrival time; network-kit F-063).

@@ -8,6 +8,10 @@
 - **Phase 4 status:** Documentation and maintenance instructions added; no application code changed. Waiting for owner DNS, GitHub Pages custom-domain/HTTPS, Firebase Authorized domains (and API-key referrer, if restricted). Live verification checklist not yet observed; this environment cannot reach the site.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
+## F-028, F-036 — 2026-11-19
+
+Owner approved ("Kör A rek"). Restore point tag `archive/restore-before-f028` made first. Room Worker `bricks` (network-kit 0.13.4 vendored; host-run relay, two player seats, `lateJoin: 'never'`, `ownerLeave: 'pass'`, 5 s countdown, auto pause after 2 s, 2 s heartbeat, admin game `bricks` mode `duo`, EU) deployed by `.github/workflows/rooms.yml` (first deploy needed a re-run: Cloudflare's "Worker does not exist" right after the first upload). Client `src/net/`: `protocol.ts` (message types, receiver checks, `OpponentStream`, shared match id, local player id) with unit tests; `NetMultiplayer.tsx` (host/join/links/lobby/settings with optimistic host edits/approval/start/rejoin/notices); `NetLiveGame.tsx` (engine and views as the Firebase match, boards every ≥100 ms newest-only, attacks and finishes reliable, pause, quit, results). `main.tsx` keeps Cloudflare links in the address. F-036: `connection-stats.ts` with tests, measured in both live views, `ConnectionComparison` in Settings. Tests: lint, unit tests, build, browser 15/15, `npm run test:net` 4 of 5 local runs green (B-024), new non-blocking CI job `net-e2e`.
+
 ## F-037 — 2026-11-18
 
 Owner chose "as in NES" after a comparison with community analysis of NES Tetris (the game checks the sixth row from the top at each lock, no margin). `nextDangerState` now equals `isDangerStack` (top six rows); `SAFE_ROW` removed; test updated. Owner asked for this change in the Bricks chat, so it was made here rather than in the music studio chat. Local: lint, unit tests, build, browser integration 15/15.

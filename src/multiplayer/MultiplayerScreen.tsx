@@ -21,6 +21,9 @@ import { invitationToken, operatingOrigin, publicOperating } from '../access/cli
 import { publicAccess, parseOperating } from '../../modules/access-control/operating.ts'
 import type { OperatingConfig } from '../../modules/access-control/operating.ts'
 import { onValue, ref } from 'firebase/database'
+import { summaryLine } from './connection-stats.ts'
+import type { Backend, ConnectionSummary } from './connection-stats.ts'
+import { BackendChoice } from '../net/BackendChoice.tsx'
 
 function configured() { try { return readFirebaseConfig(import.meta.env) !== null } catch { return false } }
 function setInvite(code: string | null) {
@@ -29,7 +32,8 @@ function setInvite(code: string | null) {
   history.replaceState(null, '', url)
 }
 
-export default function MultiplayerScreen({ username, onBack, preferences }: { preferences: MultiplayerPreferences; username: string; onBack: () => void }) {
+export default function MultiplayerScreen({ username, onBack, preferences, backendSwitch }: { preferences: MultiplayerPreferences; username: string; onBack: () => void; backendSwitch?: (value: Backend) => void }) {
+  const [connectionSummary, setConnectionSummary] = useState<ConnectionSummary | null>(null)
   const [playing, setPlaying] = useState(false)
   const [completed, setCompleted] = useState<{ result: MatchResult; uid: string } | null>(null)
   const [lastCompletedId, setLastCompletedId] = useState<string | null>(null)
@@ -224,6 +228,7 @@ export default function MultiplayerScreen({ username, onBack, preferences }: { p
   return <><main className="shell" inert={playing || completed !== null} onPointerDownCapture={() => audio.unlock()} onKeyDownCapture={() => audio.unlock()}>
     <SubpageBar title="2 Players" heading={!joined} headingRef={joined ? undefined : heading} disabled={busy} onBack={() => void back()} aside={joined ? undefined : <>Playing as <b>{username}</b></>} />
     <section className="settings-card multiplayer-card" aria-busy={busy}>
+      {!joined && backendSwitch && <BackendChoice value="firebase" onChange={backendSwitch} disabled={busy} />}
       {joined ? <div className="room-code-card">
         <span className="room-code-label" aria-hidden="true">Room code</span>
         <h1 ref={heading} tabIndex={-1} aria-label={`Room ${joined.code}`} className="code-tiles" style={{ '--count': joined.code.length } as CSSProperties}>{[...joined.code].map((letter, index) => <span aria-hidden="true" className="brand-tile" key={index}>{letter}</span>)}</h1>
@@ -249,7 +254,7 @@ export default function MultiplayerScreen({ username, onBack, preferences }: { p
         </dl>
         {localHost && guestUid && !guestOnline && connected === true && <p role="status">Opponent disconnected. Waiting up to 15 seconds before freeing the slot.</p>}
         {connected === false && <p className="notice" role="status">Unable to connect. Check your connection and try again.</p>}
-        {database && <MatchSettingsPanel options={{ preferences, audio, onPlaying: setPlaying, completedId: completed?.result.id ?? null, lastCompletedId, onCompleted }} key={`${joined.code}:${joined.room.epoch}:${joined.room.roleRevision ?? 0}`} database={database} joined={joined} connected={connected === true} hostConnected={presence[joined.room.hostUid] === true} messages={waitingMessages.current.messages} connections={connections} localConnection={localConnection} locked={starting} onLocked={setStarting} />}
+        {database && <MatchSettingsPanel options={{ preferences, audio, onPlaying: setPlaying, completedId: completed?.result.id ?? null, lastCompletedId, onCompleted, onConnection: setConnectionSummary }} key={`${joined.code}:${joined.room.epoch}:${joined.room.roleRevision ?? 0}`} database={database} joined={joined} connected={connected === true} hostConnected={presence[joined.room.hostUid] === true} messages={waitingMessages.current.messages} connections={connections} localConnection={localConnection} locked={starting} onLocked={setStarting} />}
         <div className="room-actions">
           {isHost && joined.room.players.guest && <button className="back-button" disabled={busy || starting || connected !== true || !presence[joined.room.players.guest.uid]} onClick={() => void run(async () => (await rooms()).transfer(joined))}>Transfer Host</button>}
           <button className="back-button" disabled={busy} onClick={() => void back()}>Leave Lobby</button>
@@ -273,6 +278,6 @@ export default function MultiplayerScreen({ username, onBack, preferences }: { p
       </>}
     </section>
   </main>
-    {completed && <MatchResults result={completed.result} uid={completed.uid} saving={saving} saveError={saveError} actionError={resultError || error?.message || ''} busy={busy || resultBusy} onRetrySave={() => onCompleted(completed.result, completed.uid)} onLobby={() => void resultLobby()} onMenu={() => void back()} />}
+    {completed && <MatchResults result={completed.result} uid={completed.uid} saving={saving} saveError={saveError} actionError={resultError || error?.message || ''} busy={busy || resultBusy} onRetrySave={() => onCompleted(completed.result, completed.uid)} onLobby={() => void resultLobby()} onMenu={() => void back()} connection={connectionSummary ? summaryLine(connectionSummary) : undefined} />}
   </>
 }

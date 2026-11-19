@@ -22,6 +22,9 @@ import type { HighscoreRecord, PersonalSettings, SinglePlayerSettings } from './
 import { BricksAudio } from './audio/synth.ts'
 import './App.css'
 import { checkSolo } from './access/client.ts'
+import { cloudflareLink, saveBackend, savedBackend } from './net/BackendChoice.tsx'
+import type { Backend } from './multiplayer/connection-stats.ts'
+import { ConnectionComparison } from './multiplayer/ConnectionComparison.tsx'
 import { enterFullscreen, exitFullscreen, fullscreenActive, fullscreenSupported, rememberFullscreen, restoreFullscreenOnFirstInput } from './ui/fullscreen.ts'
 
 const USERNAME_KEY = 'bricks.username'
@@ -36,6 +39,7 @@ type View = 'welcome' | 'menu' | 'settings' | 'highScores' | 'game' | 'multiplay
 const GAME_OVER_INPUT_GUARD_MS = 700
 
 const MultiplayerScreen = lazy(() => import('./multiplayer/MultiplayerScreen.tsx'))
+const NetMultiplayer = lazy(() => import('./net/NetMultiplayer.tsx'))
 
 function readControls() {
   try { return parseBindings(localStorage.getItem(CONTROLS_KEY)) } catch { return parseBindings(null) }
@@ -72,7 +76,7 @@ function readUsername() {
 function App() {
   const [username, setUsername] = useState(readUsername)
   const [draft, setDraft] = useState(username)
-  const [view, setViewState] = useState<View>(() => username ? (new URL(location.href).searchParams.has('room') ? 'multiplayer' : 'menu') : 'welcome')
+  const [view, setViewState] = useState<View>(() => username ? (new URL(location.href).searchParams.has('room') || cloudflareLink() ? 'multiplayer' : 'menu') : 'welcome')
   const [notice, setNotice] = useState('')
   const [gameAnnouncement, setGameAnnouncement] = useState('')
   const [bindings, setBindings] = useState<KeyboardBindings>(readControls)
@@ -93,6 +97,9 @@ function App() {
     doc.startViewTransition(() => flushSync(() => setViewState(next)))
   }
   useEffect(() => { document.documentElement.dataset.motion = personal.interfaceAnimations ? 'on' : 'off' }, [personal.interfaceAnimations])
+  // F-028: Firebase or Cloudflare 2 Players while both exist; a Cloudflare link opens Cloudflare.
+  const [backend, setBackend] = useState<Backend>(() => cloudflareLink() ? 'cloudflare' : new URL(location.href).searchParams.has('room') ? 'firebase' : savedBackend())
+  function chooseBackend(value: Backend) { saveBackend(value); setBackend(value) }
   const [canFullscreen] = useState(() => fullscreenSupported(document))
   const [isFullscreen, setIsFullscreen] = useState(() => fullscreenActive(document))
   useEffect(() => {
@@ -178,7 +185,7 @@ function App() {
     setGamepadCapture(null)
     setUsername(cleanName)
     usernameRef.current = cleanName
-    setView(view === 'welcome' && new URL(location.href).searchParams.has('room') ? 'multiplayer' : 'menu')
+    setView(view === 'welcome' && (new URL(location.href).searchParams.has('room') || cloudflareLink()) ? 'multiplayer' : 'menu')
     setNotice(saveFailed ? 'Your browser could not save this name. You can still continue.' : '')
   }
 
@@ -476,7 +483,9 @@ function App() {
     </section>
   </main>
 
-  if (view === 'multiplayer') return <Suspense fallback={<main className="shell"><p role="status">Loading…</p></main>}><MultiplayerScreen preferences={{ personal, bindings, gamepadBindings }} username={username} onBack={() => setView('menu')} /></Suspense>
+  if (view === 'multiplayer') return <Suspense fallback={<main className="shell"><p role="status">Loading…</p></main>}>{backend === 'cloudflare'
+    ? <NetMultiplayer preferences={{ personal, bindings, gamepadBindings }} username={username} onBack={() => setView('menu')} backendSwitch={chooseBackend} />
+    : <MultiplayerScreen preferences={{ personal, bindings, gamepadBindings }} username={username} onBack={() => setView('menu')} backendSwitch={chooseBackend} />}</Suspense>
 
   if (view === 'settings') return <main className="shell">
     <SubpageBar title="Settings" onBack={() => { setCapture(null); setGamepadCapture(null); setView('menu') }} />
@@ -541,10 +550,13 @@ function App() {
       {gamepadCaptureError && <p className="notice" role="status">{gamepadCaptureError}</p>}
       {gamepadCapture && <button className="back-button cancel-capture" onClick={() => { setGamepadCapture(null); setGamepadCaptureError('') }}>Cancel</button>}
       <button className="reset-button" onClick={resetGamepadBindings}>Reset controller controls</button>
+      <h2 className="settings-heading">Connection</h2>
+      <ConnectionComparison />
       <h2 className="settings-heading">Privacy</h2>
       <ul className="privacy-list">
         <li>Saved on this device only: player name, settings, high scores, match results and the last room code. Nothing is used for ads or tracking, and there is no analytics.</li>
-        <li>Online features (2 Players, and the check whether play is open) use an anonymous sign-in at Google Firebase. Your player name and game data are shared with the other player in the room and stored at Firebase while the room exists.</li>
+        <li>2 Players on Firebase, and the check whether play is open, use an anonymous sign-in at Google Firebase. Your player name and game data are shared with the other player in the room and stored at Firebase while the room exists.</li>
+        <li>2 Players on Cloudflare keeps your player name and the room's settings in a room on Cloudflare in the EU, deleted 24 hours after the last player left. Game data goes to the other player through the room.</li>
         <li>Google Firebase, Cloudflare and GitHub Pages see your IP address when you connect.</li>
         <li>Clear your browser data to remove what is saved on this device.</li>
       </ul>

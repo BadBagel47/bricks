@@ -10,7 +10,7 @@ guides. Owner instructions and the specification take precedence.
   - Redone because the 2026-11-11 inventory missed branches (the cloud checkout fetched only `feature/operating-controls`). Remote branches now: `main` (integration, deploys Pages) and `feature/operating-controls` (kept: admin Worker deploy trigger). Eleven older branches were archived as `archive/<branch>` tags and deleted on 2026-11-12: `ccr-308e5bf5-5nte3w`, `ccr-63fd355a-1ucin4` (its one commit, an early wording of the owner working rules, is superseded by the rules in `main`), `feature/visual-refresh`, `milestone-3.3` – `milestone-3.7`, `milestone-3.9`, `milestone-3.11`, `milestone-3.12`. No open pull requests or issues.
   - Sensitive information: git history on all branches scanned for keys, tokens and personal e-mail addresses; only test fixtures with fake service-account keys were found. The Firebase web config is public by design and protected by database rules. The repo is public.
   - Laws and regulations: brief review done; findings T-006 and T-007 in `docs/BACKLOG.md`.
-- **Publishing method:** GitHub Pages from `main` via `.github/workflows/pages.yml`, custom domain https://bricks.trythis.one ; admin Worker via the `feature/operating-controls` branch (see Decisions).
+- **Publishing method:** GitHub Pages from `main` via `.github/workflows/pages.yml`, custom domain https://bricks.trythis.one ; admin Worker via the `feature/operating-controls` branch (see Decisions); Cloudflare room Worker `bricks` (https://bricks.l8p1.workers.dev) from `main` via `.github/workflows/rooms.yml`.
 - **Project language:** English for all player-facing text and the README; chat with the owner in Swedish.
 - **Environment (2026-11-18):** a Bricks session can message the network-kit session (cross-session messages) and read `BadBagel47/network-kit` when it is added to the session; the network-kit agent answers questions and records needs on its own (its Decisions). Pushes that go beyond what the owner asked for in the current message may be stopped by the session's safety check; the owner then confirms in chat. The Firebase emulator suite can run locally with proxies unset (database emulator jar downloaded to `.firebase/`), but `tests/firebase.rooms.mjs` alone stops after 60 s for the whole file here, so CI is the gate for it.
 - **Environment (checked 2026-11-12):** agents can push to `main` and `feature/operating-controls`; GitHub REST works through `gh api`, GraphQL (`gh pr list`, `gh issue list`) is blocked in Claude cloud sessions; setting repository variables via `gh` is blocked (owner sets them); pushing tags and writing refs through the REST API are blocked, so tags are created by `.github/workflows/archive-branches.yml` (list branches in `.github/archive-branches.txt`; it tags, verifies, then deletes). A fresh cloud checkout may fetch only one branch: run `git fetch origin '+refs/heads/*:refs/remotes/origin/*'` before comparing branches.
@@ -49,13 +49,13 @@ None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 1
 
 - Live: https://bricks.trythis.one (Pages from `main`); admin https://bricks-operating.l8p1.workers.dev/admin/ (Worker from `feature/operating-controls`).
 - Latest work, newest first:
+  - 2026-11-19: F-028 Cloudflare 2 Players side by side with Firebase (switch on the 2 Players screen) and F-036 connection comparison. Needs a real match on two devices.
   - 2026-11-18: F-037 danger music ends as in NES; restore point tag before F-028; F-028 proposal with questions.
   - 2026-11-18: B-022 home screen icon fills the shape; B-023 no hover outline after taps on phones.
   - 2026-11-18: F-034 Drop / Hard Drop / Both, F-035 orange B icon, B-020 menu fits narrow phones, B-021 steadier emulator test.
   - 2026-11-18: F-033 fullscreen button on the main menu (remembered) and home screen app mode. Needs a phone check.
-  - 2026-11-18: F-032 smaller, centred logo and B-019 more room between the touch buttons. Needs a phone check.
-- Waiting on the owner: phone checks of F-030 – F-035 (also adding the game to the home screen), B-019, B-018 and B-017; a two-device check of B-004; whether the privacy text is enough.
-- Next: no proposed runs. F-028 when network-kit has network-kit F-059. F-006 music in the music studio chat.
+- Waiting on the owner: a real Cloudflare 2 Players match on two devices and a look at Settings → Connection (F-028, F-036); phone checks of F-030 – F-035 (also adding the game to the home screen), B-019, B-018 and B-017; a two-device check of B-004; whether the privacy text is enough.
+- Next: proposed run F-038/B-024 after the owner's check; T-009 only on the owner's explicit yes. F-006 music in the music studio chat.
 - Older checkpoints and history: `PROGRESS.md` (section *Handoff history*) and git history.
 
 ## Documentation map

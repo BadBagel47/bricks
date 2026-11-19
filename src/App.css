@@ -464,3 +464,14 @@ html[data-motion=off]::view-transition-old(root),html[data-motion=off]::view-tra
 .touch-split.single-drop{align-items:center!important}
 .touch-pad.single>:nth-child(1){grid-area:1/1}.touch-pad.single>:nth-child(2){grid-area:1/2}.touch-pad.single>:nth-child(3){grid-area:1/3}
 .touch-preview.split.single-drop{align-items:center}
+
+/* F-028, F-036: server choice on the 2 Players screen, connection measurements. */
+.backend-choice{margin-bottom:18px}
+.connection-line{margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.5;text-align:center}
+.connection-empty{margin:0 0 10px;color:var(--muted);font-size:14px}
+.connection-table{width:100%;border-collapse:collapse;font-size:13px;margin:0 0 10px}
+.connection-table th,.connection-table td{padding:8px 6px;border-bottom:1px solid var(--line-soft);text-align:right;white-space:nowrap}
+.connection-table th:first-child,.connection-table thead th:first-child{text-align:left}
+.connection-table thead th{color:var(--muted);font-weight:600}
+.match-settings .setting-group{margin-top:10px}
+@media(max-width:420px){.connection-table th:nth-child(5),.connection-table td:nth-child(5){display:none}}

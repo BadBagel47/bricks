@@ -62,6 +62,21 @@ jobs:
         with:
           path: dist
 
+  # F-028: Cloudflare 2 Players end to end (room Worker in local workerd, two browsers).
+  # Reported on every push but does not hold back the Pages deploy while it is new (B-024).
+  net-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run test:net
+        env:
+          BRICKS_CHROMIUM_EXECUTABLE: /usr/bin/google-chrome
+
   deploy-operating-preview:
     if: github.event_name == 'push' && github.ref == 'refs/heads/feature/operating-controls' && contains(github.event.head_commit.message, '[deploy operating]')
     needs: build

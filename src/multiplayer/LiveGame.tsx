@@ -29,6 +29,7 @@ import type { JoinedRoom } from './room-model.ts'
 import { startCatchUp } from './match-start.ts'
 import type { MatchStart } from './match-start.ts'
 import type { LiveOptions } from './live-options.ts'
+import { ConnectionStats, saveConnectionStats } from './connection-stats.ts'
 import './live-game.css'
 
 export default function LiveGame({ database, joined, start, options, serverTimeOffset, paused, onLeave, restored, resumedAt, resumedFrame, previousOpponentConnection }: { database: Database; joined: JoinedRoom; start: MatchStart; options: LiveOptions; serverTimeOffset: number; paused: boolean; onLeave: () => Promise<void>; restored?: Awaited<ReturnType<typeof prepareRecovery>>; resumedAt?: number; resumedFrame?: number; previousOpponentConnection?: string }) {
@@ -52,7 +53,16 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     return { game: advanceGame(restored.game, elapsed).state, battleGame: null }
   })
   const [game, setGame] = useState(initial.game)
-  const [collector] = useState(() => new ResultCollector(start, joined, result => options.onCompleted(result, joined.uid), previousOpponentConnection))
+  // F-036: the same measurements as the Cloudflare version.
+  const [stats] = useState(() => new ConnectionStats('firebase'))
+  const offsetRef = useRef(serverTimeOffset)
+  offsetRef.current = serverTimeOffset
+  const [collector] = useState(() => new ResultCollector(start, joined, result => {
+    const summary = stats.summary(result.playedAt)
+    if (summary) saveConnectionStats(summary)
+    options.onConnection?.(summary)
+    options.onCompleted(result, joined.uid)
+  }, previousOpponentConnection))
   const resultsVisible = options.completedId !== null
   const current = useRef(game)
   const [battleGame] = useState(initial.battleGame)
@@ -84,11 +94,11 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
   useLayoutEffect(() => {
     controlsBlocked.current = paused || confirm || Boolean(error)
     if (paused !== pausedRef.current) {
-      if (paused) { clock.pause(performance.now()); held.current.clear(); audio.pauseGame() }
-      else { clock.resume(performance.now()); audio.resumeGame() }
+      if (paused) { clock.pause(performance.now()); held.current.clear(); audio.pauseGame(); stats.paused(performance.now()) }
+      else { clock.resume(performance.now()); audio.resumeGame(); stats.resumed(performance.now()) }
       pausedRef.current = paused
     }
-  }, [paused, confirm, error, clock, audio])
+  }, [paused, confirm, error, clock, audio, stats])
   const localHost = joined.uid === start.hostUid
   const opponentUid = localHost ? start.guestUid : start.hostUid
   const connection = localHost ? start.hostConnection : start.guestConnection
@@ -150,6 +160,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
         if (next?.matchId === start.id && (next.connection === otherConnection || Boolean(previousOpponentConnection)) && next.seq > previousSequence) {
           if (battleGame && next.status === 'gameOver') battleGame.opponentEnded = true
           previousSequence = next.seq
+          stats.update(Date.now() + offsetRef.current - next.updatedAt, performance.now())
           collector.opponent(next)
           setOpponent(next)
         }
@@ -231,7 +242,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     }
     timer = setTimeout(() => void publish(), 0)
     return () => { alive = false; clearTimeout(timer); stop(); stopAttacks(); stopFinish() }
-  }, [database, base, joined.uid, opponentUid, start.id, connection, otherConnection, previousOpponentConnection, battleGame, joined, start, collector, restored, audio])
+  }, [database, base, joined.uid, opponentUid, start.id, connection, otherConnection, previousOpponentConnection, battleGame, joined, start, collector, restored, audio, stats])
 
   useLayoutEffect(() => {
     if (resultsVisible) return

@@ -6,6 +6,10 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Added (2026-11-19)
+- F-028: 2 Players can run on Cloudflare (network-kit rooms in the EU) next to Firebase: a *Server* switch on the 2 Players screen (Firebase first), six-character room codes, invite links and lobbies made on network-kit's admin page, *Rejoin Last Room*, Score Duel and Battle with results, rematch and pause on a lost connection. Received data is checked in the browser. The privacy text in Settings mentions the Cloudflare rooms.
+- F-036: both 2 Players versions measure the connection the same way; the result screen shows a line and Settings → Connection compares the latest matches.
+
 ### Added (2026-11-18)
 - F-034: Settings has Drop / Hard Drop / Both instead of the Hard Drop switch (default Both); the choice applies to touch buttons, swipe, keyboard and controller, and with one drop button the three buttons form one row centred beside the rotate buttons.
 - F-035: new browser tab and home screen icon: the logo's B tile in orange, tilted as in the logo.
