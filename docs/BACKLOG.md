@@ -42,6 +42,8 @@ records released changes.
 | F-049 | Feature | Remove the Interface animations setting; animations are on except for players whose system asks for reduced motion | Low | Proposed (2026-11-19, owner) | Standard |
 | F-050 | Feature | A Hold touch button (tapping the Hold box is a long reach) | Medium | Proposed (2026-11-19, owner) | Standard |
 | F-051 | Feature | Clearer borders around dark buttons and cards (`--line` a little lighter) | Low | Proposed (2026-11-19, owner) | Standard |
+| B-032 | Bug | Touch buttons miss taps: only the drawn button shapes react, so taps in the gaps between buttons and in the corners around the round rotate buttons do nothing (measured on a 390 × 844 phone: 35 % of the control strip reacts in Split, 45 % in Row). Each button should own the empty space nearest to it | High | Proposed (2026-11-19, owner) | Standard |
+| F-052 | Feature | Rotation next to a wall or other blocks: today it does nothing (no wall kicks, as in NES), which can feel like a missed tap. Option: try one step sideways (or modern kicks) before giving up | Medium | Proposed (2026-11-19, owner) | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
