@@ -22,7 +22,8 @@ records released changes.
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| T-010 | Task | network-kit feedback (from F-028/F-038): (1) the first deploy of a new game Worker failed with Cloudflare's "This Worker does not exist" right after the upload and passed on a re-run: the deploy guide or workflow template could retry once; (2) a guide section on continuing a game after a page reload (identity per device, room code kept in the address, the game's own state in the tab, everyone sends their current state again on `peer back`) would help other games | Low | Sent to network-kit 2026-11-19 (owner: yes); waiting for their IDs | — (owner) |
+| T-010 | Task | network-kit feedback (from F-028/F-038): (1) the first deploy of a new game Worker failed with Cloudflare's "This Worker does not exist" right after the upload and passed on a re-run: the deploy guide or workflow template could retry once; (2) a guide section on continuing a game after a page reload (identity per device, room code kept in the address, the game's own state in the tab, everyone sends their current state again on `peer back`) would help other games | Low | Done (2026-11-19): sent with the owner's yes; recorded as network-kit F-112 (retry on error 10007) and network-kit F-113 (guide section on continuing after a reload) | — (owner) |
+| B-025 | Bug | With a game link in the browser, the page's status check and notices from network-kit were refused by the browser (CORS) because Bricks' page and room Worker are on different addresses (network-kit B-104, fixed in network-kit 0.15.1); the check then read as open and notices did not show. Fix: take network-kit 0.15.1 | Medium | Proposed (2026-11-19) | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
@@ -105,7 +106,10 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 ## Proposed runs (2026-11-18)
 
-None. F-038 was done 2026-11-19.
+Prioritised for: a fix network-kit says affects Bricks.
+
+- **A** – standard model, medium level – network-kit update
+  - B-025 – Take network-kit 0.15.1 (from 0.13.4), so the status check and the admin page's notices also work in a browser that has a game link; it also fixes saving on the admin page. Check the changes since 0.13.4 and run every test, including two players on Cloudflare.
 
 Not proposed: F-006 (made in the separate music studio chat); T-009 (retire Firebase and the old admin; waits for the owner's comparison and explicit yes).
 
