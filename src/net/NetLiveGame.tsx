@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { advanceGame, createGame, dispatch } from '../engine/index.ts'
 import type { GameAction, GameState, Transition } from '../engine/index.ts'
@@ -60,7 +60,10 @@ export function netResult(round: NetRound, own: Final, other: Final, ownBattle: 
   return { version: 1, id: matchId(round.code, round.round, round.seed), mode: round.settings.mode, roomCode: round.code, epoch: round.round, playedAt: new Date(round.startsAt).toISOString(), players: round.host ? [mine, theirs] : [theirs, mine] }
 }
 
-export default function NetLiveGame({ room, round, options, paused, onExit, onConnection, restored = null }: { room: KitRoom; round: NetRound; options: LiveOptions; paused: boolean; onExit: () => void; onConnection: (summary: ConnectionSummary | null) => void; restored?: NetCheckpoint | null }) {
+export default function NetLiveGame({ room, round: startRound, options, paused, onExit, onConnection, restored = null, otherUid }: { room: KitRoom; round: NetRound; options: LiveOptions; paused: boolean; onExit: () => void; onConnection: (summary: ConnectionSummary | null) => void; restored?: NetCheckpoint | null; otherUid?: string }) {
+  // The opponent's local player id can arrive after the start (their hello); the latest one is used for the result.
+  const latestUid = otherUid ?? startRound.otherUid
+  const round = useMemo(() => latestUid === startRound.otherUid ? startRound : { ...startRound, otherUid: latestUid }, [startRound, latestUid])
   const { preferences: { personal, bindings, gamepadBindings }, audio, onPlaying } = options
   const battle = round.settings.mode === 'battle'
   const [initial] = useState(() => {

@@ -14,5 +14,5 @@
 ## Consequences
 
 - No server-side validation of game data on Cloudflare (accepted for a hobby game; anti-cheat ideas are network-kit D-062, F-063, F-064).
-- A page reload during a Cloudflare match cannot restore that player's game yet; the match ends without a result (follow-up F-038).
+- A page reload during a Cloudflare match continues it (F-038): the player's game is kept in the tab (`src/net/checkpoint.ts`), the address keeps `#room=CODE` while in a room, and both players send their current state again when the other comes back.
 - Two places control 2 Players while both exist: Bricks' admin page (Firebase) and network-kit's admin page (Cloudflare).

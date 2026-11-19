@@ -160,6 +160,7 @@ export default function NetMultiplayer({ username, onBack, preferences, backendS
     const host = state.hostId === me
     setInLobby(false)
     setRestored(saved)
+    room.send({ t: 'hello', player })
     setLive({
       code: room.code, round: state.round, seed: state.seed, startsAt: state.startsAt, settings: data.settings,
       ownId: me, otherId: other.id, host, ownName: username, otherName: other.name,
@@ -260,7 +261,7 @@ export default function NetMultiplayer({ username, onBack, preferences, backendS
       </>}
     </section>
   </main>
-    {room && live && <NetLiveGame key={`${live.code}:${live.round}`} room={room} round={live} options={options} paused={Boolean(state?.paused)} onExit={toLobby} onConnection={setConnection} restored={restored} />}
+    {room && live && <NetLiveGame key={`${live.code}:${live.round}`} room={room} round={live} options={options} paused={Boolean(state?.paused)} onExit={toLobby} onConnection={setConnection} restored={restored} otherUid={hellos[live.otherId] ? `nk:${hellos[live.otherId]}` : undefined} />}
     {completed && <MatchResults result={completed.result} uid={completed.uid} saving={saving} saveError={saveError} actionError="" busy={false} connection={connection ? summaryLine(connection) : undefined} onRetrySave={() => onCompleted(completed.result, completed.uid)} onLobby={toLobby} onMenu={back} />}
   </>
 }
