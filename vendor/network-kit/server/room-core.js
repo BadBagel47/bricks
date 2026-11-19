@@ -32,7 +32,16 @@ import {
 } from '../shared/protocol.js';
 import { newPlayerId, newSecret, randomSeed, sha256, sameSecret } from './random.js';
 
-const STATE_VERSION = 2;
+// The stored room's shape (D-105). Raising it needs, in the same change, either
+// a step in STATE_MIGRATIONS from the version before (live rooms carry on), or
+// the version in STATE_DROPPED with a CHANGELOG line saying the update closes
+// live rooms, so the owner can check on the admin page that none are playing.
+// tests/unit/room-core.test.js fails if neither is there.
+export const STATE_VERSION = 2;
+export const STATE_MIGRATIONS = {
+  // 2: (state) => ({ ...state, v: 3, newField: null }),
+};
+export const STATE_DROPPED = new Set([1]); // 0.2.0: rooms of 0.1.x were closed (before D-105)
 const LOBBY_PREFIX = 'lb_'; // lobby tokens from the admin page (F-059)
 const KNOWN_MAX = 100;
 const USAGE_SAVE_EVERY = 500;
@@ -174,9 +183,16 @@ export class RoomCore {
   async load() {
     this.state = (await this.host.storage.get('room')) ?? null;
     if (this.state && this.state.v !== STATE_VERSION) {
-      // Stored by another network-kit version: start clean rather than guess.
-      await this.deleteRoom();
-      return;
+      // Stored by an earlier network-kit: carried over step by step where a
+      // step is known (D-105), otherwise the room starts clean rather than guess.
+      let state = this.state;
+      while (state && state.v !== STATE_VERSION && STATE_MIGRATIONS[state.v]) state = STATE_MIGRATIONS[state.v](state);
+      if (state?.v !== STATE_VERSION) {
+        await this.deleteRoom();
+        return;
+      }
+      this.state = state;
+      await this.host.storage.put('room', this.state);
     }
     this.alarmAt = this.state ? this.nextTimerAt() : null;
   }

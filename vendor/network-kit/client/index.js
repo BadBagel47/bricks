@@ -6,6 +6,8 @@ export { MEASURE_NOTICE } from './measure.js';
 export { adminPass, forgetAdminPass } from './admin-pass.js';
 export { readLobbyLink, forgetLobbyLink } from './lobby.js';
 export { watchNotices, NoticeBoard, playWarningSound, noticeText, noticeIcon } from './notices.js';
+export { startPlaytest, hasTesterLink } from './playtest-entry.js';
+export { PlaytestPanel, ReportSender, readTesterLink, questionsOf, shrinkPicture, describeDevice } from './playtest.js';
 export {
   PROTOCOL, CLOSE, CLOSE_UNRESPONSIVE, CLOSE_TEXT, gameClosedText, NOTICE_TEXT, LOBBY_REFUSED, normalizeCode, isValidCode, CODE_LENGTH, CODE_MIN_LENGTH, CODE_MAX_LENGTH,
 } from '../shared/protocol.js';

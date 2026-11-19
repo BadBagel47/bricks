@@ -103,7 +103,7 @@ export function createRoomServer(gameOptions = {}) {
       return {
         'access-control-allow-origin': origin,
         'access-control-allow-methods': 'GET, POST, OPTIONS',
-        'access-control-allow-headers': 'content-type',
+        'access-control-allow-headers': 'content-type, x-admin-pass', // x-admin-pass: a game link on the status check (B-104)
         'access-control-max-age': '86400',
         vary: 'origin',
       };
@@ -216,6 +216,8 @@ export function createRoomServer(gameOptions = {}) {
     if (cors === null) return json({ error: 'origin-not-allowed' }, 403);
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
 
+    // A path with an empty part (a doubled slash) is never one of ours (B-097).
+    if (url.pathname.slice(base.length).includes('//')) return json({ error: 'not-found' }, 404, cors);
     const parts = url.pathname.slice(base.length).split('/').filter(Boolean);
 
     if (parts.length === 0 && request.method === 'POST') {

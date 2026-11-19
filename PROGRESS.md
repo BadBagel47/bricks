@@ -8,6 +8,10 @@
 - **Phase 4 status:** Documentation and maintenance instructions added; no application code changed. Waiting for owner DNS, GitHub Pages custom-domain/HTTPS, Firebase Authorized domains (and API-key referrer, if restricted). Live verification checklist not yet observed; this environment cannot reach the site.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
+## B-025 — 2026-11-19
+
+Owner approved ("Kör a"). network-kit 0.13.4 → 0.15.1 vendored (changelog: Playtest is optional, nothing to change in Bricks; does not close live rooms). Local: kit smoke test with Bricks' options, lint, unit tests, build, browser 15/15, `npm run test:net` 2 of 2; local workerd answers the status preflight from https://bricks.trythis.one with `x-admin-pass` allowed.
+
 ## F-038 — 2026-11-19
 
 Owner approved ("Kör A"). `src/net/checkpoint.ts` (save/read/validate the own game, Battle counters, own and opponent stream state, opponent's local id; reload catch-up capped at 3 s) with unit tests; `NetLiveGame` restores from it, saves every 500 ms and on `pagehide`, and sends its board, attack total and finish again when the opponent comes back; `NetMultiplayer` keeps `#room=CODE` in the address while in a room, continues the saved game for the same round, and sends the local player id again at each start (a race could store the opponent under the room id; found by the new reload test). New end-to-end test: reload mid-match, same board, both devices store the same match. Local: lint, unit tests, build, browser 15/15, `npm run test:net` 6 of 6 after the fix.
