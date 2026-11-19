@@ -1,0 +1,15 @@
+{
+  // Bricks 2 Players room server on network-kit (F-028). Deployed from main by
+  // .github/workflows/rooms.yml. The Worker's name is the game's name on
+  // network-kit's admin page.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bricks",
+  "main": "server/rooms/worker.js",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": true,
+  "observability": { "enabled": false },
+  "durable_objects": { "bindings": [{ "name": "ROOMS", "class_name": "Room" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Room"] }],
+  "services": [{ "binding": "NETWORK_KIT_ADMIN", "service": "network-kit-admin", "entrypoint": "GameApi" }],
+  "vars": { "ROOM_JURISDICTION": "eu" }
+}

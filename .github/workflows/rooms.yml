@@ -1,0 +1,50 @@
+# Deploys Bricks' 2 Players room server (network-kit, F-028) to Cloudflare from main.
+# Uses the same CLOUDFLARE_API_TOKEN secret as the operating Worker.
+name: Deploy room server
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - server/rooms/**
+      - vendor/network-kit/**
+      - wrangler.rooms.jsonc
+      - .github/workflows/rooms.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-rooms
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: network-kit smoke test with Bricks' options
+        run: node vendor/network-kit/smoke.mjs --options server/rooms/rooms-options.js
+      - name: Deploy
+        run: npx wrangler deploy --config wrangler.rooms.jsonc 2>&1 | tee deploy.log
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ba62b17cf838a334c50450438732f225
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          WRANGLER_SEND_METRICS: 'false'
+      - name: Check that the room server answers
+        run: |
+          url=$(grep -o 'https://[a-z0-9.-]*workers\.dev' deploy.log | head -1)
+          test -n "$url"
+          echo "Room server: $url" >> "$GITHUB_STEP_SUMMARY"
+          for i in 1 2 3 4 5 6; do
+            body=$(curl -fsS -H 'Origin: https://bricks.trythis.one' "$url/rooms" || true)
+            echo "$body" | grep -q codeLength && { echo "$body"; exit 0; }
+            sleep 10
+          done
+          echo "::error::The room server did not answer at $url/rooms"; exit 1
