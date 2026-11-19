@@ -386,9 +386,9 @@ test('leaving Game Over cancels the remaining effect notes before returning to t
   assert.equal(await page.evaluate(() => window.__audio.tones), await page.evaluate(() => window.__audio.menuToneCount))
 })
 
-for (const viewport of [{ width: 1280, height: 800 }, { width: 320, height: 667 }, { width: 390, height: 844 }, { width: 844, height: 390 }, { width: 800, height: 600 }]) {
-  test(`layout ${viewport.width} × ${viewport.height}: complete board and largest touch controls fit`, async () => {
-    const page = await open({ viewport, personal: { touchButtonSize: 72 }, singlePlayer: { holdEnabled: true } })
+for (const viewport of [{ width: 1280, height: 800 }, { width: 320, height: 667 }, { width: 390, height: 844 }, { width: 844, height: 390 }, { width: 800, height: 600 }]) for (const touchLayout of ['split', 'row']) {
+  test(`layout ${viewport.width} × ${viewport.height}, ${touchLayout}: complete board and largest touch controls fit`, async () => {
+    const page = await open({ viewport, personal: { touchButtonSize: 72, touchLayout, touchLayoutVersion: 2 }, singlePlayer: { holdEnabled: true } })
     await start(page)
     const dimensions = await page.evaluate(() => ({ width: innerWidth, height: innerHeight, scrollHeight: document.documentElement.scrollHeight, scrollWidth: document.documentElement.scrollWidth }))
     assert.ok(dimensions.scrollHeight <= dimensions.height + 1, JSON.stringify(dimensions))
@@ -397,18 +397,18 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 320, height: 667 
     assert.ok(board.y >= 0 && board.y + board.height <= viewport.height)
     const controls = page.getByRole('region', { name: 'Touch controls' })
     if (await controls.isVisible()) {
-      const controlBox = await controls.boundingBox()
-      assert.ok(controlBox.y >= board.y + board.height)
+      // Below the board, or (Split on short landscape screens, F-041) beside it.
       for (const button of await controls.getByRole('button').all()) {
         const box = await button.boundingBox()
         assert.ok(box.width >= 44 && box.height >= 44)
+        assert.ok(box.y >= board.y + board.height || box.x + box.width <= board.x || box.x >= board.x + board.width, `a touch button overlaps the board: ${JSON.stringify(box)}`)
         assert.ok(box.x >= 0 && box.x + box.width <= viewport.width && box.y + box.height <= viewport.height)
       }
     }
     await checkGameTabCycle(page)
     if (process.env.BRICKS_SCREENSHOT_DIR) {
       mkdirSync(process.env.BRICKS_SCREENSHOT_DIR, { recursive: true })
-      await page.screenshot({ path: `${process.env.BRICKS_SCREENSHOT_DIR}/${viewport.width}x${viewport.height}.png` })
+      await page.screenshot({ path: `${process.env.BRICKS_SCREENSHOT_DIR}/${viewport.width}x${viewport.height}-${touchLayout}.png` })
     }
   })
 }

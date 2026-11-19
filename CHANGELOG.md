@@ -6,6 +6,17 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Changed (2026-11-19, run A)
+- B-029: a Cloudflare match counts down with large bricks under "First brick in": each second a new brick with the remaining seconds drops onto a pile, in the logo's colours and tilts, over the dimmed match screen.
+- F-041: Split is the default touch layout and comes first in Settings; earlier saved Row choices move to Split once. On short landscape screens the Split buttons sit in the bottom corners beside the board; in a landscape match the pad sits above the rotate buttons.
+- F-040: in the Row layout, a gap separates left/right from the other buttons (also in the Settings preview).
+- F-042: the invitation QR code closes when the second player joins.
+- B-026: tablets in portrait stack the logo, headline and menu buttons as on phones.
+- B-027: the room buttons in the 2 Players lobby wrap centred, so the QR Code button no longer sits alone at the left.
+
+### Fixed (2026-11-19, run A)
+- B-028: when one player leaves a Cloudflare match, the other player's game stops (board frozen, music off) instead of running on behind the note.
+
 ### Added (2026-11-19)
 - F-039: a QR Code button next to Copy Invite Link in the 2 Players lobby (Firebase and Cloudflare) shows the invite link as a QR code.
 - T-012: network-kit 0.17.0 (quota protection, quieter notices on untouched pages); network-kit's default room caps are kept.

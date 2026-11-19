@@ -73,7 +73,7 @@ async function startMatch(host) {
   const start = host.page.getByRole('button', { name: 'Start Match', exact: true })
   for (let i = 0; i < 100 && await start.isDisabled(); i++) await host.page.waitForTimeout(100)
   await start.click()
-  await host.page.getByText(/^Starting in/).waitFor({ timeout: 10000 })
+  await host.page.getByRole('status', { name: /^First brick in/ }).waitFor({ timeout: 10000 })
   await host.page.waitForTimeout(5600)
 }
 
@@ -126,6 +126,11 @@ test('Battle settles by survival; a lost connection pauses both games; leaving e
   await guest.page.keyboard.press('Escape')
   await guest.page.getByRole('button', { name: 'Return to lobby', exact: true }).last().click()
   await host.page.getByText('Your opponent left the match. No result is recorded.').waitFor({ timeout: 15000 })
+  // B-028: the game that is left behind stops; the board no longer changes.
+  const board = () => host.page.getByLabel('Your game', { exact: true }).locator('.playfield').innerHTML()
+  const stopped = await board()
+  await host.page.waitForTimeout(2500)
+  assert.equal(await board(), stopped, 'the abandoned game is frozen')
   assert.deepEqual([...host.errors, ...guest.errors], [])
   await host.context.close(); await guest.context.close()
 }, { timeout: 150000 })

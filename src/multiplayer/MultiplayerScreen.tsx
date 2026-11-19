@@ -236,7 +236,7 @@ export default function MultiplayerScreen({ username, onBack, preferences, backe
         <div className="room-copy">
           {sharingURL && <button className="button button-primary" onClick={() => void copy(sharingURL, 'Invite link copied.')}>Copy Invite Link</button>}
           <button className="back-button" onClick={() => void copy(joined.code, 'Code copied.')}>Copy Code</button>
-          {sharingURL && <InviteQr url={sharingURL} />}
+          {sharingURL && <InviteQr url={sharingURL} full={Boolean(guestUid)} />}
         </div>
         {sharingURL ? <label className="invite-field">Invite link<input readOnly value={sharingURL} onFocus={event => event.currentTarget.select()} /></label> : <p className="notice">Share the original private invitation link. The room code alone does not grant access.</p>}
       </div> : null}

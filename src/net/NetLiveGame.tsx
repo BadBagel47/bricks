@@ -24,6 +24,7 @@ import type { BoardMessage, FinishMessage, NetSettings } from './protocol.ts'
 import type { KitRoom } from './kit.ts'
 import { clearNetCheckpoint, restoreBattle, restoreCatchUp, saveNetCheckpoint } from './checkpoint.ts'
 import type { NetCheckpoint } from './checkpoint.ts'
+import { StartCountdown } from '../ui/StartCountdown.tsx'
 import '../multiplayer/live-game.css'
 
 /** Everything both players know about one round when it starts. */
@@ -95,6 +96,8 @@ export default function NetLiveGame({ room, round: startRound, options, paused, 
   const held = useRef(new HeldInputs())
   const controlsBlocked = useRef(false)
   const pausedRef = useRef(paused)
+  /** B-028: an abandoned match stops: the board freezes and the music ends. */
+  const abandonedRef = useRef(false)
   const started = useRef(false)
   const battleSounds = useRef({ produced: initial.battleGame?.produced ?? 0, applied: initial.battleGame?.applied ?? 0, received: initial.battleGame?.received ?? 0 })
   // Own stream counters, kept for a reload (F-038) and to send everything again when the opponent comes back.
@@ -107,9 +110,10 @@ export default function NetLiveGame({ room, round: startRound, options, paused, 
     if (paused !== pausedRef.current) {
       const now = performance.now()
       if (paused) { clock.pause(now); held.current.clear(); audio.pauseGame(); stats.paused(now) }
-      else { clock.resume(now); audio.resumeGame(); stats.resumed(now) }
+      else { clock.resume(now); if (!abandonedRef.current) audio.resumeGame(); stats.resumed(now) }
       pausedRef.current = paused
     }
+    if (abandoned && !abandonedRef.current) { abandonedRef.current = true; held.current.clear(); audio.pauseGame() }
   }, [paused, confirm, abandoned, countdown, clock, audio, stats])
 
   function commit(transition: Transition) {
@@ -253,7 +257,7 @@ export default function NetLiveGame({ room, round: startRound, options, paused, 
     function keyup(event: KeyboardEvent) { held.current.release(event.code) }
     function clear() { held.current.clear(); previousPad.clear() }
     function tick(now: number) {
-      if (pausedRef.current || room.serverNow() < round.startsAt) {
+      if (pausedRef.current || abandonedRef.current || room.serverNow() < round.startsAt) {
         previous = null; previousPad.clear(); held.current.clear()
         frame = requestAnimationFrame(tick); return
       }
@@ -343,7 +347,6 @@ export default function NetLiveGame({ room, round: startRound, options, paused, 
         <div className="score-diff"><span>Diff</span><strong aria-label="Score difference" className={difference > 0 ? 'ahead' : difference < 0 ? 'behind' : undefined}>{difference > 0 ? '+' : ''}{difference.toLocaleString()}</strong></div>
         <div className="score-card"><span>{round.otherName}</span><strong>{opponent?.score.toLocaleString() ?? '0'}</strong></div>
       </div>
-      {countdown > 0 && <p className="match-note" role="status">Starting in {countdown}…</p>}
       {paused && <p className="match-note" role="status">Match paused. Waiting for reconnection…</p>}
       <div className="duel-boards">
         {battleGame && <div className="incoming-meter" role="img" aria-label={`Incoming garbage: ${pending} ${pending === 1 ? 'row' : 'rows'}`}><span style={{ height: `${Math.min(pending, 20) * 5}%` }} /></div>}
@@ -372,6 +375,7 @@ export default function NetLiveGame({ room, round: startRound, options, paused, 
       <p className="control-hint">Esc / {bindings.pause.replace('Key', '')}: leave match · Multiplayer keeps running while this menu is open.</p>
       <p className="visually-hidden" role="status">{announcement}</p>
       {abandoned && <p role="alert">{abandoned}</p>}
+      {countdown > 0 && !abandoned && <StartCountdown seconds={countdown} />}
       {(finished || abandoned) && <button className="back-button" onClick={() => { if (abandoned) leave(); else setConfirm(true) }}>Return to lobby</button>}
     </main>
     {confirm && <div className="game-overlay" style={{ zIndex: 21 }}><div className="overlay-card" role="dialog" aria-modal="true" aria-labelledby="leave-match-title" ref={dialog}><h1 id="leave-match-title">Leave match?</h1><p>{paused ? 'The match is paused. Returning to the lobby ends this match for both players.' : 'The match keeps running. Returning to the lobby ends this match for both players.'}</p><button className="button button-primary" onClick={() => { setConfirm(false); held.current.clear() }}>{finished ? 'Keep watching' : paused ? 'Keep waiting' : 'Keep playing'}</button><button className="overlay-link" onClick={leave}>Return to lobby</button></div></div>}

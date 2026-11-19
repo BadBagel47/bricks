@@ -1164,6 +1164,8 @@ Lock shared settings during the countdown.
 
 Cancel the countdown if a participant disconnects.
 
+Cloudflare 2 Players (B-029) shows the countdown on the match screen: "First brick in" above a pile of logo-style bricks, one new brick with the remaining seconds dropping on each second; mode and level stay visible beneath the dimmed screen.
+
 At start, both receive identical shared rules, a common piece-generation seed, and equivalent initial conditions.
 
 ---

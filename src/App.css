@@ -402,7 +402,7 @@ html[data-motion=off]::view-transition-old(root),html[data-motion=off]::view-tra
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:1ms!important;transition-duration:1ms!important}.clear-overlay .clearing{opacity:0}}
 
 /* F-023: second rotate button, split layout and Settings preview. */
-.touch-controls{--touch-size:min(var(--preferred-touch-size),calc((100vw - 28px - (var(--touch-count, 5) - 1) * clamp(5px, 2vw, 12px)) / var(--touch-count, 5)))}
+.touch-controls{--touch-size:min(var(--preferred-touch-size),calc((100vw - 28px - var(--touch-group-gap, 0px) - (var(--touch-count, 5) - 1) * clamp(5px, 2vw, 12px)) / var(--touch-count, 5)))}
 .touch-secondary{color:var(--accent)}
 .touch-split{justify-content:space-between!important;align-items:flex-end!important}
 .touch-split.left-handed{flex-direction:row-reverse}
@@ -451,7 +451,7 @@ html[data-motion=off]::view-transition-old(root),html[data-motion=off]::view-tra
 @media(max-width:760px) and (orientation:portrait){
   .game-shell{--board-w:min(calc(100vw - 28px - 86px),300px,calc((100dvh - 270px)/2));--controls-h:calc(100dvh - 159px - 2 * var(--board-w))}
   .game-shell:has(.touch-split){--board-w:min(calc(100vw - 28px - 86px),300px,calc((100dvh - 270px - 56px)/2))}
-  .game-shell .touch-controls{--touch-size:max(44px,min(84px,calc((100vw - 28px - (var(--touch-count, 5) - 1) * clamp(5px, 2vw, 12px)) / (var(--touch-count, 5) + .3)),calc(var(--controls-h) / 1.15)))}
+  .game-shell .touch-controls{--touch-size:max(44px,min(84px,calc((100vw - 28px - var(--touch-group-gap, 0px) - (var(--touch-count, 5) - 1) * clamp(5px, 2vw, 12px)) / (var(--touch-count, 5) + .3)),calc(var(--controls-h) / 1.15)))}
   .game-shell .touch-split{--touch-size:max(44px,min(84px,calc((100vw - 28px - 48px) / 5.3),calc((var(--controls-h) - 8px) / 2.1)))}
 }
 @media(max-width:900px) and (max-height:720px) and (orientation:landscape){.game-topbar>.brand{--logo-tile:24px}}
@@ -480,3 +480,42 @@ html[data-motion=off]::view-transition-old(root),html[data-motion=off]::view-tra
 .invite-qr{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:8px}
 .invite-qr-code{width:min(260px,70vw);aspect-ratio:1;padding:10px;border-radius:14px;background:#fff}
 .invite-qr-code svg{display:block;width:100%;height:100%}
+
+/* F-040: in the Row layout, a gap between the move buttons (left, right) and the rest. */
+.touch-controls:not(.touch-split){--touch-group-gap:clamp(6px,(100vw - 300px) / 4,22px)}
+.touch-row>:nth-child(2){margin-inline-end:var(--touch-group-gap)}
+.left-handed .touch-row>:nth-child(2){margin-inline:var(--touch-group-gap) 0}
+.touch-preview{--touch-group-gap:14px}
+
+/* B-026: tablets in portrait stack the logo, headline and menu buttons as on phones. */
+@media(orientation:portrait) and (min-width:761px) and (max-width:1100px){
+  .menu-content{grid-template-columns:1fr;gap:56px;width:min(100%,560px);padding:64px 0 40px}
+  .hero-copy{align-items:center;text-align:center}
+  .menu-actions{width:100%;margin:0 auto}
+}
+
+/* B-027: the room buttons wrap centred; a button alone on its row keeps the others' width. */
+.room-copy{display:flex;flex-wrap:wrap;justify-content:center}
+.room-copy>*{flex:1 1 130px;max-width:calc(50% - 5px)}
+.room-copy>.invite-qr{flex-basis:100%;max-width:none}
+
+/* B-029: the 2 Players start countdown, bricks dropping onto a pile over the dimmed match. */
+.start-countdown{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;background:rgba(10,13,24,.74);pointer-events:none}
+.start-countdown h2{position:relative;z-index:2;margin:0;font:800 34px/1.1 var(--display);letter-spacing:-.01em;color:var(--text);text-shadow:0 2px 12px rgba(10,13,24,.8)}
+.start-countdown-pile{position:relative;width:180px;height:180px}
+.start-countdown-pile .brand-tile{--tile:136px;position:absolute;left:calc(50% - var(--tile) / 2);top:calc(50% - var(--tile) / 2);background:var(--brick);font-size:calc(var(--tile) * .56);
+  box-shadow:inset 0 calc(var(--tile) * .031) 0 rgba(255,255,255,.3),inset 0 calc(var(--tile) * -.047) 0 rgba(0,0,0,.25);
+  transform:translate(var(--x),var(--y)) rotate(var(--r));filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));animation:brick-drop 420ms both}
+@keyframes brick-drop{
+  0%{transform:translate(var(--x),calc(var(--y) - 30px)) rotate(calc(var(--r) - 16deg)) scale(2.2);opacity:0;filter:drop-shadow(0 60px 40px rgba(0,0,0,0));animation-timing-function:cubic-bezier(.5,0,1,.6)}
+  30%{opacity:1}
+  75%{transform:translate(var(--x),var(--y)) rotate(var(--r)) scale(.93);filter:drop-shadow(0 4px 6px rgba(0,0,0,.45));animation-timing-function:cubic-bezier(.2,.8,.3,1)}
+  100%{transform:translate(var(--x),var(--y)) rotate(var(--r)) scale(1);opacity:1;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35))}
+}
+
+/* F-041: with Split the default, short landscape screens put the pad and the rotate buttons
+   in the bottom corners beside the board instead of below it, so the board keeps its size. */
+@media(max-width:900px) and (max-height:720px) and (orientation:landscape){
+  .game-shell .touch-split{position:fixed;left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));width:auto;margin:0;pointer-events:none;--touch-size:max(40px,min(64px,calc((100dvh - 250px) / 2.1)))}
+  .game-shell .touch-split>*{pointer-events:auto}
+}

@@ -73,7 +73,7 @@
 @media(max-width:900px){
   .multiplayer-game{padding:10px 14px;gap:8px}
   .multiplayer-game .control-hint{display:none}
-  .multiplayer-game .touch-controls{--touch-size:min(var(--preferred-touch-size),calc((100vw - 28px - (var(--touch-count, 5) - 1) * clamp(5px, 2vw, 12px)) / var(--touch-count, 5)),60px)}
+  .multiplayer-game .touch-controls{--touch-size:min(var(--preferred-touch-size),calc((100vw - 28px - var(--touch-group-gap, 0px) - (var(--touch-count, 5) - 1) * 8px) / var(--touch-count, 5)),60px)}
   .multiplayer-game .touch-split{--touch-size:min(var(--preferred-touch-size),calc((100vw - 68px) / 6.2),60px)}
   .multiplayer-game:has(.touch-split){--chrome:calc(280px + var(--touch-size, 56px) * 0.6)}
 }
@@ -101,6 +101,10 @@
   .multiplayer-game>.duel-status p{font-size:12px}
   .multiplayer-game>.touch-controls{grid-column:2;grid-row:4;align-self:end;margin:0}
   .multiplayer-game .touch-row{flex-wrap:wrap;max-width:220px}
+  .multiplayer-game .touch-row>:nth-child(2){margin-inline:0}
+  /* F-041: Split in the 220 px column: the pad above, the rotate buttons below it. */
+  .multiplayer-game .touch-split{flex-wrap:wrap;justify-content:flex-end!important;gap:8px;--touch-size:min(var(--preferred-touch-size),52px)}
+  .multiplayer-game .touch-split>.touch-pad{margin-inline:auto}
   .multiplayer-game>button{grid-column:2;grid-row:5}
 }
 

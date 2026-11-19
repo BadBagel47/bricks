@@ -39,7 +39,11 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 - **Danger music (2026-11-18, F-037):** as in NES Tetris: fast music while a locked block is in the top six rows, normal music as soon as they are empty (no margin).
 - **network-kit feedback (2026-11-19):** improvements for network-kit found while working in Bricks are raised with the owner as they come up, recorded as `T-` items in the backlog, and sent to the network-kit session only after the owner's yes (project rule in `AGENTS.md`).
 - **Room caps (2026-11-19, T-012):** Bricks keeps network-kit's default caps per room and day (from 0.16: about 4 hours with activity, 150,000 messages).
-- **Invitation QR code (2026-11-19, F-039):** a QR Code button next to Copy Invite Link in both 2 Players versions.
+- **Invitation QR code (2026-11-19, F-039):** a QR Code button next to Copy Invite Link in both 2 Players versions; it closes when the lobby is full (F-042).
+- **Touch layout default (2026-11-19, F-041, Q3 with recommendation):** Split is the default and listed first; everyone who had Row saved moves to Split once and can choose Row again.
+- **Start countdown (2026-11-19, B-029):** in Cloudflare matches, "First brick in" with bricks dropping onto a pile (logo colours and tilts, 5 blue … 1 purple) over the dimmed match screen; the 5 s countdown is kept. Same countdown for Firebase is an idea, not planned.
+- **Abandoned match (2026-11-19, B-028, Q1 with recommendation):** the remaining player's board freezes with the note and Return to lobby; the music stops.
+- **Tablet start screen (2026-11-19, B-026, Q2 with recommendation):** every portrait screen stacks the start screen as on phones.
 - **Hosting (2026-11-10):** GitHub Pages with the custom domain https://bricks.trythis.one instead of the spec's Firebase Hosting; Firebase stays the auth/database backend (`docs/DEPLOYMENT.md`).
 - **Visual refresh (2026-11-10):** spec section 5.0 design, generated audio, optional Ghost piece (off by default); block colors since F-024 are Retro / Tones / Modern.
 - **Operating controls (2026-11-09):** approved as described in the project rules; public modes start On.
@@ -49,17 +53,18 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 
 None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 11 old branches archived as `archive/<branch>` tags and deleted, project rules moved to `AGENTS.md` (outdated and duplicated ones removed; shared rules apply for model advice and untranslated working documents), history moved to `PROGRESS.md`.
 
-## Current state (2026-11-18)
+## Current state (2026-11-19)
 
 - Live: https://bricks.trythis.one (Pages from `main`); admin https://bricks-operating.l8p1.workers.dev/admin/ (Worker from `feature/operating-controls`).
 - Latest work, newest first:
+  - 2026-11-19: run A: B-028 abandoned Cloudflare match stops, B-029 brick countdown, B-026 iPad portrait start screen, B-027 centred QR Code button, F-040 Row gap, F-041 Split default (also fits landscape phones), F-042 QR closes when full.
   - 2026-11-19: F-039 invitation QR code; T-012 network-kit 0.17.0; T-011 network-kit update workflow.
   - 2026-11-19: B-025 network-kit 0.15.1 (status check and notices with a game link); T-010 feedback recorded there as network-kit F-112, F-113.
   - 2026-11-19: F-038 a reload during a Cloudflare match continues it; network-kit feedback rule (T-010 waits for the owner's yes).
   - 2026-11-19: F-028 Cloudflare 2 Players side by side with Firebase (switch on the 2 Players screen) and F-036 connection comparison. Needs a real match on two devices.
   - 2026-11-18: F-037 danger music ends as in NES; restore point tag before F-028; F-028 proposal with questions.
-- Waiting on the owner: a real Cloudflare 2 Players match on two devices and a look at Settings → Connection (F-028, F-036); phone checks of F-030 – F-035 (also adding the game to the home screen), B-019, B-018 and B-017; a two-device check of B-004; whether the privacy text is enough.
-- Next: no proposed runs; T-009 only on the owner's explicit yes. F-006 music in the music studio chat.
+- Waiting on the owner: the new countdown, Split default and stopped abandoned game on a phone (run A); a real Cloudflare 2 Players match on two devices and a look at Settings → Connection (F-028, F-036); phone checks of F-030 – F-035 (also adding the game to the home screen), B-019, B-018 and B-017; a two-device check of B-004; whether the privacy text is enough.
+- Next: B-030 (match top bar on phones) is recorded, not yet proposed as a run; T-009 only on the owner's explicit yes. F-006 music in the music studio chat.
 - Older checkpoints and history: `PROGRESS.md` (section *Handoff history*) and git history.
 
 ## Documentation map

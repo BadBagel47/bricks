@@ -503,7 +503,7 @@ function App() {
         <span className="setting-label">Rotate buttons</span>
         <Segmented label="Rotate buttons" value={personal.rotateButtons} options={[{ value: 'one', label: 'One' }, { value: 'two', label: 'Two' }]} onChange={(rotateButtons) => savePersonal({ ...personal, rotateButtons })} />
         <span className="setting-label">Layout</span>
-        <Segmented label="Button layout" value={personal.touchLayout} options={[{ value: 'row', label: 'Row' }, { value: 'split', label: 'Split' }]} onChange={(touchLayout) => savePersonal({ ...personal, touchLayout })} />
+        <Segmented label="Button layout" value={personal.touchLayout} options={[{ value: 'split', label: 'Split' }, { value: 'row', label: 'Row' }]} onChange={(touchLayout) => savePersonal({ ...personal, touchLayout })} />
         <TouchPreview rotateButtons={personal.rotateButtons} layout={personal.touchLayout} dropMode={personal.dropMode} leftHanded={personal.leftHandedControls} />
       </>}
       <span className="setting-label">Drop</span>

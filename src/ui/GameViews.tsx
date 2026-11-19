@@ -72,7 +72,7 @@ const ICONS = {
   hardDrop: <><path d="M6 5l6 6 6-6" /><path d="M6 11l6 6 6-6" /><path d="M5 21h14" /></>,
 }
 
-export function TouchControls({ method, buttonSize, leftHanded, dropMode, enabled, apply, rotateButtons = 'two', layout = 'row' }: {
+export function TouchControls({ method, buttonSize, leftHanded, dropMode, enabled, apply, rotateButtons = 'two', layout = 'split' }: {
   method: 'dpad' | 'swipe'; buttonSize: number; leftHanded: boolean; holdEnabled?: boolean; dropMode: DropMode; enabled: boolean; apply: (action: GameAction) => void; rotateButtons?: 'one' | 'two'; layout?: 'row' | 'split'
 }) {
   const two = rotateButtons === 'two'
