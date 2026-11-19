@@ -42,9 +42,11 @@ jobs:
           url=$(grep -o 'https://[a-z0-9.-]*workers\.dev' deploy.log | head -1)
           test -n "$url"
           echo "Room server: $url" >> "$GITHUB_STEP_SUMMARY"
-          for i in 1 2 3 4 5 6; do
+          # Wait until the new version answers (a fresh upload can take a little while to take over).
+          want=$(tr -d '[:space:]' < vendor/network-kit/VERSION)
+          for i in $(seq 1 18); do
             body=$(curl -fsS -H 'Origin: https://bricks.trythis.one' "$url/rooms" || true)
-            echo "$body" | grep -q codeLength && { echo "$body"; exit 0; }
+            echo "$body" | grep -q "\"version\":\"$want\"" && { echo "$body"; exit 0; }
             sleep 10
           done
-          echo "::error::The room server did not answer at $url/rooms"; exit 1
+          echo "::error::The room server at $url/rooms did not answer with network-kit $want: $body"; exit 1
