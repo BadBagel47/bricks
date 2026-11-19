@@ -10,7 +10,7 @@
 
 ## T-011, T-012, F-039 — 2026-11-19
 
-Owner approved ("Kör A", then Q1 both versions, Q2 keep the caps). T-011: network-kit's update template as `.github/workflows/update-network-kit.yml` (Bricks' room options for the smoke test; lint, unit, build, browser and Cloudflare tests); a first manual run found no 0.15 fix and announced 0.17 with an issue. T-012: network-kit 0.17.0 vendored (no code changes needed; caps per room now 150,000 messages and 240 active minutes a day). F-039: `src/net/InviteQr.tsx` uses network-kit's `qrSvg`, in both lobbies. Local: kit smoke test, lint, unit tests, build, browser 15/15, `npm run test:net` 3/3; QR checked on an emulated phone.
+Owner approved ("Kör A", then Q1 both versions, Q2 keep the caps). T-011: network-kit's update template as `.github/workflows/update-network-kit.yml` (Bricks' room options for the smoke test; lint, unit, build, browser and Cloudflare tests); a first manual run found no 0.15 fix and announced 0.17 with an issue. T-012: network-kit 0.17.0 vendored (no code changes needed; caps per room now 150,000 messages and 240 active minutes a day). F-039: `src/net/InviteQr.tsx` uses network-kit's `qrSvg`, in both lobbies. Local: kit smoke test, lint, unit tests, build, browser 15/15, `npm run test:net` 3/3; QR checked on an emulated phone. The room server's deploy check first saw the old 0.15.1 answering right after the upload; `rooms.yml` now waits until `/rooms` answers with the vendored version, and the redeploy confirmed 0.17.0.
 
 ## B-025 — 2026-11-19
 
