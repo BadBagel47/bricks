@@ -36,6 +36,12 @@ records released changes.
 | F-043 | Feature | 2 Players: switching between Firebase and Cloudflare cross-fades like other screen changes (Interface animations) | Low | Done (2026-11-19) | Standard |
 | F-044 | Feature | 2 Players lobby: Copy Invite Link is filled orange like a selected option; consider the outlined style of Copy Code and QR Code, keeping orange for Start Match and selected options | Low | Done (2026-11-19) | Standard |
 | F-045 | Feature | Start screen: on phones the menu buttons are as wide as the logo; on tablets in portrait the logo is as wide as the menu buttons | Low | Done (2026-11-19) | Standard |
+| F-046 | Feature | Piece randomizer choice: today's NES-style randomizer (long I-piece droughts possible) or a 7-bag (each of the seven pieces once per bag; at most 12 pieces between two I pieces) | Medium | Proposed (2026-11-19, owner) | Standard |
+| F-047 | Feature | Interface animations where they are missing today (audit 2026-11-19: QR code, notices, the opponent joining, room code tiles, code entry, Settings options that appear, the 2 Players result screen and the return to the lobby) | Low | Proposed (2026-11-19, owner) | Standard |
+| F-048 | Feature | Remove the Game effects setting; the effects are always on (reduced motion still turns the line-clear animation off) | Low | Proposed (2026-11-19, owner) | Standard |
+| F-049 | Feature | Remove the Interface animations setting; animations are on except for players whose system asks for reduced motion | Low | Proposed (2026-11-19, owner) | Standard |
+| F-050 | Feature | A Hold touch button (tapping the Hold box is a long reach) | Medium | Proposed (2026-11-19, owner) | Standard |
+| F-051 | Feature | Clearer borders around dark buttons and cards (`--line` a little lighter) | Low | Proposed (2026-11-19, owner) | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Modern block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
