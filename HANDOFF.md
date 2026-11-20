@@ -5,7 +5,7 @@ guides. Owner instructions and the specification take precedence.
 
 ## Shared rules and inventory
 
-- **Shared rules version:** v1.12 (2026-11-17), https://raw.githubusercontent.com/BadBagel47/agent-rules/main/AGENTS.md . Adapted to v1.12 on 2026-11-18 (previously v1.9 from 2026-11-15, v1.7 before that; v1.6, v1.3 and v1.0 before that, T-004). v1.10–v1.12 changed the reply format, run proposals (priority line, dependencies, questions with recommendations) and IDs from other repos (written as e.g. "network-kit F-059"); the current documents were updated accordingly. v1.8–v1.9 needed no repo change: Bricks has no `auto-merge.yml` (agents push to `main`, see Decisions), and the new working steps ("Pågår" marks, [wip] commits, restoring a broken site at once) apply from now on.
+- **Shared rules version:** v1.14 (2026-11-18), https://raw.githubusercontent.com/BadBagel47/agent-rules/main/AGENTS.md . Adapted to v1.14 on 2026-11-20: v1.13 added WEB.md (web basics, applied only with the owner's go-ahead, see *Pending adaptation*) and v1.14 slimmed the rules (setup moved to SETUP.md) and removes old fully merged work branches at session start (this session can only push its own branch, so the merged `ccr-d6b5c771-fnfalf` from 2026-11-18 is left; limitation noted 2026-11-20). Before that adapted to v1.12 on 2026-11-18 (previously v1.9 from 2026-11-15, v1.7 before that; v1.6, v1.3 and v1.0 before that, T-004). v1.10–v1.12 changed the reply format, run proposals (priority line, dependencies, questions with recommendations) and IDs from other repos (written as e.g. "network-kit F-059"); the current documents were updated accordingly. v1.8–v1.9 needed no repo change: Bricks has no `auto-merge.yml` (agents push to `main`, see Decisions), and the new working steps ("Pågår" marks, [wip] commits, restoring a broken site at once) apply from now on.
 - Inventory: 2026-11-12
   - Redone because the 2026-11-11 inventory missed branches (the cloud checkout fetched only `feature/operating-controls`). Remote branches now: `main` (integration, deploys Pages) and `feature/operating-controls` (kept: admin Worker deploy trigger). Eleven older branches were archived as `archive/<branch>` tags and deleted on 2026-11-12: `ccr-308e5bf5-5nte3w`, `ccr-63fd355a-1ucin4` (its one commit, an early wording of the owner working rules, is superseded by the rules in `main`), `feature/visual-refresh`, `milestone-3.3` – `milestone-3.7`, `milestone-3.9`, `milestone-3.11`, `milestone-3.12`. No open pull requests or issues.
   - Sensitive information: git history on all branches scanned for keys, tokens and personal e-mail addresses; only test fixtures with fake service-account keys were found. The Firebase web config is public by design and protected by database rules. The repo is public.
@@ -58,7 +58,9 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 
 ## Pending adaptation
 
-None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 11 old branches archived as `archive/<branch>` tags and deleted, project rules moved to `AGENTS.md` (outdated and duplicated ones removed; shared rules apply for model advice and untranslated working documents), history moved to `PROGRESS.md`.
+- 1.1 (web basics, WEB.md v1.13): Bricks already has no blue tap highlight, a focus ring only for keyboard users and pressed states; missing is the own SVG arrow in drop-down menus (the one `<select>` is in the Firebase match settings). Waits for the owner's go-ahead.
+
+Earlier: The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 11 old branches archived as `archive/<branch>` tags and deleted, project rules moved to `AGENTS.md` (outdated and duplicated ones removed; shared rules apply for model advice and untranslated working documents), history moved to `PROGRESS.md`.
 
 ## Current state (2026-11-19)
 
