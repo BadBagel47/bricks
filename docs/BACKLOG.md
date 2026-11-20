@@ -2,6 +2,8 @@
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| B-036 | Bug | Battle help text in the lobby says "Clearing lines sends garbage rows", but a single-line clear sends nothing (2 lines → 1 row, 3 → 2, 4 → 4). Found 2026-11-20 when the owner asked how Battle works | Low | Proposed (2026-11-20) | Economical |
+| T-014 | Task | Cloudflare Battle end-to-end test: check that garbage rows really reach the other player (today only the Firebase test and the unit tests check it; the Cloudflare test checks survival, pause and leaving). Found 2026-11-20 when the owner asked | Medium | Proposed (2026-11-20) | Standard |
 | F-056 | Feature | Adjustable key repeat for held buttons (DAS delay and repeat rate; today fixed 160 ms and 48 ms). A control setting, not a rule | Low | Proposed (2026-11-20) | Standard |
 | F-057 | Feature | Pieces appear in hidden rows above the board, as in modern games (fewer losses at the very top) | Low | Parked (2026-11-20) | Standard |
 | F-058 | Feature | Modern scoring: T-spins, combos and back-to-back, and their garbage in Battle. Rewards advanced play and changes 2 Players, so kept out of Modern for now | Low | Parked (2026-11-20) | Standard |
@@ -142,6 +144,13 @@ Not proposed: F-006 (music studio chat); T-009 (retire Firebase and the old admi
 Parked: F-027 (alternative Vivid piece colors), F-057 (pieces above the board), F-058 (modern scoring).
 
 ## Details
+
+### Battle rules as built (checked 2026-11-20, owner question)
+- Clearing 2 lines at once sends 1 garbage row, 3 lines 2 rows, 4 lines 4 rows; a single line sends nothing; no combo or drop bonus (`penaltyRows` in `src/engine/battle.ts`).
+- Your own clears first cancel garbage waiting for you, the oldest first; only the rest is sent.
+- Waiting garbage is shown as a red meter beside your board and rises from the bottom when your next piece locks, all waiting rows at once. Each row is grey and full except one hole in a random column (each row its own hole; both players see the same holes).
+- Rows that push blocks out of the top, or into the falling piece, end the game. The player who survives longer wins (shared match clock); the same moment is a draw. Points do not decide Battle. After a player is out, the survivor's clears send nothing more.
+- Checked by the unit tests and the Firebase two-player test (rows arrive, are applied once, survive a reconnect); the Cloudflare two-player test does not yet check that rows arrive (T-014).
 
 ### B-035 Hard Drop pressed instead of the buttons below (2026-11-20)
 - Owner: "Det är väldigt lätt att hard drop trycks istället för de andra styrknapparna. Jag kan till och med se att den trycker på den knappen fastän större delen av tummen är längre ner."
