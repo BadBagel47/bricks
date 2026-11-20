@@ -8,6 +8,11 @@
 - **Phase 4 status:** Documentation and maintenance instructions added; no application code changed. Waiting for owner DNS, GitHub Pages custom-domain/HTTPS, Firebase Authorized domains (and API-key referrer, if restricted). Live verification checklist not yet observed; this environment cannot reach the site.
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
+
+## F-062 — 2026-11-20
+
+Owner: "Döp om till vivid". The Block colors label Modern → Vivid (stored value unchanged, so saved choices keep working). Local: lint, build, browser 20/20.
+
 ## CI fix after runs C and D — 2026-11-20
 
 The Firebase emulator suite (CI only) failed for runs C and D: the match screen at 320 × 667 was 5 px taller than its box. Cause: run C set `overflow: clip` on `.multiplayer-game`, which is a fixed, scrolling screen (`overflow: auto`), so it no longer scrolled and the touch areas' extension below the last buttons counted as overflow. `.multiplayer-game` scrolls again and its touch areas stay inside its padding (at most 8 px below and 12 px to the sides). Its 20-odd px of sideways overflow on phones comes from the match top bar (B-030), not from this change. Local: lint, browser 20/20, `npm run test:net` 3/3; Cloudflare match measured at 320 × 667, 390 × 844 and 844 × 390 (height fits).

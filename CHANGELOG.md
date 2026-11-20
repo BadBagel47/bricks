@@ -6,6 +6,9 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Changed (2026-11-20)
+- F-062: the Block colors choice Modern is now called Vivid, so it is not confused with the Modern rules.
+
 ### Added (2026-11-20, run D)
 - F-046, F-052 – F-055: Rules in Settings → 1 Player: Classic (as the NES game), Modern (the new default: 7-bag piece order, SRS wall kicks, lock delay, 3 next pieces, Hold and ghost piece) or Custom (the six rules as switches, starting from the preset chosen before). High scores show which rules they were played with; older scores count as Classic. Cloudflare matches have a Classic / Modern match setting instead of Hold Piece (Modern by default); Firebase matches stay Classic.
 

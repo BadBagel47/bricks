@@ -513,7 +513,7 @@ function App() {
       </div>
       <h2 className="settings-heading">Display</h2>
       <span className="setting-label">Block colors</span>
-      <Segmented label="Block colors" value={personal.blockColors} options={[{ value: 'level', label: 'Retro' }, { value: 'tones', label: 'Tones' }, { value: 'classic', label: 'Modern' }]} onChange={(blockColors) => savePersonal({ ...personal, blockColors })} />
+      <Segmented label="Block colors" value={personal.blockColors} options={[{ value: 'level', label: 'Retro' }, { value: 'tones', label: 'Tones' }, { value: 'classic', label: 'Vivid' }]} onChange={(blockColors) => savePersonal({ ...personal, blockColors })} />
       <ColorPreview colors={personal.blockColors} level={singlePlayer.startLevel} />
       <h2 className="settings-heading">1 Player</h2>
       <span className="setting-label">Rules</span>

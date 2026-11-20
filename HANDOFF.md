@@ -52,7 +52,7 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 - **Borders (2026-11-20, F-051, Q2 with recommendation):** `--line` #3A4268.
 - **Orange (2026-11-19, F-044, Q1 with recommendation):** orange fill is for Start Match and selected options; Copy Invite Link is outlined like the other room buttons.
 - **Hosting (2026-11-10):** GitHub Pages with the custom domain https://bricks.trythis.one instead of the spec's Firebase Hosting; Firebase stays the auth/database backend (`docs/DEPLOYMENT.md`).
-- **Visual refresh (2026-11-10):** spec section 5.0 design, generated audio, optional Ghost piece (off by default); block colors since F-024 are Retro / Tones / Modern.
+- **Visual refresh (2026-11-10):** spec section 5.0 design, generated audio, optional Ghost piece (off by default); block colors since F-024 are Retro / Tones / Vivid (Vivid was called Modern until F-062, 2026-11-20).
 - **Operating controls (2026-11-09):** approved as described in the project rules; public modes start On.
 - **Shared rules adaptation (2026-11-12):** model advice and translation follow the shared rules (only models in the agent's own environment; working documents are never translated); finished milestone authorizations and duplicated working rules were removed; old branches are kept as `archive/*` tags (restore: `git push origin archive/<branch>:refs/heads/<branch>`).
 
@@ -66,6 +66,7 @@ Earlier: The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12
 
 - Live: https://bricks.trythis.one (Pages from `main`); admin https://bricks-operating.l8p1.workers.dev/admin/ (Worker from `feature/operating-controls`).
 - Latest work, newest first:
+  - 2026-11-20: F-062 block colours Modern → Vivid.
   - 2026-11-20: run D: Rules Classic / Modern / Custom (7-bag, wall kicks, lock delay, 3 next pieces, Hold and ghost as rules), Modern by default; Cloudflare matches choose Classic or Modern.
   - 2026-11-20: run C: B-032 touch areas around the buttons, F-050 Hold button, F-048/F-049 settings removed, F-051 clearer borders, F-047 missing animations.
   - 2026-11-19: run B: B-031 square QR box, F-043 server switch cross-fades, F-044 Copy Invite Link outlined, F-045 equal logo and button widths.
