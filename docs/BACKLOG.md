@@ -2,7 +2,7 @@
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| B-035 | Bug | Split touch controls: Hard Drop is pressed by mistake when aiming at the buttons below it (left, soft drop, right); the owner sees it react although most of the thumb is lower (2026-11-20). Found: the Hard Drop touch area reaches only 4 px into the 8 px gap, so the drawn layout is as intended; the action fires at the very first contact, and a thumb coming from below first touches with its tip, which the phone reports higher than where the thumb ends up | High | Proposed (2026-11-20, owner) | Standard |
+| B-035 | Bug | Split touch controls: Hard Drop is pressed by mistake when aiming at the buttons below it (left, soft drop, right); the owner sees it react although most of the thumb is lower (2026-11-20). Found: the Hard Drop touch area reaches only 4 px into the 8 px gap, so the drawn layout is as intended; the action fires at the very first contact, and a thumb coming from below first touches with its tip, which the phone reports higher than where the thumb ends up | High | Proposed (2026-11-20, owner); Pågår (2026-11-20, session ccr-15c9b6e3-or4w1x, run A) | Standard |
 | F-056 | Feature | Adjustable key repeat for held buttons (DAS delay and repeat rate; today fixed 160 ms and 48 ms). A control setting, not a rule | Low | Proposed (2026-11-20) | Standard |
 | F-057 | Feature | Pieces appear in hidden rows above the board, as in modern games (fewer losses at the very top) | Low | Parked (2026-11-20) | Standard |
 | F-058 | Feature | Modern scoring: T-spins, combos and back-to-back, and their garbage in Battle. Rewards advanced play and changes 2 Players, so kept out of Modern for now | Low | Parked (2026-11-20) | Standard |
