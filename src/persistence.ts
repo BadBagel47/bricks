@@ -22,6 +22,9 @@ export interface PersonalSettings {
   readonly touchLayout: 'row' | 'split'
   /** F-041: 2 once the layout was saved after Split became the default; earlier saves move to Split once. */
   readonly touchLayoutVersion: 2
+  /** F-060 (owner test, 2026-11-20): with Split and two rotate buttons, Hold sits below the orange
+   *  rotate button ('bottom') or in the free top corner above the other one ('top'). One is removed after the test. */
+  readonly holdPlacement: 'bottom' | 'top'
   readonly hideTouchControlsWhenController: boolean
   readonly blockColors: BlockColors
   /** Menu and screen transitions, switches, dialogs (F-021). */
@@ -54,7 +57,7 @@ export interface HighscoreResult {
 
 export const DEFAULT_PERSONAL_SETTINGS: PersonalSettings = {
   version: 1, hardDropEnabled: true, dropMode: 'both', musicEnabled: true, musicVolume: 70, effectsEnabled: true, effectsVolume: 70,
-  mobileControlMethod: 'dpad', touchButtonSize: 56, leftHandedControls: false, rotateButtons: 'two', touchLayout: 'split', touchLayoutVersion: 2, hideTouchControlsWhenController: true,
+  mobileControlMethod: 'dpad', touchButtonSize: 56, leftHandedControls: false, rotateButtons: 'two', touchLayout: 'split', touchLayoutVersion: 2, holdPlacement: 'bottom', hideTouchControlsWhenController: true,
   blockColors: 'level',
 }
 export const DEFAULT_SINGLE_PLAYER_SETTINGS: SinglePlayerSettings = { version: 1, startLevel: 0, rules: DEFAULT_RULES_CHOICE }
@@ -86,6 +89,7 @@ export function parsePersonalSettings(raw: string | null): PersonalSettings {
     rotateButtons: value?.rotateButtons === 'one' ? 'one' : 'two',
     touchLayout: value?.touchLayoutVersion === 2 && value?.touchLayout === 'row' ? 'row' : 'split',
     touchLayoutVersion: 2,
+    holdPlacement: value?.holdPlacement === 'top' ? 'top' : 'bottom',
     hideTouchControlsWhenController: typeof value?.hideTouchControlsWhenController === 'boolean' ? value.hideTouchControlsWhenController : true,
     blockColors: value?.blockColors === 'classic' || value?.blockColors === 'tones' ? value.blockColors : 'level',
   }

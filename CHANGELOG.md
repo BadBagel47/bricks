@@ -6,6 +6,14 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Changed (2026-11-20, run A)
+- F-060 (test): with Split and two rotate buttons the Hold button sits with the rotate buttons, which move further apart: below the orange rotate button (Bottom, default) or in the free top corner above the other one (Top), chosen in Settings → Hold button while both are tried; mirrored for left-handed. One placement is removed after the test.
+- F-063: on phones in portrait the 1 Player top bar follows the columns below it: the logo is centred over the board (smaller where the board is narrow) and Pause is as wide as the side column.
+- F-064: no fullscreen button on the start screen in the home-screen app, which is always fullscreen.
+
+### Fixed (2026-11-20, run A)
+- B-034: in 2 Players on smaller phones the side column no longer runs under the rotate buttons, so level and lines are visible again: the two later Next pieces sit side by side, the Next and Hold boxes are only as tall as the pieces, and on short phones the opponent's board is a little smaller.
+
 ### Changed (2026-11-20)
 - F-062: the Block colors choice Modern is now called Vivid, so it is not confused with the Modern rules.
 

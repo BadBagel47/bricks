@@ -9,6 +9,10 @@
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 
+## Run A: B-034, F-060, F-063, F-064 — 2026-11-20
+
+Owner: "Kör A rek" (Q1: the logo may get smaller on smaller phones to fit over the board). B-034: match side column compacted on phones in portrait (later Next pieces side by side, half-height preview boxes via a `--shape` ratio on the preview grid, smaller opponent board below 600 px height, `.duel-boards` no longer shrinks under the controls); measured with two local Cloudflare players at 320 × 568, 320 × 667, 360 × 640, 375 × 667, 390 × 844, 412 × 915 and 844 × 390: level and lines above the controls, no scrolling. F-060: `holdPlacement` personal setting ('bottom' default, 'top'), Hold inside `.touch-rotate.with-hold` with its own touch areas, Settings choice and preview. F-063: phone portrait game layout and top bar share the columns `var(--board-w) 76px`. F-064: `runsAsInstalledApp` (display mode at page open, iPhone `navigator.standalone`). Local: lint (no new warnings), unit 216, build, browser 25/25 (layouts now with both Hold placements, no overlapping buttons, logo and Pause alignment), `npm run test:net` 3/3, operating 3/3. Firebase emulator suite: CI.
+
 ## F-062 — 2026-11-20
 
 Owner: "Döp om till vivid". The Block colors label Modern → Vivid (stored value unchanged, so saved choices keep working). Local: lint, build, browser 20/20.

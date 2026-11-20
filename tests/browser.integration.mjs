@@ -224,6 +224,9 @@ test('settings and mappings survive reload; leaving capture does not intercept g
   const page = await open()
   await settings(page)
   await page.getByRole('radio', { name: 'Drop', exact: true }).click()
+  // F-060: the Hold button's place (test choice) shows with Split, two rotate buttons and Hold on.
+  await page.getByRole('radiogroup', { name: 'Hold button' }).getByRole('radio', { name: 'Top', exact: true }).click()
+  await page.locator('.touch-preview .touch-rotate.hold-top .touch-hold').waitFor()
   // F-046: Custom starts from Modern; turning one rule off is kept.
   await page.getByRole('radio', { name: 'Custom', exact: true }).click()
   await page.getByLabel('Ghost piece', { exact: true }).uncheck()
@@ -236,6 +239,10 @@ test('settings and mappings survive reload; leaving capture does not intercept g
   assert.equal(await page.getByLabel('Ghost piece', { exact: true }).isChecked(), false)
   assert.equal(await page.getByLabel('Hold', { exact: true }).isChecked(), true)
   assert.equal(await page.getByLabel('Starting Level', { exact: true }).textContent(), '04')
+  assert.equal(await page.getByRole('radiogroup', { name: 'Hold button' }).getByRole('radio', { name: 'Top', exact: true }).getAttribute('aria-checked'), 'true')
+  await page.getByRole('radio', { name: 'One', exact: true }).click()
+  assert.equal(await page.getByRole('radiogroup', { name: 'Hold button' }).count(), 0, 'with one rotate button Hold stays in the pad')
+  await page.getByRole('radio', { name: 'Two', exact: true }).click()
   await page.locator('.binding-row').filter({ hasText: 'Soft drop' }).first().getByRole('button').click()
   await page.getByRole('button', { name: 'Back to menu', exact: true }).click()
   await start(page)
@@ -390,9 +397,10 @@ test('leaving Game Over cancels the remaining effect notes before returning to t
   assert.equal(await page.evaluate(() => window.__audio.tones), await page.evaluate(() => window.__audio.menuToneCount))
 })
 
-for (const viewport of [{ width: 1280, height: 800 }, { width: 320, height: 667 }, { width: 390, height: 844 }, { width: 844, height: 390 }, { width: 800, height: 600 }]) for (const touchLayout of ['split', 'row']) {
-  test(`layout ${viewport.width} × ${viewport.height}, ${touchLayout}: complete board and largest touch controls fit`, async () => {
-    const page = await open({ viewport, personal: { touchButtonSize: 72, touchLayout, touchLayoutVersion: 2 }, singlePlayer: { holdEnabled: true } })
+// F-060: Split is checked with both Hold placements under test (below the orange rotate button, top corner).
+for (const viewport of [{ width: 1280, height: 800 }, { width: 320, height: 667 }, { width: 390, height: 844 }, { width: 844, height: 390 }, { width: 800, height: 600 }]) for (const [touchLayout, holdPlacement] of [['split', 'bottom'], ['split', 'top'], ['row', 'bottom']]) {
+  test(`layout ${viewport.width} × ${viewport.height}, ${touchLayout}${touchLayout === 'split' ? `, Hold ${holdPlacement}` : ''}: complete board and largest touch controls fit`, async () => {
+    const page = await open({ viewport, personal: { touchButtonSize: 72, touchLayout, touchLayoutVersion: 2, holdPlacement }, singlePlayer: { holdEnabled: true } })
     await start(page)
     const dimensions = await page.evaluate(() => ({ width: innerWidth, height: innerHeight, scrollHeight: document.documentElement.scrollHeight, scrollWidth: document.documentElement.scrollWidth }))
     assert.ok(dimensions.scrollHeight <= dimensions.height + 1, JSON.stringify(dimensions))
@@ -402,8 +410,11 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 320, height: 667 
     const controls = page.getByRole('region', { name: 'Touch controls' })
     if (await controls.isVisible()) {
       // Below the board, or (Split on short landscape screens, F-041) beside it.
+      const boxes = []
       for (const button of await controls.getByRole('button').all()) {
         const box = await button.boundingBox()
+        for (const other of boxes) assert.ok(box.x >= other.x + other.width || other.x >= box.x + box.width || box.y >= other.y + other.height || other.y >= box.y + box.height, `two touch buttons overlap: ${JSON.stringify([box, other])}`)
+        boxes.push(box)
         // Row with Hold has seven buttons and may draw them down to 36 px (owner, 2026-11-20).
         const least = touchLayout === 'row' ? 36 : 44
         assert.ok(box.width >= least && box.height >= least, `a touch button is too small: ${JSON.stringify(box)}`)
@@ -411,10 +422,23 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 320, height: 667 
         assert.ok(box.x >= 0 && box.x + box.width <= viewport.width && box.y + box.height <= viewport.height)
       }
     }
+    if (touchLayout === 'split' && viewport.width < viewport.height) {
+      // F-060: Hold sits with the rotate buttons; F-063: the top bar follows the columns below it.
+      const hold = await controls.getByRole('button', { name: 'Hold', exact: true }).boundingBox()
+      const rotate = await controls.getByRole('button', { name: 'Rotate clockwise', exact: true }).boundingBox()
+      if (holdPlacement === 'bottom') assert.ok(Math.abs(hold.x + hold.width / 2 - rotate.x - rotate.width / 2) <= 1 && hold.y >= rotate.y + rotate.height, 'Hold is centred below the orange rotate button')
+      else assert.ok(hold.x + hold.width <= rotate.x && hold.y <= rotate.y + 1, 'Hold is in the top corner beside the orange rotate button')
+      const logo = await page.locator('.game-topbar>.brand').boundingBox()
+      const pause = await page.getByRole('button', { name: 'Pause', exact: true }).boundingBox()
+      const side = await page.locator('.next-panel').boundingBox()
+      assert.ok(Math.abs(logo.x + logo.width / 2 - board.x - board.width / 2) <= 1.5, 'the logo is centred over the board')
+      assert.ok(logo.x >= board.x - 1 && logo.x + logo.width <= board.x + board.width + 1, 'the logo fits over the board')
+      assert.ok(Math.abs(pause.x - side.x) <= 1 && Math.abs(pause.width - side.width) <= 1, 'Pause is as wide as the side column, above it')
+    }
     await checkGameTabCycle(page)
     if (process.env.BRICKS_SCREENSHOT_DIR) {
       mkdirSync(process.env.BRICKS_SCREENSHOT_DIR, { recursive: true })
-      await page.screenshot({ path: `${process.env.BRICKS_SCREENSHOT_DIR}/${viewport.width}x${viewport.height}-${touchLayout}.png` })
+      await page.screenshot({ path: `${process.env.BRICKS_SCREENSHOT_DIR}/${viewport.width}x${viewport.height}-${touchLayout}-${holdPlacement}.png` })
     }
   })
 }

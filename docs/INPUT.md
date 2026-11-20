@@ -8,7 +8,7 @@ Arrow keys move and soft-drop; Z/X rotate; Space Hard Drops; C Holds; P or Escap
 
 ## Touch
 
-The default mobile layout puts a directional pad and A/B-style rotation buttons below the playfield, with Hard Drop, optional Hold and Pause nearby. Holding movement or soft-drop buttons repeats the action. Touch controls can be resized, moved to a left-handed layout, or hidden while a gamepad is connected.
+The default mobile layout puts a directional pad and A/B-style rotation buttons below the playfield, with Hard Drop, optional Hold and Pause nearby. Holding movement or soft-drop buttons repeats the action. Touch controls can be resized, moved to a left-handed layout, or hidden while a gamepad is connected. With the Split layout and two rotate buttons, the Hold button sits with the rotate buttons (F-060: below the orange one or in the top corner, chosen in Settings → Hold button while the owner tries both).
 
 The optional Swipe layout uses a tap for clockwise rotation, horizontal swipes for movement, downward swipes for Soft Drop, and an upward swipe for Hard Drop. Swipe thresholds reduce accidental input.
 

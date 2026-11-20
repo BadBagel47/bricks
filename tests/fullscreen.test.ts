@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { FULLSCREEN_KEY, fullscreenActive, rememberFullscreen, rememberedFullscreen, restoreFullscreenOnFirstInput } from '../src/ui/fullscreen.ts'
+import { FULLSCREEN_KEY, fullscreenActive, rememberFullscreen, rememberedFullscreen, restoreFullscreenOnFirstInput, runsAsInstalledApp } from '../src/ui/fullscreen.ts'
 import type { FullscreenDocument } from '../src/ui/fullscreen.ts'
 
 function memoryStorage(initial: Record<string, string> = {}) {
@@ -64,4 +64,15 @@ test('the first tap on the fullscreen button itself is left to the button', () =
   doc.fire('pointerup', { target: { closest: (selector: string) => selector === '[data-fullscreen-toggle]' ? {} : null } } as unknown as Event)
   doc.fire('pointerup')
   assert.equal(doc.requests(), 0)
+})
+
+test('F-064: the installed home-screen app is recognised by its display mode, a fullscreen tab is not', () => {
+  const display = (mode: string | null, standalone?: boolean) => ({ matchMedia: (query: string) => ({ matches: mode !== null && query === `(display-mode: ${mode})` }), navigator: { standalone } })
+  assert.equal(runsAsInstalledApp(display('fullscreen'), fakeDocument()), true)
+  assert.equal(runsAsInstalledApp(display('standalone'), fakeDocument()), true)
+  assert.equal(runsAsInstalledApp(display('browser'), fakeDocument()), false)
+  assert.equal(runsAsInstalledApp(display(null, true), fakeDocument()), true, 'iPhone home-screen app')
+  assert.equal(runsAsInstalledApp({}, fakeDocument()), false)
+  const tab = fakeDocument(); tab.active = true
+  assert.equal(runsAsInstalledApp(display('fullscreen'), tab), false, 'a browser tab in page fullscreen keeps its button')
 })

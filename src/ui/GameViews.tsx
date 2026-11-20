@@ -63,6 +63,9 @@ export function Playfield({ game, swipeMode, onSwipe, ghost = false, colors = 'l
   </div>
 }
 
+/** F-060 (owner test): Hold below the orange rotate button, or in the free top corner above the other one. */
+export type HoldPlacement = 'bottom' | 'top'
+
 const ICONS = {
   left: <path d="M15 5l-7 7 7 7" />,
   right: <path d="M9 5l7 7-7 7" />,
@@ -72,8 +75,8 @@ const ICONS = {
   hardDrop: <><path d="M6 5l6 6 6-6" /><path d="M6 11l6 6 6-6" /><path d="M5 21h14" /></>,
 }
 
-export function TouchControls({ method, buttonSize, leftHanded, dropMode, enabled, apply, rotateButtons = 'two', layout = 'split', holdEnabled = false, holdAvailable = true }: {
-  method: 'dpad' | 'swipe'; buttonSize: number; leftHanded: boolean; holdEnabled?: boolean; holdAvailable?: boolean; dropMode: DropMode; enabled: boolean; apply: (action: GameAction) => void; rotateButtons?: 'one' | 'two'; layout?: 'row' | 'split'
+export function TouchControls({ method, buttonSize, leftHanded, dropMode, enabled, apply, rotateButtons = 'two', layout = 'split', holdEnabled = false, holdAvailable = true, holdPlacement = 'bottom' }: {
+  method: 'dpad' | 'swipe'; buttonSize: number; leftHanded: boolean; holdEnabled?: boolean; holdAvailable?: boolean; dropMode: DropMode; enabled: boolean; apply: (action: GameAction) => void; rotateButtons?: 'one' | 'two'; layout?: 'row' | 'split'; holdPlacement?: HoldPlacement
 }) {
   const two = rotateButtons === 'two'
   const left = <TouchButton enabled={enabled} label="Move left" icon={ICONS.left} action="moveLeft" apply={apply} repeat />
@@ -86,26 +89,30 @@ export function TouchControls({ method, buttonSize, leftHanded, dropMode, enable
   const hold = holdEnabled && <TouchButton enabled={enabled && holdAvailable} label="Hold" text="HOLD" action="hold" apply={apply} hold />
   const single = dropMode !== 'both'
   const count = 3 + (two ? 1 : 0) + (single ? 1 : 2) + (holdEnabled ? 1 : 0)
-  return <section className={`touch-controls${leftHanded ? ' left-handed' : ''}${method === 'dpad' && layout === 'split' ? ' touch-split' : ''}${single ? ' single-drop' : ''}`} style={{ '--preferred-touch-size': `${buttonSize}px`, '--touch-count': count } as CSSProperties} aria-label="Touch controls">
+  // F-060: with Split and two rotate buttons, Hold joins the rotate buttons; otherwise it stays in the pad.
+  const holdInRotate = Boolean(hold) && two
+  const padHold = holdInRotate ? false : hold
+  return <section className={`touch-controls${leftHanded ? ' left-handed' : ''}${method === 'dpad' && layout === 'split' ? ' touch-split' : ''}${single ? ' single-drop' : ''}${method === 'dpad' && layout === 'split' && holdInRotate ? ' hold-in-rotate' : ''}`} style={{ '--preferred-touch-size': `${buttonSize}px`, '--touch-count': count } as CSSProperties} aria-label="Touch controls">
     {method === 'swipe' ? <p className="swipe-instructions">Tap the left half to rotate ↺ and the right half to rotate ↻ · Swipe left/right to move{softDropAllowed(dropMode) ? ' · Swipe down to soft drop' : ''}{hardDropAllowed(dropMode) ? ' · Swipe up to hard drop' : ''}</p>
       : layout === 'split' ? <>
-        {single ? <div className={`touch-pad single${hold ? ' with-hold' : ''}`}>{left}{down || drop}{right}{hold}</div> : <div className="touch-pad">{drop}{left}{down}{right}{hold}</div>}
-        <div className={`touch-rotate${two ? ' two' : ''}`}>{ccw}{cw}</div>
+        {single ? <div className={`touch-pad single${padHold ? ' with-hold' : ''}`}>{left}{down || drop}{right}{padHold}</div> : <div className="touch-pad">{drop}{left}{down}{right}{padHold}</div>}
+        <div className={`touch-rotate${two ? ' two' : ''}${holdInRotate ? ` with-hold hold-${holdPlacement}` : ''}`}>{ccw}{cw}{holdInRotate && hold}</div>
       </>
       : <div className="touch-row">{left}{right}{down}{ccw}{cw}{drop}{hold}</div>}
   </section>
 }
 
 /** Small static copy of the touch buttons for the Settings preview (F-023). */
-export function TouchPreview({ rotateButtons, layout, dropMode, leftHanded, holdEnabled = false }: { rotateButtons: 'one' | 'two'; layout: 'row' | 'split'; dropMode: DropMode; leftHanded: boolean; holdEnabled?: boolean }) {
+export function TouchPreview({ rotateButtons, layout, dropMode, leftHanded, holdEnabled = false, holdPlacement = 'bottom' }: { rotateButtons: 'one' | 'two'; layout: 'row' | 'split'; dropMode: DropMode; leftHanded: boolean; holdEnabled?: boolean; holdPlacement?: HoldPlacement }) {
   const icon = (paths: ReactNode, kind = '') => <span className={`preview-key${kind}`}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">{paths}</svg></span>
   const two = rotateButtons === 'two'
   const ccw = two && icon(ICONS.counterclockwise, ' secondary'), cw = icon(ICONS.clockwise, ' primary')
   const down = softDropAllowed(dropMode) && icon(ICONS.down), drop = hardDropAllowed(dropMode) && icon(ICONS.hardDrop), single = dropMode !== 'both'
   const hold = holdEnabled && <span className="preview-key touch-hold">HOLD</span>
+  const holdInRotate = Boolean(hold) && two, padHold = holdInRotate ? false : hold
   return <div className={`touch-preview${layout === 'split' ? ' split' : ''}${single ? ' single-drop' : ''}${leftHanded ? ' left-handed' : ''}`} role="img" aria-label={`Preview: ${layout === 'split' ? 'split layout' : 'one row'} with ${two ? 'two rotate buttons' : 'one rotate button'}`}>
     {layout === 'split'
-      ? <><div className={`touch-pad${single ? ' single' : ''}${single && hold ? ' with-hold' : ''}`}>{single ? <>{icon(ICONS.left)}{down || drop}{icon(ICONS.right)}{hold}</> : <>{drop}{icon(ICONS.left)}{down}{icon(ICONS.right)}{hold}</>}</div><div className={`touch-rotate${two ? ' two' : ''}`}>{ccw}{cw}</div></>
+      ? <><div className={`touch-pad${single ? ' single' : ''}${single && padHold ? ' with-hold' : ''}`}>{single ? <>{icon(ICONS.left)}{down || drop}{icon(ICONS.right)}{padHold}</> : <>{drop}{icon(ICONS.left)}{down}{icon(ICONS.right)}{padHold}</>}</div><div className={`touch-rotate${two ? ' two' : ''}${holdInRotate ? ` with-hold hold-${holdPlacement}` : ''}`}>{ccw}{cw}{holdInRotate && hold}</div></>
       : <div className="touch-row">{icon(ICONS.left)}{icon(ICONS.right)}{down}{ccw}{cw}{drop}{hold}</div>}
   </div>
 }
@@ -143,7 +150,7 @@ export function PiecePreview({ type, level, colors = 'level' }: { type: PieceTyp
   const shape = previewShape(type)
   // The 4 × 4 frame keeps its size; the piece's own grid sits exactly in its centre.
   return <div className="piece-preview" aria-label={`${type} piece`}>
-    <div className="piece-preview-grid" style={{ width: `${shape.width * 25}%`, height: `${shape.height * 25}%`, gridTemplateColumns: `repeat(${shape.width}, 1fr)`, gridTemplateRows: `repeat(${shape.height}, 1fr)` }}>
+    <div className="piece-preview-grid" style={{ width: `${shape.width * 25}%`, height: `${shape.height * 25}%`, gridTemplateColumns: `repeat(${shape.width}, 1fr)`, gridTemplateRows: `repeat(${shape.height}, 1fr)`, '--shape': `${shape.width} / ${shape.height}` } as CSSProperties}>
       {Array.from({ length: shape.width * shape.height }, (_, index) => {
         const filled = shape.cells.has(index)
         return <span className={filled ? 'filled' : ''} key={index} style={filled ? blockVars(type, level, colors) : undefined} />

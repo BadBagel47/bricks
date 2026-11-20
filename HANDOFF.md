@@ -48,6 +48,7 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 - **Rules (2026-11-20, F-046, F-052 – F-055):** Classic / Modern / Custom in Settings → 1 Player, Modern by default; Modern = 7-bag, SRS wall kicks, lock delay, 3 next pieces, Hold, ghost piece; Custom shows the switches only when chosen and starts from the preset chosen before (Q7 a); one high-score list with a Classic/Modern/Custom label (Q5); Cloudflare matches choose Classic or Modern, Firebase stays Classic (Q4). Modern scoring (T-spins, combos) parked as F-058.
 - **Design and animations (2026-11-20, standing):** every new or changed element follows Bricks' design and animations; ask the owner when unsure (project rule in `AGENTS.md`).
 - **Settings removed (2026-11-20, F-048, F-049):** no Game effects or Interface animations setting; only the system's reduced-motion choice turns animations off.
+- **Logo over the board (2026-11-20, F-063, Q1 with recommendation):** on phones in portrait the 1 Player logo is centred over the board and gets smaller where the board is narrow, rather than reaching over the side column.
 - **Hold button (2026-11-20, F-050, Q1 with recommendation):** Split: the pad's free top corner on the outer side; Row: last in the row, the seven buttons may be drawn down to 36 px (owner's choice during the run).
 - **Borders (2026-11-20, F-051, Q2 with recommendation):** `--line` #3A4268.
 - **Orange (2026-11-19, F-044, Q1 with recommendation):** orange fill is for Start Match and selected options; Copy Invite Link is outlined like the other room buttons.
@@ -62,23 +63,17 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 
 Earlier: The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 11 old branches archived as `archive/<branch>` tags and deleted, project rules moved to `AGENTS.md` (outdated and duplicated ones removed; shared rules apply for model advice and untranslated working documents), history moved to `PROGRESS.md`.
 
-## Current state (2026-11-19)
+## Current state (2026-11-20)
 
 - Live: https://bricks.trythis.one (Pages from `main`); admin https://bricks-operating.l8p1.workers.dev/admin/ (Worker from `feature/operating-controls`).
-- Latest work, newest first:
+- Latest work, newest first (older entries in `PROGRESS.md`):
+  - 2026-11-20: run A: B-034 match side column fits above the controls on smaller phones, F-060 both Hold placements switchable for the test, F-063 top bar follows the columns, F-064 no fullscreen button in the home-screen app.
   - 2026-11-20: F-062 block colours Modern → Vivid.
   - 2026-11-20: run D: Rules Classic / Modern / Custom (7-bag, wall kicks, lock delay, 3 next pieces, Hold and ghost as rules), Modern by default; Cloudflare matches choose Classic or Modern.
   - 2026-11-20: run C: B-032 touch areas around the buttons, F-050 Hold button, F-048/F-049 settings removed, F-051 clearer borders, F-047 missing animations.
-  - 2026-11-19: run B: B-031 square QR box, F-043 server switch cross-fades, F-044 Copy Invite Link outlined, F-045 equal logo and button widths.
-  - 2026-11-19: run A: B-028 abandoned Cloudflare match stops, B-029 brick countdown, B-026 iPad portrait start screen, B-027 centred QR Code button, F-040 Row gap, F-041 Split default (also fits landscape phones), F-042 QR closes when full.
-  - 2026-11-19: F-039 invitation QR code; T-012 network-kit 0.17.0; T-011 network-kit update workflow.
-  - 2026-11-19: B-025 network-kit 0.15.1 (status check and notices with a game link); T-010 feedback recorded there as network-kit F-112, F-113.
-  - 2026-11-19: F-038 a reload during a Cloudflare match continues it; network-kit feedback rule (T-010 waits for the owner's yes).
-  - 2026-11-19: F-028 Cloudflare 2 Players side by side with Firebase (switch on the 2 Players screen) and F-036 connection comparison. Needs a real match on two devices.
-  - 2026-11-18: F-037 danger music ends as in NES; restore point tag before F-028; F-028 proposal with questions.
-- Waiting on the owner: the QR box on the iPad (B-031, Safari not testable here); the new countdown, Split default and stopped abandoned game on a phone (run A); a real Cloudflare 2 Players match on two devices and a look at Settings → Connection (F-028, F-036); phone checks of F-030 – F-035 (also adding the game to the home screen), B-019, B-018 and B-017; a two-device check of B-004; whether the privacy text is enough.
-- F-060 (Hold placement), owner 2026-11-20: test exactly two placements from the owner's screenshots, see the backlog item; no new variants.
-- Next: B-030 (match top bar on phones), B-033 and F-056 (key repeat settings) are recorded, not yet proposed as runs; T-009 only on the owner's explicit yes. F-006 music in the music studio chat.
+  - 2026-11-19: runs A and B (layout, countdown, QR and lobby fixes); F-028 Cloudflare 2 Players and F-036 connection comparison.
+- Waiting on the owner: F-060 which Hold placement stays (Settings → Hold button, Bottom / Top; then the other is removed); run A on a phone (match side column, top bar, no fullscreen button in the home-screen app); the QR box on the iPad (B-031); the countdown, Split default and stopped abandoned game on a phone (run A of 2026-11-19); a real Cloudflare 2 Players match on two devices and a look at Settings → Connection (F-028, F-036); phone checks of F-030 – F-035, B-019, B-018 and B-017; a two-device check of B-004; whether the privacy text is enough.
+- Next: proposed runs in `docs/BACKLOG.md` (B-030 and B-033 layout faults, F-056 key repeat, F-061/F-059 own control layout); T-009 only on the owner's explicit yes. F-006 music in the music studio chat.
 - Older checkpoints and history: `PROGRESS.md` (section *Handoff history*) and git history.
 
 ## Documentation map

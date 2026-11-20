@@ -27,7 +27,7 @@ import { ConnectionComparison } from './multiplayer/ConnectionComparison.tsx'
 import { crossFade } from './ui/motion.ts'
 import { DEFAULT_RULES_CHOICE, engineRules, playRules, RULE_KEYS, RULE_LABELS, rulesLabel } from './play-rules.ts'
 import type { PlayRules } from './play-rules.ts'
-import { enterFullscreen, exitFullscreen, fullscreenActive, fullscreenSupported, rememberFullscreen, restoreFullscreenOnFirstInput } from './ui/fullscreen.ts'
+import { enterFullscreen, exitFullscreen, fullscreenActive, fullscreenSupported, rememberFullscreen, restoreFullscreenOnFirstInput, runsAsInstalledApp } from './ui/fullscreen.ts'
 
 const USERNAME_KEY = 'bricks.username'
 const CONTROLS_KEY = 'bricks.controls.v1'
@@ -94,15 +94,16 @@ function App() {
   // F-028: Firebase or Cloudflare 2 Players while both exist; a Cloudflare link opens Cloudflare.
   const [backend, setBackend] = useState<Backend>(() => cloudflareLink() ? 'cloudflare' : new URL(location.href).searchParams.has('room') ? 'firebase' : savedBackend())
   function chooseBackend(value: Backend) { saveBackend(value); crossFade(() => setBackend(value)) } // F-043: cross-fades like other screen changes
-  const [canFullscreen] = useState(() => fullscreenSupported(document))
+  // F-064: the installed home-screen app is always fullscreen, so it shows no fullscreen button.
+  const [canFullscreen] = useState(() => fullscreenSupported(document) && !runsAsInstalledApp(window, document))
   const [isFullscreen, setIsFullscreen] = useState(() => fullscreenActive(document))
   useEffect(() => {
     const update = () => setIsFullscreen(fullscreenActive(document))
     document.addEventListener('fullscreenchange', update)
     document.addEventListener('webkitfullscreenchange', update)
-    const stopRestore = restoreFullscreenOnFirstInput(document, localStorage)
+    const stopRestore = canFullscreen ? restoreFullscreenOnFirstInput(document, localStorage) : () => {}
     return () => { document.removeEventListener('fullscreenchange', update); document.removeEventListener('webkitfullscreenchange', update); stopRestore() }
-  }, [])
+  }, [canFullscreen])
   async function toggleFullscreen() {
     if (fullscreenActive(document)) { rememberFullscreen(localStorage, false); await exitFullscreen(document) }
     else if (await enterFullscreen(document)) rememberFullscreen(localStorage, true)
@@ -503,7 +504,11 @@ function App() {
         <Segmented label="Rotate buttons" value={personal.rotateButtons} options={[{ value: 'one', label: 'One' }, { value: 'two', label: 'Two' }]} onChange={(rotateButtons) => savePersonal({ ...personal, rotateButtons })} />
         <span className="setting-label">Layout</span>
         <Segmented label="Button layout" value={personal.touchLayout} options={[{ value: 'split', label: 'Split' }, { value: 'row', label: 'Row' }]} onChange={(touchLayout) => savePersonal({ ...personal, touchLayout })} />
-        <TouchPreview rotateButtons={personal.rotateButtons} layout={personal.touchLayout} dropMode={personal.dropMode} leftHanded={personal.leftHandedControls} holdEnabled={playRules(singlePlayer.rules).hold} />
+        {personal.touchLayout === 'split' && personal.rotateButtons === 'two' && playRules(singlePlayer.rules).hold && <div className="settings-appear">
+          <span className="setting-label">Hold button</span>
+          <Segmented label="Hold button" value={personal.holdPlacement} options={[{ value: 'bottom', label: 'Bottom' }, { value: 'top', label: 'Top' }]} onChange={(holdPlacement) => savePersonal({ ...personal, holdPlacement })} />
+        </div>}
+        <TouchPreview rotateButtons={personal.rotateButtons} layout={personal.touchLayout} dropMode={personal.dropMode} leftHanded={personal.leftHandedControls} holdEnabled={playRules(singlePlayer.rules).hold} holdPlacement={personal.holdPlacement} />
       </div>}
       <span className="setting-label">Drop</span>
       <Segmented label="Drop" value={personal.dropMode} options={[{ value: 'drop', label: 'Drop' }, { value: 'hard', label: 'Hard Drop' }, { value: 'both', label: 'Both' }]} onChange={(dropMode) => savePersonal({ ...personal, dropMode, hardDropEnabled: hardDropAllowed(dropMode) })} />
@@ -596,7 +601,7 @@ function App() {
       <Playfield game={game} ghost={gameRules.ghost} colors={personal.blockColors} clear={clearFx} thump={thump} swipeMode={personal.mobileControlMethod === 'swipe'} onSwipe={(start, end, board) => actionsForSwipe(start, end, board).forEach(apply)} />
       <aside className="game-side next-panel"><div className="next-box"><span>Next</span><PiecePreview type={game.next} level={game.level} colors={personal.blockColors} /><NextQueue queue={game.queue} level={game.level} colors={personal.blockColors} /></div>{game.holdEnabled && <HoldBox type={game.held} level={game.level} colors={personal.blockColors} enabled={game.status === 'playing' && !game.holdUsed} onHold={() => apply('hold')} />}</aside>
     </section>
-    {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={72} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdEnabled={game.holdEnabled} holdAvailable={!game.holdUsed} dropMode={personal.dropMode} enabled={game.status === 'playing'} apply={apply} />}
+    {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={72} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdPlacement={personal.holdPlacement} holdEnabled={game.holdEnabled} holdAvailable={!game.holdUsed} dropMode={personal.dropMode} enabled={game.status === 'playing'} apply={apply} />}
     <p className="controller-status" aria-live="polite">{controllerStatus}</p>
     <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">{gameAnnouncement}</p>
     <p className="control-hint" aria-label="Keyboard controls">{keyLabel(bindings.moveLeft)} {keyLabel(bindings.moveRight)} Move · {softDropAllowed(personal.dropMode) ? `${keyLabel(bindings.softDrop)} Soft drop · ` : ''}{keyLabel(bindings.rotateCounterclockwise)} {keyLabel(bindings.rotateClockwise)} Rotate · {hardDropAllowed(personal.dropMode) ? `${keyLabel(bindings.hardDrop)} Hard drop` : 'Hard Drop off'}{game.holdEnabled ? ` · ${keyLabel(bindings.hold)} Hold` : ''} · {keyLabel(bindings.pause)} / Esc Pause</p>

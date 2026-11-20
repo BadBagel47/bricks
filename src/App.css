@@ -611,3 +611,64 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
   .next-queue{flex-direction:row;justify-content:center;gap:6px}
   .next-queue .piece-preview{width:min(40%,34px)}
 }
+
+/* F-060 (owner test, 2026-11-20): with Split and two rotate buttons, Hold joins the rotate buttons,
+   which move further apart. Bottom: below the orange button, centred under it. Top: the free top
+   corner, above the other rotate button. Mirrored for left-handed. One placement stays after the test. */
+.touch-rotate.two.with-hold{width:calc(var(--touch-size) * 2.65)}
+.touch-rotate.with-hold .touch-button.touch-hold{position:absolute;width:var(--touch-size);height:max(44px,calc(var(--touch-size) * .75));border-radius:16px}
+.touch-rotate.hold-bottom .touch-hold{bottom:0;right:calc(var(--touch-size) * .125)}
+.touch-rotate.hold-top .touch-hold{top:0;left:calc(var(--touch-size) * .075)}
+.left-handed .touch-rotate.hold-bottom .touch-hold{right:auto;left:calc(var(--touch-size) * .125)}
+.left-handed .touch-rotate.hold-top .touch-hold{left:auto;right:calc(var(--touch-size) * .075)}
+@media(max-width:760px) and (orientation:portrait){
+  .game-shell .touch-split.hold-in-rotate{--touch-size:max(44px,min(84px,calc((100vw - 28px - 40px) / 5.65),calc((var(--controls-h) - 8px) / 2.1)))}
+}
+/* Touch areas (B-032): each button owns the empty space nearest to it. */
+.touch-rotate.two.hold-bottom .touch-secondary{--hit-t:-6px;--hit-l:-12px;--hit-b:-16px;--hit-r:calc(var(--touch-size) * -.19)}
+.touch-rotate.two.hold-bottom .touch-primary{--hit-t:-10px;--hit-r:-14px;--hit-b:calc(var(--touch-size) * -.05 - 4px);--hit-l:calc(var(--touch-size) * -1.4 - 10px)}
+.touch-rotate.two.hold-bottom .touch-hold{--hit-t:calc(var(--touch-size) * -.05 - 4px);--hit-b:-16px;--hit-r:calc(var(--touch-size) * -.125 - 14px);--hit-l:calc(var(--touch-size) * -.19)}
+.touch-rotate.two.hold-top .touch-hold{--hit-t:-10px;--hit-l:calc(var(--touch-size) * -.075 - 12px);--hit-r:calc(var(--touch-size) * -.16);--hit-b:calc(var(--touch-size) * -.1 - 4px)}
+.touch-rotate.two.hold-top .touch-secondary{--hit-t:calc(var(--touch-size) * -.1 - 4px);--hit-l:-12px;--hit-b:-16px;--hit-r:calc(var(--touch-size) * -1.5 - 14px)}
+.touch-rotate.two.hold-top .touch-primary{--hit-t:-10px;--hit-r:-14px;--hit-b:-6px;--hit-l:calc(var(--touch-size) * -.16)}
+.left-handed .touch-rotate.two.hold-bottom .touch-secondary{--hit-r:-12px;--hit-l:calc(var(--touch-size) * -.19)}
+.left-handed .touch-rotate.two.hold-bottom .touch-primary{--hit-l:-14px;--hit-r:calc(var(--touch-size) * -1.4 - 10px)}
+.left-handed .touch-rotate.two.hold-bottom .touch-hold{--hit-l:calc(var(--touch-size) * -.125 - 14px);--hit-r:calc(var(--touch-size) * -.19)}
+.left-handed .touch-rotate.two.hold-top .touch-hold{--hit-r:calc(var(--touch-size) * -.075 - 12px);--hit-l:calc(var(--touch-size) * -.16)}
+.left-handed .touch-rotate.two.hold-top .touch-secondary{--hit-r:-12px;--hit-l:calc(var(--touch-size) * -1.5 - 14px)}
+.left-handed .touch-rotate.two.hold-top .touch-primary{--hit-l:-14px;--hit-r:calc(var(--touch-size) * -.16)}
+/* The Settings preview follows the same placements. */
+.touch-preview .touch-rotate.two.with-hold{width:96px}
+.touch-preview .touch-rotate.with-hold .preview-key.touch-hold{position:absolute;width:36px;height:27px;border-radius:9px}
+.touch-preview .touch-rotate.hold-bottom .touch-hold{bottom:0;right:3px}
+.touch-preview .touch-rotate.hold-top .touch-hold{top:0;left:0}
+.touch-preview.left-handed .touch-rotate.hold-bottom .touch-hold{right:auto;left:3px}
+.touch-preview.left-handed .touch-rotate.hold-top .touch-hold{left:auto;right:0}
+
+/* F-063: on phones in portrait the 1 Player top bar follows the columns below it: the logo
+   centred over the board (smaller where the board is narrow), Pause over the side column, as wide as it. */
+@media(max-width:760px) and (orientation:portrait){
+  .game-shell .game-layout{grid-template-columns:var(--board-w) 76px}
+  .game-shell .game-layout>.playfield{width:var(--board-w)}
+  .game-shell>.game-topbar{display:grid;grid-template-columns:var(--board-w) 76px;column-gap:10px;justify-content:center;align-items:center;width:100%}
+  .game-shell>.game-topbar>.brand{position:static;justify-self:center;--logo-tile:min(34px,calc((var(--board-w) - 24px) / 6.2));transform:translateY(calc(var(--logo-tile) * -.08))}
+  .game-shell>.game-topbar>.mobile-pause-button{width:100%}
+}
+@media(max-width:360px) and (orientation:portrait){.game-shell .game-stats>div{padding-inline:8px}}
+
+/* B-034: in matches on phones in portrait the two later Next pieces sit side by side, so the side
+   column (opponent's board, Next, Hold, level and lines) ends above the touch controls. */
+@media(max-width:900px) and (orientation:portrait){
+  .live-previews .next-queue{flex-direction:row;justify-content:center;gap:6px}
+  .live-previews .next-queue .piece-preview{width:min(30px,44%)}
+  /* Spawn pieces are at most two cells tall, so the boxes are half as tall as wide. */
+  .live-previews .piece-preview,.live-previews .empty-hold{aspect-ratio:2}
+  .live-previews .piece-preview-grid{height:auto!important;aspect-ratio:var(--shape)}
+  .live-previews .empty-hold{width:min(48px,100%)}
+  /* Never let the side column run under the controls: the screen scrolls a little instead. */
+  .multiplayer-game>.duel-boards{flex-shrink:0}
+}
+/* Short phones (about 320 × 568): the opponent's board a little smaller, so everything still fits. */
+@media(max-width:900px) and (orientation:portrait) and (max-height:600px){
+  .match-side>.opponent-board{width:76%;align-self:center}
+}

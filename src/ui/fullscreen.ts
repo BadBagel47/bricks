@@ -71,3 +71,21 @@ export function restoreFullscreenOnFirstInput(doc: FullscreenDocument, storage: 
   for (const type of events) doc.addEventListener(type, restore, true)
   return stop
 }
+
+interface DisplayWindow { matchMedia?: (query: string) => { matches: boolean }; navigator?: object }
+
+/**
+ * F-064: true when the game runs as an app added to the home screen, which is always
+ * fullscreen, so the fullscreen button has nothing to do. Checked when the page opens:
+ * a browser tab cannot be in page fullscreen then (it needs a tap first), so a fullscreen
+ * or standalone display mode at that moment means the installed app.
+ */
+export function runsAsInstalledApp(win: DisplayWindow, doc: FullscreenDocument): boolean {
+  if (fullscreenActive(doc)) return false
+  if ((win.navigator as { standalone?: unknown } | undefined)?.standalone === true) return true // iPhone home-screen app
+  try {
+    return ['fullscreen', 'standalone', 'minimal-ui'].some((mode) => win.matchMedia?.(`(display-mode: ${mode})`).matches === true)
+  } catch {
+    return false
+  }
+}
