@@ -2,6 +2,7 @@
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| B-038 | Bug | iPad in portrait: in matches the top bar and the score cards span the whole screen (about 790 px on an 820 px iPad) while the boards below are only about 460 px wide, so the top looks very wide; the boards also stay small (own board capped at 300 px) with a large empty area around them (owner photo 2026-11-20). Cause: on screens up to 900 px wide the match screen uses the phone layout, full width | Medium | Proposed (2026-11-20, owner) | Standard |
 | B-037 | Bug | After B-035 Hard Drop seems hard to activate (owner, 2026-11-20, on the phone). B-035 gave the arrows below the lowest 30 % of the Hard Drop button and moved Hard Drop's own touch area to an invisible layer (the button itself ignores touches) so that its lower part could go to the arrows. Likely causes: a press on the lower third of the button now soft-drops, and the phone's own touch correction (which picks the button the finger overlaps most) may not count the invisible layer as Hard Drop. Neither can be tested here without a real phone | High | Proposed (2026-11-20, owner) | Standard |
 | B-036 | Bug | Battle help text in the lobby says "Clearing lines sends garbage rows", but a single-line clear sends nothing (2 lines → 1 row, 3 → 2, 4 → 4). Found 2026-11-20 when the owner asked how Battle works | Low | Proposed (2026-11-20) | Economical |
 | T-014 | Task | Cloudflare Battle end-to-end test: check that garbage rows really reach the other player (today only the Firebase test and the unit tests check it; the Cloudflare test checks survival, pause and leaving). Found 2026-11-20 when the owner asked | Medium | Proposed (2026-11-20) | Standard |
@@ -126,21 +127,24 @@ The approved High items come from the owner's request of 2026-11-10: use the
 sketch's layout **and behavior**, not only its look. Design reference:
 "Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
 
-## Proposed runs (2026-11-20, after B-037 was found)
+## Proposed runs (2026-11-20, after B-038 was found)
 
 Prioritized for: visible faults first, then the touch controls.
 
 - **A** – standard model, medium – Hard Drop easy to hit again, without the old mistakes
   - B-037 – the whole Hard Drop button reacts again, as a normal button; the larger gap from B-035 stays and the arrows below own all of it
-  - Question: recommended as above (the gap alone keeps most of B-035's help, and the button behaves like every other button). Alternative: keep giving a smaller strip of Hard Drop to the arrows (about 15 % instead of 30 %)
-- **B** – economical model, low – Battle help text
+  - Question: recommended as above. Alternative: keep giving a smaller strip of Hard Drop to the arrows (about 15 % instead of 30 %)
+- **B** – standard model, medium – Match screen on iPad
+  - B-038 – the top bar and the score cards become as wide as the boards below, centred, as on the 1 Player screen
+  - Question: recommended: the boards also grow on tablets to use the empty space (as large as the height allows), and the top follows their width; the touch controls stay at the screen edges. Alternative: only narrow the top, boards as today
+- **C** – economical model, low – Battle help text
   - B-036 – the lobby text says that clearing 2 or more lines sends garbage rows
-- **C** – standard model, medium – Cloudflare Battle test
+- **D** – standard model, medium – Cloudflare Battle test
   - T-014 – the two-player test checks that garbage rows really reach the other player
-- **D** – standard model, medium – Key repeat
+- **E** – standard model, medium – Key repeat
   - F-056 – two settings for held buttons: how soon they repeat and how fast
   - Question: where? Recommended: Settings, next to the touch-control choices, defaults as today
-- **E** – strong model, high – Own control layout
+- **F** – strong model, high – Own control layout
   - F-061 – arrange the touch controls yourself and set the playing field's height
   - F-059 – the Row layout possibly removed
   - Question: how far? Recommended: an edit mode where the button groups are dragged into place and resized, plus a board-height slider; Row removed once that exists
@@ -152,6 +156,9 @@ Not proposed: F-006 (music studio chat); T-009 (retire Firebase and the old admi
 Parked: F-027 (alternative Vivid piece colors), F-057 (pieces above the board), F-058 (modern scoring).
 
 ## Details
+
+### B-038 match screen on iPad (2026-11-20)
+- Measured with two local players: 820 × 1180 top bar and scores 14–806 px, boards 181–639 px; 810 × 1080 and 768 × 1024 the same pattern; iPad landscape 1180 × 820 bar 640 px wide over 473 px of boards. The own board stays at 300 px wide on tablets in portrait, leaving about 320 px of empty height above the touch controls.
 
 ### Battle rules as built (checked 2026-11-20, owner question)
 - Clearing 2 lines at once sends 1 garbage row, 3 lines 2 rows, 4 lines 4 rows; a single line sends nothing; no combo or drop bonus (`penaltyRows` in `src/engine/battle.ts`).
