@@ -2,6 +2,7 @@
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| B-035 | Bug | Split touch controls: Hard Drop is pressed by mistake when aiming at the buttons below it (left, soft drop, right); the owner sees it react although most of the thumb is lower (2026-11-20). Found: the Hard Drop touch area reaches only 4 px into the 8 px gap, so the drawn layout is as intended; the action fires at the very first contact, and a thumb coming from below first touches with its tip, which the phone reports higher than where the thumb ends up | High | Proposed (2026-11-20, owner) | Standard |
 | F-056 | Feature | Adjustable key repeat for held buttons (DAS delay and repeat rate; today fixed 160 ms and 48 ms). A control setting, not a rule | Low | Proposed (2026-11-20) | Standard |
 | F-057 | Feature | Pieces appear in hidden rows above the board, as in modern games (fewer losses at the very top) | Low | Parked (2026-11-20) | Standard |
 | F-058 | Feature | Modern scoring: T-spins, combos and back-to-back, and their garbage in Battle. Rewards advanced play and changes 2 Players, so kept out of Modern for now | Low | Parked (2026-11-20) | Standard |
@@ -122,14 +123,17 @@ The approved High items come from the owner's request of 2026-11-10: use the
 sketch's layout **and behavior**, not only its look. Design reference:
 "Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
 
-## Proposed runs (2026-11-20, after the second run A)
+## Proposed runs (2026-11-20, after B-035 was found)
 
 Prioritized for: visible faults first, then the touch controls.
 
-- **A** – standard model, medium – Key repeat
+- **A** – standard model, medium – Hard Drop pressed by mistake
+  - B-035 – more space between Hard Drop and the row below, and the lower buttons also take the gap and the lowest part of the Hard Drop button, so a thumb aimed at them no longer drops the piece
+  - Question: how? Recommended: as above (the look stays almost the same). Alternatives: Hard Drop reacts only when the thumb is lifted while still on it (safer, but every hard drop comes a moment later), or Hard Drop moves away from the arrows (a bigger layout change)
+- **B** – standard model, medium – Key repeat
   - F-056 – two settings for held buttons: how soon they repeat and how fast
   - Question: where? Recommended: Settings, next to the touch-control choices, defaults as today
-- **B** – strong model, high – Own control layout
+- **C** – strong model, high – Own control layout
   - F-061 – arrange the touch controls yourself and set the playing field's height
   - F-059 – the Row layout possibly removed
   - Question: how far? Recommended: an edit mode where the button groups are dragged into place and resized, plus a board-height slider; Row removed once that exists
@@ -141,6 +145,11 @@ Not proposed: F-006 (music studio chat); T-009 (retire Firebase and the old admi
 Parked: F-027 (alternative Vivid piece colors), F-057 (pieces above the board), F-058 (modern scoring).
 
 ## Details
+
+### B-035 Hard Drop pressed instead of the buttons below (2026-11-20)
+- Owner: "Det är väldigt lätt att hard drop trycks istället för de andra styrknapparna. Jag kan till och med se att den trycker på den knappen fastän större delen av tummen är längre ner."
+- Measured (390 × 844, 375 × 667, 412 × 915, Split): Hard Drop sits above Soft Drop with an 8 px gap; its touch area (B-032) reaches 4 px below the button, the lower buttons own the rest. So the layout behaves as built; the cause is how a thumb meets the screen: the action fires at the first contact (pointer down), and a thumb coming from below touches first with its tip, reported higher than its centre. Hard Drop cannot be undone, so a wrong press costs much more than a wrong move.
+- Options: (1, recommended) more space between Hard Drop and the row below, with the lower buttons also owning the gap and the lowest part of the Hard Drop button; (2) Hard Drop acts when released over it (safer, slower); (3) move Hard Drop away from the arrows.
 
 ### B-030 match top bar and "Synchronizing…" (2026-11-20)
 - The opponent's first board is sent once when the countdown starts (newest-only, unreliable) and again only when it changes, i.e. after the countdown; if that first one is lost, the chip read Synchronizing… for the whole countdown. The round only starts with both players in the room and a lost player pauses the match, so the countdown now reads Connected.
