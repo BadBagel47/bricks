@@ -45,6 +45,7 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 - **Abandoned match (2026-11-19, B-028, Q1 with recommendation):** the remaining player's board freezes with the note and Return to lobby; the music stops.
 - **Tablet start screen (2026-11-19, B-026, Q2 with recommendation):** every portrait screen stacks the start screen as on phones.
 - **Start screen widths (2026-11-19, F-045):** logo and menu buttons equally wide: on phones the buttons follow the logo, on tablets in portrait the logo grows to the buttons' width.
+- **Rules (2026-11-20, F-046, F-052 – F-055):** Classic / Modern / Custom in Settings → 1 Player, Modern by default; Modern = 7-bag, SRS wall kicks, lock delay, 3 next pieces, Hold, ghost piece; Custom shows the switches only when chosen and starts from the preset chosen before (Q7 a); one high-score list with a Classic/Modern/Custom label (Q5); Cloudflare matches choose Classic or Modern, Firebase stays Classic (Q4). Modern scoring (T-spins, combos) parked as F-058.
 - **Design and animations (2026-11-20, standing):** every new or changed element follows Bricks' design and animations; ask the owner when unsure (project rule in `AGENTS.md`).
 - **Settings removed (2026-11-20, F-048, F-049):** no Game effects or Interface animations setting; only the system's reduced-motion choice turns animations off.
 - **Hold button (2026-11-20, F-050, Q1 with recommendation):** Split: the pad's free top corner on the outer side; Row: last in the row, the seven buttons may be drawn down to 36 px (owner's choice during the run).
@@ -63,6 +64,7 @@ None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 1
 
 - Live: https://bricks.trythis.one (Pages from `main`); admin https://bricks-operating.l8p1.workers.dev/admin/ (Worker from `feature/operating-controls`).
 - Latest work, newest first:
+  - 2026-11-20: run D: Rules Classic / Modern / Custom (7-bag, wall kicks, lock delay, 3 next pieces, Hold and ghost as rules), Modern by default; Cloudflare matches choose Classic or Modern.
   - 2026-11-20: run C: B-032 touch areas around the buttons, F-050 Hold button, F-048/F-049 settings removed, F-051 clearer borders, F-047 missing animations.
   - 2026-11-19: run B: B-031 square QR box, F-043 server switch cross-fades, F-044 Copy Invite Link outlined, F-045 equal logo and button widths.
   - 2026-11-19: run A: B-028 abandoned Cloudflare match stops, B-029 brick countdown, B-026 iPad portrait start screen, B-027 centred QR Code button, F-040 Row gap, F-041 Split default (also fits landscape phones), F-042 QR closes when full.
@@ -72,7 +74,7 @@ None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 1
   - 2026-11-19: F-028 Cloudflare 2 Players side by side with Firebase (switch on the 2 Players screen) and F-036 connection comparison. Needs a real match on two devices.
   - 2026-11-18: F-037 danger music ends as in NES; restore point tag before F-028; F-028 proposal with questions.
 - Waiting on the owner: the QR box on the iPad (B-031, Safari not testable here); the new countdown, Split default and stopped abandoned game on a phone (run A); a real Cloudflare 2 Players match on two devices and a look at Settings → Connection (F-028, F-036); phone checks of F-030 – F-035 (also adding the game to the home screen), B-019, B-018 and B-017; a two-device check of B-004; whether the privacy text is enough.
-- Next: B-030 (match top bar on phones) is recorded, not yet proposed as a run; T-009 only on the owner's explicit yes. F-006 music in the music studio chat.
+- Next: B-030 (match top bar on phones), B-033 and F-056 (key repeat settings) are recorded, not yet proposed as runs; T-009 only on the owner's explicit yes. F-006 music in the music studio chat.
 - Older checkpoints and history: `PROGRESS.md` (section *Handoff history*) and git history.
 
 ## Documentation map

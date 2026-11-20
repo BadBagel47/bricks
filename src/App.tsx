@@ -14,7 +14,7 @@ import type { GamepadBindings } from './input/gamepad.ts'
 import { HeldInputs } from './input/repeat.ts'
 import { actionsForSwipe } from './input/swipe.ts'
 import { actionAllowed, hardDropAllowed, softDropAllowed } from './input/drop-mode.ts'
-import { HoldBox, Playfield, PiecePreview, TouchControls, TouchPreview } from './ui/GameViews.tsx'
+import { HoldBox, NextQueue, Playfield, PiecePreview, TouchControls, TouchPreview } from './ui/GameViews.tsx'
 import { ColorPreview, Segmented, Stepper } from './ui/SettingsControls.tsx'
 import { addHighscore, DEFAULT_PERSONAL_SETTINGS, DEFAULT_SINGLE_PLAYER_SETTINGS, parseHighscores, parsePersonalSettings, parseSinglePlayerSettings, serializeHighscores } from './persistence.ts'
 import type { HighscoreRecord, PersonalSettings, SinglePlayerSettings } from './persistence.ts'
@@ -25,6 +25,8 @@ import { cloudflareLink, saveBackend, savedBackend } from './net/BackendChoice.t
 import type { Backend } from './multiplayer/connection-stats.ts'
 import { ConnectionComparison } from './multiplayer/ConnectionComparison.tsx'
 import { crossFade } from './ui/motion.ts'
+import { DEFAULT_RULES_CHOICE, engineRules, playRules, RULE_KEYS, RULE_LABELS, rulesLabel } from './play-rules.ts'
+import type { PlayRules } from './play-rules.ts'
 import { enterFullscreen, exitFullscreen, fullscreenActive, fullscreenSupported, rememberFullscreen, restoreFullscreenOnFirstInput } from './ui/fullscreen.ts'
 
 const USERNAME_KEY = 'bricks.username'
@@ -126,6 +128,9 @@ function App() {
   const highscoresRef = useRef(highscores)
   const usernameRef = useRef(username)
   const runIdRef = useRef('')
+  // F-046: the rules of the running game (the ghost piece and the high-score label follow them).
+  const [gameRules, setGameRules] = useState<PlayRules>(() => playRules(DEFAULT_RULES_CHOICE))
+  const gameRulesRef = useRef(gameRules)
   const gameOverAtRef = useRef(0)
   const audioRef = useRef<BricksAudio | null>(null)
   const checkingAccess = useRef(false)
@@ -201,7 +206,10 @@ function App() {
     finally { checkingAccess.current = false }
     if (previousViewRef.current !== requestedFrom) return
     setGameAnnouncement('')
-    const fresh = createGame({ startLevel: singlePlayer.startLevel, hardDropEnabled: personal.hardDropEnabled, holdEnabled: singlePlayer.holdEnabled })
+    const rules = playRules(singlePlayer.rules)
+    gameRulesRef.current = rules
+    setGameRules(rules)
+    const fresh = createGame({ startLevel: singlePlayer.startLevel, hardDropEnabled: personal.hardDropEnabled, holdEnabled: rules.hold, rules: engineRules(rules) })
     audio.beginGame(personal)
     audio.setDanger(fresh.board)
     runIdRef.current = makeRunId()
@@ -244,6 +252,7 @@ function App() {
         score: next.score,
         level: next.level,
         lines: next.lines,
+        rules: rulesLabel(gameRulesRef.current),
         achievedAt: new Date().toISOString(),
       })
       highscoresRef.current = [...result.records]
@@ -494,7 +503,7 @@ function App() {
         <Segmented label="Rotate buttons" value={personal.rotateButtons} options={[{ value: 'one', label: 'One' }, { value: 'two', label: 'Two' }]} onChange={(rotateButtons) => savePersonal({ ...personal, rotateButtons })} />
         <span className="setting-label">Layout</span>
         <Segmented label="Button layout" value={personal.touchLayout} options={[{ value: 'split', label: 'Split' }, { value: 'row', label: 'Row' }]} onChange={(touchLayout) => savePersonal({ ...personal, touchLayout })} />
-        <TouchPreview rotateButtons={personal.rotateButtons} layout={personal.touchLayout} dropMode={personal.dropMode} leftHanded={personal.leftHandedControls} holdEnabled={singlePlayer.holdEnabled} />
+        <TouchPreview rotateButtons={personal.rotateButtons} layout={personal.touchLayout} dropMode={personal.dropMode} leftHanded={personal.leftHandedControls} holdEnabled={playRules(singlePlayer.rules).hold} />
       </div>}
       <span className="setting-label">Drop</span>
       <Segmented label="Drop" value={personal.dropMode} options={[{ value: 'drop', label: 'Drop' }, { value: 'hard', label: 'Hard Drop' }, { value: 'both', label: 'Both' }]} onChange={(dropMode) => savePersonal({ ...personal, dropMode, hardDropEnabled: hardDropAllowed(dropMode) })} />
@@ -506,13 +515,14 @@ function App() {
       <span className="setting-label">Block colors</span>
       <Segmented label="Block colors" value={personal.blockColors} options={[{ value: 'level', label: 'Retro' }, { value: 'tones', label: 'Tones' }, { value: 'classic', label: 'Modern' }]} onChange={(blockColors) => savePersonal({ ...personal, blockColors })} />
       <ColorPreview colors={personal.blockColors} level={singlePlayer.startLevel} />
-      <div className="setting-group">
-      <label className="toggle-row"><span>Ghost piece</span><input checked={personal.ghostPiece} onChange={(event) => savePersonal({ ...personal, ghostPiece: event.target.checked })} type="checkbox" /></label>
-      </div>
       <h2 className="settings-heading">1 Player</h2>
+      <span className="setting-label">Rules</span>
+      <Segmented label="Rules" value={singlePlayer.rules.preset} options={[{ value: 'classic', label: 'Classic' }, { value: 'modern', label: 'Modern' }, { value: 'custom', label: 'Custom' }]} onChange={(preset) => saveSinglePlayer({ ...singlePlayer, rules: preset === 'custom' && singlePlayer.rules.preset !== 'custom' ? { preset, custom: playRules(singlePlayer.rules) } : { ...singlePlayer.rules, preset } })} />
+      {singlePlayer.rules.preset === 'custom'
+        ? <div className="settings-appear"><div className="setting-group">{RULE_KEYS.map((key) => <label className="toggle-row" key={key}><span>{RULE_LABELS[key]}</span><input checked={singlePlayer.rules.custom[key]} onChange={(event) => saveSinglePlayer({ ...singlePlayer, rules: { preset: 'custom', custom: { ...singlePlayer.rules.custom, [key]: event.target.checked } } })} type="checkbox" /></label>)}</div></div>
+        : <span className="field-hint rules-summary" key={singlePlayer.rules.preset}>{singlePlayer.rules.preset === 'modern' ? '7-bag, wall kicks, lock delay, 3 next pieces, hold and ghost piece.' : 'As the original NES game.'}</span>}
       <div className="setting-group">
         <Stepper label="Starting Level" value={singlePlayer.startLevel} min={0} max={19} lowerLabel="Lower starting level" raiseLabel="Raise starting level" onChange={(startLevel) => saveSinglePlayer({ ...singlePlayer, startLevel })} />
-      <label className="toggle-row"><span>Hold Piece</span><input checked={singlePlayer.holdEnabled} onChange={(event) => saveSinglePlayer({ ...singlePlayer, holdEnabled: event.target.checked })} type="checkbox" /></label>
       </div>
       <h2 className="settings-heading">Audio</h2>
       <div className="setting-group">
@@ -583,8 +593,8 @@ function App() {
         <div className={levelUp ? 'level-up' : undefined} key={`level-${levelUp}`}><span>Level</span><strong>{String(game.level).padStart(2, '0')}</strong></div>
         <div><span>Lines</span><strong>{game.lines}</strong></div>
       </aside>
-      <Playfield game={game} ghost={personal.ghostPiece} colors={personal.blockColors} clear={clearFx} thump={thump} swipeMode={personal.mobileControlMethod === 'swipe'} onSwipe={(start, end, board) => actionsForSwipe(start, end, board).forEach(apply)} />
-      <aside className="game-side next-panel"><div className="next-box"><span>Next</span><PiecePreview type={game.next} level={game.level} colors={personal.blockColors} /></div>{game.holdEnabled && <HoldBox type={game.held} level={game.level} colors={personal.blockColors} enabled={game.status === 'playing' && !game.holdUsed} onHold={() => apply('hold')} />}</aside>
+      <Playfield game={game} ghost={gameRules.ghost} colors={personal.blockColors} clear={clearFx} thump={thump} swipeMode={personal.mobileControlMethod === 'swipe'} onSwipe={(start, end, board) => actionsForSwipe(start, end, board).forEach(apply)} />
+      <aside className="game-side next-panel"><div className="next-box"><span>Next</span><PiecePreview type={game.next} level={game.level} colors={personal.blockColors} /><NextQueue queue={game.queue} level={game.level} colors={personal.blockColors} /></div>{game.holdEnabled && <HoldBox type={game.held} level={game.level} colors={personal.blockColors} enabled={game.status === 'playing' && !game.holdUsed} onHold={() => apply('hold')} />}</aside>
     </section>
     {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={72} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdEnabled={game.holdEnabled} holdAvailable={!game.holdUsed} dropMode={personal.dropMode} enabled={game.status === 'playing'} apply={apply} />}
     <p className="controller-status" aria-live="polite">{controllerStatus}</p>
@@ -631,8 +641,8 @@ function focusableControls(scope: HTMLElement): HTMLElement[] {
 
 function HighscoreTable({ records, compact = false, highlight }: { records: readonly HighscoreRecord[]; compact?: boolean; highlight?: string }) {
   return <table className={`score-cards${compact ? ' compact' : ''}`} aria-label="1 Player highscores">
-    <thead className="visually-hidden"><tr><th>#</th><th>Player</th><th>Level and lines</th><th>Score</th></tr></thead>
-    <tbody>{records.map((record, index) => <tr key={record.id} className={record.id === highlight ? 'own' : undefined}><td className="rank">{index + 1}</td><td className="name">{record.username}</td><td className="meta">Level {String(record.level).padStart(2, '0')} · {record.lines} lines</td><td className="value">{record.score.toLocaleString()}</td></tr>)}</tbody>
+    <thead className="visually-hidden"><tr><th>#</th><th>Player</th><th>Level, lines and rules</th><th>Score</th></tr></thead>
+    <tbody>{records.map((record, index) => <tr key={record.id} className={record.id === highlight ? 'own' : undefined}><td className="rank">{index + 1}</td><td className="name">{record.username}</td><td className="meta">Level {String(record.level).padStart(2, '0')} · {record.lines} lines · <span className={`rules-tag ${record.rules}`}>{record.rules === 'modern' ? 'Modern' : record.rules === 'custom' ? 'Custom' : 'Classic'}</span></td><td className="value">{record.score.toLocaleString()}</td></tr>)}</tbody>
   </table>
 }
 

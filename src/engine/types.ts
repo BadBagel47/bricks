@@ -18,13 +18,34 @@ export interface Randomizer {
   readonly previous: PieceType | null
   /** Number of pieces drawn, including the active piece and preview. */
   readonly index: number
+  /** F-046: pieces left in the current 7-bag, in dealing order (empty with the NES-style order). */
+  readonly bag: readonly PieceType[]
 }
+
+/**
+ * F-046, F-052 – F-054: the gameplay rules that differ between Classic (NES) and Modern.
+ * Hold is `holdEnabled`; the ghost piece is drawn by the views and is not an engine rule.
+ */
+export interface GameRules {
+  /** Pieces come from shuffled bags of all seven instead of the NES-style roll. */
+  readonly bag: boolean
+  /** SRS wall kicks: a rotation that does not fit tries the standard offsets. */
+  readonly kicks: boolean
+  /** A landed piece waits before locking; moving or rotating restarts the wait a limited number of times. */
+  readonly lockDelay: boolean
+  /** How many upcoming pieces are known and shown. */
+  readonly preview: 1 | 3
+}
+export const CLASSIC_RULES: GameRules = { bag: false, kicks: false, lockDelay: false, preview: 1 }
+export const MODERN_RULES: GameRules = { bag: true, kicks: true, lockDelay: true, preview: 3 }
 
 export interface GameOptions {
   readonly seed?: number
   readonly startLevel?: number
   readonly holdEnabled?: boolean
   readonly hardDropEnabled?: boolean
+  /** Default: Classic. */
+  readonly rules?: GameRules
 }
 
 export interface GameState {
@@ -46,6 +67,13 @@ export interface GameState {
   readonly gravityFrames: number
   /** Unprocessed fraction of a 60 Hz frame. */
   readonly remainderMs: number
+  readonly rules: GameRules
+  /** Upcoming pieces after `next` (preview − 1 of them). */
+  readonly queue: readonly PieceType[]
+  /** Lock delay: frames the active piece has rested, restarts used, and the lowest row it reached. */
+  readonly lockFrames: number
+  readonly lockResets: number
+  readonly lowestY: number
 }
 
 export type GameAction =

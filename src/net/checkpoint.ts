@@ -2,6 +2,8 @@ import { BattleGame } from '../engine/battle.ts'
 import type { GameState } from '../engine/types.ts'
 import { validateCheckpoint } from '../multiplayer/checkpoint.ts'
 import { parseMessage } from './protocol.ts'
+import { presetRules } from '../play-rules.ts'
+import type { NetRules } from './protocol.ts'
 import type { BoardMessage, FinishMessage } from './protocol.ts'
 
 /**
@@ -46,12 +48,12 @@ export function clearNetCheckpoint(storage: Store = sessionStorage): void {
 }
 
 /** The saved game for exactly this round, checked before use; null when missing or not usable. */
-export function readNetCheckpoint(expected: { code: string; round: number; seed: number; startLevel: number; hold: boolean; battle: boolean }, storage: Store = sessionStorage): NetCheckpoint | null {
+export function readNetCheckpoint(expected: { code: string; round: number; seed: number; startLevel: number; rules: NetRules; battle: boolean }, storage: Store = sessionStorage): NetCheckpoint | null {
   try {
     const c = JSON.parse(storage.getItem(NET_CHECKPOINT_KEY) ?? 'null') as NetCheckpoint
     if (!c || c.v !== 1 || c.code !== expected.code || c.round !== expected.round || c.seed !== expected.seed) return null
     if (!count(c.savedAt, Number.MAX_SAFE_INTEGER) || !count(c.seq) || !count(c.sentAttacks, 100_000) || typeof c.sentFinal !== 'boolean' || !count(c.otherAttacks, 100_000) || typeof c.otherUid !== 'string' || !c.otherUid) return null
-    const game = validateCheckpoint(c.game, { seed: expected.seed, startLevel: expected.startLevel, holdEnabled: expected.hold, battle: expected.battle })
+    const game = validateCheckpoint(c.game, { seed: expected.seed, startLevel: expected.startLevel, holdEnabled: expected.rules === 'modern', battle: expected.battle, rules: presetRules(expected.rules) })
     if (expected.battle !== (c.battle !== null)) return null
     if (c.battle) {
       const b = c.battle

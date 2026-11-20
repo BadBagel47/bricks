@@ -593,3 +593,19 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
 .touch-row .touch-button{min-width:36px;min-height:36px}
 /* The touch areas reach the screen edge without making the page scroll sideways. */
 .game-shell,.multiplayer-game{overflow:clip}
+
+/* F-054: the two pieces after the next one, smaller, below it. */
+.next-queue{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:2px;align-self:stretch}
+.next-queue .piece-preview{width:62%;opacity:.85}
+.live-previews .next-queue .piece-preview{width:min(30px,100%)}
+/* F-046: the rules summary under Classic / Modern. */
+.rules-summary{display:block;margin:8px 2px 0;animation:row-in 240ms cubic-bezier(.2,.8,.2,1) both}
+/* F-046: which rules a high score was played with. */
+.rules-tag{font-weight:600;color:var(--soft)}.rules-tag.modern{color:var(--accent)}
+/* F-046: Mode and Rules in the match settings, one after the other. */
+.match-settings .segmented+.segmented{margin-top:10px}
+/* F-054 on short landscape screens: the two later pieces side by side, so the side column fits. */
+@media(max-width:900px) and (max-height:720px) and (orientation:landscape){
+  .next-queue{flex-direction:row;justify-content:center;gap:6px}
+  .next-queue .piece-preview{width:min(40%,34px)}
+}

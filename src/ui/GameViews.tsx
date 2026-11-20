@@ -159,3 +159,9 @@ export function HoldBox({ type, level, colors = 'level', enabled, onHold }: { ty
     {type ? <PiecePreview type={type} level={level} colors={colors} /> : <span className="empty-hold" aria-hidden="true">—</span>}
   </button>
 }
+
+/** F-054: the pieces after the next one, smaller, below it (Modern shows three in all). */
+export function NextQueue({ queue, level, colors = 'level' }: { queue: readonly PieceType[]; level: number; colors?: BlockColors }) {
+  if (!queue.length) return null
+  return <div className="next-queue" aria-label={`Then ${queue.join(', ')}`}>{queue.map((type, index) => <PiecePreview key={index} type={type} level={level} colors={colors} />)}</div>
+}

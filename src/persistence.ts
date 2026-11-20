@@ -1,3 +1,5 @@
+import { DEFAULT_RULES_CHOICE, parseRulesChoice } from './play-rules.ts'
+import type { RulesChoice, RulesPreset } from './play-rules.ts'
 import type { BlockColors } from './ui/level-palettes.ts'
 import { hardDropAllowed, parseDropMode } from './input/drop-mode.ts'
 import type { DropMode } from './input/drop-mode.ts'
@@ -21,7 +23,6 @@ export interface PersonalSettings {
   /** F-041: 2 once the layout was saved after Split became the default; earlier saves move to Split once. */
   readonly touchLayoutVersion: 2
   readonly hideTouchControlsWhenController: boolean
-  readonly ghostPiece: boolean
   readonly blockColors: BlockColors
   /** Menu and screen transitions, switches, dialogs (F-021). */
   /** Line clears, landing and level-up effects on the board (F-022). */
@@ -30,7 +31,8 @@ export interface PersonalSettings {
 export interface SinglePlayerSettings {
   readonly version: 1
   readonly startLevel: number
-  readonly holdEnabled: boolean
+  /** F-046: Classic / Modern / Custom; Hold and the ghost piece are part of the rules (F-055). */
+  readonly rules: RulesChoice
 }
 
 export interface HighscoreRecord {
@@ -40,6 +42,8 @@ export interface HighscoreRecord {
   readonly level: number
   readonly lines: number
   readonly achievedAt: string
+  /** F-046: the rules the score was played with; scores from before the rules are Classic. */
+  readonly rules: RulesPreset
 }
 
 export interface HighscoreResult {
@@ -51,9 +55,9 @@ export interface HighscoreResult {
 export const DEFAULT_PERSONAL_SETTINGS: PersonalSettings = {
   version: 1, hardDropEnabled: true, dropMode: 'both', musicEnabled: true, musicVolume: 70, effectsEnabled: true, effectsVolume: 70,
   mobileControlMethod: 'dpad', touchButtonSize: 56, leftHandedControls: false, rotateButtons: 'two', touchLayout: 'split', touchLayoutVersion: 2, hideTouchControlsWhenController: true,
-  ghostPiece: false, blockColors: 'level',
+  blockColors: 'level',
 }
-export const DEFAULT_SINGLE_PLAYER_SETTINGS: SinglePlayerSettings = { version: 1, startLevel: 0, holdEnabled: false }
+export const DEFAULT_SINGLE_PLAYER_SETTINGS: SinglePlayerSettings = { version: 1, startLevel: 0, rules: DEFAULT_RULES_CHOICE }
 
 function parseObject(raw: string | null): Record<string, unknown> | null {
   if (!raw) return null
@@ -83,7 +87,6 @@ export function parsePersonalSettings(raw: string | null): PersonalSettings {
     touchLayout: value?.touchLayoutVersion === 2 && value?.touchLayout === 'row' ? 'row' : 'split',
     touchLayoutVersion: 2,
     hideTouchControlsWhenController: typeof value?.hideTouchControlsWhenController === 'boolean' ? value.hideTouchControlsWhenController : true,
-    ghostPiece: typeof value?.ghostPiece === 'boolean' ? value.ghostPiece : false,
     blockColors: value?.blockColors === 'classic' || value?.blockColors === 'tones' ? value.blockColors : 'level',
   }
 }
@@ -94,7 +97,7 @@ export function parseSinglePlayerSettings(raw: string | null): SinglePlayerSetti
   return {
     version: 1,
     startLevel: typeof startLevel === 'number' && Number.isInteger(startLevel) && startLevel >= 0 && startLevel <= 19 ? startLevel : 0,
-    holdEnabled: typeof value?.holdEnabled === 'boolean' ? value.holdEnabled : false,
+    rules: parseRulesChoice(value?.rules),
   }
 }
 
@@ -107,7 +110,7 @@ export function parseHighscores(raw: string | null): HighscoreRecord[] {
     if (typeof record.id !== 'string' || !record.id || typeof record.username !== 'string' || !record.username.trim()) return []
     if (![record.score, record.level, record.lines].every((number) => typeof number === 'number' && Number.isSafeInteger(number) && number >= 0)) return []
     if (typeof record.achievedAt !== 'string' || !Number.isFinite(Date.parse(record.achievedAt))) return []
-    return [{ id: record.id, username: record.username, score: record.score as number, level: record.level as number, lines: record.lines as number, achievedAt: new Date(record.achievedAt).toISOString() }]
+    return [{ id: record.id, username: record.username, score: record.score as number, level: record.level as number, lines: record.lines as number, achievedAt: new Date(record.achievedAt).toISOString(), rules: record.rules === 'modern' || record.rules === 'custom' ? record.rules : 'classic' }]
   })
   const unique = new Map<string, HighscoreRecord>()
   // Games that end without points are not highscores (B-007); older saves may still contain them.

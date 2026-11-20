@@ -9,7 +9,7 @@ function memory() {
   const values = new Map<string, string>()
   return { getItem: (k: string) => values.get(k) ?? null, setItem: (k: string, v: string) => { values.set(k, v) }, removeItem: (k: string) => { values.delete(k) } }
 }
-const expected = { code: 'ABCDEF', round: 2, seed: 77, startLevel: 0, hold: false, battle: false }
+const expected = { code: 'ABCDEF', round: 2, seed: 77, startLevel: 0, rules: 'classic' as const, battle: false }
 
 function checkpoint(over: Partial<NetCheckpoint> = {}): NetCheckpoint {
   const game = dispatch(createGame({ seed: 77 }), 'hardDrop').state

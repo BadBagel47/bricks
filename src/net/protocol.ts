@@ -8,8 +8,10 @@ import type { PieceType } from '../engine/types.ts'
  * nonsensical data off the screen and out of the results.
  */
 export type NetMode = 'score-duel' | 'battle'
-export interface NetSettings { readonly revision: number; readonly mode: NetMode; readonly startLevel: number; readonly hold: boolean; readonly requireApproval: boolean }
-export const DEFAULT_NET_SETTINGS: NetSettings = { revision: 0, mode: 'score-duel', startLevel: 0, hold: false, requireApproval: false }
+/** F-046: Classic or Modern rules for the match (Hold and the ghost piece come with Modern). */
+export type NetRules = 'classic' | 'modern'
+export interface NetSettings { readonly revision: number; readonly mode: NetMode; readonly startLevel: number; readonly rules: NetRules; readonly requireApproval: boolean }
+export const DEFAULT_NET_SETTINGS: NetSettings = { revision: 0, mode: 'score-duel', startLevel: 0, rules: 'modern', requireApproval: false }
 
 /** Shared room data, set by the host: settings, the guest's approval and the round's players. */
 export interface RoomData {
@@ -49,8 +51,8 @@ const exactKeys = (value: object, keys: readonly string[]) => Object.keys(value)
 
 export function parseSettings(value: unknown): NetSettings | null {
   const s = value as NetSettings
-  if (!s || typeof s !== 'object' || !exactKeys(s, ['revision', 'mode', 'startLevel', 'hold', 'requireApproval'])) return null
-  if (!count(s.revision) || (s.mode !== 'score-duel' && s.mode !== 'battle') || !count(s.startLevel, 19) || typeof s.hold !== 'boolean' || typeof s.requireApproval !== 'boolean') return null
+  if (!s || typeof s !== 'object' || !exactKeys(s, ['revision', 'mode', 'startLevel', 'rules', 'requireApproval'])) return null
+  if (!count(s.revision) || (s.mode !== 'score-duel' && s.mode !== 'battle') || !count(s.startLevel, 19) || (s.rules !== 'classic' && s.rules !== 'modern') || typeof s.requireApproval !== 'boolean') return null
   return s
 }
 

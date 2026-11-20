@@ -395,7 +395,7 @@ The multiplayer host cannot modify another player's personal settings.
 Include:
 
 - Starting Level, default 00.
-- Hold Piece ON/OFF, default OFF.
+- Rules: Classic / Modern / Custom, default Modern (owner, 2026-11-20; F-046). Classic is the NES-style game below with every modern rule off. Modern turns on 7-bag piece order, SRS wall kicks, lock delay (0.5 s, at most 15 restarts), 3 next pieces, Hold and the ghost piece. Custom shows the six rules as switches and starts from the preset chosen before. High scores are marked Classic, Modern or Custom.
 
 Keep previous selections for future games.
 
@@ -464,7 +464,7 @@ Use classic NES-inspired movement, rotation, gravity, and scoring.
 
 Keep behavior consistent and documented.
 
-Do not introduce advanced modern mechanics such as Super Rotation System wall kicks, T-spin bonuses, or complex combo scoring unless explicitly approved.
+Advanced modern scoring (T-spin bonuses, combos, back-to-back) stays out unless explicitly approved (parked as F-058). The owner approved SRS wall kicks, the 7-bag, lock delay and a 3-piece preview as the Modern rules (2026-11-20).
 
 ## 9.4 Deterministic piece generation
 
@@ -561,7 +561,7 @@ Do not make it a host-controlled setting.
 
 ## 9.10 Ghost Piece
 
-Optional Ghost Piece in Personal Settings, **off by default**. It outlines where the active piece would land. It is display-only and never affects scoring or multiplayer data.
+Ghost Piece is one of the rules (F-055): on in Modern, off in Classic, a switch in Custom; in 2 Players it follows the match's rules. It outlines where the active piece would land. It is display-only and never affects scoring or multiplayer data.
 
 ## 9.11 Game Over
 
@@ -1064,7 +1064,8 @@ Host-controlled settings:
 |---|---|
 | Match Mode | Score Duel |
 | Start Level | 00 |
-| Hold Piece | OFF |
+| Hold Piece | OFF (Firebase) |
+| Rules | Modern (Cloudflare: Classic / Modern; Hold and the ghost piece come with Modern) |
 | Require Approval | OFF |
 
 Starting level supports 00–19.

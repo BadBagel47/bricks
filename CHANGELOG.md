@@ -6,6 +6,12 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Added (2026-11-20, run D)
+- F-046, F-052 – F-055: Rules in Settings → 1 Player: Classic (as the NES game), Modern (the new default: 7-bag piece order, SRS wall kicks, lock delay, 3 next pieces, Hold and ghost piece) or Custom (the six rules as switches, starting from the preset chosen before). High scores show which rules they were played with; older scores count as Classic. Cloudflare matches have a Classic / Modern match setting instead of Hold Piece (Modern by default); Firebase matches stay Classic.
+
+### Changed (2026-11-20, run D)
+- Hold Piece (1 Player) and Ghost piece (Display) are no longer separate settings; they are part of the rules.
+
 ### Changed (2026-11-20, run C)
 - F-050: a Hold touch button when Hold is on: in Split in the pad's free top corner (outer side), in Row last in the row (the seven Row buttons may be drawn down to 36 px on narrow phones); also in the Settings preview. The Hold box can still be tapped.
 - F-048, F-049: the Game effects and Interface animations settings are gone; effects and animations are always on, except when the system asks for reduced motion.

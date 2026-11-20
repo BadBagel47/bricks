@@ -35,7 +35,7 @@ test('battle, lobby and identity messages are checked', () => {
 
 test('room data falls back to defaults when it is missing or broken', () => {
   assert.deepEqual(parseRoomData(null), { v: 1, settings: DEFAULT_NET_SETTINGS, approved: 0 })
-  const settings = { revision: 2, mode: 'battle', startLevel: 5, hold: true, requireApproval: true }
+  const settings = { revision: 2, mode: 'battle', startLevel: 5, rules: 'classic', requireApproval: true }
   assert.deepEqual(parseRoomData({ v: 1, settings, approved: 2 }), { v: 1, settings, approved: 2 })
   assert.equal(parseRoomData({ v: 1, settings: { ...settings, startLevel: 30 }, approved: 0 }).settings, DEFAULT_NET_SETTINGS)
 })

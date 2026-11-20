@@ -150,7 +150,7 @@ export default function NetMultiplayer({ username, onBack, preferences, backendS
     let saved: NetCheckpoint | null = null
     if (store.get(ROUND_KEY, sessionStorage) === marker) {
       // This page took part in this round before a reload: continue its saved game, if any.
-      saved = readNetCheckpoint({ code: room.code, round: state.round, seed: state.seed, startLevel: data.settings.startLevel, hold: data.settings.hold, battle: data.settings.mode === 'battle' })
+      saved = readNetCheckpoint({ code: room.code, round: state.round, seed: state.seed, startLevel: data.settings.startLevel, rules: data.settings.rules, battle: data.settings.mode === 'battle' })
       if (!saved) {
         room.send({ t: 'quit', round: state.round })
         if (isHost) room.end()
@@ -231,13 +231,13 @@ export default function NetMultiplayer({ username, onBack, preferences, backendS
           <h2 className="settings-heading">Match settings</h2>
           {isHost ? <>
             <Segmented label="Mode" value={data.settings.mode} options={[{ value: 'score-duel', label: 'Score Duel' }, { value: 'battle', label: 'Battle' }]} onChange={mode => saveSettings({ mode })} />
+            <Segmented label="Rules" value={data.settings.rules} options={[{ value: 'classic', label: 'Classic' }, { value: 'modern', label: 'Modern' }]} onChange={rules => saveSettings({ rules })} />
             <div className="setting-group">
               <Stepper label="Starting Level" value={data.settings.startLevel} min={0} max={19} lowerLabel="Lower starting level" raiseLabel="Raise starting level" onChange={startLevel => saveSettings({ startLevel })} />
-              <label className="toggle-row"><span>Hold Piece</span><input checked={data.settings.hold} onChange={event => saveSettings({ hold: event.target.checked })} type="checkbox" /></label>
               <label className="toggle-row"><span>Guest approves settings</span><input checked={data.settings.requireApproval} onChange={event => saveSettings({ requireApproval: event.target.checked })} type="checkbox" /></label>
             </div>
           </> : <>
-            <p className="mode-summary">{data.settings.mode === 'battle' ? 'Battle' : 'Score Duel'} · Level {String(data.settings.startLevel).padStart(2, '0')} · Hold {data.settings.hold ? 'on' : 'off'}</p>
+            <p className="mode-summary">{data.settings.mode === 'battle' ? 'Battle' : 'Score Duel'} · Level {String(data.settings.startLevel).padStart(2, '0')} · {data.settings.rules === 'modern' ? 'Modern' : 'Classic'}</p>
             {approvalNeeded && <button className="button button-primary" onClick={() => room.send({ t: 'approve', revision: data.settings.revision })}>Approve Settings</button>}
           </>}
         </section>

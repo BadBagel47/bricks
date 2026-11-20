@@ -22,7 +22,7 @@ import { gamepadActions } from '../input/gamepad.ts'
 import { HeldInputs } from '../input/repeat.ts'
 import { actionsForSwipe } from '../input/swipe.ts'
 import { actionAllowed } from '../input/drop-mode.ts'
-import { HoldBox, PiecePreview, Playfield, TouchControls } from '../ui/GameViews.tsx'
+import { HoldBox, NextQueue, PiecePreview, Playfield, TouchControls } from '../ui/GameViews.tsx'
 import { decodeBoard, parseGameSnapshot, SnapshotGate, SNAPSHOT_POLL_MS, SNAPSHOT_SPACING_MS } from './game-snapshot.ts'
 import type { GameSnapshot } from './game-snapshot.ts'
 import type { JoinedRoom } from './room-model.ts'
@@ -348,7 +348,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
         {battleGame && <div className="incoming-meter" role="img" aria-label={`Incoming garbage: ${pending} ${pending === 1 ? 'row' : 'rows'}`}><span style={{ height: `${Math.min(pending, 20) * 5}%` }} /></div>}
         <section className="own-board" aria-label="Your game">
           <h2 className="visually-hidden">{ownName}</h2>
-          <Playfield game={game} ghost={personal.ghostPiece && !finished} colors={personal.blockColors} clear={clearFx} thump={thump} swipeMode={personal.mobileControlMethod === 'swipe' && !finished} onSwipe={(from, to, board) => actionsForSwipe(from, to, board).forEach(action => apply(action))} />
+          <Playfield game={game} ghost={false} colors={personal.blockColors} clear={clearFx} thump={thump} swipeMode={personal.mobileControlMethod === 'swipe' && !finished} onSwipe={(from, to, board) => actionsForSwipe(from, to, board).forEach(action => apply(action))} />
           <dl className="live-stats visually-hidden"><div><dt>Score</dt><dd>{game.score.toLocaleString()}</dd></div><div><dt>Level</dt><dd>{pad(game.level)}</dd></div><div><dt>Lines</dt><dd>{game.lines}</dd></div></dl>
           <p role="status" className={finished ? 'board-status' : 'visually-hidden'}>{finished ? 'Game over' : 'Playing'}</p>
         </section>
@@ -359,7 +359,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
             <Playfield game={{ board: decodeBoard(opponent?.board ?? '0'.repeat(200)), active: null, level: opponent?.level ?? start.settings.startLevel }} colors={personal.blockColors} swipeMode={false} onSwipe={() => {}} />
           </section>
           <div className="live-previews">
-            <div className="preview-card"><span>Next</span><PiecePreview type={game.next} level={game.level} colors={personal.blockColors} /></div>
+            <div className="preview-card"><span>Next</span><PiecePreview type={game.next} level={game.level} colors={personal.blockColors} /><NextQueue queue={game.queue} level={game.level} colors={personal.blockColors} /></div>
             {game.holdEnabled && <div><HoldBox type={game.held} level={game.level} colors={personal.blockColors} enabled={!finished && !error && !confirm && !paused && !game.holdUsed} onHold={() => apply('hold')} /></div>}
             {battleGame && pending > 0 && <div className="incoming-badge" aria-hidden="true"><strong>+{pending}</strong><span>incoming</span></div>}
           </div>

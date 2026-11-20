@@ -9,7 +9,7 @@ import type { InputAction } from '../input/keyboard.ts'
 import { HeldInputs } from '../input/repeat.ts'
 import { actionsForSwipe } from '../input/swipe.ts'
 import { actionAllowed } from '../input/drop-mode.ts'
-import { HoldBox, PiecePreview, Playfield, TouchControls } from '../ui/GameViews.tsx'
+import { HoldBox, NextQueue, PiecePreview, Playfield, TouchControls } from '../ui/GameViews.tsx'
 import { lineClearEffect } from '../ui/board-effects.ts'
 import type { ClearEffect } from '../ui/board-effects.ts'
 import { decodeBoard, snapshotContent } from '../multiplayer/game-snapshot.ts'
@@ -25,6 +25,7 @@ import type { KitRoom } from './kit.ts'
 import { clearNetCheckpoint, restoreBattle, restoreCatchUp, saveNetCheckpoint } from './checkpoint.ts'
 import type { NetCheckpoint } from './checkpoint.ts'
 import { StartCountdown } from '../ui/StartCountdown.tsx'
+import { presetRules } from '../play-rules.ts'
 import '../multiplayer/live-game.css'
 
 /** Everything both players know about one round when it starts. */
@@ -69,7 +70,7 @@ export default function NetLiveGame({ room, round: startRound, options, paused, 
   const battle = round.settings.mode === 'battle'
   const [initial] = useState(() => {
     if (restored) return { game: restored.game, battleGame: restoreBattle(restored, round.host ? 'guest' : 'host') }
-    const game = createGame({ seed: round.seed, startLevel: round.settings.startLevel, holdEnabled: round.settings.hold, hardDropEnabled: personal.hardDropEnabled })
+    const game = createGame({ seed: round.seed, startLevel: round.settings.startLevel, holdEnabled: round.settings.rules === 'modern', hardDropEnabled: personal.hardDropEnabled, rules: presetRules(round.settings.rules) })
     return { game, battleGame: battle ? new BattleGame(game, round.seed, round.host ? 'guest' : 'host') : null }
   })
   const [battleGame] = useState(initial.battleGame)
@@ -350,7 +351,7 @@ export default function NetLiveGame({ room, round: startRound, options, paused, 
         {battleGame && <div className="incoming-meter" role="img" aria-label={`Incoming garbage: ${pending} ${pending === 1 ? 'row' : 'rows'}`}><span style={{ height: `${Math.min(pending, 20) * 5}%` }} /></div>}
         <section className="own-board" aria-label="Your game">
           <h2 className="visually-hidden">{round.ownName}</h2>
-          <Playfield game={game} ghost={personal.ghostPiece && !finished} colors={personal.blockColors} clear={clearFx} thump={thump} swipeMode={personal.mobileControlMethod === 'swipe' && !finished} onSwipe={(from, to, board) => actionsForSwipe(from, to, board).forEach(action => apply(action))} />
+          <Playfield game={game} ghost={round.settings.rules === 'modern' && !finished} colors={personal.blockColors} clear={clearFx} thump={thump} swipeMode={personal.mobileControlMethod === 'swipe' && !finished} onSwipe={(from, to, board) => actionsForSwipe(from, to, board).forEach(action => apply(action))} />
           <dl className="live-stats visually-hidden"><div><dt>Score</dt><dd>{game.score.toLocaleString()}</dd></div><div><dt>Level</dt><dd>{pad(game.level)}</dd></div><div><dt>Lines</dt><dd>{game.lines}</dd></div></dl>
           <p role="status" className={finished ? 'board-status' : 'visually-hidden'}>{finished ? 'Game over' : 'Playing'}</p>
         </section>
@@ -360,7 +361,7 @@ export default function NetLiveGame({ room, round: startRound, options, paused, 
             <Playfield game={{ board: decodeBoard(opponent?.board ?? '0'.repeat(200)), active: null, level: opponent?.level ?? round.settings.startLevel }} colors={personal.blockColors} swipeMode={false} onSwipe={() => {}} />
           </section>
           <div className="live-previews">
-            <div className="preview-card"><span>Next</span><PiecePreview type={game.next} level={game.level} colors={personal.blockColors} /></div>
+            <div className="preview-card"><span>Next</span><PiecePreview type={game.next} level={game.level} colors={personal.blockColors} /><NextQueue queue={game.queue} level={game.level} colors={personal.blockColors} /></div>
             {game.holdEnabled && <div><HoldBox type={game.held} level={game.level} colors={personal.blockColors} enabled={!finished && !abandoned && !confirm && !paused && !game.holdUsed && countdown === 0} onHold={() => apply('hold')} /></div>}
             {battleGame && pending > 0 && <div className="incoming-badge" aria-hidden="true"><strong>+{pending}</strong><span>incoming</span></div>}
           </div>
