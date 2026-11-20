@@ -1,24 +1,22 @@
-# Bricks backlog
-
-Planned features, fixes and operational tasks. This file is the single list of
-work that is not done yet. `PROGRESS.md` records what was done; `CHANGELOG.md`
-records released changes.
-
-## Conventions
-
-- **IDs:** `F-###` feature, `B-###` bug, `T-###` operational/owner task (Bricks keeps `T-` instead of the shared `D-`). IDs are never
-  reused or renumbered. Reference them in commit messages, PRs and docs
-  (for example `F-001: add admin tabs`).
-- **Status:** `Idea` → `Proposed` → `Approved` → `In progress` → `Done`
-  (or `Dropped`). Only the owner moves an item to `Approved`. Done items are moved to the *Done* table, not deleted.
-- **Priority:** High, Medium, Low (shared agent-rules scale; converted from P1/P2/P3 on 2026-11-11: P1 = High, P2 = Medium, P3 = Low).
-- **Runs:** collect approved items into one run. Start a run only after the
-  owner's explicit go-ahead (for example "Kör"). Recommend a model and reasoning
-  level per run before starting.
-- When an item is done: set `Done`, add the commit or PR, and add a line to
-  `CHANGELOG.md` under *Unreleased*.
-
 ## Open
+
+| ID | Type | Title | Priority | Status | Suggested model |
+| --- | --- | --- | --- | --- | --- |
+| B-030 | Bug | Cloudflare 2 Players on a phone: the match top bar is wider than the screen, so the Room button is cut off at the right edge; the connection chip also says "Synchronizing…" for the whole start countdown | Low | Proposed (2026-11-19, owner) | Standard |
+| F-056 | Feature | Adjustable key repeat for held buttons (DAS delay and repeat rate; today fixed 160 ms and 48 ms). A control setting, not a rule | Low | Proposed (2026-11-20) | Standard |
+| F-057 | Feature | Pieces appear in hidden rows above the board, as in modern games (fewer losses at the very top) | Low | Parked (2026-11-20) | Standard |
+| F-058 | Feature | Modern scoring: T-spins, combos and back-to-back, and their garbage in Battle. Rewards advanced play and changes 2 Players, so kept out of Modern for now | Low | Parked (2026-11-20) | Standard |
+| B-033 | Bug | Landscape phones about 667 × 375 with the Row layout: the 1 Player screen is about 5 px taller than the screen and scrolls a little (seen 2026-11-20; also with Classic, so older than the rules) | Low | Proposed (2026-11-20) | Standard |
+| F-059 | Feature | Possibly remove the Row touch layout (one row of buttons) and keep only Split | Low | Proposed (2026-11-20, owner) | Standard |
+| F-060 | Feature | Hold button placement: owner's idea (2026-11-20) is the empty space beside the board, at the foot of the side column; earlier drafts A/B/C put it above the right rotate button. Beside the board fits in 1 Player on all phones and in 2 Players on large phones, not on smaller ones (see B-034) | Low | Proposed (2026-11-20, owner) | Standard |
+| F-061 | Feature | A setting to arrange the touch controls on the screen yourself, and to set the height of the playing field | Medium | Proposed (2026-11-20, owner) | Standard |
+| F-006 | Feature | More music tracks | Low | Idea | Standard |
+| F-027 | Feature | Vivid (formerly Modern) block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
+| F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
+| T-009 | Task | After F-028 is confirmed on two devices: retire Bricks' admin Worker (`feature/operating-controls`, D1) and the Firebase project, and remove the Firebase code | Low | Idea; deleting external services needs the owner's explicit yes | Standard |
+| B-034 | Bug | 2 Players on smaller phones (about 375 × 667): with the Modern rules' three next pieces, the side column (opponent board, Next, Hold, level and lines) reaches 44 px into the touch controls, so the rotate buttons cover level and lines (found 2026-11-20 while drafting F-060; since run D) | High | Proposed (2026-11-20) | Standard |
+
+## Done
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
@@ -31,7 +29,6 @@ records released changes.
 | B-028 | Bug | Cloudflare 2 Players: when one player returns to the lobby, the other's game keeps running (pieces keep falling, music plays) behind the "opponent left" note; the abandoned game should stop. Cause: the game loop in `NetLiveGame` does not stop when the match is abandoned, only the controls do | High | Done (2026-11-19) | Standard |
 | F-042 | Feature | Invitation QR code (both versions): close it automatically when the lobby is full | Low | Done (2026-11-19) | Standard |
 | B-029 | Bug | Cloudflare 2 Players: the game screen appears several seconds before the pieces start falling. Cause: the game view opens at the start of the room's 5 s countdown (`countdownMs: 5000`) with only a small "Starting in N…" line, while Firebase counts down in the lobby and opens the game when play starts | Medium | Done (2026-11-19) | Standard |
-| B-030 | Bug | Cloudflare 2 Players on a phone: the match top bar is wider than the screen, so the Room button is cut off at the right edge; the connection chip also says "Synchronizing…" for the whole start countdown | Low | Proposed (2026-11-19, owner) | Standard |
 | B-031 | Bug | iPad: the invitation QR code has a larger white area below the code. Likely cause: the SVG is sized with `height: 100%` inside a box sized by `aspect-ratio`, which Safari can resolve taller than wide; the code is drawn at the top of the SVG and its white background fills the rest | Low | Done (2026-11-19) | Standard |
 | F-043 | Feature | 2 Players: switching between Firebase and Cloudflare cross-fades like other screen changes (Interface animations) | Low | Done (2026-11-19) | Standard |
 | F-044 | Feature | 2 Players lobby: Copy Invite Link is filled orange like a selected option; consider the outlined style of Copy Code and QR Code, keeping orange for Start Match and selected options | Low | Done (2026-11-19) | Standard |
@@ -47,24 +44,8 @@ records released changes.
 | F-053 | Feature | Lock delay: a landed piece locks after about 0.5 s; moving or rotating restarts the wait, at most about 15 times. Part of the Rules (F-046) | Medium | Done (2026-11-20) | Standard |
 | F-054 | Feature | Show the next 3 pieces instead of 1. Part of the Rules (F-046) | Medium | Done (2026-11-20) | Standard |
 | F-055 | Feature | Hold and Ghost piece move into the Rules (F-046): on in Modern, off in Classic, own switches in Custom | Medium | Done (2026-11-20) | Standard |
-| F-056 | Feature | Adjustable key repeat for held buttons (DAS delay and repeat rate; today fixed 160 ms and 48 ms). A control setting, not a rule | Low | Proposed (2026-11-20) | Standard |
-| F-057 | Feature | Pieces appear in hidden rows above the board, as in modern games (fewer losses at the very top) | Low | Parked (2026-11-20) | Standard |
-| F-058 | Feature | Modern scoring: T-spins, combos and back-to-back, and their garbage in Battle. Rewards advanced play and changes 2 Players, so kept out of Modern for now | Low | Parked (2026-11-20) | Standard |
-| B-033 | Bug | Landscape phones about 667 × 375 with the Row layout: the 1 Player screen is about 5 px taller than the screen and scrolls a little (seen 2026-11-20; also with Classic, so older than the rules) | Low | Proposed (2026-11-20) | Standard |
-| F-059 | Feature | Possibly remove the Row touch layout (one row of buttons) and keep only Split | Low | Proposed (2026-11-20, owner) | Standard |
-| F-060 | Feature | Design proposal: the Hold button in the space above the right rotate button (Split), with a little more space between the two rotate buttons than today | Low | Proposed (2026-11-20, owner) | Standard |
-| F-061 | Feature | A setting to arrange the touch controls on the screen yourself, and to set the height of the playing field | Medium | Proposed (2026-11-20, owner) | Standard |
 | F-062 | Feature | Block colors: the third choice is called Vivid instead of Modern, so it is not confused with the Modern rules | Low | Done (2026-11-20, owner: "Döp om till vivid") | Standard |
-| F-006 | Feature | More music tracks | Low | Idea | Standard |
-| F-027 | Feature | Vivid (formerly Modern) block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
-| F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
 | T-008 | Task | Owner decisions before the move | Medium | Done (2026-11-18): start before another game is fully proven, after network-kit F-057/network-kit F-058 and more testing; 6-character codes; 1 Player On/Off and administrator play come from network-kit (network-kit F-057, network-kit F-058) | — (owner) |
-| T-009 | Task | After F-028 is confirmed on two devices: retire Bricks' admin Worker (`feature/operating-controls`, D1) and the Firebase project, and remove the Firebase code | Low | Idea; deleting external services needs the owner's explicit yes | Standard |
-
-## Done
-
-| ID | Type | Title | Priority | Status | Suggested model |
-| --- | --- | --- | --- | --- | --- |
 | B-025 | Bug | With a game link in the browser, the page's status check and notices from network-kit were refused by the browser (CORS) because Bricks' page and room Worker are on different addresses (network-kit B-104, fixed in network-kit 0.15.1); the check then read as open and notices did not show. Fix: take network-kit 0.15.1 | Medium | Done (2026-11-19): network-kit 0.15.1 taken in; preflight with a game link allowed | Standard |
 | T-012 | Task | Take network-kit 0.17.0 (Bricks has 0.15.1 since B-025): per network-kit no code changes are needed for 0.16–0.17; 0.16.0 protects the quota (network-kit F-098); does not close live rooms | Medium | Done (2026-11-19): network-kit 0.17.0 with its default room caps (owner) | Standard |
 | F-039 | Feature | QR code for the invitation in the 2 Players lobby (owner 2026-11-19) | Medium | Done (2026-11-19): QR Code button next to Copy Invite Link in both versions; needs a scan with a phone | Standard |
@@ -139,16 +120,28 @@ The approved High items come from the owner's request of 2026-11-10: use the
 sketch's layout **and behavior**, not only its look. Design reference:
 "Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
 
-## Proposed runs (2026-11-18)
+## Proposed runs (2026-11-20)
 
-None. F-039 and T-012 were done 2026-11-19.
+Prioritized for: visible faults first, then the touch controls.
 
-Not proposed: F-006 (made in the separate music studio chat); T-009 (retire Firebase and the old admin; waits for the owner's comparison and explicit yes).
+- **A** – standard model, medium – Match side column and Hold beside the board
+  - B-034 – the side column in matches fits above the touch controls on smaller phones (the two later Next pieces smaller, side by side), so level and lines are visible again
+  - F-060 – the Hold button at the foot of the side column beside the board; in 2 Players on smaller phones it stays among the touch buttons
+  - Question: in 2 Players on smaller phones, keep Hold among the touch buttons (recommended) or shrink the opponent's board to make room?
+- **B** – standard model, low – Small layout faults
+  - B-030 – the match top bar fits on phones (no sideways scrolling, Room button not cut off; no "Synchronizing…" during the countdown)
+  - B-033 – 1 Player in landscape around 667 × 375 with Row no longer scrolls
+- **C** – standard model, medium – Key repeat
+  - F-056 – two settings for held buttons: how soon they repeat and how fast
+  - Question: where? Recommended: Settings, next to the touch-control choices, defaults as today
+- **D** – strong model, high – Own control layout – waits for an answer
+  - F-061 – arrange the touch controls yourself and set the playing field's height
+  - F-059 – the Row layout possibly removed
+  - Question: how far? Recommended: an edit mode where the button groups are dragged into place and resized, plus a board-height slider; Row removed once that exists
 
+Not proposed: F-006 (music studio chat); T-009 (retire Firebase and the old admin; waits for the owner's two-device check and explicit yes); adaptation item 1.1 (web basics, see HANDOFF).
 
-Waiting for the owner: a real Cloudflare 2 Players match on two devices (F-028) and the comparison in Settings → Connection (F-036); F-030 – F-035 and B-019 check on a phone (F-033 also: add the game to the home screen); B-018 check on a phone; B-004 two-device check of the opponent board; check B-017 on a real phone; decide whether the privacy text in Settings is enough (not legal advice).
-
-Parked: F-027 (alternative Modern piece colors).
+Parked: F-027 (alternative Vivid piece colors), F-057 (pieces above the board), F-058 (modern scoring).
 
 ## Details
 
