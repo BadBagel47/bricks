@@ -2,6 +2,7 @@
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| B-037 | Bug | After B-035 Hard Drop seems hard to activate (owner, 2026-11-20, on the phone). B-035 gave the arrows below the lowest 30 % of the Hard Drop button and moved Hard Drop's own touch area to an invisible layer (the button itself ignores touches) so that its lower part could go to the arrows. Likely causes: a press on the lower third of the button now soft-drops, and the phone's own touch correction (which picks the button the finger overlaps most) may not count the invisible layer as Hard Drop. Neither can be tested here without a real phone | High | Proposed (2026-11-20, owner) | Standard |
 | B-036 | Bug | Battle help text in the lobby says "Clearing lines sends garbage rows", but a single-line clear sends nothing (2 lines → 1 row, 3 → 2, 4 → 4). Found 2026-11-20 when the owner asked how Battle works | Low | Proposed (2026-11-20) | Economical |
 | T-014 | Task | Cloudflare Battle end-to-end test: check that garbage rows really reach the other player (today only the Firebase test and the unit tests check it; the Cloudflare test checks survival, pause and leaving). Found 2026-11-20 when the owner asked | Medium | Proposed (2026-11-20) | Standard |
 | F-056 | Feature | Adjustable key repeat for held buttons (DAS delay and repeat rate; today fixed 160 ms and 48 ms). A control setting, not a rule | Low | Proposed (2026-11-20) | Standard |
@@ -125,14 +126,21 @@ The approved High items come from the owner's request of 2026-11-10: use the
 sketch's layout **and behavior**, not only its look. Design reference:
 "Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
 
-## Proposed runs (2026-11-20, after B-035)
+## Proposed runs (2026-11-20, after B-037 was found)
 
 Prioritized for: visible faults first, then the touch controls.
 
-- **A** – standard model, medium – Key repeat
+- **A** – standard model, medium – Hard Drop easy to hit again, without the old mistakes
+  - B-037 – the whole Hard Drop button reacts again, as a normal button; the larger gap from B-035 stays and the arrows below own all of it
+  - Question: recommended as above (the gap alone keeps most of B-035's help, and the button behaves like every other button). Alternative: keep giving a smaller strip of Hard Drop to the arrows (about 15 % instead of 30 %)
+- **B** – economical model, low – Battle help text
+  - B-036 – the lobby text says that clearing 2 or more lines sends garbage rows
+- **C** – standard model, medium – Cloudflare Battle test
+  - T-014 – the two-player test checks that garbage rows really reach the other player
+- **D** – standard model, medium – Key repeat
   - F-056 – two settings for held buttons: how soon they repeat and how fast
   - Question: where? Recommended: Settings, next to the touch-control choices, defaults as today
-- **B** – strong model, high – Own control layout
+- **E** – strong model, high – Own control layout
   - F-061 – arrange the touch controls yourself and set the playing field's height
   - F-059 – the Row layout possibly removed
   - Question: how far? Recommended: an edit mode where the button groups are dragged into place and resized, plus a board-height slider; Row removed once that exists
