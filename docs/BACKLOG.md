@@ -8,7 +8,7 @@
 | F-058 | Feature | Modern scoring: T-spins, combos and back-to-back, and their garbage in Battle. Rewards advanced play and changes 2 Players, so kept out of Modern for now | Low | Parked (2026-11-20) | Standard |
 | B-033 | Bug | Landscape phones about 667 × 375 with the Row layout: the 1 Player screen is about 5 px taller than the screen and scrolls a little (seen 2026-11-20; also with Classic, so older than the rules) | Low | Proposed (2026-11-20) | Standard |
 | F-059 | Feature | Possibly remove the Row touch layout (one row of buttons) and keep only Split | Low | Proposed (2026-11-20, owner) | Standard |
-| F-060 | Feature | Hold button placement: owner's idea (2026-11-20) is the empty space beside the board, at the foot of the side column; earlier drafts A/B/C put it above the right rotate button. Beside the board fits in 1 Player on all phones and in 2 Players on large phones, not on smaller ones (see B-034) | Low | Proposed (2026-11-20, owner) | Standard |
+| F-060 | Feature | Hold button placement. Owner (2026-11-20): none of the first drafts was quite right; start from B (more space between the rotate buttons) and move Hold to the bottom-right corner of the rotate area, below the right rotate button (mirrored for left-handed). Sketch made 2026-11-20 and shown; waiting for the owner's feedback. Also drafted: Hold beside the board (fits in 1 Player and on large phones in 2 Players) | Low | Proposed (2026-11-20, owner) | Standard |
 | F-061 | Feature | A setting to arrange the touch controls on the screen yourself, and to set the height of the playing field | Medium | Proposed (2026-11-20, owner) | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Vivid (formerly Modern) block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
@@ -124,10 +124,9 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 Prioritized for: visible faults first, then the touch controls.
 
-- **A** – standard model, medium – Match side column and Hold beside the board
+- **A** – standard model, medium – Match side column and the Hold button's new place
   - B-034 – the side column in matches fits above the touch controls on smaller phones (the two later Next pieces smaller, side by side), so level and lines are visible again
-  - F-060 – the Hold button at the foot of the side column beside the board; in 2 Players on smaller phones it stays among the touch buttons
-  - Question: in 2 Players on smaller phones, keep Hold among the touch buttons (recommended) or shrink the opponent's board to make room?
+  - F-060 – the Hold button in the bottom-right corner of the rotate area, with more space between the rotate buttons (sketch from B; waits for the owner's feedback on the sketch)
 - **B** – standard model, low – Small layout faults
   - B-030 – the match top bar fits on phones (no sideways scrolling, Room button not cut off; no "Synchronizing…" during the countdown)
   - B-033 – 1 Player in landscape around 667 × 375 with Row no longer scrolls
