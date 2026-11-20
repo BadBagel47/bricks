@@ -2,6 +2,7 @@
    side column with the opponent's board and previews, controls below. */
 .multiplayer-game{
   --side:clamp(78px,24vw,150px);--meter:0px;--chrome:280px;
+  --board:min(calc(100vw - 28px - var(--side) - 8px - var(--meter)),300px,calc((100dvh - var(--chrome))/2));
   position:fixed;inset:0;z-index:20;overflow:auto;background:var(--bg);color:var(--text);
   padding:12px max(14px,calc((100vw - 640px)/2));display:flex;flex-direction:column;align-items:center;gap:10px
 }
@@ -33,7 +34,7 @@
 .incoming-meter{flex:0 0 10px;align-self:stretch;border-radius:5px;background:var(--panel);display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
 .incoming-meter span{display:block;background:var(--bad);border-radius:3px;transition:height .2s}
 .own-board{min-width:0;display:flex;flex-direction:column;gap:4px}
-.own-board .playfield{width:min(calc(100vw - 28px - var(--side) - 8px - var(--meter)),300px,calc((100dvh - var(--chrome))/2))}
+.own-board .playfield{width:var(--board)}
 .live-stats{display:flex;gap:14px;margin:0;font-size:12px}
 .live-stats>div{display:flex;align-items:baseline;gap:6px}
 .live-stats dt{color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-size:11px}
@@ -65,8 +66,7 @@
 
 /* Wide screens: larger side column; keyboard hint visible. */
 @media(min-width:901px){
-  .multiplayer-game{--side:170px;--chrome:230px}
-  .own-board .playfield{width:min(320px,calc((100dvh - var(--chrome))/2))}
+  .multiplayer-game{--side:170px;--chrome:230px;--board:min(320px,calc((100dvh - var(--chrome))/2))}
 }
 
 /* Phones and small windows. */
@@ -119,4 +119,18 @@
   .match-chip[class*=link-]{width:32px;padding:0;justify-content:center}
   .match-chip[class*=link-] .link-text{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .match-chip[class*=link-] i{width:10px;height:10px;border-radius:5px}
+}
+
+/* B-038: on tablets and wider screens the boards grow as far as the height allows (portrait
+   tablets used the phone cap of 300 px), and the top bar and score cards are exactly as wide as
+   the boards below, centred. Phones keep the full-width top bar (B-030). */
+.multiplayer-game:has(.incoming-meter){--meter-row:18px}
+@media(min-width:600px) and (max-width:900px) and (orientation:portrait){
+  .multiplayer-game{--board:min(calc(100vw - 28px - var(--side) - 8px - var(--meter)),480px,calc((100dvh - var(--chrome))/2))}
+}
+@media(min-width:600px){
+  .multiplayer-game>.match-bar,.multiplayer-game>.score-row{width:min(100%,calc(var(--board) + 8px + var(--side) + var(--meter-row, 0px)))}
+}
+@media(max-width:900px) and (orientation:landscape){
+  .multiplayer-game>.match-bar,.multiplayer-game>.score-row{width:100%}
 }

@@ -685,11 +685,9 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
   .game-side .piece-preview-grid{height:auto!important;aspect-ratio:var(--shape)}
 }
 
-/* B-035: a thumb aimed at the arrows below Hard Drop first touches with its tip, higher up, so
-   Hard Drop was pressed by mistake. More space between Hard Drop and the row below, and that row
-   also answers in the gap and on the lowest part of the Hard Drop button (Hard Drop answers only
-   above it, through its touch area; it still acts at once when pressed). */
+/* B-035, B-037: a thumb aimed at the arrows below Hard Drop first touches with its tip, higher up,
+   so Hard Drop was pressed by mistake. More space between Hard Drop and the row below, and that
+   row answers in the whole gap; the Hard Drop button itself reacts on all of its surface. */
 .touch-pad:not(.single){row-gap:max(8px,calc(var(--touch-size) * .25))}
-.touch-pad:not(.single)>.touch-button:nth-child(1){pointer-events:none;--hit-b:calc(var(--touch-size) * .3)}
-.touch-pad:not(.single)>.touch-button:nth-child(1)::after{pointer-events:auto}
-.touch-pad:not(.single)>.touch-button:nth-child(n+2):not(.touch-hold){--hit-t:calc(max(8px, var(--touch-size) * .25) * -1 - var(--touch-size) * .3)}
+.touch-pad:not(.single)>.touch-button:nth-child(1){--hit-b:0px}
+.touch-pad:not(.single)>.touch-button:nth-child(n+2):not(.touch-hold){--hit-t:calc(max(8px, var(--touch-size) * .25) * -1)}

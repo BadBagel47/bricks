@@ -6,6 +6,10 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Fixed (2026-11-20, B-037, B-038)
+- B-037: the whole Hard Drop button reacts again (B-035 had given its lowest part to the arrows, which made it hard to press); the larger gap below it stays and belongs to the arrows.
+- B-038: on iPad and other tablets in portrait the match boards grow to use the screen, and on tablets and wider screens the match top bar and score cards are as wide as the boards instead of the whole screen.
+
 ### Fixed (2026-11-20, B-035)
 - B-035: Hard Drop is no longer pressed by mistake when aiming at the arrows below it (Split): more space between them, and the arrows also answer in the gap and on the lowest part of the Hard Drop button.
 

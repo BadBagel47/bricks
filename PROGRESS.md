@@ -9,6 +9,10 @@
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 
+## B-037, B-038 — 2026-11-20
+
+Owner: "Kör A och B rek" (Q5: Hard Drop a normal button again, gap kept; Q6: boards grow on tablets, top as wide as the boards, touch controls at the edges). B-037: B-035's `pointer-events: none` and 30 % strip removed; Hard Drop's touch area ends at its bottom edge, the row below owns the whole gap; real taps low and high on the button hard-drop. B-038: `live-game.css` sizes the own board through `--board` (phone formula unchanged; 480 px cap on portrait tablets from 600 px wide; 320 px cap above 900 px), and from 600 px wide `.match-bar` and `.score-row` are `--board + 8px + --side (+ 18 px with the Battle meter)` wide; landscape phones keep their grid. Measured with two local players at 768 × 1024, 810 × 1080, 820 × 1180, 1180 × 820, 1280 × 800 (also Battle), 390 × 844, 320 × 667 and 844 × 390: bar edges match the boards from 600 px, no scrolling. Found B-039 (no touch controls above 900 px, e.g. iPad landscape). Local: lint (no new warnings), unit 216, build, browser 25/25, `npm run test:net` 3/3, operating 3/3. Firebase emulator suite: CI.
+
 ## B-035 — 2026-11-20
 
 Owner: "Kör A rek" (Q4: more space and the lower row owns the gap and the lowest part of Hard Drop). Two-row Split pad: `row-gap: max(8px, 25 % of a button)`; Hard Drop has `pointer-events: none` and answers through its `::after` area, which ends 30 % above its bottom edge; left, soft drop and right reach up through the gap to that line. Measured at 320 × 568, 375 × 667 and 390 × 844 (Hard Drop zone from 10 px above the button to 30 % above its bottom), real touch taps checked (low tap = soft drop, high tap = hard drop), match screens still fit at 320 × 568, 320 × 667, 375 × 667, 390 × 844 and 844 × 390. Local: lint (no new warnings), unit 216, build, browser 25/25, `npm run test:net` 3/3. Firebase emulator suite: CI.

@@ -2,8 +2,7 @@
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| B-038 | Bug | iPad in portrait: in matches the top bar and the score cards span the whole screen (about 790 px on an 820 px iPad) while the boards below are only about 460 px wide, so the top looks very wide; the boards also stay small (own board capped at 300 px) with a large empty area around them (owner photo 2026-11-20). Cause: on screens up to 900 px wide the match screen uses the phone layout, full width | Medium | Proposed (2026-11-20, owner); Pågår (2026-11-20, session ccr-15c9b6e3-or4w1x, run A/B) | Standard |
-| B-037 | Bug | After B-035 Hard Drop seems hard to activate (owner, 2026-11-20, on the phone). B-035 gave the arrows below the lowest 30 % of the Hard Drop button and moved Hard Drop's own touch area to an invisible layer (the button itself ignores touches) so that its lower part could go to the arrows. Likely causes: a press on the lower third of the button now soft-drops, and the phone's own touch correction (which picks the button the finger overlaps most) may not count the invisible layer as Hard Drop. Neither can be tested here without a real phone | High | Proposed (2026-11-20, owner); Pågår (2026-11-20, session ccr-15c9b6e3-or4w1x, run A/B) | Standard |
+| B-039 | Bug | iPad in landscape (and other touch screens wider than 900 px): no touch controls are shown, in 1 Player or in matches, so the game can only be played with a keyboard or controller there (found 2026-11-20 while measuring B-038: the touch controls are only shown up to 900 px width) | High | Proposed (2026-11-20) | Standard |
 | B-036 | Bug | Battle help text in the lobby says "Clearing lines sends garbage rows", but a single-line clear sends nothing (2 lines → 1 row, 3 → 2, 4 → 4). Found 2026-11-20 when the owner asked how Battle works | Low | Proposed (2026-11-20) | Economical |
 | T-014 | Task | Cloudflare Battle end-to-end test: check that garbage rows really reach the other player (today only the Firebase test and the unit tests check it; the Cloudflare test checks survival, pause and leaving). Found 2026-11-20 when the owner asked | Medium | Proposed (2026-11-20) | Standard |
 | F-056 | Feature | Adjustable key repeat for held buttons (DAS delay and repeat rate; today fixed 160 ms and 48 ms). A control setting, not a rule | Low | Proposed (2026-11-20) | Standard |
@@ -21,6 +20,8 @@
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| B-037 | Bug | After B-035 Hard Drop seems hard to activate (owner, 2026-11-20, on the phone). B-035 gave the arrows below the lowest 30 % of the Hard Drop button and moved Hard Drop's own touch area to an invisible layer (the button itself ignores touches) so that its lower part could go to the arrows. Likely causes: a press on the lower third of the button now soft-drops, and the phone's own touch correction (which picks the button the finger overlaps most) may not count the invisible layer as Hard Drop. Neither can be tested here without a real phone | High | Done (2026-11-20): the whole Hard Drop button reacts again, as a normal button; the larger gap from B-035 stays and the arrows below own all of it. Real taps checked low and high on the button (both hard-drop). Needs the owner's thumb | Standard |
+| B-038 | Bug | iPad in portrait: in matches the top bar and the score cards span the whole screen (about 790 px on an 820 px iPad) while the boards below are only about 460 px wide, so the top looks very wide; the boards also stay small (own board capped at 300 px) with a large empty area around them (owner photo 2026-11-20). Cause: on screens up to 900 px wide the match screen uses the phone layout, full width | Medium | Done (2026-11-20): on tablets in portrait the boards grow as far as the height allows (own board 434 px instead of 300 px on an 820 × 1180 iPad); on tablets and wider screens the top bar and score cards are exactly as wide as the boards (with the Battle meter too), centred. Phones keep the full-width bar. Needs a look on the iPad | Standard |
 | B-035 | Bug | Split touch controls: Hard Drop is pressed by mistake when aiming at the buttons below it (left, soft drop, right); the owner sees it react although most of the thumb is lower (2026-11-20). Found: the Hard Drop touch area reaches only 4 px into the 8 px gap, so the drawn layout is as intended; the action fires at the very first contact, and a thumb coming from below first touches with its tip, which the phone reports higher than where the thumb ends up | High | Done (2026-11-20): the gap below Hard Drop grows from 8 px to a quarter button (14 px on a 390 px phone); the row below also answers in the gap and on the lowest 30 % of the Hard Drop button; Hard Drop answers above that and still acts at once. Real taps checked: low on the button moves the piece down one row, higher up hard-drops. Needs the owner's thumb | Standard |
 | B-030 | Bug | Cloudflare 2 Players on a phone: the match top bar is wider than the screen, so the Room button is cut off at the right edge; the connection chip also says "Synchronizing…" for the whole start countdown | Low | Done (2026-11-20): on phones up to 480 px the room code shows without its label, the chips are tighter and the connection chip is its coloured dot (text kept for screen readers and as a tooltip; with room to spare, since fonts differ between phones). The countdown reads Connected. Measured with no sideways overflow at 320, 360, 375, 390, 412 and 480 px | Standard |
 | B-033 | Bug | Landscape phones about 667 × 375 with the Row layout: the 1 Player screen is about 5 px taller than the screen and scrolls a little (seen 2026-11-20; also with Classic, so older than the rules) | Low | Done (2026-11-20): Row buttons in short landscape take the height left below the board; at about 568 × 320 the Next and Hold boxes are only as tall as the pieces. No scrolling measured at 568 × 320, 640 × 360, 667 × 375, 740 × 360, 812 × 375, 844 × 390 and 896 × 414 (Row and Split) | Standard |
@@ -127,24 +128,21 @@ The approved High items come from the owner's request of 2026-11-10: use the
 sketch's layout **and behavior**, not only its look. Design reference:
 "Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
 
-## Proposed runs (2026-11-20, after B-038 was found)
+## Proposed runs (2026-11-20, after B-037 and B-038)
 
 Prioritized for: visible faults first, then the touch controls.
 
-- **A** – standard model, medium – Hard Drop easy to hit again, without the old mistakes
-  - B-037 – the whole Hard Drop button reacts again, as a normal button; the larger gap from B-035 stays and the arrows below own all of it
-  - Question: recommended as above. Alternative: keep giving a smaller strip of Hard Drop to the arrows (about 15 % instead of 30 %)
-- **B** – standard model, medium – Match screen on iPad
-  - B-038 – the top bar and the score cards become as wide as the boards below, centred, as on the 1 Player screen
-  - Question: recommended: the boards also grow on tablets to use the empty space (as large as the height allows), and the top follows their width; the touch controls stay at the screen edges. Alternative: only narrow the top, boards as today
-- **C** – economical model, low – Battle help text
+- **A** – standard model, medium – Touch controls on iPad in landscape
+  - B-039 – touch controls also on touch screens wider than 900 px (iPad in landscape), placed beside the board as on landscape phones
+  - Question: recommended: show them whenever the device has a touch screen and no mouse, whatever its width; on a computer with a mouse they stay hidden as today
+- **B** – economical model, low – Battle help text
   - B-036 – the lobby text says that clearing 2 or more lines sends garbage rows
-- **D** – standard model, medium – Cloudflare Battle test
+- **C** – standard model, medium – Cloudflare Battle test
   - T-014 – the two-player test checks that garbage rows really reach the other player
-- **E** – standard model, medium – Key repeat
+- **D** – standard model, medium – Key repeat
   - F-056 – two settings for held buttons: how soon they repeat and how fast
   - Question: where? Recommended: Settings, next to the touch-control choices, defaults as today
-- **F** – strong model, high – Own control layout
+- **E** – strong model, high – Own control layout
   - F-061 – arrange the touch controls yourself and set the playing field's height
   - F-059 – the Row layout possibly removed
   - Question: how far? Recommended: an edit mode where the button groups are dragged into place and resized, plus a board-height slider; Row removed once that exists
