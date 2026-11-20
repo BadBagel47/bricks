@@ -74,7 +74,19 @@ async function startMatch(host) {
   for (let i = 0; i < 100 && await start.isDisabled(); i++) await host.page.waitForTimeout(100)
   await start.click()
   await host.page.getByRole('status', { name: /^First brick in/ }).waitFor({ timeout: 10000 })
-  await host.page.waitForTimeout(5600)
+  // B-030: the countdown reads Connected (not Synchronizing…), and on phones the match bar fits.
+  assert.equal(await host.page.locator('.match-chip[class*=link-]').textContent(), 'Connected')
+  for (const viewport of [{ width: 320, height: 667 }, { width: 375, height: 667 }, { width: 390, height: 844 }]) {
+    await host.page.setViewportSize(viewport)
+    const bar = await host.page.evaluate(() => {
+      const screen = document.querySelector('.multiplayer-game'), room = document.querySelector('.match-room').getBoundingClientRect()
+      return { overflow: screen.scrollWidth - screen.clientWidth, roomRight: room.right, width: innerWidth }
+    })
+    assert.ok(bar.overflow <= 0 && bar.roomRight <= bar.width - 14 + 0.5, `match bar fits: ${JSON.stringify({ viewport, bar })}`)
+  }
+  await host.page.setViewportSize({ width: 1100, height: 900 })
+  await host.page.getByRole('status', { name: /^First brick in/ }).waitFor({ state: 'detached', timeout: 10000 })
+  await host.page.waitForTimeout(600)
 }
 
 // The last player to finish goes straight to the result screen, often before "Game over"

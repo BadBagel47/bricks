@@ -6,6 +6,10 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Fixed (2026-11-20, second run A)
+- B-030: the Cloudflare match top bar fits on phones: the room code without its label, tighter chips, and on narrow phones the connection status as its coloured dot; the countdown reads Connected instead of Synchronizing….
+- B-033: 1 Player on short landscape phones with the Row layout no longer scrolls a few pixels; on the smallest (about 568 × 320) the Next and Hold boxes are only as tall as the pieces.
+
 ### Changed (2026-11-20, run A)
 - F-060 (test): with Split and two rotate buttons the Hold button sits with the rotate buttons, which move further apart: below the orange rotate button (Bottom, default) or in the free top corner above the other one (Top), chosen in Settings → Hold button while both are tried; mirrored for left-handed. One placement is removed after the test.
 - F-063: on phones in portrait the 1 Player top bar follows the columns below it: the logo is centred over the board (smaller where the board is narrow) and Pause is as wide as the side column.

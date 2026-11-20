@@ -331,14 +331,16 @@ export default function NetLiveGame({ room, round: startRound, options, paused, 
   const difference = game.score - (opponent?.score ?? 0)
   const pending = battleGame?.pending ?? 0
   const status = finished ? 'Waiting for opponent to finish.' : opponent?.status === 'gameOver' ? 'Opponent finished. Keep playing.' : ''
-  const link = paused ? { text: 'Paused', kind: 'wait' } : opponent ? opponent.status === 'gameOver' ? { text: 'Finished', kind: 'done' } : { text: 'Connected', kind: 'ok' } : { text: 'Synchronizing…', kind: 'wait' }
+  // B-030: the round only starts with both players in the room, and the opponent's first board can
+  // arrive after the countdown (it changes only once pieces fall), so the countdown reads Connected.
+  const link = paused ? { text: 'Paused', kind: 'wait' } : opponent ? opponent.status === 'gameOver' ? { text: 'Finished', kind: 'done' } : { text: 'Connected', kind: 'ok' } : countdown > 0 ? { text: 'Connected', kind: 'ok' } : { text: 'Synchronizing…', kind: 'wait' }
   const pad = (value: number) => String(value).padStart(2, '0')
   return createPortal(<>
     <main ref={screen} className="multiplayer-game" inert={confirm} aria-label="Multiplayer game">
       <header className="match-bar">
         <button tabIndex={-1} type="button" className="match-leave" aria-label="Leave match" onClick={() => setConfirm(true)}><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 5 8 12 15 19" /></svg></button>
         <span className="match-chip">{battle ? 'Battle' : 'Score Duel'}</span>
-        <span className={`match-chip link-${link.kind}`}><i aria-hidden="true" />{link.text}</span>
+        <span className={`match-chip link-${link.kind}`} title={link.text}><i aria-hidden="true" /><span className="link-text">{link.text}</span></span>
         <span className="match-chip match-room"><span className="room-label">Room </span><b>{round.code}</b></span>
       </header>
       <div className="score-row">

@@ -2,11 +2,9 @@
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| B-030 | Bug | Cloudflare 2 Players on a phone: the match top bar is wider than the screen, so the Room button is cut off at the right edge; the connection chip also says "Synchronizing…" for the whole start countdown | Low | Proposed (2026-11-19, owner); Pågår (2026-11-20, session ccr-15c9b6e3-or4w1x, run A) | Standard |
 | F-056 | Feature | Adjustable key repeat for held buttons (DAS delay and repeat rate; today fixed 160 ms and 48 ms). A control setting, not a rule | Low | Proposed (2026-11-20) | Standard |
 | F-057 | Feature | Pieces appear in hidden rows above the board, as in modern games (fewer losses at the very top) | Low | Parked (2026-11-20) | Standard |
 | F-058 | Feature | Modern scoring: T-spins, combos and back-to-back, and their garbage in Battle. Rewards advanced play and changes 2 Players, so kept out of Modern for now | Low | Parked (2026-11-20) | Standard |
-| B-033 | Bug | Landscape phones about 667 × 375 with the Row layout: the 1 Player screen is about 5 px taller than the screen and scrolls a little (seen 2026-11-20; also with Classic, so older than the rules) | Low | Proposed (2026-11-20); Pågår (2026-11-20, session ccr-15c9b6e3-or4w1x, run A) | Standard |
 | F-059 | Feature | Possibly remove the Row touch layout (one row of buttons) and keep only Split | Low | Proposed (2026-11-20, owner) | Standard |
 | F-060 | Feature | Hold button placement (Split). Owner (2026-11-20, with screenshots): try two placements on the phone, both with more space between the rotate buttons than today: (1) Hold at the bottom, to the right of the left rotate button and centred under the orange (right) rotate button; (2) sketch B: Hold in the free top corner of the rotate area, above the left rotate button and to the left of the orange one. Both mirrored for left-handed. Both are to be made switchable for the test; the loser is removed afterwards. Do not invent new placements | Low | Built for the test (2026-11-20): Settings → Hold button, Bottom (default) / Top; shown with Split, two rotate buttons and Hold on; with one rotate button or Row, Hold stays where it was. Waits for the owner's choice on the phone, then the other placement is removed | Standard |
 | F-061 | Feature | A setting to arrange the touch controls on the screen yourself, and to set the height of the playing field | Medium | Proposed (2026-11-20, owner) | Standard |
@@ -19,6 +17,8 @@
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| B-030 | Bug | Cloudflare 2 Players on a phone: the match top bar is wider than the screen, so the Room button is cut off at the right edge; the connection chip also says "Synchronizing…" for the whole start countdown | Low | Done (2026-11-20): on phones up to 480 px the room code shows without its label and the chips are tighter; below 390 px the connection chip is its coloured dot (text kept for screen readers). The countdown reads Connected. Measured with no sideways overflow at 320, 360, 375, 390, 412 and 480 px | Standard |
+| B-033 | Bug | Landscape phones about 667 × 375 with the Row layout: the 1 Player screen is about 5 px taller than the screen and scrolls a little (seen 2026-11-20; also with Classic, so older than the rules) | Low | Done (2026-11-20): Row buttons in short landscape take the height left below the board; at about 568 × 320 the Next and Hold boxes are only as tall as the pieces. No scrolling measured at 568 × 320, 640 × 360, 667 × 375, 740 × 360, 812 × 375, 844 × 390 and 896 × 414 (Row and Split) | Standard |
 | B-034 | Bug | 2 Players on smaller phones (about 375 × 667): with the Modern rules' three next pieces, the side column (opponent board, Next, Hold, level and lines) reaches 44 px into the touch controls, so the rotate buttons cover level and lines (found 2026-11-20 while drafting F-060; since run D) | High | Done (2026-11-20): in matches on phones in portrait the two later Next pieces sit side by side and the Next and Hold boxes are as tall as the pieces need; on short phones (about 320 × 568) the opponent's board is a little smaller. Measured clear of the controls at 320 × 568, 360 × 640, 375 × 667, 390 × 844 and 412 × 915 | Standard |
 | F-063 | Feature | Phones: the board and its side column do not fill the full width, so the Pause button in the corner makes the layout look lopsided (owner, 2026-11-20; moving Pause in is not wanted either). Proposal: the top bar follows the columns below, the logo centred over the board and Pause over the side column, as wide as it | Low | Done (2026-11-20): logo centred over the board, smaller where the board is narrow (Q1 with recommendation), Pause as wide as the side column | Standard |
 | F-064 | Feature | Remove the fullscreen button on the start screen when the game runs as an installed app (home-screen app), which is always fullscreen | Low | Done (2026-11-20): hidden when the page opens as the home-screen app; needs a check on the phone | Standard |
@@ -122,17 +122,14 @@ The approved High items come from the owner's request of 2026-11-10: use the
 sketch's layout **and behavior**, not only its look. Design reference:
 "Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
 
-## Proposed runs (2026-11-20, after run A)
+## Proposed runs (2026-11-20, after the second run A)
 
 Prioritized for: visible faults first, then the touch controls.
 
-- **A** – standard model, low – Small layout faults
-  - B-030 – the match top bar fits on phones (no sideways scrolling, Room button not cut off; no "Synchronizing…" during the countdown)
-  - B-033 – 1 Player in landscape around 667 × 375 with Row no longer scrolls
-- **B** – standard model, medium – Key repeat
+- **A** – standard model, medium – Key repeat
   - F-056 – two settings for held buttons: how soon they repeat and how fast
   - Question: where? Recommended: Settings, next to the touch-control choices, defaults as today
-- **C** – strong model, high – Own control layout
+- **B** – strong model, high – Own control layout
   - F-061 – arrange the touch controls yourself and set the playing field's height
   - F-059 – the Row layout possibly removed
   - Question: how far? Recommended: an edit mode where the button groups are dragged into place and resized, plus a board-height slider; Row removed once that exists
@@ -144,6 +141,9 @@ Not proposed: F-006 (music studio chat); T-009 (retire Firebase and the old admi
 Parked: F-027 (alternative Vivid piece colors), F-057 (pieces above the board), F-058 (modern scoring).
 
 ## Details
+
+### B-030 match top bar and "Synchronizing…" (2026-11-20)
+- The opponent's first board is sent once when the countdown starts (newest-only, unreliable) and again only when it changes, i.e. after the countdown; if that first one is lost, the chip read Synchronizing… for the whole countdown. The round only starts with both players in the room and a lost player pauses the match, so the countdown now reads Connected.
 
 ### F-060 Hold placements under test (2026-11-20)
 - Built from the owner's description of the two screenshots: with Split and two rotate buttons, the rotate area is wider (2.65 instead of 2.3 button widths), so the two rotate buttons are further apart, and Hold (a button-wide, three-quarter-high key) joins it. *Bottom*: below the orange rotate button, centred under it, level with the bottom of the other rotate button. *Top*: the free top corner above the other rotate button, beside the orange one. Mirrored for left-handed. The pad no longer has Hold in its top corner in this case.
