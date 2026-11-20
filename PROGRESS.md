@@ -9,6 +9,10 @@
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 
+## B-035 — 2026-11-20
+
+Owner: "Kör A rek" (Q4: more space and the lower row owns the gap and the lowest part of Hard Drop). Two-row Split pad: `row-gap: max(8px, 25 % of a button)`; Hard Drop has `pointer-events: none` and answers through its `::after` area, which ends 30 % above its bottom edge; left, soft drop and right reach up through the gap to that line. Measured at 320 × 568, 375 × 667 and 390 × 844 (Hard Drop zone from 10 px above the button to 30 % above its bottom), real touch taps checked (low tap = soft drop, high tap = hard drop), match screens still fit at 320 × 568, 320 × 667, 375 × 667, 390 × 844 and 844 × 390. Local: lint (no new warnings), unit 216, build, browser 25/25, `npm run test:net` 3/3. Firebase emulator suite: CI.
+
 ## Second run A: B-030, B-033 — 2026-11-20
 
 Owner: "Kör A". B-030: `live-game.css` phone rules (≤ 480 px: label hidden, chips 10 px padding and not shrinking, connection chip dot-only with the text visually hidden and as `title`; a first version kept the text down to 390 px, which CI's Chrome drew 10 px too wide), countdown chip reads Connected in `NetLiveGame`; `tests/net.e2e.mjs` checks the chip during the countdown and the bar at 320, 375 and 390 px, then waits for the countdown to end. B-033: Row touch size in short landscape capped to the height left below the board; half-height Next/Hold boxes below 340 px height. Local: lint (no new warnings), unit 216, build, browser 25/25, `npm run test:net` 3/3 (twice), operating 3/3; 1 Player measured in seven landscape sizes (Row and Split) and the match bar at six widths. Firebase emulator suite: CI.

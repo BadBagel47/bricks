@@ -2,7 +2,6 @@
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| B-035 | Bug | Split touch controls: Hard Drop is pressed by mistake when aiming at the buttons below it (left, soft drop, right); the owner sees it react although most of the thumb is lower (2026-11-20). Found: the Hard Drop touch area reaches only 4 px into the 8 px gap, so the drawn layout is as intended; the action fires at the very first contact, and a thumb coming from below first touches with its tip, which the phone reports higher than where the thumb ends up | High | Proposed (2026-11-20, owner); Pågår (2026-11-20, session ccr-15c9b6e3-or4w1x, run A) | Standard |
 | F-056 | Feature | Adjustable key repeat for held buttons (DAS delay and repeat rate; today fixed 160 ms and 48 ms). A control setting, not a rule | Low | Proposed (2026-11-20) | Standard |
 | F-057 | Feature | Pieces appear in hidden rows above the board, as in modern games (fewer losses at the very top) | Low | Parked (2026-11-20) | Standard |
 | F-058 | Feature | Modern scoring: T-spins, combos and back-to-back, and their garbage in Battle. Rewards advanced play and changes 2 Players, so kept out of Modern for now | Low | Parked (2026-11-20) | Standard |
@@ -18,6 +17,7 @@
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| B-035 | Bug | Split touch controls: Hard Drop is pressed by mistake when aiming at the buttons below it (left, soft drop, right); the owner sees it react although most of the thumb is lower (2026-11-20). Found: the Hard Drop touch area reaches only 4 px into the 8 px gap, so the drawn layout is as intended; the action fires at the very first contact, and a thumb coming from below first touches with its tip, which the phone reports higher than where the thumb ends up | High | Done (2026-11-20): the gap below Hard Drop grows from 8 px to a quarter button (14 px on a 390 px phone); the row below also answers in the gap and on the lowest 30 % of the Hard Drop button; Hard Drop answers above that and still acts at once. Real taps checked: low on the button moves the piece down one row, higher up hard-drops. Needs the owner's thumb | Standard |
 | B-030 | Bug | Cloudflare 2 Players on a phone: the match top bar is wider than the screen, so the Room button is cut off at the right edge; the connection chip also says "Synchronizing…" for the whole start countdown | Low | Done (2026-11-20): on phones up to 480 px the room code shows without its label, the chips are tighter and the connection chip is its coloured dot (text kept for screen readers and as a tooltip; with room to spare, since fonts differ between phones). The countdown reads Connected. Measured with no sideways overflow at 320, 360, 375, 390, 412 and 480 px | Standard |
 | B-033 | Bug | Landscape phones about 667 × 375 with the Row layout: the 1 Player screen is about 5 px taller than the screen and scrolls a little (seen 2026-11-20; also with Classic, so older than the rules) | Low | Done (2026-11-20): Row buttons in short landscape take the height left below the board; at about 568 × 320 the Next and Hold boxes are only as tall as the pieces. No scrolling measured at 568 × 320, 640 × 360, 667 × 375, 740 × 360, 812 × 375, 844 × 390 and 896 × 414 (Row and Split) | Standard |
 | B-034 | Bug | 2 Players on smaller phones (about 375 × 667): with the Modern rules' three next pieces, the side column (opponent board, Next, Hold, level and lines) reaches 44 px into the touch controls, so the rotate buttons cover level and lines (found 2026-11-20 while drafting F-060; since run D) | High | Done (2026-11-20): in matches on phones in portrait the two later Next pieces sit side by side and the Next and Hold boxes are as tall as the pieces need; on short phones (about 320 × 568) the opponent's board is a little smaller. Measured clear of the controls at 320 × 568, 360 × 640, 375 × 667, 390 × 844 and 412 × 915 | Standard |
@@ -123,17 +123,14 @@ The approved High items come from the owner's request of 2026-11-10: use the
 sketch's layout **and behavior**, not only its look. Design reference:
 "Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
 
-## Proposed runs (2026-11-20, after B-035 was found)
+## Proposed runs (2026-11-20, after B-035)
 
 Prioritized for: visible faults first, then the touch controls.
 
-- **A** – standard model, medium – Hard Drop pressed by mistake
-  - B-035 – more space between Hard Drop and the row below, and the lower buttons also take the gap and the lowest part of the Hard Drop button, so a thumb aimed at them no longer drops the piece
-  - Question: how? Recommended: as above (the look stays almost the same). Alternatives: Hard Drop reacts only when the thumb is lifted while still on it (safer, but every hard drop comes a moment later), or Hard Drop moves away from the arrows (a bigger layout change)
-- **B** – standard model, medium – Key repeat
+- **A** – standard model, medium – Key repeat
   - F-056 – two settings for held buttons: how soon they repeat and how fast
   - Question: where? Recommended: Settings, next to the touch-control choices, defaults as today
-- **C** – strong model, high – Own control layout
+- **B** – strong model, high – Own control layout
   - F-061 – arrange the touch controls yourself and set the playing field's height
   - F-059 – the Row layout possibly removed
   - Question: how far? Recommended: an edit mode where the button groups are dragged into place and resized, plus a board-height slider; Row removed once that exists

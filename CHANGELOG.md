@@ -6,6 +6,9 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Fixed (2026-11-20, B-035)
+- B-035: Hard Drop is no longer pressed by mistake when aiming at the arrows below it (Split): more space between them, and the arrows also answer in the gap and on the lowest part of the Hard Drop button.
+
 ### Fixed (2026-11-20, second run A)
 - B-030: the Cloudflare match top bar fits on phones: the room code without its label, tighter chips, and the connection status as its coloured dot; the countdown reads Connected instead of Synchronizing….
 - B-033: 1 Player on short landscape phones with the Row layout no longer scrolls a few pixels; on the smallest (about 568 × 320) the Next and Hold boxes are only as tall as the pieces.

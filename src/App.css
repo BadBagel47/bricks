@@ -450,7 +450,7 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
   .game-shell{--board-w:min(calc(100vw - 28px - 86px),300px,calc((100dvh - 270px)/2));--controls-h:calc(100dvh - 159px - 2 * var(--board-w))}
   .game-shell:has(.touch-split){--board-w:min(calc(100vw - 28px - 86px),300px,calc((100dvh - 270px - 56px)/2))}
   .game-shell .touch-controls{--touch-size:max(36px,min(84px,calc((100vw - 28px - var(--touch-group-gap, 0px) - (var(--touch-count, 5) - 1) * clamp(5px, 2vw, 12px)) / (var(--touch-count, 5) + .3)),calc(var(--controls-h) / 1.15)))}
-  .game-shell .touch-split{--touch-size:max(44px,min(84px,calc((100vw - 28px - 48px) / 5.3),calc((var(--controls-h) - 8px) / 2.1)))}
+  .game-shell .touch-split{--touch-size:max(44px,min(84px,calc((100vw - 28px - 48px) / 5.3),calc((var(--controls-h) - 8px) / 2.1),calc(var(--controls-h) / 2.25)))}
 }
 @media(max-width:900px) and (max-height:720px) and (orientation:landscape){.game-topbar>.brand{--logo-tile:24px}}
 
@@ -622,7 +622,7 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
 .left-handed .touch-rotate.hold-bottom .touch-hold{right:auto;left:calc(var(--touch-size) * .125)}
 .left-handed .touch-rotate.hold-top .touch-hold{left:auto;right:calc(var(--touch-size) * .075)}
 @media(max-width:760px) and (orientation:portrait){
-  .game-shell .touch-split.hold-in-rotate{--touch-size:max(44px,min(84px,calc((100vw - 28px - 40px) / 5.65),calc((var(--controls-h) - 8px) / 2.1)))}
+  .game-shell .touch-split.hold-in-rotate{--touch-size:max(44px,min(84px,calc((100vw - 28px - 40px) / 5.65),calc((var(--controls-h) - 8px) / 2.1),calc(var(--controls-h) / 2.25)))}
 }
 /* Touch areas (B-032): each button owns the empty space nearest to it. */
 .touch-rotate.two.hold-bottom .touch-secondary{--hit-t:-6px;--hit-l:-12px;--hit-b:-16px;--hit-r:calc(var(--touch-size) * -.19)}
@@ -684,3 +684,12 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
   .game-side .piece-preview,.game-side .empty-hold{aspect-ratio:2}
   .game-side .piece-preview-grid{height:auto!important;aspect-ratio:var(--shape)}
 }
+
+/* B-035: a thumb aimed at the arrows below Hard Drop first touches with its tip, higher up, so
+   Hard Drop was pressed by mistake. More space between Hard Drop and the row below, and that row
+   also answers in the gap and on the lowest part of the Hard Drop button (Hard Drop answers only
+   above it, through its touch area; it still acts at once when pressed). */
+.touch-pad:not(.single){row-gap:max(8px,calc(var(--touch-size) * .25))}
+.touch-pad:not(.single)>.touch-button:nth-child(1){pointer-events:none;--hit-b:calc(var(--touch-size) * .3)}
+.touch-pad:not(.single)>.touch-button:nth-child(1)::after{pointer-events:auto}
+.touch-pad:not(.single)>.touch-button:nth-child(n+2):not(.touch-hold){--hit-t:calc(max(8px, var(--touch-size) * .25) * -1 - var(--touch-size) * .3)}
