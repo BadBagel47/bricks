@@ -592,7 +592,9 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
    phones; their touch areas (B-032) stay larger than the drawn buttons. */
 .touch-row .touch-button{min-width:36px;min-height:36px}
 /* The touch areas reach the screen edge without making the page scroll sideways. */
-.game-shell,.multiplayer-game{overflow:clip}
+.game-shell{overflow:clip}
+/* The match screen scrolls on its own (overflow:auto), so there the touch areas stay inside its padding. */
+.multiplayer-game .touch-button::after{bottom:max(var(--hit-b, -16px), -8px);left:max(var(--hit-l, -6px), -12px);right:max(var(--hit-r, -6px), -12px)}
 
 /* F-054: the two pieces after the next one, smaller, below it. */
 .next-queue{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:2px;align-self:stretch}
