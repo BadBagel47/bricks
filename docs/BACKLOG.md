@@ -8,13 +8,15 @@
 | F-058 | Feature | Modern scoring: T-spins, combos and back-to-back, and their garbage in Battle. Rewards advanced play and changes 2 Players, so kept out of Modern for now | Low | Parked (2026-11-20) | Standard |
 | B-033 | Bug | Landscape phones about 667 × 375 with the Row layout: the 1 Player screen is about 5 px taller than the screen and scrolls a little (seen 2026-11-20; also with Classic, so older than the rules) | Low | Proposed (2026-11-20) | Standard |
 | F-059 | Feature | Possibly remove the Row touch layout (one row of buttons) and keep only Split | Low | Proposed (2026-11-20, owner) | Standard |
-| F-060 | Feature | Hold button placement. Owner (2026-11-20): none of the first drafts was quite right; start from B (more space between the rotate buttons) and move Hold to the bottom-right corner of the rotate area, below the right rotate button (mirrored for left-handed). Sketch made 2026-11-20 and shown; waiting for the owner's feedback. Also drafted: Hold beside the board (fits in 1 Player and on large phones in 2 Players) | Low | Proposed (2026-11-20, owner) | Standard |
+| F-060 | Feature | Hold button placement. Owner (2026-11-20): go with B (more space between the rotate buttons) with Hold moved down into the bottom-right corner, centred under the right (orange) rotate button; mirrored for left-handed. Sketch shown 2026-11-20 | Low | Proposed (2026-11-20, owner) | Standard |
 | F-061 | Feature | A setting to arrange the touch controls on the screen yourself, and to set the height of the playing field | Medium | Proposed (2026-11-20, owner) | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Vivid (formerly Modern) block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
 | T-009 | Task | After F-028 is confirmed on two devices: retire Bricks' admin Worker (`feature/operating-controls`, D1) and the Firebase project, and remove the Firebase code | Low | Idea; deleting external services needs the owner's explicit yes | Standard |
 | B-034 | Bug | 2 Players on smaller phones (about 375 × 667): with the Modern rules' three next pieces, the side column (opponent board, Next, Hold, level and lines) reaches 44 px into the touch controls, so the rotate buttons cover level and lines (found 2026-11-20 while drafting F-060; since run D) | High | Proposed (2026-11-20) | Standard |
+| F-063 | Feature | Phones: the board and its side column do not fill the full width, so the Pause button in the corner makes the layout look lopsided (owner, 2026-11-20; moving Pause in is not wanted either). Proposal: the top bar follows the columns below, the logo centred over the board and Pause over the side column, as wide as it | Low | Proposed (2026-11-20, owner) | Standard |
+| F-064 | Feature | Remove the fullscreen button on the start screen when the game runs as an installed app (home-screen app), which is always fullscreen | Low | Proposed (2026-11-20, owner) | Standard |
 
 ## Done
 
@@ -124,9 +126,12 @@ sketch's layout **and behavior**, not only its look. Design reference:
 
 Prioritized for: visible faults first, then the touch controls.
 
-- **A** – standard model, medium – Match side column and the Hold button's new place
+- **A** – standard model, medium – Match side column, the Hold button's new place and the top bar
   - B-034 – the side column in matches fits above the touch controls on smaller phones (the two later Next pieces smaller, side by side), so level and lines are visible again
-  - F-060 – the Hold button in the bottom-right corner of the rotate area, with more space between the rotate buttons (sketch from B; waits for the owner's feedback on the sketch)
+  - F-060 – the Hold button in the bottom-right corner, centred under the right rotate button, with more space between the rotate buttons
+  - F-063 – the top bar follows the columns: the logo centred over the board and Pause over the side column, so the layout no longer looks lopsided
+  - F-064 – no fullscreen button on the start screen in the installed app
+  - Question: on smaller phones the logo gets smaller to fit over the board; acceptable (recommended) or keep its size and let it reach a little over the side column?
 - **B** – standard model, low – Small layout faults
   - B-030 – the match top bar fits on phones (no sideways scrolling, Room button not cut off; no "Synchronizing…" during the countdown)
   - B-033 – 1 Player in landscape around 667 × 375 with Row no longer scrolls
