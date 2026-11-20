@@ -77,6 +77,7 @@ Earlier: The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12
   - 2026-11-19: F-028 Cloudflare 2 Players side by side with Firebase (switch on the 2 Players screen) and F-036 connection comparison. Needs a real match on two devices.
   - 2026-11-18: F-037 danger music ends as in NES; restore point tag before F-028; F-028 proposal with questions.
 - Waiting on the owner: the QR box on the iPad (B-031, Safari not testable here); the new countdown, Split default and stopped abandoned game on a phone (run A); a real Cloudflare 2 Players match on two devices and a look at Settings → Connection (F-028, F-036); phone checks of F-030 – F-035 (also adding the game to the home screen), B-019, B-018 and B-017; a two-device check of B-004; whether the privacy text is enough.
+- F-060 (Hold placement), owner 2026-11-20: test exactly two placements from the owner's screenshots, see the backlog item; no new variants.
 - Next: B-030 (match top bar on phones), B-033 and F-056 (key repeat settings) are recorded, not yet proposed as runs; T-009 only on the owner's explicit yes. F-006 music in the music studio chat.
 - Older checkpoints and history: `PROGRESS.md` (section *Handoff history*) and git history.
 

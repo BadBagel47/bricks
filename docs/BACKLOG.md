@@ -8,7 +8,7 @@
 | F-058 | Feature | Modern scoring: T-spins, combos and back-to-back, and their garbage in Battle. Rewards advanced play and changes 2 Players, so kept out of Modern for now | Low | Parked (2026-11-20) | Standard |
 | B-033 | Bug | Landscape phones about 667 × 375 with the Row layout: the 1 Player screen is about 5 px taller than the screen and scrolls a little (seen 2026-11-20; also with Classic, so older than the rules) | Low | Proposed (2026-11-20) | Standard |
 | F-059 | Feature | Possibly remove the Row touch layout (one row of buttons) and keep only Split | Low | Proposed (2026-11-20, owner) | Standard |
-| F-060 | Feature | Hold button placement. Owner (2026-11-20): go with B (more space between the rotate buttons) with Hold moved down into the bottom-right corner, centred under the right (orange) rotate button; mirrored for left-handed. Sketch shown 2026-11-20 | Low | Proposed (2026-11-20, owner) | Standard |
+| F-060 | Feature | Hold button placement (Split). Owner (2026-11-20, with screenshots): try two placements on the phone, both with more space between the rotate buttons than today: (1) Hold at the bottom, to the right of the left rotate button and centred under the orange (right) rotate button; (2) sketch B: Hold in the free top corner of the rotate area, above the left rotate button and to the left of the orange one. Both mirrored for left-handed. Both are to be made switchable for the test; the loser is removed afterwards. Do not invent new placements | Low | Proposed (2026-11-20, owner) | Standard |
 | F-061 | Feature | A setting to arrange the touch controls on the screen yourself, and to set the height of the playing field | Medium | Proposed (2026-11-20, owner) | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Vivid (formerly Modern) block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
@@ -128,7 +128,7 @@ Prioritized for: visible faults first, then the touch controls.
 
 - **A** – standard model, medium – Match side column, the Hold button's new place and the top bar
   - B-034 – the side column in matches fits above the touch controls on smaller phones (the two later Next pieces smaller, side by side), so level and lines are visible again
-  - F-060 – the Hold button in the bottom-right corner, centred under the right rotate button, with more space between the rotate buttons
+  - F-060 – both Hold placements from the owner's screenshots (bottom, centred under the orange button; and B, top corner), switchable in Settings for the test; the other is removed after the owner's choice
   - F-063 – the top bar follows the columns: the logo centred over the board and Pause over the side column, so the layout no longer looks lopsided
   - F-064 – no fullscreen button on the start screen in the installed app
   - Question: on smaller phones the logo gets smaller to fit over the board; acceptable (recommended) or keep its size and let it reach a little over the side column?
