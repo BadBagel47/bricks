@@ -16,6 +16,7 @@ These add to the shared agent rules. Owner decisions behind them are recorded un
 ### Product
 - [BRICKS_SPEC.md](BRICKS_SPEC.md) is the product source of truth (section 5.0 is the approved visual design).
 - Bricks is a hobby game for casual play with friends. Prioritize Firebase Spark quota efficiency and simple operation; advanced anti-cheat or server-authoritative competition is not a priority. Keep normal identity and database authorization protections. No paid service or billing upgrade without owner approval.
+- Every new or changed interface element follows Bricks' design (spec section 5.0 and the current look: colours, tiles, borders, buttons) and its animations (interface animations, honouring the system's reduced-motion choice). Ask the owner when it is unclear how something should look or move (owner, 2026-11-20).
 - Keep interface copy direct and functional. Keep the headline "Make room for one more."; no decorative subheadings, slogans, menu descriptions or footers. Necessary instructions, validation and availability status stay.
 - Operating controls: admitted games finish after closure; new starts and rematches are denied.
   - Firebase 2 Players and 1 Player (until T-009): Bricks' own admin page with separate public 1 Player and 2 Players On/Off/Until; administrators may play while public play is closed; shared private room invitations bypass public closure but stay private while public play is on.

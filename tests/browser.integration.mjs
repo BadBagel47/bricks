@@ -400,7 +400,9 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 320, height: 667 
       // Below the board, or (Split on short landscape screens, F-041) beside it.
       for (const button of await controls.getByRole('button').all()) {
         const box = await button.boundingBox()
-        assert.ok(box.width >= 44 && box.height >= 44)
+        // Row with Hold has seven buttons and may draw them down to 36 px (owner, 2026-11-20).
+        const least = touchLayout === 'row' ? 36 : 44
+        assert.ok(box.width >= least && box.height >= least, `a touch button is too small: ${JSON.stringify(box)}`)
         assert.ok(box.y >= board.y + board.height || box.x + box.width <= board.x || box.x >= board.x + board.width, `a touch button overlaps the board: ${JSON.stringify(box)}`)
         assert.ok(box.x >= 0 && box.x + box.width <= viewport.width && box.y + box.height <= viewport.height)
       }

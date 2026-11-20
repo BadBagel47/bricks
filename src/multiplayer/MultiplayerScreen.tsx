@@ -24,6 +24,7 @@ import { onValue, ref } from 'firebase/database'
 import { summaryLine } from './connection-stats.ts'
 import type { Backend, ConnectionSummary } from './connection-stats.ts'
 import { BackendChoice } from '../net/BackendChoice.tsx'
+import { crossFade } from '../ui/motion.ts'
 import { InviteQr } from '../net/InviteQr.tsx'
 
 function configured() { try { return readFirebaseConfig(import.meta.env) !== null } catch { return false } }
@@ -102,7 +103,7 @@ export default function MultiplayerScreen({ username, onBack, preferences, backe
   useEffect(() => { alive.current = true; return () => { alive.current = false; void service.current?.then(repository => { if (!alive.current) repository.suspend() }) } }, [])
 
   const onCompleted = useCallback((result: MatchResult, uid: string) => {
-    if (alive.current) { setCompleted({ result, uid }); setLastCompletedId(result.id); setSaving(true); setSaveError('') }
+    if (alive.current) { crossFade(() => setCompleted({ result, uid })); setLastCompletedId(result.id); setSaving(true); setSaveError('') }
     // Save even if the view left while the final server acknowledgement was in flight.
     void recordResult(result).catch(() => {
       if (alive.current) setSaveError('Results could not be saved on this device.')
@@ -110,7 +111,7 @@ export default function MultiplayerScreen({ username, onBack, preferences, backe
   }, [])
   async function resultLobby() {
     setResultBusy(true); setResultError('')
-    try { if (database && joined) await cancelCurrentStart(database, joined); setCompleted(null) }
+    try { if (database && joined) await cancelCurrentStart(database, joined); crossFade(() => setCompleted(null)) }
     catch { setResultError('Unable to return to the lobby. Check your connection and try again.') }
     finally { setResultBusy(false) }
   }
@@ -241,12 +242,12 @@ export default function MultiplayerScreen({ username, onBack, preferences, backe
         {sharingURL ? <label className="invite-field">Invite link<input readOnly value={sharingURL} onFocus={event => event.currentTarget.select()} /></label> : <p className="notice">Share the original private invitation link. The room code alone does not grant access.</p>}
       </div> : null}
       {!available && <p className="notice" role="status">Multiplayer is not connected yet.</p>}
-      {accessNotice && <p className="notice" role="status">{accessNotice}</p>}
-      {error && <div role="alert"><p className="notice">{error.message}</p><div className="room-actions">
+      {accessNotice && <p className="notice" role="status" key={accessNotice}>{accessNotice}</p>}
+      {error && <div role="alert"><p className="notice" key={error.message}>{error.message}</p><div className="room-actions">
         {retry.current && <button className="back-button" disabled={busy} onClick={() => void run(retry.current!)}>Retry</button>}
         {!joined && <button className="back-button" onClick={() => { setError(null); input.current?.focus() }}>Edit code</button>}
       </div></div>}
-      {notice && <p className="notice" role="status">{notice}</p>}
+      {notice && <p className="notice" role="status" key={notice}>{notice}</p>}
       {copyFallback && <label className="invite-field">Copy text<input readOnly autoFocus value={copyFallback} onFocus={event => event.currentTarget.select()} /></label>}
       {busy && <p role="status">Connecting…</p>}
       {joined ? <>

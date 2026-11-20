@@ -116,14 +116,12 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
     // Gravity counters change at 60 Hz; render only a visible engine transition.
     if (!transition.events.length) return
     setGame(transition.state)
-    if (personal.gameEffects) {
-      // F-022: same board effects as 1 Player; a Battle clear mixed with incoming rows simply skips the fall animation.
-      if (transition.events.some(event => event.type === 'linesCleared')) {
-        const effect = lineClearEffect(previous, transition.state, ++effectId.current)
-        if (effect) { setClearFx(effect); window.setTimeout(() => setClearFx(fx => fx?.id === effect.id ? null : fx), 450) }
-      }
-      if (transition.events.some(event => event.type === 'hardDropped')) setThump(++effectId.current)
+    // F-022: same board effects as 1 Player; a Battle clear mixed with incoming rows simply skips the fall animation.
+    if (transition.events.some(event => event.type === 'linesCleared')) {
+      const effect = lineClearEffect(previous, transition.state, ++effectId.current)
+      if (effect) { setClearFx(effect); window.setTimeout(() => setClearFx(fx => fx?.id === effect.id ? null : fx), 450) }
     }
+    if (transition.events.some(event => event.type === 'hardDropped')) setThump(++effectId.current)
     audio.handleEvents(transition.events)
     audio.setDanger(transition.state.board)
     if (battleGame) {
@@ -370,7 +368,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
       </div>
       {battleGame && <p className="battle-stats visually-hidden" aria-label="Battle attacks">Pending: {battleGame.pending} · Sent: {sentRows} · Applied: {battleGame.applied} · Cancelled: {battleGame.cancelled}</p>}
       {(duel || battle) && !error && duelStatus && <section className="duel-status" aria-label={battle ? "Battle status" : "Score Duel status"} role="status">{outcome ? <><h2>{outcomeTitle}</h2><p>{ownName}: {game.score.toLocaleString()} · {otherName}: {opponent!.score.toLocaleString()}</p><p>{battle ? `Survival: ${(ownFinishFrame! / 60).toFixed(2)} s · ${(otherFinish!.frame / 60).toFixed(2)} s` : `Score difference: ${Math.abs(outcome.difference).toLocaleString()}`}</p></> : <p>{duelStatus}</p>}</section>}
-      {!finished && !(controller && personal.hideTouchControlsWhenController) && <TouchControls method={personal.mobileControlMethod} buttonSize={56} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdEnabled={game.holdEnabled} dropMode={personal.dropMode} enabled={!finished && !error && !confirm && !paused} apply={apply} />}
+      {!finished && !(controller && personal.hideTouchControlsWhenController) && <TouchControls method={personal.mobileControlMethod} buttonSize={56} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdEnabled={game.holdEnabled} holdAvailable={!game.holdUsed} dropMode={personal.dropMode} enabled={!finished && !error && !confirm && !paused} apply={apply} />}
       <p className="control-hint">Esc / {bindings.pause.replace('Key', '')}: leave match · Multiplayer keeps running while this menu is open.</p>
       <p className="visually-hidden" role="status">{announcement}</p>
       {error && <p role="alert">{error}</p>}

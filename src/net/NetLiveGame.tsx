@@ -121,13 +121,11 @@ export default function NetLiveGame({ room, round: startRound, options, paused, 
     current.current = transition.state
     if (!transition.events.length) return
     setGame(transition.state)
-    if (personal.gameEffects) {
-      if (transition.events.some(event => event.type === 'linesCleared')) {
-        const effect = lineClearEffect(previous, transition.state, ++effectId.current)
-        if (effect) { setClearFx(effect); window.setTimeout(() => setClearFx(fx => fx?.id === effect.id ? null : fx), 450) }
-      }
-      if (transition.events.some(event => event.type === 'hardDropped')) setThump(++effectId.current)
+    if (transition.events.some(event => event.type === 'linesCleared')) {
+      const effect = lineClearEffect(previous, transition.state, ++effectId.current)
+      if (effect) { setClearFx(effect); window.setTimeout(() => setClearFx(fx => fx?.id === effect.id ? null : fx), 450) }
     }
+    if (transition.events.some(event => event.type === 'hardDropped')) setThump(++effectId.current)
     audio.handleEvents(transition.events)
     audio.setDanger(transition.state.board)
     if (battleGame) {
@@ -371,7 +369,7 @@ export default function NetLiveGame({ room, round: startRound, options, paused, 
       </div>
       {battleGame && <p className="battle-stats visually-hidden" aria-label="Battle attacks">Pending: {battleGame.pending} · Sent: {sentRows} · Applied: {battleGame.applied} · Cancelled: {battleGame.cancelled}</p>}
       {!abandoned && status && <section className="duel-status" aria-label={battle ? 'Battle status' : 'Score Duel status'} role="status"><p>{status}</p></section>}
-      {!finished && !abandoned && !(controller && personal.hideTouchControlsWhenController) && <TouchControls method={personal.mobileControlMethod} buttonSize={56} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdEnabled={game.holdEnabled} dropMode={personal.dropMode} enabled={!finished && !confirm && !paused && countdown === 0} apply={apply} />}
+      {!finished && !abandoned && !(controller && personal.hideTouchControlsWhenController) && <TouchControls method={personal.mobileControlMethod} buttonSize={56} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdEnabled={game.holdEnabled} holdAvailable={!game.holdUsed} dropMode={personal.dropMode} enabled={!finished && !confirm && !paused && countdown === 0} apply={apply} />}
       <p className="control-hint">Esc / {bindings.pause.replace('Key', '')}: leave match · Multiplayer keeps running while this menu is open.</p>
       <p className="visually-hidden" role="status">{announcement}</p>
       {abandoned && <p role="alert">{abandoned}</p>}

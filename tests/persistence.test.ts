@@ -9,8 +9,8 @@ function score(id: string, points: number, username = 'Player'): HighscoreRecord
 
 test('personal and single-player settings load safe defaults and validate saved values', () => {
   assert.deepEqual(parsePersonalSettings(null), DEFAULT_PERSONAL_SETTINGS)
-  assert.deepEqual(parsePersonalSettings('{"hardDropEnabled":false}'), { version: 1, hardDropEnabled: false, dropMode: 'drop', musicEnabled: true, musicVolume: 70, effectsEnabled: true, effectsVolume: 70, mobileControlMethod: 'dpad', touchButtonSize: 56, leftHandedControls: false, rotateButtons: 'two', touchLayout: 'split', touchLayoutVersion: 2, hideTouchControlsWhenController: true, ghostPiece: false, blockColors: 'level', interfaceAnimations: true, gameEffects: true })
-  assert.deepEqual(parsePersonalSettings('{"musicEnabled":false,"musicVolume":120,"effectsEnabled":false,"effectsVolume":25,"mobileControlMethod":"swipe","touchButtonSize":72,"leftHandedControls":true}'), { version: 1, hardDropEnabled: true, dropMode: 'both', musicEnabled: false, musicVolume: 70, effectsEnabled: false, effectsVolume: 25, mobileControlMethod: 'swipe', touchButtonSize: 72, leftHandedControls: true, rotateButtons: 'two', touchLayout: 'split', touchLayoutVersion: 2, hideTouchControlsWhenController: true, ghostPiece: false, blockColors: 'level', interfaceAnimations: true, gameEffects: true })
+  assert.deepEqual(parsePersonalSettings('{"hardDropEnabled":false}'), { version: 1, hardDropEnabled: false, dropMode: 'drop', musicEnabled: true, musicVolume: 70, effectsEnabled: true, effectsVolume: 70, mobileControlMethod: 'dpad', touchButtonSize: 56, leftHandedControls: false, rotateButtons: 'two', touchLayout: 'split', touchLayoutVersion: 2, hideTouchControlsWhenController: true, ghostPiece: false, blockColors: 'level' })
+  assert.deepEqual(parsePersonalSettings('{"musicEnabled":false,"musicVolume":120,"effectsEnabled":false,"effectsVolume":25,"mobileControlMethod":"swipe","touchButtonSize":72,"leftHandedControls":true}'), { version: 1, hardDropEnabled: true, dropMode: 'both', musicEnabled: false, musicVolume: 70, effectsEnabled: false, effectsVolume: 25, mobileControlMethod: 'swipe', touchButtonSize: 72, leftHandedControls: true, rotateButtons: 'two', touchLayout: 'split', touchLayoutVersion: 2, hideTouchControlsWhenController: true, ghostPiece: false, blockColors: 'level' })
   assert.deepEqual(parsePersonalSettings('{"ghostPiece":true,"blockColors":"classic"}'), { ...DEFAULT_PERSONAL_SETTINGS, ghostPiece: true, blockColors: 'classic' })
   assert.deepEqual(parsePersonalSettings('{"ghostPiece":"yes","blockColors":"neon"}'), DEFAULT_PERSONAL_SETTINGS)
   assert.equal(parsePersonalSettings('{"blockColors":"tones"}').blockColors, 'tones')
@@ -21,7 +21,8 @@ test('personal and single-player settings load safe defaults and validate saved 
   assert.equal(parsePersonalSettings('{"touchLayout":"row"}').touchLayout, 'split')
   assert.equal(parsePersonalSettings('{"touchLayout":"row","touchLayoutVersion":2}').touchLayout, 'row')
   assert.equal(parsePersonalSettings(null).touchLayout, 'split')
-  assert.deepEqual(parsePersonalSettings('{"interfaceAnimations":false,"gameEffects":false}'), { ...DEFAULT_PERSONAL_SETTINGS, interfaceAnimations: false, gameEffects: false })
+  // F-048, F-049: the removed Game effects and Interface animations settings are ignored.
+  assert.deepEqual(parsePersonalSettings('{"interfaceAnimations":false,"gameEffects":false}'), DEFAULT_PERSONAL_SETTINGS)
   assert.deepEqual(parsePersonalSettings('{"interfaceAnimations":"no","gameEffects":1}'), DEFAULT_PERSONAL_SETTINGS)
   assert.deepEqual(parseSinglePlayerSettings('{"startLevel":19,"holdEnabled":true}'), { version: 1, startLevel: 19, holdEnabled: true })
   assert.deepEqual(parseSinglePlayerSettings('{"startLevel":20,"holdEnabled":"yes"}'), DEFAULT_SINGLE_PLAYER_SETTINGS)

@@ -45,6 +45,10 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 - **Abandoned match (2026-11-19, B-028, Q1 with recommendation):** the remaining player's board freezes with the note and Return to lobby; the music stops.
 - **Tablet start screen (2026-11-19, B-026, Q2 with recommendation):** every portrait screen stacks the start screen as on phones.
 - **Start screen widths (2026-11-19, F-045):** logo and menu buttons equally wide: on phones the buttons follow the logo, on tablets in portrait the logo grows to the buttons' width.
+- **Design and animations (2026-11-20, standing):** every new or changed element follows Bricks' design and animations; ask the owner when unsure (project rule in `AGENTS.md`).
+- **Settings removed (2026-11-20, F-048, F-049):** no Game effects or Interface animations setting; only the system's reduced-motion choice turns animations off.
+- **Hold button (2026-11-20, F-050, Q1 with recommendation):** Split: the pad's free top corner on the outer side; Row: last in the row, the seven buttons may be drawn down to 36 px (owner's choice during the run).
+- **Borders (2026-11-20, F-051, Q2 with recommendation):** `--line` #3A4268.
 - **Orange (2026-11-19, F-044, Q1 with recommendation):** orange fill is for Start Match and selected options; Copy Invite Link is outlined like the other room buttons.
 - **Hosting (2026-11-10):** GitHub Pages with the custom domain https://bricks.trythis.one instead of the spec's Firebase Hosting; Firebase stays the auth/database backend (`docs/DEPLOYMENT.md`).
 - **Visual refresh (2026-11-10):** spec section 5.0 design, generated audio, optional Ghost piece (off by default); block colors since F-024 are Retro / Tones / Modern.
@@ -59,6 +63,7 @@ None. The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12: 1
 
 - Live: https://bricks.trythis.one (Pages from `main`); admin https://bricks-operating.l8p1.workers.dev/admin/ (Worker from `feature/operating-controls`).
 - Latest work, newest first:
+  - 2026-11-20: run C: B-032 touch areas around the buttons, F-050 Hold button, F-048/F-049 settings removed, F-051 clearer borders, F-047 missing animations.
   - 2026-11-19: run B: B-031 square QR box, F-043 server switch cross-fades, F-044 Copy Invite Link outlined, F-045 equal logo and button widths.
   - 2026-11-19: run A: B-028 abandoned Cloudflare match stops, B-029 brick countdown, B-026 iPad portrait start screen, B-027 centred QR Code button, F-040 Row gap, F-041 Split default (also fits landscape phones), F-042 QR closes when full.
   - 2026-11-19: F-039 invitation QR code; T-012 network-kit 0.17.0; T-011 network-kit update workflow.

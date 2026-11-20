@@ -4,7 +4,6 @@ import { SubpageBar } from './ui/SubpageBar.tsx'
 import { MultiplayerHighscores } from './multiplayer/ResultViews.tsx'
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { CSSProperties, FormEvent } from 'react'
-import { flushSync } from 'react-dom'
 import { createPortal } from 'react-dom'
 import { advanceGame, createGame, dispatch } from './engine/index.ts'
 import type { GameAction, GameEvent, GameState } from './engine/index.ts'
@@ -25,6 +24,7 @@ import { checkSolo } from './access/client.ts'
 import { cloudflareLink, saveBackend, savedBackend } from './net/BackendChoice.tsx'
 import type { Backend } from './multiplayer/connection-stats.ts'
 import { ConnectionComparison } from './multiplayer/ConnectionComparison.tsx'
+import { crossFade } from './ui/motion.ts'
 import { enterFullscreen, exitFullscreen, fullscreenActive, fullscreenSupported, rememberFullscreen, restoreFullscreenOnFirstInput } from './ui/fullscreen.ts'
 
 const USERNAME_KEY = 'bricks.username'
@@ -87,17 +87,8 @@ function App() {
   const [gamepadCaptureError, setGamepadCaptureError] = useState('')
   const [controllerStatus, setControllerStatus] = useState('No controller detected')
   const [personal, setPersonal] = useState<PersonalSettings>(() => readStored(PERSONAL_KEY, parsePersonalSettings, DEFAULT_PERSONAL_SETTINGS))
-  const personalRef = useRef(personal)
-  personalRef.current = personal
-  /** F-021: screens cross-fade with the View Transitions API where the browser has it. */
-  function crossFade(update: () => void, instant = false) {
-    const doc = document as Document & { startViewTransition?: (update: () => void) => unknown }
-    if (instant || !personalRef.current.interfaceAnimations || !doc.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) { update(); return }
-    doc.startViewTransition(() => flushSync(update))
-  }
   // The game starts instantly: a transition would briefly swallow the first taps.
   function setView(next: View) { crossFade(() => setViewState(next), next === 'game') }
-  useEffect(() => { document.documentElement.dataset.motion = personal.interfaceAnimations ? 'on' : 'off' }, [personal.interfaceAnimations])
   // F-028: Firebase or Cloudflare 2 Players while both exist; a Cloudflare link opens Cloudflare.
   const [backend, setBackend] = useState<Backend>(() => cloudflareLink() ? 'cloudflare' : new URL(location.href).searchParams.has('room') ? 'firebase' : savedBackend())
   function chooseBackend(value: Backend) { saveBackend(value); crossFade(() => setBackend(value)) } // F-043: cross-fades like other screen changes
@@ -229,14 +220,12 @@ function App() {
     gameRef.current = next
     setGame(next)
     audioRef.current?.handleEvents(events)
-    if (personalRef.current.gameEffects) {
-      if (events.some((event) => event.type === 'linesCleared')) {
-        const effect = lineClearEffect(previous, next, ++effectIdRef.current)
-        if (effect) { setClearFx(effect); window.setTimeout(() => setClearFx((current) => current?.id === effect.id ? null : current), 450) }
-      }
-      if (events.some((event) => event.type === 'hardDropped')) setThump(++effectIdRef.current)
-      if (events.some((event) => event.type === 'levelChanged')) setLevelUp(++effectIdRef.current)
+    if (events.some((event) => event.type === 'linesCleared')) {
+      const effect = lineClearEffect(previous, next, ++effectIdRef.current)
+      if (effect) { setClearFx(effect); window.setTimeout(() => setClearFx((current) => current?.id === effect.id ? null : current), 450) }
     }
+    if (events.some((event) => event.type === 'hardDropped')) setThump(++effectIdRef.current)
+    if (events.some((event) => event.type === 'levelChanged')) setLevelUp(++effectIdRef.current)
     const announcements = events.flatMap((event) => {
       if (event.type === 'linesCleared') return [`${event.count} ${event.count === 1 ? 'line' : 'lines'} cleared.`]
       if (event.type === 'levelChanged') return [`Level ${event.to}.`]
@@ -478,7 +467,7 @@ function App() {
         <label htmlFor="username">Player name</label>
         <div className="name-field"><input autoComplete="nickname" autoFocus id="username" maxLength={16} minLength={2} onChange={(event) => setDraft(event.target.value)} required value={draft} /><span className="name-count" aria-hidden="true">{draft.length}/16</span></div>
         <span className="field-hint">2–16 characters</span>
-        {notice && <p className="notice" role="status">{notice}</p>}
+        {notice && <p className="notice" role="status" key={notice}>{notice}</p>}
         <button className="button button-primary" type="submit">Continue</button>
       </form>
     </section>
@@ -500,13 +489,13 @@ function App() {
       </form>
       <span className="setting-label" id="touch-controls-label">Touch controls</span>
       <Segmented label="Touch controls" value={personal.mobileControlMethod} options={[{ value: 'dpad', label: 'Buttons' }, { value: 'swipe', label: 'Swipe' }]} onChange={(mobileControlMethod) => savePersonal({ ...personal, mobileControlMethod })} />
-      {personal.mobileControlMethod === 'dpad' && <>
+      {personal.mobileControlMethod === 'dpad' && <div className="settings-appear">
         <span className="setting-label">Rotate buttons</span>
         <Segmented label="Rotate buttons" value={personal.rotateButtons} options={[{ value: 'one', label: 'One' }, { value: 'two', label: 'Two' }]} onChange={(rotateButtons) => savePersonal({ ...personal, rotateButtons })} />
         <span className="setting-label">Layout</span>
         <Segmented label="Button layout" value={personal.touchLayout} options={[{ value: 'split', label: 'Split' }, { value: 'row', label: 'Row' }]} onChange={(touchLayout) => savePersonal({ ...personal, touchLayout })} />
-        <TouchPreview rotateButtons={personal.rotateButtons} layout={personal.touchLayout} dropMode={personal.dropMode} leftHanded={personal.leftHandedControls} />
-      </>}
+        <TouchPreview rotateButtons={personal.rotateButtons} layout={personal.touchLayout} dropMode={personal.dropMode} leftHanded={personal.leftHandedControls} holdEnabled={singlePlayer.holdEnabled} />
+      </div>}
       <span className="setting-label">Drop</span>
       <Segmented label="Drop" value={personal.dropMode} options={[{ value: 'drop', label: 'Drop' }, { value: 'hard', label: 'Hard Drop' }, { value: 'both', label: 'Both' }]} onChange={(dropMode) => savePersonal({ ...personal, dropMode, hardDropEnabled: hardDropAllowed(dropMode) })} />
       <div className="setting-group">
@@ -519,8 +508,6 @@ function App() {
       <ColorPreview colors={personal.blockColors} level={singlePlayer.startLevel} />
       <div className="setting-group">
       <label className="toggle-row"><span>Ghost piece</span><input checked={personal.ghostPiece} onChange={(event) => savePersonal({ ...personal, ghostPiece: event.target.checked })} type="checkbox" /></label>
-      <label className="toggle-row"><span>Game effects</span><input checked={personal.gameEffects} onChange={(event) => savePersonal({ ...personal, gameEffects: event.target.checked })} type="checkbox" /></label>
-      <label className="toggle-row"><span>Interface animations</span><input checked={personal.interfaceAnimations} onChange={(event) => savePersonal({ ...personal, interfaceAnimations: event.target.checked })} type="checkbox" /></label>
       </div>
       <h2 className="settings-heading">1 Player</h2>
       <div className="setting-group">
@@ -540,7 +527,7 @@ function App() {
         <button className="key-button" onClick={() => { setCapture(action); setCaptureError('') }}>{capture === action ? 'Press a key…' : keyLabel(bindings[action])}</button>
       </div>)}</div>
       <button className="reset-button" onClick={resetKeyboardBindings}>Reset keyboard controls</button>
-      {captureError && <p className="notice" role="status">{captureError}</p>}
+      {captureError && <p className="notice" role="status" key={captureError}>{captureError}</p>}
       {capture && <button className="back-button cancel-capture" onClick={() => { setCapture(null); setCaptureError('') }}>Cancel</button>}
       <h2 className="settings-heading">Controller</h2>
       <p className="controller-status">{controllerStatus}</p>
@@ -548,7 +535,7 @@ function App() {
         <span>{ACTION_LABELS[action]}</span>
         <button className="key-button" onClick={() => { setGamepadCapture(action); setGamepadCaptureError('') }}>{gamepadCapture === action ? 'Press a button…' : gamepadButtonLabel(gamepadBindings[action])}</button>
       </div>)}</div>
-      {gamepadCaptureError && <p className="notice" role="status">{gamepadCaptureError}</p>}
+      {gamepadCaptureError && <p className="notice" role="status" key={gamepadCaptureError}>{gamepadCaptureError}</p>}
       {gamepadCapture && <button className="back-button cancel-capture" onClick={() => { setGamepadCapture(null); setGamepadCaptureError('') }}>Cancel</button>}
       <button className="reset-button" onClick={resetGamepadBindings}>Reset controller controls</button>
       <h2 className="settings-heading">Connection</h2>
@@ -561,7 +548,7 @@ function App() {
         <li>Google Firebase, Cloudflare and GitHub Pages see your IP address when you connect.</li>
         <li>Clear your browser data to remove what is saved on this device.</li>
       </ul>
-      {notice && <p className="notice" role="status">{notice}</p>}
+      {notice && <p className="notice" role="status" key={notice}>{notice}</p>}
     </section>
   </main>
 
@@ -599,7 +586,7 @@ function App() {
       <Playfield game={game} ghost={personal.ghostPiece} colors={personal.blockColors} clear={clearFx} thump={thump} swipeMode={personal.mobileControlMethod === 'swipe'} onSwipe={(start, end, board) => actionsForSwipe(start, end, board).forEach(apply)} />
       <aside className="game-side next-panel"><div className="next-box"><span>Next</span><PiecePreview type={game.next} level={game.level} colors={personal.blockColors} /></div>{game.holdEnabled && <HoldBox type={game.held} level={game.level} colors={personal.blockColors} enabled={game.status === 'playing' && !game.holdUsed} onHold={() => apply('hold')} />}</aside>
     </section>
-    {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={72} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdEnabled={game.holdEnabled} dropMode={personal.dropMode} enabled={game.status === 'playing'} apply={apply} />}
+    {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={72} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdEnabled={game.holdEnabled} holdAvailable={!game.holdUsed} dropMode={personal.dropMode} enabled={game.status === 'playing'} apply={apply} />}
     <p className="controller-status" aria-live="polite">{controllerStatus}</p>
     <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">{gameAnnouncement}</p>
     <p className="control-hint" aria-label="Keyboard controls">{keyLabel(bindings.moveLeft)} {keyLabel(bindings.moveRight)} Move · {softDropAllowed(personal.dropMode) ? `${keyLabel(bindings.softDrop)} Soft drop · ` : ''}{keyLabel(bindings.rotateCounterclockwise)} {keyLabel(bindings.rotateClockwise)} Rotate · {hardDropAllowed(personal.dropMode) ? `${keyLabel(bindings.hardDrop)} Hard drop` : 'Hard Drop off'}{game.holdEnabled ? ` · ${keyLabel(bindings.hold)} Hold` : ''} · {keyLabel(bindings.pause)} / Esc Pause</p>
@@ -615,7 +602,7 @@ function App() {
     </section></div>, document.body)}
     {game.status === 'gameOver' && createPortal(<div className="game-overlay"><section className="overlay-card result-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title" onKeyDown={(event) => { if (event.key === 'Enter' && event.target === event.currentTarget.querySelector('h1')) playAgain() }}>
       <header className="result-card-head"><h1 id="overlay-title" tabIndex={-1}>Game over</h1>{isNewRecord ? <p className="record-badge">New record</p> : resultRank ? <p className="record-badge rank">#{resultRank} on your list</p> : null}</header>
-      {notice && <p className="notice" role="status">{notice}</p>}
+      {notice && <p className="notice" role="status" key={notice}>{notice}</p>}
       <div className="final-score"><span>Final score</span><strong>{game.score.toLocaleString()}</strong></div>
       <div className="result-stats"><div><span>Level</span><strong>{String(game.level).padStart(2, '0')}</strong></div><div><span>Lines</span><strong>{game.lines}</strong></div><div><span>Best</span><strong>{bestScore === null ? '—' : bestScore.toLocaleString()}</strong></div></div>
       <HighscoreTable records={highscores.slice(0, 5)} compact highlight={runIdRef.current} />

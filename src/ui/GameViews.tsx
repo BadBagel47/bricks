@@ -72,8 +72,8 @@ const ICONS = {
   hardDrop: <><path d="M6 5l6 6 6-6" /><path d="M6 11l6 6 6-6" /><path d="M5 21h14" /></>,
 }
 
-export function TouchControls({ method, buttonSize, leftHanded, dropMode, enabled, apply, rotateButtons = 'two', layout = 'split' }: {
-  method: 'dpad' | 'swipe'; buttonSize: number; leftHanded: boolean; holdEnabled?: boolean; dropMode: DropMode; enabled: boolean; apply: (action: GameAction) => void; rotateButtons?: 'one' | 'two'; layout?: 'row' | 'split'
+export function TouchControls({ method, buttonSize, leftHanded, dropMode, enabled, apply, rotateButtons = 'two', layout = 'split', holdEnabled = false, holdAvailable = true }: {
+  method: 'dpad' | 'swipe'; buttonSize: number; leftHanded: boolean; holdEnabled?: boolean; holdAvailable?: boolean; dropMode: DropMode; enabled: boolean; apply: (action: GameAction) => void; rotateButtons?: 'one' | 'two'; layout?: 'row' | 'split'
 }) {
   const two = rotateButtons === 'two'
   const left = <TouchButton enabled={enabled} label="Move left" icon={ICONS.left} action="moveLeft" apply={apply} repeat />
@@ -82,33 +82,36 @@ export function TouchControls({ method, buttonSize, leftHanded, dropMode, enable
   const ccw = two && <TouchButton enabled={enabled} label="Rotate counterclockwise" icon={ICONS.counterclockwise} action="rotateCounterclockwise" apply={apply} secondary />
   const cw = <TouchButton enabled={enabled} label={two ? 'Rotate clockwise' : 'Rotate'} icon={ICONS.clockwise} action="rotateClockwise" apply={apply} primary />
   const drop = hardDropAllowed(dropMode) && <TouchButton enabled={enabled} label="Hard drop" icon={ICONS.hardDrop} action="hardDrop" apply={apply} />
+  // F-050: a Hold button when Hold is on; the Hold box can still be tapped.
+  const hold = holdEnabled && <TouchButton enabled={enabled && holdAvailable} label="Hold" text="HOLD" action="hold" apply={apply} hold />
   const single = dropMode !== 'both'
-  const count = 3 + (two ? 1 : 0) + (single ? 1 : 2)
+  const count = 3 + (two ? 1 : 0) + (single ? 1 : 2) + (holdEnabled ? 1 : 0)
   return <section className={`touch-controls${leftHanded ? ' left-handed' : ''}${method === 'dpad' && layout === 'split' ? ' touch-split' : ''}${single ? ' single-drop' : ''}`} style={{ '--preferred-touch-size': `${buttonSize}px`, '--touch-count': count } as CSSProperties} aria-label="Touch controls">
     {method === 'swipe' ? <p className="swipe-instructions">Tap the left half to rotate ↺ and the right half to rotate ↻ · Swipe left/right to move{softDropAllowed(dropMode) ? ' · Swipe down to soft drop' : ''}{hardDropAllowed(dropMode) ? ' · Swipe up to hard drop' : ''}</p>
       : layout === 'split' ? <>
-        {single ? <div className="touch-pad single">{left}{down || drop}{right}</div> : <div className="touch-pad">{drop}{left}{down}{right}</div>}
+        {single ? <div className={`touch-pad single${hold ? ' with-hold' : ''}`}>{left}{down || drop}{right}{hold}</div> : <div className="touch-pad">{drop}{left}{down}{right}{hold}</div>}
         <div className={`touch-rotate${two ? ' two' : ''}`}>{ccw}{cw}</div>
       </>
-      : <div className="touch-row">{left}{right}{down}{ccw}{cw}{drop}</div>}
+      : <div className="touch-row">{left}{right}{down}{ccw}{cw}{drop}{hold}</div>}
   </section>
 }
 
 /** Small static copy of the touch buttons for the Settings preview (F-023). */
-export function TouchPreview({ rotateButtons, layout, dropMode, leftHanded }: { rotateButtons: 'one' | 'two'; layout: 'row' | 'split'; dropMode: DropMode; leftHanded: boolean }) {
+export function TouchPreview({ rotateButtons, layout, dropMode, leftHanded, holdEnabled = false }: { rotateButtons: 'one' | 'two'; layout: 'row' | 'split'; dropMode: DropMode; leftHanded: boolean; holdEnabled?: boolean }) {
   const icon = (paths: ReactNode, kind = '') => <span className={`preview-key${kind}`}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">{paths}</svg></span>
   const two = rotateButtons === 'two'
   const ccw = two && icon(ICONS.counterclockwise, ' secondary'), cw = icon(ICONS.clockwise, ' primary')
   const down = softDropAllowed(dropMode) && icon(ICONS.down), drop = hardDropAllowed(dropMode) && icon(ICONS.hardDrop), single = dropMode !== 'both'
+  const hold = holdEnabled && <span className="preview-key touch-hold">HOLD</span>
   return <div className={`touch-preview${layout === 'split' ? ' split' : ''}${single ? ' single-drop' : ''}${leftHanded ? ' left-handed' : ''}`} role="img" aria-label={`Preview: ${layout === 'split' ? 'split layout' : 'one row'} with ${two ? 'two rotate buttons' : 'one rotate button'}`}>
     {layout === 'split'
-      ? <><div className={`touch-pad${single ? ' single' : ''}`}>{single ? <>{icon(ICONS.left)}{down || drop}{icon(ICONS.right)}</> : <>{drop}{icon(ICONS.left)}{down}{icon(ICONS.right)}</>}</div><div className={`touch-rotate${two ? ' two' : ''}`}>{ccw}{cw}</div></>
-      : <div className="touch-row">{icon(ICONS.left)}{icon(ICONS.right)}{down}{ccw}{cw}{drop}</div>}
+      ? <><div className={`touch-pad${single ? ' single' : ''}${single && hold ? ' with-hold' : ''}`}>{single ? <>{icon(ICONS.left)}{down || drop}{icon(ICONS.right)}{hold}</> : <>{drop}{icon(ICONS.left)}{down}{icon(ICONS.right)}{hold}</>}</div><div className={`touch-rotate${two ? ' two' : ''}`}>{ccw}{cw}</div></>
+      : <div className="touch-row">{icon(ICONS.left)}{icon(ICONS.right)}{down}{ccw}{cw}{drop}{hold}</div>}
   </div>
 }
 
-function TouchButton({ label, icon, action, apply, enabled, repeat = false, primary = false, secondary = false }: {
-  label: string; icon: ReactNode; action: GameAction; apply: (action: GameAction) => void; enabled: boolean; repeat?: boolean; primary?: boolean; secondary?: boolean
+function TouchButton({ label, icon, text, action, apply, enabled, repeat = false, primary = false, secondary = false, hold = false }: {
+  label: string; icon?: ReactNode; text?: string; action: GameAction; apply: (action: GameAction) => void; enabled: boolean; repeat?: boolean; primary?: boolean; secondary?: boolean; hold?: boolean
 }) {
   const activePointer = useRef<number | null>(null)
   const delay = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -133,7 +136,7 @@ function TouchButton({ label, icon, action, apply, enabled, repeat = false, prim
     if (activePointer.current === event.pointerId) stop()
   }
   useEffect(() => { if (!enabled) stop(); return stop }, [enabled])
-  return <button aria-label={label} disabled={!enabled} className={`touch-button${primary ? ' touch-primary' : ''}${secondary ? ' touch-secondary' : ''}`} onClick={(event) => { if (event.detail === 0) apply(action) }} onLostPointerCapture={release} onPointerCancel={release} onPointerDown={press} onPointerUp={release} type="button"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">{icon}</svg></button>
+  return <button aria-label={label} disabled={!enabled} className={`touch-button${primary ? ' touch-primary' : ''}${secondary ? ' touch-secondary' : ''}${hold ? ' touch-hold' : ''}`} onClick={(event) => { if (event.detail === 0) apply(action) }} onLostPointerCapture={release} onPointerCancel={release} onPointerDown={press} onPointerUp={release} type="button">{text ? <span aria-hidden="true">{text}</span> : <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">{icon}</svg>}</button>
 }
 
 export function PiecePreview({ type, level, colors = 'level' }: { type: PieceType; level: number; colors?: BlockColors }) {

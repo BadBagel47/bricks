@@ -6,6 +6,15 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Changed (2026-11-20, run C)
+- F-050: a Hold touch button when Hold is on: in Split in the pad's free top corner (outer side), in Row last in the row (the seven Row buttons may be drawn down to 36 px on narrow phones); also in the Settings preview. The Hold box can still be tapped.
+- F-048, F-049: the Game effects and Interface animations settings are gone; effects and animations are always on, except when the system asks for reduced motion.
+- F-051: clearer borders around dark buttons, cards and fields.
+- F-047: animations where things appeared abruptly: the QR code, notices, the opponent joining the lobby, the room code tiles, the tiles of a typed code, touch-control options and preview in Settings, Start Match becoming available, the 2 Players result screen and the return to the lobby.
+
+### Fixed (2026-11-20, run C)
+- B-032: touch buttons answer in the empty space around them (gaps, the corners of the round rotate buttons, towards the screen edges); on a 390 px phone the reacting share of the control strip went from 35 % to 89 % (Split) and from 45 % to 90 % (Row).
+
 ### Changed (2026-11-19, run B)
 - F-045: on the start screen the logo and the menu buttons are equally wide: narrower buttons on phones, a larger logo on tablets in portrait.
 - F-044: Copy Invite Link has the outlined style of Copy Code and QR Code; orange is kept for Start Match and selected options.

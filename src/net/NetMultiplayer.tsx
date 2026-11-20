@@ -19,6 +19,7 @@ import { InviteQr } from './InviteQr.tsx'
 import { readNetCheckpoint } from './checkpoint.ts'
 import type { NetCheckpoint } from './checkpoint.ts'
 import type { NetRound } from './NetLiveGame.tsx'
+import { crossFade } from '../ui/motion.ts'
 import type { Backend } from '../multiplayer/connection-stats.ts'
 
 export const LAST_ROOM_KEY = 'bricks.net-last-room.v1'
@@ -172,13 +173,13 @@ export default function NetMultiplayer({ username, onBack, preferences, backendS
   }, [room, state?.phase, state?.round, me, other?.id])
 
   const onCompleted = useCallback((result: MatchResult, uid: string) => {
-    setCompleted({ result, uid }); setSaving(true); setSaveError('')
+    crossFade(() => setCompleted({ result, uid })); setSaving(true); setSaveError('')
     void recordResult(result).catch(() => { if (alive.current) setSaveError('Results could not be saved on this device.') }).finally(() => { if (alive.current) setSaving(false) })
   }, [])
   const options = { preferences, audio, onPlaying: setPlaying, completedId: completed?.result.id ?? null, lastCompletedId: null, onCompleted }
 
   function toLobby() {
-    setLive(null); setCompleted(null); setInLobby(true)
+    crossFade(() => { setLive(null); setCompleted(null); setInLobby(true) })
     if (room && isHost && state?.phase === 'playing') room.end()
   }
   function leaveRoom() {
@@ -217,8 +218,8 @@ export default function NetMultiplayer({ username, onBack, preferences, backendS
           <InviteQr url={inviteLink} full={Boolean(other)} />
         </div>
       </div>}
-      {error && <div role="alert"><p className="notice">{error}</p></div>}
-      {notice && <p className="notice" role="status">{notice}</p>}
+      {error && <div role="alert"><p className="notice" key={error}>{error}</p></div>}
+      {notice && <p className="notice" role="status" key={notice}>{notice}</p>}
       {copyFallback && <label className="invite-field">Copy text<input readOnly autoFocus value={copyFallback} onFocus={event => event.currentTarget.select()} /></label>}
       {busy && <p role="status">Connecting…</p>}
       {room ? <>
