@@ -7,7 +7,7 @@ not publish version numbers yet; entries are grouped by deployment.
 ## [Unreleased]
 
 ### Fixed (2026-11-20, second run A)
-- B-030: the Cloudflare match top bar fits on phones: the room code without its label, tighter chips, and on narrow phones the connection status as its coloured dot; the countdown reads Connected instead of Synchronizing….
+- B-030: the Cloudflare match top bar fits on phones: the room code without its label, tighter chips, and the connection status as its coloured dot; the countdown reads Connected instead of Synchronizing….
 - B-033: 1 Player on short landscape phones with the Row layout no longer scrolls a few pixels; on the smallest (about 568 × 320) the Next and Hold boxes are only as tall as the pieces.
 
 ### Changed (2026-11-20, run A)

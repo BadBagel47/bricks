@@ -11,7 +11,7 @@
 
 ## Second run A: B-030, B-033 — 2026-11-20
 
-Owner: "Kör A". B-030: `live-game.css` phone rules (≤ 480 px label hidden, chips 10 px padding and not shrinking; < 390 px connection chip dot-only with the text visually hidden and as `title`), countdown chip reads Connected in `NetLiveGame`; `tests/net.e2e.mjs` checks the chip during the countdown and the bar at 320, 375 and 390 px, then waits for the countdown to end. B-033: Row touch size in short landscape capped to the height left below the board; half-height Next/Hold boxes below 340 px height. Local: lint (no new warnings), unit 216, build, browser 25/25, `npm run test:net` 3/3 (twice), operating 3/3; 1 Player measured in seven landscape sizes (Row and Split) and the match bar at six widths. Firebase emulator suite: CI.
+Owner: "Kör A". B-030: `live-game.css` phone rules (≤ 480 px: label hidden, chips 10 px padding and not shrinking, connection chip dot-only with the text visually hidden and as `title`; a first version kept the text down to 390 px, which CI's Chrome drew 10 px too wide), countdown chip reads Connected in `NetLiveGame`; `tests/net.e2e.mjs` checks the chip during the countdown and the bar at 320, 375 and 390 px, then waits for the countdown to end. B-033: Row touch size in short landscape capped to the height left below the board; half-height Next/Hold boxes below 340 px height. Local: lint (no new warnings), unit 216, build, browser 25/25, `npm run test:net` 3/3 (twice), operating 3/3; 1 Player measured in seven landscape sizes (Row and Split) and the match bar at six widths. Firebase emulator suite: CI.
 
 ## Run A: B-034, F-060, F-063, F-064 — 2026-11-20
 

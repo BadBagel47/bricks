@@ -108,15 +108,14 @@
   .multiplayer-game>button{grid-column:2;grid-row:5}
 }
 
-/* B-030: on phones the bar fits the screen: the room code without its label, tighter chips, and on
-   narrow phones the connection chip as its coloured dot only (the text stays for screen readers;
-   a pause or a finished opponent is also told below the scores). */
+/* B-030: on phones the bar fits the screen: the room code without its label, tighter chips, and the
+   connection chip as its coloured dot only (the text stays for screen readers and as a
+   tooltip; a pause or a finished opponent is also told below the scores). Fonts differ between
+   phones, so the bar keeps room to spare instead of fitting the text exactly. */
 @media (max-width:480px){
   .match-bar{gap:6px}
   .match-chip{padding:0 10px;flex:none}
   .match-room .room-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-}
-@media (max-width:389px){
   .match-chip[class*=link-]{width:32px;padding:0;justify-content:center}
   .match-chip[class*=link-] .link-text{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .match-chip[class*=link-] i{width:10px;height:10px;border-radius:5px}
