@@ -1,4 +1,6 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
+import { DEFAULT_REPEAT } from '../input/repeat.ts'
+import type { RepeatTiming } from '../input/repeat.ts'
 import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from 'react'
 import { dropPosition, pieceCells } from '../engine/index.ts'
 import type { Cell, GameAction, GameState, PieceType } from '../engine/index.ts'
@@ -75,13 +77,13 @@ const ICONS = {
   hardDrop: <><path d="M6 5l6 6 6-6" /><path d="M6 11l6 6 6-6" /><path d="M5 21h14" /></>,
 }
 
-export function TouchControls({ method, buttonSize, leftHanded, dropMode, enabled, apply, rotateButtons = 'two', layout = 'split', holdEnabled = false, holdAvailable = true, holdPlacement = 'bottom' }: {
-  method: 'dpad' | 'swipe'; buttonSize: number; leftHanded: boolean; holdEnabled?: boolean; holdAvailable?: boolean; dropMode: DropMode; enabled: boolean; apply: (action: GameAction) => void; rotateButtons?: 'one' | 'two'; layout?: 'row' | 'split'; holdPlacement?: HoldPlacement
+export function TouchControls({ method, buttonSize, leftHanded, dropMode, enabled, apply, rotateButtons = 'two', layout = 'split', holdEnabled = false, holdAvailable = true, holdPlacement = 'bottom', repeat = DEFAULT_REPEAT }: {
+  method: 'dpad' | 'swipe'; buttonSize: number; leftHanded: boolean; holdEnabled?: boolean; holdAvailable?: boolean; dropMode: DropMode; enabled: boolean; apply: (action: GameAction) => void; rotateButtons?: 'one' | 'two'; layout?: 'row' | 'split'; holdPlacement?: HoldPlacement; repeat?: RepeatTiming
 }) {
   const two = rotateButtons === 'two'
-  const left = <TouchButton enabled={enabled} label="Move left" icon={ICONS.left} action="moveLeft" apply={apply} repeat />
-  const right = <TouchButton enabled={enabled} label="Move right" icon={ICONS.right} action="moveRight" apply={apply} repeat />
-  const down = softDropAllowed(dropMode) && <TouchButton enabled={enabled} label="Soft drop" icon={ICONS.down} action="softDrop" apply={apply} repeat />
+  const left = <TouchButton enabled={enabled} timing={repeat} label="Move left" icon={ICONS.left} action="moveLeft" apply={apply} repeat />
+  const right = <TouchButton enabled={enabled} timing={repeat} label="Move right" icon={ICONS.right} action="moveRight" apply={apply} repeat />
+  const down = softDropAllowed(dropMode) && <TouchButton enabled={enabled} timing={repeat} label="Soft drop" icon={ICONS.down} action="softDrop" apply={apply} repeat />
   const ccw = two && <TouchButton enabled={enabled} label="Rotate counterclockwise" icon={ICONS.counterclockwise} action="rotateCounterclockwise" apply={apply} secondary />
   const cw = <TouchButton enabled={enabled} label={two ? 'Rotate clockwise' : 'Rotate'} icon={ICONS.clockwise} action="rotateClockwise" apply={apply} primary />
   const drop = hardDropAllowed(dropMode) && <TouchButton enabled={enabled} label="Hard drop" icon={ICONS.hardDrop} action="hardDrop" apply={apply} />
@@ -117,8 +119,8 @@ export function TouchPreview({ rotateButtons, layout, dropMode, leftHanded, hold
   </div>
 }
 
-function TouchButton({ label, icon, text, action, apply, enabled, repeat = false, primary = false, secondary = false, hold = false }: {
-  label: string; icon?: ReactNode; text?: string; action: GameAction; apply: (action: GameAction) => void; enabled: boolean; repeat?: boolean; primary?: boolean; secondary?: boolean; hold?: boolean
+function TouchButton({ label, icon, text, action, apply, enabled, repeat = false, timing = DEFAULT_REPEAT, primary = false, secondary = false, hold = false }: {
+  label: string; icon?: ReactNode; text?: string; action: GameAction; apply: (action: GameAction) => void; enabled: boolean; repeat?: boolean; timing?: RepeatTiming; primary?: boolean; secondary?: boolean; hold?: boolean
 }) {
   const activePointer = useRef<number | null>(null)
   const delay = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -137,7 +139,7 @@ function TouchButton({ label, icon, text, action, apply, enabled, repeat = false
     activePointer.current = event.pointerId
     event.currentTarget.setPointerCapture(event.pointerId)
     apply(action)
-    if (repeat) delay.current = setTimeout(() => { apply(action); interval.current = setInterval(() => apply(action), action === 'softDrop' ? 65 : 48) }, 160)
+    if (repeat) delay.current = setTimeout(() => { apply(action); interval.current = setInterval(() => apply(action), action === 'softDrop' ? timing.softDropInterval : timing.interval) }, timing.delay)
   }
   function release(event: ReactPointerEvent<HTMLButtonElement>) {
     if (activePointer.current === event.pointerId) stop()

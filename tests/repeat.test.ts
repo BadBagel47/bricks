@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { HeldInputs } from '../src/input/repeat.ts'
+import { DEFAULT_REPEAT, HeldInputs, repeatTiming } from '../src/input/repeat.ts'
 
 test('held controls repeat at the same rate at 30, 60 and 120 Hz and after a frame stall', () => {
   const counts = [30, 60, 120].map((rate) => {
@@ -28,4 +28,20 @@ test('releases, pause clearing and controller disconnect clear only the intended
   held.press('ArrowLeft', 'moveLeft', 0)
   held.clear()
   assert.deepEqual(held.due(1000), [])
+})
+
+test('F-056: the default timing is unchanged; delay and speed settings change when and how fast held buttons repeat', () => {
+  assert.deepEqual(DEFAULT_REPEAT, { delay: 160, interval: 48, softDropInterval: 65 })
+  const quick = new HeldInputs(repeatTiming('short', 'fast'))
+  quick.press('ArrowLeft', 'moveLeft', 0)
+  assert.deepEqual(quick.due(109), [])
+  assert.equal(quick.due(110 + 28 * 3).length, 4)
+  const slow = new HeldInputs(repeatTiming('long', 'slow'))
+  slow.press('ArrowLeft', 'moveLeft', 0)
+  slow.press('ArrowDown', 'softDrop', 0)
+  assert.deepEqual(slow.due(229), [])
+  assert.deepEqual(slow.due(230 + 80), ['moveLeft', 'moveLeft', 'softDrop', 'softDrop'], 'soft drop keeps its own pace')
+  slow.timing = DEFAULT_REPEAT
+  slow.press('ArrowRight', 'moveRight', 1000)
+  assert.deepEqual(slow.due(1159).filter(a => a === 'moveRight'), [])
 })

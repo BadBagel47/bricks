@@ -6,7 +6,7 @@ import { BattleGame, battleOutcome } from '../engine/battle.ts'
 import { actionForCode } from '../input/keyboard.ts'
 import { gamepadActions } from '../input/gamepad.ts'
 import type { InputAction } from '../input/keyboard.ts'
-import { HeldInputs } from '../input/repeat.ts'
+import { HeldInputs, repeatTiming } from '../input/repeat.ts'
 import { actionsForSwipe } from '../input/swipe.ts'
 import { actionAllowed } from '../input/drop-mode.ts'
 import { HoldBox, NextQueue, PiecePreview, Playfield, TouchControls } from '../ui/GameViews.tsx'
@@ -95,6 +95,9 @@ export default function NetLiveGame({ room, round: startRound, options, paused, 
   const [completed, setCompleted] = useState(false)
   const effectId = useRef(0)
   const held = useRef(new HeldInputs())
+  // F-056: the player's key repeat settings, for keyboard, controller and touch buttons.
+  const repeat = useMemo(() => repeatTiming(personal.repeatDelay, personal.repeatSpeed), [personal.repeatDelay, personal.repeatSpeed])
+  useEffect(() => { held.current.timing = repeat }, [repeat])
   const controlsBlocked = useRef(false)
   const pausedRef = useRef(paused)
   /** B-028: an abandoned match stops: the board freezes and the music ends. */
@@ -372,7 +375,7 @@ export default function NetLiveGame({ room, round: startRound, options, paused, 
       </div>
       {battleGame && <p className="battle-stats visually-hidden" aria-label="Battle attacks">Pending: {battleGame.pending} · Sent: {sentRows} · Applied: {battleGame.applied} · Cancelled: {battleGame.cancelled}</p>}
       {!abandoned && status && <section className="duel-status" aria-label={battle ? 'Battle status' : 'Score Duel status'} role="status"><p>{status}</p></section>}
-      {!finished && !abandoned && !(controller && personal.hideTouchControlsWhenController) && <TouchControls method={personal.mobileControlMethod} buttonSize={56} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdPlacement={personal.holdPlacement} holdEnabled={game.holdEnabled} holdAvailable={!game.holdUsed} dropMode={personal.dropMode} enabled={!finished && !confirm && !paused && countdown === 0} apply={apply} />}
+      {!finished && !abandoned && !(controller && personal.hideTouchControlsWhenController) && <TouchControls method={personal.mobileControlMethod} buttonSize={56} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdPlacement={personal.holdPlacement} repeat={repeat} holdEnabled={game.holdEnabled} holdAvailable={!game.holdUsed} dropMode={personal.dropMode} enabled={!finished && !confirm && !paused && countdown === 0} apply={apply} />}
       <p className="control-hint">Esc / {bindings.pause.replace('Key', '')}: leave match · Multiplayer keeps running while this menu is open.</p>
       <p className="visually-hidden" role="status">{announcement}</p>
       {abandoned && <p role="alert">{abandoned}</p>}

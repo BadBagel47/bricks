@@ -11,7 +11,7 @@ import { BattleGame, battleOutcome } from '../engine/battle.ts'
 import { battlePath, parseAttackStream, parseBattleFinish, publishBattleFinish, sendAttacks } from './battle-repository.ts'
 import type { BattleFinish } from './battle-repository.ts'
 import { scoreDuelOutcome } from './score-duel.ts'
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { get, onValue, ref } from 'firebase/database'
 import type { Database } from 'firebase/database'
@@ -19,7 +19,7 @@ import { advanceGame, createGame, dispatch } from '../engine/index.ts'
 import type { GameAction, Transition } from '../engine/index.ts'
 import { actionForCode } from '../input/keyboard.ts'
 import { gamepadActions } from '../input/gamepad.ts'
-import { HeldInputs } from '../input/repeat.ts'
+import { HeldInputs, repeatTiming } from '../input/repeat.ts'
 import { actionsForSwipe } from '../input/swipe.ts'
 import { actionAllowed } from '../input/drop-mode.ts'
 import { HoldBox, NextQueue, PiecePreview, Playfield, TouchControls } from '../ui/GameViews.tsx'
@@ -89,6 +89,9 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
   const screen = useRef<HTMLElement>(null)
   const dialog = useRef<HTMLDivElement>(null)
   const held = useRef(new HeldInputs())
+  // F-056: the player's key repeat settings, for keyboard, controller and touch buttons.
+  const repeat = useMemo(() => repeatTiming(personal.repeatDelay, personal.repeatSpeed), [personal.repeatDelay, personal.repeatSpeed])
+  useEffect(() => { held.current.timing = repeat }, [repeat])
   const controlsBlocked = useRef(false)
   const pausedRef = useRef(paused)
   useLayoutEffect(() => {
@@ -368,7 +371,7 @@ export default function LiveGame({ database, joined, start, options, serverTimeO
       </div>
       {battleGame && <p className="battle-stats visually-hidden" aria-label="Battle attacks">Pending: {battleGame.pending} · Sent: {sentRows} · Applied: {battleGame.applied} · Cancelled: {battleGame.cancelled}</p>}
       {(duel || battle) && !error && duelStatus && <section className="duel-status" aria-label={battle ? "Battle status" : "Score Duel status"} role="status">{outcome ? <><h2>{outcomeTitle}</h2><p>{ownName}: {game.score.toLocaleString()} · {otherName}: {opponent!.score.toLocaleString()}</p><p>{battle ? `Survival: ${(ownFinishFrame! / 60).toFixed(2)} s · ${(otherFinish!.frame / 60).toFixed(2)} s` : `Score difference: ${Math.abs(outcome.difference).toLocaleString()}`}</p></> : <p>{duelStatus}</p>}</section>}
-      {!finished && !(controller && personal.hideTouchControlsWhenController) && <TouchControls method={personal.mobileControlMethod} buttonSize={56} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdPlacement={personal.holdPlacement} holdEnabled={game.holdEnabled} holdAvailable={!game.holdUsed} dropMode={personal.dropMode} enabled={!finished && !error && !confirm && !paused} apply={apply} />}
+      {!finished && !(controller && personal.hideTouchControlsWhenController) && <TouchControls method={personal.mobileControlMethod} buttonSize={56} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdPlacement={personal.holdPlacement} repeat={repeat} holdEnabled={game.holdEnabled} holdAvailable={!game.holdUsed} dropMode={personal.dropMode} enabled={!finished && !error && !confirm && !paused} apply={apply} />}
       <p className="control-hint">Esc / {bindings.pause.replace('Key', '')}: leave match · Multiplayer keeps running while this menu is open.</p>
       <p className="visually-hidden" role="status">{announcement}</p>
       {error && <p role="alert">{error}</p>}

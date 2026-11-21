@@ -9,6 +9,10 @@
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 
+## F-056 — 2026-11-21
+
+Owner: "Kör A rek" (Q2: in Settings next to the touch-control choices, defaults as today). `src/input/repeat.ts` has `repeatTiming(delay, speed)` (delay 110 / 160 / 230 ms, sideways interval 80 / 48 / 28 ms, soft drop 65 ms) and `HeldInputs` takes the timing; personal settings `repeatDelay` and `repeatSpeed` ('normal' by default); `TouchButton` uses the same timing; 1 Player, Firebase and Cloudflare matches pass the player's choice. Local: lint (no new warnings), unit 217, build, browser 28/28, `npm run test:net` 4/4, operating 3/3. Firebase emulator suite: CI.
+
 ## B-039, B-036, T-014 — 2026-11-21
 
 Owner: "Kör A–C rek" (Q1: touch controls whenever there is a touch screen and no mouse). B-039: `@media (min-width: 901px) and (hover: none) and (pointer: coarse)` shows `.touch-controls` and `.mobile-pause-button`, hides keyboard hints, puts Split in fixed bottom corners (`--touch-size` up to 64 px) in 1 Player and matches, and shrinks the board for Row/Swipe (1 Player playfield, match `--chrome: 314px`). Measured 1 Player at 1024 × 768, 1180 × 820, 1366 × 1024, 1024 × 1366 (Split and Row): no overlap with board or side columns, no scrolling; matches at 1024 × 768 and 1180 × 820; desktop without touch unchanged. New browser tests (iPad landscape Split and Row, mouse computer). B-036: Battle help text. T-014: `tests/net.e2e.mjs` plans a two-line clear from the host's kept seed (`tests/fixtures/plan-inputs.ts`, Classic rules) and checks Pending/Applied and nine grey cells per row on the guest. Local: lint (no new warnings), unit 216, build, browser 28/28, `npm run test:net` 4/4 (twice), operating 3/3. Firebase emulator suite: CI.

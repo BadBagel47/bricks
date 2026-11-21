@@ -2,7 +2,6 @@
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| F-056 | Feature | Adjustable key repeat for held buttons (DAS delay and repeat rate; today fixed 160 ms and 48 ms). A control setting, not a rule | Low | Proposed (2026-11-20); Pågår (2026-11-21, session ccr-15c9b6e3-or4w1x, run A) | Standard |
 | F-057 | Feature | Pieces appear in hidden rows above the board, as in modern games (fewer losses at the very top) | Low | Parked (2026-11-20) | Standard |
 | F-058 | Feature | Modern scoring: T-spins, combos and back-to-back, and their garbage in Battle. Rewards advanced play and changes 2 Players, so kept out of Modern for now | Low | Parked (2026-11-20) | Standard |
 | F-059 | Feature | Possibly remove the Row touch layout (one row of buttons) and keep only Split | Low | Proposed (2026-11-20, owner) | Standard |
@@ -17,6 +16,7 @@
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| F-056 | Feature | Adjustable key repeat for held buttons (DAS delay and repeat rate; today fixed 160 ms and 48 ms). A control setting, not a rule | Low | Done (2026-11-21): Settings → Repeat delay (Short / Normal / Long: 110 / 160 / 230 ms) and Repeat speed (Slow / Normal / Fast: one step every 80 / 48 / 28 ms) next to the touch-control choices; Normal is today's timing. Apply to touch buttons, keyboard and controller in 1 Player and both kinds of match; soft drop keeps its own pace (65 ms), only its wait follows the delay | Standard |
 | B-039 | Bug | iPad in landscape (and other touch screens wider than 900 px): no touch controls are shown, in 1 Player or in matches, so the game can only be played with a keyboard or controller there (found 2026-11-20 while measuring B-038: the touch controls are only shown up to 900 px width) | High | Done (2026-11-21): on touch screens without a mouse (hover none, coarse pointer) the touch controls and Pause show at every width; Split sits in the bottom corners beside the board, Row and Swipe below it with a smaller board; keyboard hints hidden there. Checked at 1024 × 768, 1180 × 820, 1366 × 1024 and 1024 × 1366 (1 Player) and in matches at 1024 × 768 and 1180 × 820; a computer with a mouse is unchanged. Needs a look on the iPad | Standard |
 | B-036 | Bug | Battle help text in the lobby says "Clearing lines sends garbage rows", but a single-line clear sends nothing (2 lines → 1 row, 3 → 2, 4 → 4). Found 2026-11-20 when the owner asked how Battle works | Low | Done (2026-11-21): "Clear 2 or more lines at once to send garbage rows. Last player standing wins." (Firebase lobby; the Cloudflare lobby shows no help text) | Economical |
 | T-014 | Task | Cloudflare Battle end-to-end test: check that garbage rows really reach the other player (today only the Firebase test and the unit tests check it; the Cloudflare test checks survival, pause and leaving). Found 2026-11-20 when the owner asked | Medium | Done (2026-11-21): the Cloudflare two-player suite plays a planned two-line clear (Classic rules) and checks that the guest sees the row waiting and gets one grey row with one hole at its next lock | Standard |
@@ -128,14 +128,11 @@ The approved High items come from the owner's request of 2026-11-10: use the
 sketch's layout **and behavior**, not only its look. Design reference:
 "Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
 
-## Proposed runs (2026-11-21, after B-039, B-036 and T-014)
+## Proposed runs (2026-11-21, after F-056)
 
 Prioritized for: visible faults first, then the touch controls.
 
-- **A** – standard model, medium – Key repeat
-  - F-056 – two settings for held buttons: how soon they repeat and how fast
-  - Question: where? Recommended: Settings, next to the touch-control choices, defaults as today
-- **B** – strong model, high – Own control layout
+- **A** – strong model, high – Own control layout
   - F-061 – arrange the touch controls yourself and set the playing field's height
   - F-059 – the Row layout possibly removed
   - Question: how far? Recommended: an edit mode where the button groups are dragged into place and resized, plus a board-height slider; Row removed once that exists

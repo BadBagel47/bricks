@@ -6,6 +6,9 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Added (2026-11-21, F-056)
+- F-056: Settings → Repeat delay (Short / Normal / Long) and Repeat speed (Slow / Normal / Fast) for held buttons on touch, keyboard and controller; Normal keeps the earlier timing.
+
 ### Fixed (2026-11-21, B-039, B-036, T-014)
 - B-039: iPad in landscape and other wide touch screens without a mouse show the touch controls and the Pause button (Split in the bottom corners beside the board; Row and Swipe below it).
 - B-036: the Battle help text says that clearing 2 or more lines at once sends garbage rows.

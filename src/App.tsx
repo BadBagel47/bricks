@@ -2,7 +2,7 @@ import { lineClearEffect } from './ui/board-effects.ts'
 import type { ClearEffect } from './ui/board-effects.ts'
 import { SubpageBar } from './ui/SubpageBar.tsx'
 import { MultiplayerHighscores } from './multiplayer/ResultViews.tsx'
-import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, FormEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { advanceGame, createGame, dispatch } from './engine/index.ts'
@@ -11,7 +11,7 @@ import { ACTION_LABELS, actionForCode, DEFAULT_BINDINGS, INPUT_ACTIONS, isRepeat
 import type { InputAction, KeyboardBindings } from './input/keyboard.ts'
 import { DEFAULT_GAMEPAD_BINDINGS, gamepadActions, gamepadButtonLabel, parseGamepadBindings, remapGamepadButton } from './input/gamepad.ts'
 import type { GamepadBindings } from './input/gamepad.ts'
-import { HeldInputs } from './input/repeat.ts'
+import { HeldInputs, repeatTiming } from './input/repeat.ts'
 import { actionsForSwipe } from './input/swipe.ts'
 import { actionAllowed, hardDropAllowed, softDropAllowed } from './input/drop-mode.ts'
 import { HoldBox, NextQueue, Playfield, PiecePreview, TouchControls, TouchPreview } from './ui/GameViews.tsx'
@@ -363,11 +363,13 @@ function App() {
     return () => cancelAnimationFrame(frame)
   }, [gamepadCapture, view])
 
+  // F-056: the player's key repeat settings, for keyboard, controller and touch buttons.
+  const repeat = useMemo(() => repeatTiming(personal.repeatDelay, personal.repeatSpeed), [personal.repeatDelay, personal.repeatSpeed])
   useEffect(() => {
     if (view !== 'game') return
     let frame = 0
     let previous = 0
-    const held = new HeldInputs()
+    const held = new HeldInputs(repeat)
     let previousPadActions = new Set<InputAction>()
     let previousPadIndex: number | null = null
     const stopRepeats = () => held.clear()
@@ -448,7 +450,7 @@ function App() {
       window.removeEventListener('blur', onBlur)
       document.removeEventListener('visibilitychange', onVisibility)
     }
-  }, [view, gameSession])
+  }, [view, gameSession, repeat])
 
   useEffect(() => {
     if (view !== 'settings' || !capture) return
@@ -512,6 +514,10 @@ function App() {
       </div>}
       <span className="setting-label">Drop</span>
       <Segmented label="Drop" value={personal.dropMode} options={[{ value: 'drop', label: 'Drop' }, { value: 'hard', label: 'Hard Drop' }, { value: 'both', label: 'Both' }]} onChange={(dropMode) => savePersonal({ ...personal, dropMode, hardDropEnabled: hardDropAllowed(dropMode) })} />
+      <span className="setting-label">Repeat delay</span>
+      <Segmented label="Repeat delay" value={personal.repeatDelay} options={[{ value: 'short', label: 'Short' }, { value: 'normal', label: 'Normal' }, { value: 'long', label: 'Long' }]} onChange={(repeatDelay) => savePersonal({ ...personal, repeatDelay })} />
+      <span className="setting-label">Repeat speed</span>
+      <Segmented label="Repeat speed" value={personal.repeatSpeed} options={[{ value: 'slow', label: 'Slow' }, { value: 'normal', label: 'Normal' }, { value: 'fast', label: 'Fast' }]} onChange={(repeatSpeed) => savePersonal({ ...personal, repeatSpeed })} />
       <div className="setting-group">
       <label className="toggle-row"><span>Left-handed layout</span><input checked={personal.leftHandedControls} onChange={(event) => savePersonal({ ...personal, leftHandedControls: event.target.checked })} type="checkbox" /></label>
       <label className="toggle-row"><span>Hide touch controls when a controller is connected</span><input checked={personal.hideTouchControlsWhenController} onChange={(event) => savePersonal({ ...personal, hideTouchControlsWhenController: event.target.checked })} type="checkbox" /></label>
@@ -601,7 +607,7 @@ function App() {
       <Playfield game={game} ghost={gameRules.ghost} colors={personal.blockColors} clear={clearFx} thump={thump} swipeMode={personal.mobileControlMethod === 'swipe'} onSwipe={(start, end, board) => actionsForSwipe(start, end, board).forEach(apply)} />
       <aside className="game-side next-panel"><div className="next-box"><span>Next</span><PiecePreview type={game.next} level={game.level} colors={personal.blockColors} /><NextQueue queue={game.queue} level={game.level} colors={personal.blockColors} /></div>{game.holdEnabled && <HoldBox type={game.held} level={game.level} colors={personal.blockColors} enabled={game.status === 'playing' && !game.holdUsed} onHold={() => apply('hold')} />}</aside>
     </section>
-    {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={72} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdPlacement={personal.holdPlacement} holdEnabled={game.holdEnabled} holdAvailable={!game.holdUsed} dropMode={personal.dropMode} enabled={game.status === 'playing'} apply={apply} />}
+    {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={72} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} layout={personal.touchLayout} holdPlacement={personal.holdPlacement} repeat={repeat} holdEnabled={game.holdEnabled} holdAvailable={!game.holdUsed} dropMode={personal.dropMode} enabled={game.status === 'playing'} apply={apply} />}
     <p className="controller-status" aria-live="polite">{controllerStatus}</p>
     <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">{gameAnnouncement}</p>
     <p className="control-hint" aria-label="Keyboard controls">{keyLabel(bindings.moveLeft)} {keyLabel(bindings.moveRight)} Move · {softDropAllowed(personal.dropMode) ? `${keyLabel(bindings.softDrop)} Soft drop · ` : ''}{keyLabel(bindings.rotateCounterclockwise)} {keyLabel(bindings.rotateClockwise)} Rotate · {hardDropAllowed(personal.dropMode) ? `${keyLabel(bindings.hardDrop)} Hard drop` : 'Hard Drop off'}{game.holdEnabled ? ` · ${keyLabel(bindings.hold)} Hold` : ''} · {keyLabel(bindings.pause)} / Esc Pause</p>

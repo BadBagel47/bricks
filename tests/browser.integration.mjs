@@ -227,6 +227,9 @@ test('settings and mappings survive reload; leaving capture does not intercept g
   // F-060: the Hold button's place (test choice) shows with Split, two rotate buttons and Hold on.
   await page.getByRole('radiogroup', { name: 'Hold button' }).getByRole('radio', { name: 'Top', exact: true }).click()
   await page.locator('.touch-preview .touch-rotate.hold-top .touch-hold').waitFor()
+  // F-056: key repeat choices are kept.
+  await page.getByRole('radiogroup', { name: 'Repeat delay' }).getByRole('radio', { name: 'Short', exact: true }).click()
+  await page.getByRole('radiogroup', { name: 'Repeat speed' }).getByRole('radio', { name: 'Fast', exact: true }).click()
   // F-046: Custom starts from Modern; turning one rule off is kept.
   await page.getByRole('radio', { name: 'Custom', exact: true }).click()
   await page.getByLabel('Ghost piece', { exact: true }).uncheck()
@@ -240,6 +243,8 @@ test('settings and mappings survive reload; leaving capture does not intercept g
   assert.equal(await page.getByLabel('Hold', { exact: true }).isChecked(), true)
   assert.equal(await page.getByLabel('Starting Level', { exact: true }).textContent(), '04')
   assert.equal(await page.getByRole('radiogroup', { name: 'Hold button' }).getByRole('radio', { name: 'Top', exact: true }).getAttribute('aria-checked'), 'true')
+  assert.equal(await page.getByRole('radiogroup', { name: 'Repeat delay' }).getByRole('radio', { name: 'Short', exact: true }).getAttribute('aria-checked'), 'true')
+  assert.equal(await page.getByRole('radiogroup', { name: 'Repeat speed' }).getByRole('radio', { name: 'Fast', exact: true }).getAttribute('aria-checked'), 'true')
   await page.getByRole('radio', { name: 'One', exact: true }).click()
   assert.equal(await page.getByRole('radiogroup', { name: 'Hold button' }).count(), 0, 'with one rotate button Hold stays in the pad')
   await page.getByRole('radio', { name: 'Two', exact: true }).click()
