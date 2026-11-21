@@ -534,7 +534,7 @@ function App() {
       <Segmented label="Rules" value={singlePlayer.rules.preset} options={[{ value: 'classic', label: 'Classic' }, { value: 'modern', label: 'Modern' }, { value: 'custom', label: 'Custom' }]} onChange={(preset) => saveSinglePlayer({ ...singlePlayer, rules: preset === 'custom' && singlePlayer.rules.preset !== 'custom' ? { preset, custom: playRules(singlePlayer.rules) } : { ...singlePlayer.rules, preset } })} />
       {singlePlayer.rules.preset === 'custom'
         ? <div className="settings-appear"><div className="setting-group">{RULE_KEYS.map((key) => <label className="toggle-row" key={key}><span>{RULE_LABELS[key]}</span><input checked={singlePlayer.rules.custom[key]} onChange={(event) => saveSinglePlayer({ ...singlePlayer, rules: { preset: 'custom', custom: { ...singlePlayer.rules.custom, [key]: event.target.checked } } })} type="checkbox" /></label>)}</div></div>
-        : <span className="field-hint rules-summary" key={singlePlayer.rules.preset}>{singlePlayer.rules.preset === 'modern' ? '7-bag, wall kicks, lock delay, 3 next pieces, hold and ghost piece.' : 'As the original NES game.'}</span>}
+        : <span className="field-hint rules-summary" key={singlePlayer.rules.preset}>{singlePlayer.rules.preset === 'modern' ? '7-bag, wall kicks, lock delay, 3 next pieces, hold, ghost piece and pieces above the board.' : 'As the original NES game.'}</span>}
       <div className="setting-group">
         <Stepper label="Starting Level" value={singlePlayer.startLevel} min={0} max={19} lowerLabel="Lower starting level" raiseLabel="Raise starting level" onChange={(startLevel) => saveSinglePlayer({ ...singlePlayer, startLevel })} />
       </div>

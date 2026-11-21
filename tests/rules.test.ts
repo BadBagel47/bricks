@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { advanceFrames, CLASSIC_RULES, createGame, createRandomizer, dispatch, drawPiece, LOCK_DELAY_FRAMES, MAX_LOCK_RESETS, MODERN_RULES, PIECE_TYPES } from '../src/engine/index.ts'
+import { advanceFrames, CLASSIC_RULES, createGame, createRandomizer, dispatch, drawPiece, LOCK_DELAY_FRAMES, MAX_LOCK_RESETS, MODERN_RULES, modernClearPoints, PIECE_TYPES } from '../src/engine/index.ts'
+import { visibleBoard } from '../src/multiplayer/game-snapshot.ts'
 import type { GameState, PieceType } from '../src/engine/index.ts'
 import { validateCheckpoint } from '../src/multiplayer/checkpoint.ts'
 import { CLASSIC_PLAY, engineRules, MODERN_PLAY, playRules, rulesLabel } from '../src/play-rules.ts'
@@ -79,4 +80,53 @@ test('rules choice: presets, Custom, and the label a score gets', () => {
   assert.equal(rulesLabel(MODERN_PLAY), 'modern')
   assert.equal(rulesLabel(CLASSIC_PLAY), 'classic')
   assert.equal(rulesLabel({ ...MODERN_PLAY, ghost: false }), 'custom')
+})
+
+test('F-057: with pieces above the board a full top no longer ends the game at once; a lock above the board does', () => {
+  const blocked = (rules: typeof MODERN_RULES): GameState => {
+    const game = createGame({ seed: 3, rules })
+    const board = game.board.map((row, y) => y < 2 ? row.map((_, x) => x >= 3 && x <= 6 ? 'G' as const : null) : [...row])
+    return { ...game, board, active: { type: 'O', rotation: 0, x: 0, y: 5 }, lowestY: 5, next: 'T' }
+  }
+  const classic = dispatch(blocked(CLASSIC_RULES), 'hardDrop').state
+  assert.equal(classic.status, 'gameOver', 'Classic: no room at the top ends the game')
+  const modern = dispatch(blocked(MODERN_RULES), 'hardDrop').state
+  assert.equal(modern.status, 'playing')
+  assert.deepEqual([modern.active?.type, modern.active?.y], ['T', -2], 'the T appears in the two rows above the board')
+  assert.ok(!visibleBoard(modern).includes('3'), 'cells above the board are not drawn')
+  assert.equal(validateCheckpoint(modern, { seed: 3, startLevel: 0, holdEnabled: false, battle: true, rules: MODERN_RULES }).active?.y, -2, 'a saved game with a piece above the board is accepted')
+  const locked = dispatch(modern, 'hardDrop')
+  assert.equal(locked.state.status, 'gameOver', 'a piece that locks above the board ends the game')
+  assert.ok(locked.events.some(event => event.type === 'gameOver'))
+  assert.equal(engineRules(MODERN_PLAY).spawnAbove, true)
+  assert.equal(engineRules(CLASSIC_PLAY).spawnAbove, false)
+})
+
+test('F-058: modern scoring is off in Classic and Modern; when chosen, T-spins, back-to-back and combos score more', () => {
+  assert.equal(MODERN_PLAY.scoring, false)
+  assert.equal(CLASSIC_PLAY.scoring, false)
+  assert.equal(rulesLabel({ ...MODERN_PLAY, scoring: true }), 'custom')
+  assert.deepEqual([1, 2, 3, 4].map(rows => modernClearPoints(rows, 0, false, false, 0).points), [100, 300, 500, 800])
+  assert.deepEqual([0, 1, 2, 3].map(rows => modernClearPoints(rows, 0, true, false, 0).points), [400, 800, 1200, 1600])
+  assert.equal(modernClearPoints(4, 0, false, true, 0).points, 1200, 'back-to-back Tetris × 1.5')
+  assert.equal(modernClearPoints(1, 0, false, true, 0).points, 100, 'a single is not difficult')
+  assert.equal(modernClearPoints(1, 0, false, false, 2).points, 200, 'third clear in a row: + 50 × 2')
+  assert.equal(modernClearPoints(2, 4, false, false, 0).points, 1500, 'times (level + 1)')
+  // A T rotated into a slot with three corners filled clears two rows: a T-spin double.
+  const tSpinDouble = (modernScoring: boolean): GameState => {
+    const game = createGame({ seed: 3, rules: { ...MODERN_RULES, modernScoring } })
+    const board = game.board.map((row, y) => row.map((_, x) => y === 17 && x === 3 ? 'G' as const : y === 18 && (x < 3 || x > 5) ? 'G' as const : y === 19 && x !== 4 ? 'G' as const : null))
+    return { ...game, board, active: { type: 'T', rotation: 1, x: 3, y: 17 }, lowestY: 17 }
+  }
+  for (const [modernScoring, score] of [[true, 1200], [false, 100]] as const) {
+    const turned = dispatch(tSpinDouble(modernScoring), 'rotateClockwise').state
+    assert.equal(turned.active?.rotation, 2)
+    const result = dispatch(turned, 'hardDrop')
+    assert.equal(result.state.lines, 2)
+    assert.equal(result.state.score, score, modernScoring ? 'T-spin double' : 'plain double without modern scoring')
+    assert.equal(result.events.some(event => event.type === 'bonus' && event.tSpin), modernScoring)
+  }
+  // Without the rotation as the last move it is a plain double.
+  const slid = { ...tSpinDouble(true), active: { type: 'T' as const, rotation: 2, x: 3, y: 17 } }
+  assert.equal(dispatch(slid, 'hardDrop').state.score, 300)
 })

@@ -2,8 +2,6 @@
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| F-057 | Feature | Pieces appear in hidden rows above the board, as in modern games (fewer losses at the very top). Part of the Modern rules (owner, 2026-11-21): on in Modern, off in Classic, own switch in Custom; Cloudflare matches with Modern too | Low | Proposed (2026-11-21, owner: "Vi gör den som en del av modern"); Pågår (2026-11-21, session ccr-15c9b6e3-or4w1x, runs A and B) | Strong |
-| F-058 | Feature | Modern scoring: T-spins, combos and back-to-back, and their garbage in Battle. Rewards advanced play and changes 2 Players, so kept out of Modern for now. Owner 2026-11-21: add it, but not on by default (not part of Modern) | Low | Proposed (2026-11-21, owner: "lägg in, men inte på som standard"); Pågår (2026-11-21, session ccr-15c9b6e3-or4w1x, runs A and B) | Standard |
 | F-060 | Feature | Hold button placement (Split). Owner (2026-11-20, with screenshots): try two placements on the phone, both with more space between the rotate buttons than today: (1) Hold at the bottom, to the right of the left rotate button and centred under the orange (right) rotate button; (2) sketch B: Hold in the free top corner of the rotate area, above the left rotate button and to the left of the orange one. Both mirrored for left-handed. Both are to be made switchable for the test; the loser is removed afterwards. Do not invent new placements | Low | Built for the test (2026-11-20): Settings → Hold button, Bottom (default) / Top; shown with Split, two rotate buttons and Hold on; with one rotate button or Row, Hold stays where it was. Waits for the owner's choice on the phone, then the other placement is removed | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Vivid (formerly Modern) block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
@@ -14,6 +12,8 @@
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| F-057 | Feature | Pieces appear in hidden rows above the board, as in modern games (fewer losses at the very top). Part of the Modern rules (owner, 2026-11-21): on in Modern, off in Classic, own switch in Custom; Cloudflare matches with Modern too | Low | Done (2026-11-21): Modern rule (Custom switch "Pieces above the board"): a new piece without room at the top appears one or two rows higher, above the board; the game ends when a piece locks with any part above the board, or there is no room above either. Cloudflare matches with Modern use it; Classic and Firebase matches unchanged. Normal play looks as before (pieces still appear at the top when there is room) | Strong |
+| F-058 | Feature | Modern scoring: T-spins, combos and back-to-back, and their garbage in Battle. Rewards advanced play and changes 2 Players, so kept out of Modern for now. Owner 2026-11-21: add it, but not on by default (not part of Modern) | Low | Done (2026-11-21): Custom switch "Modern scoring", off by default (also when Custom starts from Modern), 1 Player only: T-spins, back-to-back and combos as in today's guideline games, × (level + 1); matches and Battle garbage unchanged. No on-screen callout for a T-spin or combo yet | Standard |
 | B-040 | Bug | Sometimes the whole screen turns black when 2 Players is tapped (owner, 2026-11-21). Cause found: the 2 Players screens are loaded only when first opened, as separate code files whose names change with every published version; a page (or home-screen app) opened before a new version was published asks for the old file, which is gone, and the error removes the whole app. Reproduced by making that file missing. Happens after each publish until the page is reloaded | High | Done (2026-11-21): a missing 2 Players file reloads the page once by itself and 2 Players opens again in the new version; if it still cannot be loaded within a minute (e.g. offline), "Could not load 2 Players" with Try again and Main menu shows instead of a black screen. Tested by making the file missing once and permanently. The first time after this fix is published an already open old page can still go black once (it does not have the fix yet) | Standard |
 | F-061 | Feature | A setting to arrange the touch controls on the screen yourself, and to set the height of the playing field; with a reset to the standard layout (owner, 2026-11-21) | Medium | Done (2026-11-21): Settings → Edit layout opens a copy of the 1 Player screen with sample pieces; drag the two button groups, resize them with the corner handle (keyboard: arrows and + / −), set the board height (60–100 %), Reset returns to the standard layout, Done keeps it. Used in 1 Player upright; landscape and matches keep the standard layout (ADR 0009). Needs a try on the phone | Standard |
 | F-059 | Feature | Remove the Row touch layout (one row of buttons) and keep only Split; players who had Row move to Split | Low | Done (2026-11-21): the Row layout and its Settings choice are gone; everyone uses Split, saved Row choices are ignored. Touch controls on phones, tablets and in matches are Split (or Swipe) | Standard |
@@ -129,18 +129,9 @@ The approved High items come from the owner's request of 2026-11-10: use the
 sketch's layout **and behavior**, not only its look. Design reference:
 "Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
 
-## Proposed runs (2026-11-21, F-057 and F-058 back from parking)
+## Proposed runs (2026-11-21, after F-057 and F-058)
 
-Prioritized for: the owner's latest requests.
-
-- **A** – strong model, high – Pieces appear above the board (Modern)
-  - F-057 – in Modern, new pieces appear in two hidden rows above the board and slide in, so a high stack no longer ends the game at once; Classic as today, Custom gets its own switch, Cloudflare matches with Modern use it too
-  - Question: what ends the game? Recommended: when a piece locks with any part above the board, or a new piece has no room to appear above it (the board itself stays 20 rows)
-- **B** – strong model, high – Modern scoring, off by default
-  - F-058 – T-spins, combos and back-to-back give extra points, as a switch under Custom (off in Classic and Modern)
-  - Question: also in 2 Players? Recommended: 1 Player only for now, so matches keep their balance; Battle garbage unchanged
-
-Waiting for the owner: F-060 (which Hold placement stays; both are in Settings → Hold button for the test).
+Nothing ready to propose. Waiting for the owner: F-060 (which Hold placement stays; both are in Settings → Hold button for the test).
 
 Not proposed: F-006 (music studio chat); T-009 (retire Firebase and the old admin; waits for the owner's two-device check and explicit yes); adaptation item 1.1 (web basics, see HANDOFF).
 

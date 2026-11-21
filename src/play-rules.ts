@@ -12,12 +12,16 @@ export interface PlayRules {
   readonly threeNext: boolean
   readonly hold: boolean
   readonly ghost: boolean
+  /** F-057: pieces may appear above the board when the top is full. */
+  readonly above: boolean
+  /** F-058: modern scoring (T-spins, combos, back-to-back); never part of Modern. */
+  readonly scoring: boolean
 }
 export type RulesPreset = 'classic' | 'modern' | 'custom'
-export const RULE_KEYS = ['bag', 'kicks', 'lockDelay', 'threeNext', 'hold', 'ghost'] as const
-export const CLASSIC_PLAY: PlayRules = { bag: false, kicks: false, lockDelay: false, threeNext: false, hold: false, ghost: false }
-export const MODERN_PLAY: PlayRules = { bag: true, kicks: true, lockDelay: true, threeNext: true, hold: true, ghost: true }
-export const RULE_LABELS: Record<(typeof RULE_KEYS)[number], string> = { bag: '7-bag', kicks: 'Wall kicks', lockDelay: 'Lock delay', threeNext: '3 next pieces', hold: 'Hold', ghost: 'Ghost piece' }
+export const RULE_KEYS = ['bag', 'kicks', 'lockDelay', 'threeNext', 'hold', 'ghost', 'above', 'scoring'] as const
+export const CLASSIC_PLAY: PlayRules = { bag: false, kicks: false, lockDelay: false, threeNext: false, hold: false, ghost: false, above: false, scoring: false }
+export const MODERN_PLAY: PlayRules = { bag: true, kicks: true, lockDelay: true, threeNext: true, hold: true, ghost: true, above: true, scoring: false }
+export const RULE_LABELS: Record<(typeof RULE_KEYS)[number], string> = { bag: '7-bag', kicks: 'Wall kicks', lockDelay: 'Lock delay', threeNext: '3 next pieces', hold: 'Hold', ghost: 'Ghost piece', above: 'Pieces above the board', scoring: 'Modern scoring' }
 
 export interface RulesChoice { readonly preset: RulesPreset; readonly custom: PlayRules }
 export const DEFAULT_RULES_CHOICE: RulesChoice = { preset: 'modern', custom: MODERN_PLAY }
@@ -29,7 +33,7 @@ export function playRules(choice: RulesChoice): PlayRules {
 
 /** The engine's part of the rules (hold and the ghost piece are handled outside the rules object). */
 export function engineRules(rules: PlayRules): GameRules {
-  return { bag: rules.bag, kicks: rules.kicks, lockDelay: rules.lockDelay, preview: rules.threeNext ? 3 : 1 }
+  return { bag: rules.bag, kicks: rules.kicks, lockDelay: rules.lockDelay, preview: rules.threeNext ? 3 : 1, spawnAbove: rules.above, modernScoring: rules.scoring }
 }
 export function presetRules(preset: 'classic' | 'modern'): GameRules {
   return preset === 'modern' ? MODERN_RULES : CLASSIC_RULES

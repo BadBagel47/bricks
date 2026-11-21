@@ -1,5 +1,6 @@
 import { advanceFrames, dispatch } from './game.ts'
 import { collides } from './board.ts'
+import { HIDDEN_ROWS } from './types.ts'
 import type { GameAction, GameEvent, GameState, Transition } from './types.ts'
 
 export const penaltyRows = (cleared: number): number => [0, 0, 1, 2, 4][cleared] ?? 0
@@ -23,7 +24,8 @@ export function addGarbage(game: GameState, count: number, hole: (index: number)
     return Array.from({ length: 10 }, (_, x) => x === gap ? null : 'G' as const)
   })
   const board = [...game.board.slice(n), ...rows]
-  if (overflow || (game.active && collides(board, game.active))) return { state: { ...game, board, active: null, status: 'gameOver' }, events: [{ type: 'gameOver' }] }
+  // F-057: a falling piece may be above the board in Modern; only a real overlap ends the game.
+  if (overflow || (game.active && collides(board, game.active, game.rules?.spawnAbove ? HIDDEN_ROWS : 0))) return { state: { ...game, board, active: null, status: 'gameOver' }, events: [{ type: 'gameOver' }] }
   return { state: { ...game, board }, events: [] }
 }
 

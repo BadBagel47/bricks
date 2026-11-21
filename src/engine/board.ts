@@ -12,23 +12,25 @@ export function createBoard(): Board {
   return Array.from({ length: BOARD_HEIGHT }, emptyRow)
 }
 
-export function collides(board: Board, piece: ActivePiece): boolean {
+/** `above`: how many empty rows above the board a piece may occupy (F-057; 0 = none). */
+export function collides(board: Board, piece: ActivePiece, above = 0): boolean {
   return pieceCells(piece).some(([x, y]) =>
-    x < 0 || x >= BOARD_WIDTH || y < 0 || y >= BOARD_HEIGHT || board[y][x] !== null,
+    x < 0 || x >= BOARD_WIDTH || y < -above || y >= BOARD_HEIGHT || (y >= 0 && board[y][x] !== null),
   )
 }
 
 /** Lowest position the piece can fall to from where it is, as used by Hard Drop and the ghost piece. */
-export function dropPosition(board: Board, piece: ActivePiece): ActivePiece {
+export function dropPosition(board: Board, piece: ActivePiece, above = 2): ActivePiece {
   let landed = piece
-  while (!collides(board, { ...landed, y: landed.y + 1 })) landed = { ...landed, y: landed.y + 1 }
+  while (!collides(board, { ...landed, y: landed.y + 1 }, above)) landed = { ...landed, y: landed.y + 1 }
   return landed
 }
 
-export function lockPiece(board: Board, piece: ActivePiece): Board {
-  if (collides(board, piece)) throw new RangeError('Cannot lock a colliding piece')
+/** Cells above the board (F-057) are not kept; a lock there ends the game (see the engine). */
+export function lockPiece(board: Board, piece: ActivePiece, above = 0): Board {
+  if (collides(board, piece, above)) throw new RangeError('Cannot lock a colliding piece')
   const result = board.map((row) => [...row])
-  for (const [x, y] of pieceCells(piece)) result[y][x] = piece.type
+  for (const [x, y] of pieceCells(piece)) if (y >= 0) result[y][x] = piece.type
   return result
 }
 

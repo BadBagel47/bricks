@@ -36,5 +36,5 @@ test('Battle recovery checks the saved game and confirmed attack prefixes', () =
   assert.throws(() => restoreCheckpoint(battleRecord, battleSnapshot, battleStart, joined, { own: 0, opponent: 2 }))
   const tampered = JSON.parse(battleRecord.payload); tampered.battle.game = battle.game
   assert.throws(() => restoreCheckpoint({ ...battleRecord, payload: JSON.stringify(tampered) }, battleSnapshot, battleStart, joined, { own: 0, opponent: 3 }))
-  assert.ok(battleRecord.payload.length < 1000)
+  assert.ok(battleRecord.payload.length < 1100) // F-057, F-058 added three counters and two rules (about 1,020 characters; Firebase allows 8,192)
 })

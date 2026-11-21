@@ -6,6 +6,10 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Added (2026-11-21, F-057, F-058)
+- F-057: Modern rule "Pieces above the board": when the top is full, a new piece can appear above the board instead of ending the game at once; a piece that locks above the board ends it. Also a Custom switch and in Cloudflare matches with Modern.
+- F-058: Custom switch "Modern scoring" (off by default, 1 Player): T-spins, back-to-back and combos score as in modern games.
+
 ### Fixed (2026-11-21, B-040)
 - B-040: tapping 2 Players on a page opened before a new version was published no longer turns the screen black: the page reloads once and opens 2 Players, or shows a short message with Try again and Main menu.
 

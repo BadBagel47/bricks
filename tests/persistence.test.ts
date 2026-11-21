@@ -32,7 +32,7 @@ test('personal and single-player settings load safe defaults and validate saved 
   // F-046: Modern by default; an old saved Hold choice gives way to the rules.
   assert.deepEqual(parseSinglePlayerSettings('{"startLevel":19,"holdEnabled":true}'), { ...DEFAULT_SINGLE_PLAYER_SETTINGS, startLevel: 19 })
   assert.equal(DEFAULT_SINGLE_PLAYER_SETTINGS.rules.preset, 'modern')
-  assert.deepEqual(parseSinglePlayerSettings('{"rules":{"preset":"custom","custom":{"bag":false,"kicks":true,"lockDelay":"x"}}}').rules, { preset: 'custom', custom: { bag: false, kicks: true, lockDelay: true, threeNext: true, hold: true, ghost: true } })
+  assert.deepEqual(parseSinglePlayerSettings('{"rules":{"preset":"custom","custom":{"bag":false,"kicks":true,"lockDelay":"x"}}}').rules, { preset: 'custom', custom: { bag: false, kicks: true, lockDelay: true, threeNext: true, hold: true, ghost: true, above: true, scoring: false } })
   assert.deepEqual(parseSinglePlayerSettings('{"startLevel":20,"holdEnabled":"yes"}'), DEFAULT_SINGLE_PLAYER_SETTINGS)
 })
 

@@ -35,9 +35,15 @@ export interface GameRules {
   readonly lockDelay: boolean
   /** How many upcoming pieces are known and shown. */
   readonly preview: 1 | 3
+  /** F-057: a new piece that has no room at the top may appear in the two hidden rows above the board. */
+  readonly spawnAbove: boolean
+  /** F-058: modern scoring: T-spins, combos and back-to-back (1 Player, off unless chosen). */
+  readonly modernScoring: boolean
 }
-export const CLASSIC_RULES: GameRules = { bag: false, kicks: false, lockDelay: false, preview: 1 }
-export const MODERN_RULES: GameRules = { bag: true, kicks: true, lockDelay: true, preview: 3 }
+export const CLASSIC_RULES: GameRules = { bag: false, kicks: false, lockDelay: false, preview: 1, spawnAbove: false, modernScoring: false }
+export const MODERN_RULES: GameRules = { bag: true, kicks: true, lockDelay: true, preview: 3, spawnAbove: true, modernScoring: false }
+/** F-057: rows above the visible board where a new piece may appear. */
+export const HIDDEN_ROWS = 2
 
 export interface GameOptions {
   readonly seed?: number
@@ -74,6 +80,10 @@ export interface GameState {
   readonly lockFrames: number
   readonly lockResets: number
   readonly lowestY: number
+  /** F-058: clears in a row (-1 before the first), whether the last clear was a difficult one, and whether the last successful move was a rotation. */
+  readonly combo: number
+  readonly backToBack: boolean
+  readonly lastRotated: boolean
 }
 
 export type GameAction =
@@ -86,6 +96,8 @@ export type GameEvent =
   | { readonly type: 'rotated'; readonly direction: Direction }
   | { readonly type: 'locked'; readonly piece: PieceType }
   | { readonly type: 'linesCleared'; readonly count: number; readonly points: number }
+  /** F-058, modern scoring only: what the lock scored besides plain lines. */
+  | { readonly type: 'bonus'; readonly tSpin: boolean; readonly combo: number; readonly backToBack: boolean; readonly points: number }
   | { readonly type: 'levelChanged'; readonly from: number; readonly to: number }
   | { readonly type: 'spawned'; readonly piece: PieceType }
   | { readonly type: 'held'; readonly piece: PieceType }

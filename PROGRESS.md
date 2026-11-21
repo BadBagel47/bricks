@@ -9,6 +9,10 @@
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 
+## F-057, F-058 — 2026-11-21
+
+Owner: "Kör A och B rek" (Q1: the game ends when a piece locks with any part above the board or a new piece has no room above it; Q2: modern scoring in 1 Player only). Engine: `GameRules.spawnAbove` and `modernScoring`, `HIDDEN_ROWS`, `collides(board, piece, above)`, spawn one or two rows higher when blocked, lock-out ends the game, `modernClearPoints`, state `combo` / `backToBack` / `lastRotated`, `bonus` event; Battle garbage respects pieces above the board; views draw only visible cells; checkpoint validation updated (the Firebase checkpoint grows to about 1,020 characters, limit 8,192). Play rules: `above` (Modern) and `scoring` (never in a preset), labels in Custom, Modern summary text. Spec and `docs/ENGINE.md` updated. Local: lint (no new warnings), unit 223 (new: blocked top in Classic vs Modern, lock-out, checkpoint with a piece above the board; scoring table, T-spin double from a real rotation, plain double without), build, browser 25/25, `npm run test:net` 4/4, operating 3/3. Firebase emulator suite: CI.
+
 ## B-040 — 2026-11-21
 
 Owner: "Kör A rek". `src/ui/reload-after-update.ts` wraps the two lazy 2 Players imports: a failed import reloads once (note in sessionStorage with the screen to reopen; no second reload within 60 s); `App` reopens 2 Players after such a reload; `LoadErrorBoundary` shows "Could not load 2 Players" with Try again and Main menu. Unit tests for the reload rules; browser test with the file missing once (reload, 2 Players opens) and permanently (message, Main menu works). Local: lint (no new warnings), unit 221, build, browser 25/25, `npm run test:net` 4/4, operating 3/3. Firebase emulator suite: CI.

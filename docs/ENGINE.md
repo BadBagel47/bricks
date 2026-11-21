@@ -106,3 +106,8 @@ most 20 rows. `endedFrame` captures the fatal simulation frame even when advanci
 a large batch; the UI anchors these frame numbers to the shared start timeline.
 The caller stops sending to an eliminated opponent. `battleOutcome` compares only
 confirmed final frame numbers: larger wins, equality draws; score is irrelevant.
+
+## Pieces above the board and modern scoring (F-057, F-058, 2026-11-21)
+
+- `GameRules.spawnAbove` (Modern, Custom switch): a new piece that collides at its spawn row tries one and then two rows higher (`HIDDEN_ROWS = 2`); cells above the board count as empty for moves and rotations (`collides(board, piece, above)`). A lock with any cell above the board ends the game (its visible cells stay on the board); no room in the hidden rows either ends it as before. The board stays 20 rows, so snapshots and checkpoints keep their format (only the active piece may have a negative row).
+- `GameRules.modernScoring` (Custom switch, 1 Player only): `modernClearPoints` in `scoring.ts`; the state keeps `combo` (−1 before the first clear in a row), `backToBack` and `lastRotated` (a T-spin needs a rotation as the last successful move and three of the four corners of the T's 3 × 3 frame filled; walls and floor count as filled). A `bonus` event reports extra points.

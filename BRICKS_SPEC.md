@@ -395,7 +395,7 @@ The multiplayer host cannot modify another player's personal settings.
 Include:
 
 - Starting Level, default 00.
-- Rules: Classic / Modern / Custom, default Modern (owner, 2026-11-20; F-046). Classic is the NES-style game below with every modern rule off. Modern turns on 7-bag piece order, SRS wall kicks, lock delay (0.5 s, at most 15 restarts), 3 next pieces, Hold and the ghost piece. Custom shows the six rules as switches and starts from the preset chosen before. High scores are marked Classic, Modern or Custom.
+- Rules: Classic / Modern / Custom, default Modern (owner, 2026-11-20; F-046). Classic is the NES-style game below with every modern rule off. Modern turns on 7-bag piece order, SRS wall kicks, lock delay (0.5 s, at most 15 restarts), 3 next pieces, Hold, the ghost piece and pieces above the board (F-057, 2026-11-21: a new piece with no room at the top may appear in two hidden rows above the board; the game ends when a piece locks with any part above the board or a new piece has no room there either; the board stays 20 rows). Custom shows the rules as switches and starts from the preset chosen before; it also offers Modern scoring (F-058), which is off in Classic and Modern and when Custom starts. High scores are marked Classic, Modern or Custom.
 
 Keep previous selections for future games.
 
@@ -464,7 +464,7 @@ Use classic NES-inspired movement, rotation, gravity, and scoring.
 
 Keep behavior consistent and documented.
 
-Advanced modern scoring (T-spin bonuses, combos, back-to-back) stays out unless explicitly approved (parked as F-058). The owner approved SRS wall kicks, the 7-bag, lock delay and a 3-piece preview as the Modern rules (2026-11-20).
+Modern scoring (F-058, owner 2026-11-21: "lägg in, men inte på som standard") is a Custom switch for 1 Player only, off by default: lines 100 / 300 / 500 / 800, T-spin 400 / 800 / 1200 / 1600 (0–3 lines, three-corner rule after a rotation), back-to-back Tetris or T-spin with lines × 1.5, combo + 50 × count, all × (level + 1); drops still score nothing. Matches and Battle garbage keep the classic rules. The owner approved SRS wall kicks, the 7-bag, lock delay and a 3-piece preview as the Modern rules (2026-11-20).
 
 ## 9.4 Deterministic piece generation
 

@@ -27,8 +27,9 @@ export function Playfield({ game, swipeMode, onSwipe, ghost = false, colors = 'l
   const root = useRef<HTMLDivElement>(null)
   const activeCells = new Set<number>()
   if (game.active) {
-    if (ghost) for (const [x, y] of pieceCells(dropPosition(game.board, game.active))) ghosts.add(y * 10 + x)
-    for (const [x, y] of pieceCells(game.active)) { cells[y * 10 + x] = game.active.type; ghosts.delete(y * 10 + x); activeCells.add(y * 10 + x) }
+    // F-057: cells above the board are not drawn.
+    if (ghost) for (const [x, y] of pieceCells(dropPosition(game.board, game.active))) if (y >= 0) ghosts.add(y * 10 + x)
+    for (const [x, y] of pieceCells(game.active)) if (y >= 0) { cells[y * 10 + x] = game.active.type; ghosts.delete(y * 10 + x); activeCells.add(y * 10 + x) }
   }
   // F-022: blocks above cleared rows fall into place after the cleared rows flash away.
   useLayoutEffect(() => {

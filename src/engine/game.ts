@@ -1,14 +1,18 @@
 import { clearRows, collides, createBoard, lockPiece } from './board.ts'
 import { FRAME_MS, framesPerFall, levelForLines, validateStartLevel } from './levels.ts'
-import { kickOffsets, rotatedPiece, spawnPiece } from './pieces.ts'
+import { kickOffsets, pieceCells, rotatedPiece, spawnPiece } from './pieces.ts'
 import { createRandomizer, drawPiece } from './rng.ts'
-import { lineClearPoints } from './scoring.ts'
-import { CLASSIC_RULES } from './types.ts'
+import { lineClearPoints, modernClearPoints } from './scoring.ts'
+import { CLASSIC_RULES, HIDDEN_ROWS } from './types.ts'
 import type { ActivePiece, GameAction, GameEvent, GameOptions, GameRules, GameState, PieceType, Randomizer, Transition } from './types.ts'
 
 /** F-053: half a second at 60 Hz, and at most 15 restarts per piece (as in modern games). */
 export const LOCK_DELAY_FRAMES = 30
 export const MAX_LOCK_RESETS = 15
+
+/** F-057: how many rows above the board a piece may use under these rules. */
+const above = (rules: GameRules) => rules.spawnAbove ? HIDDEN_ROWS : 0
+const hits = (state: GameState, piece: ActivePiece) => collides(state.board, piece, above(state.rules))
 
 function draw(randomizer: Randomizer, rules: GameRules) {
   return drawPiece(randomizer, rules.bag)
@@ -48,17 +52,22 @@ export function createGame(options: GameOptions = {}): GameState {
     lockFrames: 0,
     lockResets: 0,
     lowestY: active.y,
+    combo: -1,
+    backToBack: false,
+    lastRotated: false,
   }
 }
 
 function activate(state: GameState, type: PieceType, events: GameEvent[]): GameState {
-  const active = spawnPiece(type)
-  if (collides(state.board, active)) {
+  // F-057: with no room at the top, a piece may appear one or two rows higher, above the board.
+  const spawn = spawnPiece(type)
+  const active = [0, 1, 2].slice(0, above(state.rules) + 1).map(up => ({ ...spawn, y: spawn.y - up })).find(piece => !hits(state, piece))
+  if (!active) {
     events.push({ type: 'gameOver' })
     return { ...state, active: null, status: 'gameOver', gravityFrames: 0, remainderMs: 0 }
   }
   events.push({ type: 'spawned', piece: type })
-  return { ...state, active, gravityFrames: 0, lockFrames: 0, lockResets: 0, lowestY: active.y }
+  return { ...state, active, gravityFrames: 0, lockFrames: 0, lockResets: 0, lowestY: active.y, lastRotated: false }
 }
 
 function spawnNext(state: GameState, events: GameEvent[]): GameState {
@@ -68,7 +77,7 @@ function spawnNext(state: GameState, events: GameEvent[]): GameState {
   return activate({ ...state, next: line[0], queue: line.slice(1), randomizer: drawn.randomizer }, state.next, events)
 }
 
-const grounded = (state: GameState, piece: ActivePiece | null = state.active) => piece !== null && collides(state.board, { ...piece, y: piece.y + 1 })
+const grounded = (state: GameState, piece: ActivePiece | null = state.active) => piece !== null && hits(state, { ...piece, y: piece.y + 1 })
 
 /** F-053: a successful move or rotation while the lock wait runs restarts it, a limited number of times. */
 function moved(state: GameState, active: ActivePiece): GameState {
@@ -76,27 +85,50 @@ function moved(state: GameState, active: ActivePiece): GameState {
   return { ...state, active, lockFrames: 0, lockResets: state.lockResets + 1 }
 }
 
+/** F-058: a T that was rotated into place with at least three of the four corners around its centre filled. */
+function isTSpin(state: GameState, piece: ActivePiece): boolean {
+  if (piece.type !== 'T' || !state.lastRotated) return false
+  const filled = ([dx, dy]: readonly [number, number]) => {
+    const x = piece.x + dx, y = piece.y + dy
+    return x < 0 || x >= 10 || y >= 20 || (y >= 0 && state.board[y][x] !== null)
+  }
+  return ([[0, 0], [2, 0], [0, 2], [2, 2]] as const).filter(filled).length >= 3
+}
+
 function lockActive(state: GameState, events: GameEvent[]): GameState {
   if (!state.active) return state
-  const cleared = clearRows(lockPiece(state.board, state.active))
-  const points = lineClearPoints(cleared.cleared, state.level)
-  const lines = state.lines + cleared.cleared
+  const piece = state.active
+  // F-057: a piece that locks with any part above the board ends the game.
+  if (pieceCells(piece).some(([, y]) => y < 0)) {
+    events.push({ type: 'locked', piece: piece.type }, { type: 'gameOver' })
+    return { ...state, board: lockPiece(state.board, piece, above(state.rules)), active: null, status: 'gameOver', gravityFrames: 0, remainderMs: 0 }
+  }
+  const tSpin = state.rules.modernScoring && isTSpin(state, piece)
+  const cleared = clearRows(lockPiece(state.board, piece))
+  const rows = cleared.cleared
+  const combo = rows ? state.combo + 1 : -1
+  const difficult = rows > 0 && (rows === 4 || tSpin)
+  const modern = state.rules.modernScoring ? modernClearPoints(rows, state.level, tSpin, state.backToBack, combo) : null
+  const points = modern ? modern.points : lineClearPoints(rows, state.level)
+  const lines = state.lines + rows
   const level = levelForLines(state.startLevel, lines)
-  events.push({ type: 'locked', piece: state.active.type })
-  if (cleared.cleared) events.push({ type: 'linesCleared', count: cleared.cleared, points })
+  events.push({ type: 'locked', piece: piece.type })
+  if (rows) events.push({ type: 'linesCleared', count: rows, points })
+  if (modern && modern.bonus > 0) events.push({ type: 'bonus', tSpin, combo: Math.max(0, combo), backToBack: difficult && state.backToBack, points: modern.bonus })
   if (level !== state.level) events.push({ type: 'levelChanged', from: state.level, to: level })
-  return spawnNext({ ...state, board: cleared.board, score: state.score + points, lines, level, holdUsed: false }, events)
+  const backToBack = rows ? difficult : state.backToBack
+  return spawnNext({ ...state, board: cleared.board, score: state.score + points, lines, level, holdUsed: false, combo, backToBack }, events)
 }
 
 function fall(state: GameState, events: GameEvent[]): GameState {
   if (!state.active) return state
   const active = { ...state.active, y: state.active.y + 1 }
   // With lock delay a landed piece waits (advanceFrames locks it); without, it locks now.
-  if (collides(state.board, active)) return state.rules.lockDelay ? state : lockActive(state, events)
+  if (hits(state, active)) return state.rules.lockDelay ? state : lockActive(state, events)
   events.push({ type: 'moved', dx: 0, dy: 1 })
   // Reaching a new lowest row gives the restarts back, as in modern games.
   const lower = active.y > state.lowestY
-  return { ...state, active, gravityFrames: 0, lockFrames: 0, lowestY: lower ? active.y : state.lowestY, lockResets: lower ? 0 : state.lockResets }
+  return { ...state, active, gravityFrames: 0, lockFrames: 0, lowestY: lower ? active.y : state.lowestY, lockResets: lower ? 0 : state.lockResets, lastRotated: false }
 }
 
 export function dispatch(state: GameState, action: GameAction): Transition {
@@ -116,8 +148,8 @@ export function dispatch(state: GameState, action: GameAction): Transition {
     case 'moveRight': {
       const dx = action === 'moveLeft' ? -1 : 1
       const active = { ...state.active, x: state.active.x + dx }
-      if (collides(state.board, active)) return { state, events }
-      return { state: moved(state, active), events: [{ type: 'moved', dx, dy: 0 }] }
+      if (hits(state, active)) return { state, events }
+      return { state: { ...moved(state, active), lastRotated: false }, events: [{ type: 'moved', dx, dy: 0 }] }
     }
     case 'rotateClockwise':
     case 'rotateCounterclockwise': {
@@ -126,9 +158,9 @@ export function dispatch(state: GameState, action: GameAction): Transition {
       if (turned.rotation === state.active.rotation) return { state, events }
       // F-052: with wall kicks the standard offsets are tried in order; without, only the turn itself.
       const offsets = state.rules.kicks ? kickOffsets(turned.type, state.active.rotation, turned.rotation) : [[0, 0] as const]
-      const active = offsets.map(([dx, dy]) => ({ ...turned, x: turned.x + dx, y: turned.y + dy })).find(piece => !collides(state.board, piece))
+      const active = offsets.map(([dx, dy]) => ({ ...turned, x: turned.x + dx, y: turned.y + dy })).find(piece => !hits(state, piece))
       if (!active) return { state, events }
-      return { state: moved(state, active), events: [{ type: 'rotated', direction }] }
+      return { state: { ...moved(state, active), lastRotated: true }, events: [{ type: 'rotated', direction }] }
     }
     case 'softDrop':
       return { state: fall(state, events), events }
@@ -136,12 +168,12 @@ export function dispatch(state: GameState, action: GameAction): Transition {
       if (!state.hardDropEnabled) return { state, events }
       let active = state.active
       let distance = 0
-      while (!collides(state.board, { ...active, y: active.y + 1 })) {
+      while (!hits(state, { ...active, y: active.y + 1 })) {
         active = { ...active, y: active.y + 1 }
         distance++
       }
       events.push({ type: 'hardDropped', distance })
-      return { state: lockActive({ ...state, active }, events), events }
+      return { state: lockActive({ ...state, active, lastRotated: state.lastRotated && distance === 0 }, events), events }
     }
     case 'hold': {
       if (!state.holdEnabled || state.holdUsed) return { state, events }
