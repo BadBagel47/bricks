@@ -2,6 +2,7 @@
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| B-040 | Bug | Sometimes the whole screen turns black when 2 Players is tapped (owner, 2026-11-21). Cause found: the 2 Players screens are loaded only when first opened, as separate code files whose names change with every published version; a page (or home-screen app) opened before a new version was published asks for the old file, which is gone, and the error removes the whole app. Reproduced by making that file missing. Happens after each publish until the page is reloaded | High | Proposed (2026-11-21, owner) | Standard |
 | F-057 | Feature | Pieces appear in hidden rows above the board, as in modern games (fewer losses at the very top) | Low | Parked (2026-11-20) | Standard |
 | F-058 | Feature | Modern scoring: T-spins, combos and back-to-back, and their garbage in Battle. Rewards advanced play and changes 2 Players, so kept out of Modern for now | Low | Parked (2026-11-20) | Standard |
 | F-060 | Feature | Hold button placement (Split). Owner (2026-11-20, with screenshots): try two placements on the phone, both with more space between the rotate buttons than today: (1) Hold at the bottom, to the right of the left rotate button and centred under the orange (right) rotate button; (2) sketch B: Hold in the free top corner of the rotate area, above the left rotate button and to the left of the orange one. Both mirrored for left-handed. Both are to be made switchable for the test; the loser is removed afterwards. Do not invent new placements | Low | Built for the test (2026-11-20): Settings → Hold button, Bottom (default) / Top; shown with Split, two rotate buttons and Hold on; with one rotate button or Row, Hold stays where it was. Waits for the owner's choice on the phone, then the other placement is removed | Standard |
@@ -128,15 +129,24 @@ The approved High items come from the owner's request of 2026-11-10: use the
 sketch's layout **and behavior**, not only its look. Design reference:
 "Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
 
-## Proposed runs (2026-11-21, after F-059 and F-061)
+## Proposed runs (2026-11-21, after B-040 was found)
 
-Nothing ready to propose. Waiting for the owner: F-060 (which Hold placement stays; both are in Settings → Hold button for the test).
+Prioritized for: visible faults first.
+
+- **A** – standard model, medium – No black screen after a new version
+  - B-040 – when a part of the game cannot be loaded because a newer version was published, the page reloads once by itself and opens 2 Players again; if it still fails (for example offline), a short message with Try again and Main menu shows instead of a black screen
+  - Question: recommended as above. Alternative: no automatic reload, only the message with a Reload button
+
+Waiting for the owner: F-060 (which Hold placement stays; both are in Settings → Hold button for the test).
 
 Not proposed: F-006 (music studio chat); T-009 (retire Firebase and the old admin; waits for the owner's two-device check and explicit yes); adaptation item 1.1 (web basics, see HANDOFF).
 
 Parked: F-027 (alternative Vivid piece colors), F-057 (pieces above the board), F-058 (modern scoring).
 
 ## Details
+
+### B-040 black screen on 2 Players (2026-11-21)
+- `App.tsx` loads `MultiplayerScreen` and `NetMultiplayer` with `lazy()`; the files have content hashes (`assets/NetMultiplayer-<hash>.js`). GitHub Pages serves only the newest build, so after a publish the old names answer 404 (checked live: two earlier chunk names 404). `index.html` may be cached for 10 minutes, and an open tab or home-screen app keeps the old page. There is no error boundary, so the failed import unmounts the app: `#root` empty, the dark background shows. Reproduced locally by answering the chunk with 404.
 
 ### B-038 match screen on iPad (2026-11-20)
 - Measured with two local players: 820 × 1180 top bar and scores 14–806 px, boards 181–639 px; 810 × 1080 and 768 × 1024 the same pattern; iPad landscape 1180 × 820 bar 640 px wide over 473 px of boards. The own board stays at 300 px wide on tablets in portrait, leaving about 320 px of empty height above the touch controls.
