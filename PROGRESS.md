@@ -9,6 +9,10 @@
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 
+## T-014 test fix — 2026-11-21
+
+CI for F-061 failed in the T-014 test, not in F-061: the room chooses the piece seed and the simple planner finds a two-line clear for about 7 in 8 seeds (174 of 200 measured), so seed 965151569 had none. The test now plays out a round without a plan and starts a rematch with a new seed (up to six rounds). The rematch path was checked by forcing it once; `npm run test:net` 4/4 twice.
+
 ## F-061 — 2026-11-21
 
 Owner: "Kör A och B rek" and "Den egna layouten behöver en funktion för återställning" (editor from Settings → Edit layout, Done and Reset at the top). `src/ui/custom-layout.ts` (model, parsing, keep-on-screen, resize, place from the drawn standard layout), `src/ui/LayoutEditor.tsx` (copy of the 1 Player screen with sample pieces, dashed frames with corner handles, keyboard nudging, board slider, Reset, Done; landscape asks to turn the device upright), `customLayout` in personal settings, `TouchControls` places the groups with `--x/--y/--s` (CSS only upright), 1 Player board via `--board-auto × --board-scale`. ADR 0009. Local: lint (no new warnings), unit 219, build, browser 24/24 (new: edit, use in the game with a working moved button, Reset back to the standard places), `npm run test:net` 4/4, operating 3/3. Firebase emulator suite: CI.

@@ -155,15 +155,28 @@ test('T-014: Battle garbage rows reach the other player and rise at their next l
   const { host, guest } = await lobby()
   await host.page.getByRole('radio', { name: 'Battle', exact: true }).click()
   await host.page.getByRole('radio', { name: 'Classic', exact: true }).click()
-  await startMatch(host)
-  let seed = null
-  for (let i = 0; i < 40 && seed === null; i++) {
-    seed = await host.page.evaluate(() => JSON.parse(sessionStorage.getItem('bricks.net-match.v1') ?? 'null')?.seed ?? null)
-    if (seed === null) await host.page.waitForTimeout(100)
+  // The room picks the piece seed; the simple planner finds a two-line clear for most seeds (about
+  // 7 in 8), so a round without one is played out and a rematch brings a new seed.
+  let plan = null, previousSeed = null
+  for (let round = 0; round < 6 && !plan; round++) {
+    if (round > 0) {
+      await topOut(host.page); await topOut(guest.page)
+      for (const p of [host.page, guest.page]) await p.getByRole('button', { name: 'Rematch', exact: true }).waitFor({ timeout: 20000 })
+      await host.page.getByRole('button', { name: 'Rematch', exact: true }).click()
+      await guest.page.getByRole('button', { name: 'Rematch', exact: true }).click()
+    }
+    await startMatch(host)
+    let seed = null
+    for (let i = 0; i < 40 && (seed === null || seed === previousSeed); i++) {
+      seed = await host.page.evaluate(() => JSON.parse(sessionStorage.getItem('bricks.net-match.v1') ?? 'null')?.seed ?? null)
+      if (seed === null || seed === previousSeed) await host.page.waitForTimeout(100)
+    }
+    assert.ok(Number.isInteger(seed) && seed !== previousSeed, 'the host keeps its match (and seed) in the tab')
+    previousSeed = seed
+    const candidate = planInputs(seed, 0, 2)
+    if (candidate.lines >= 2) plan = candidate
   }
-  assert.ok(Number.isInteger(seed), 'the host keeps its match (and seed) in the tab')
-  const plan = planInputs(seed, 0, 2)
-  assert.ok(plan.lines >= 2, `a two-line clear can be planned: ${JSON.stringify({ seed, lines: plan.lines })}`)
+  assert.ok(plan, 'a two-line clear could be planned in one of the rounds')
   const keyFor = { rotateClockwise: 'KeyX', moveLeft: 'ArrowLeft', moveRight: 'ArrowRight', hardDrop: 'Space' }
   for (const action of plan.actions) await host.page.keyboard.press(keyFor[action])
   const rows = [0, 0, 1, 2, 4][Math.min(plan.lines, 4)]
@@ -176,7 +189,7 @@ test('T-014: Battle garbage rows reach the other player and rise at their next l
   assert.equal(await grey(), rows * 9, 'each garbage row is full except one hole')
   assert.deepEqual([...host.errors, ...guest.errors], [])
   await host.context.close(); await guest.context.close()
-}, { timeout: 120000 })
+}, { timeout: 300000 })
 
 test('F-038: a page reload during a match continues the same game and the match still settles', async () => {
   const { host, guest } = await lobby()
