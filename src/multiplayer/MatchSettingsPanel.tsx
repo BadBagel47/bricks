@@ -19,7 +19,7 @@ import { Segmented } from '../ui/SettingsControls.tsx'
 
 const MODE_HELP: Record<MatchSettings['mode'], string> = {
   'score-duel': 'Highest score wins when both games are over.',
-  battle: 'Clearing lines sends garbage rows. Last player standing wins.',
+  battle: 'Clear 2 or more lines at once to send garbage rows. Last player standing wins.', // B-036: a single line sends nothing
 }
 
 export default function MatchSettingsPanel({ options, database, joined, connected, hostConnected, messages, connections, localConnection, locked, onLocked }: { options: LiveOptions; database: Database; joined: JoinedRoom; connected: boolean; hostConnected: boolean; messages: WaitingMessages; connections: Connections | null; localConnection: string | null; locked: boolean; onLocked: (value: boolean) => void }) {

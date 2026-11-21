@@ -691,3 +691,16 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
 .touch-pad:not(.single){row-gap:max(8px,calc(var(--touch-size) * .25))}
 .touch-pad:not(.single)>.touch-button:nth-child(1){--hit-b:0px}
 .touch-pad:not(.single)>.touch-button:nth-child(n+2):not(.touch-hold){--hit-t:calc(max(8px, var(--touch-size) * .25) * -1)}
+
+/* B-039: touch screens wider than 900 px (iPad in landscape, large tablets) also get the touch
+   controls and the Pause button, as long as the device has no mouse. Split sits in the bottom
+   corners beside the board; Row and Swipe sit below it and the board makes room. */
+@media(min-width:901px) and (hover:none) and (pointer:coarse){
+  .touch-controls{width:100%;display:flex;align-items:center;justify-content:center;margin:14px auto 0}
+  .mobile-pause-button{display:inline-flex;width:48px;min-height:44px;align-items:center;justify-content:center;padding:0;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--soft);font-size:15px;font-weight:600}
+  .game-shell>.control-hint,.game-shell>.controller-status,.multiplayer-game>.control-hint{display:none}
+  .game-shell .touch-split,.multiplayer-game .touch-split{position:fixed;left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));width:auto;margin:0;pointer-events:none;--touch-size:min(64px,calc((100dvh - 250px) / 2.1))}
+  .game-shell .touch-split>*,.multiplayer-game .touch-split>*{pointer-events:auto}
+  .touch-controls:not(.touch-split){--touch-size:min(64px,var(--preferred-touch-size))}
+  .game-shell:has(.touch-controls:not(.touch-split)) .playfield{width:min(320px,calc((100dvh - 190px - 84px) / 2))}
+}

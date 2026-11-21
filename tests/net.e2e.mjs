@@ -5,6 +5,7 @@ import { existsSync, rmSync } from 'node:fs'
 import { spawn, spawnSync } from 'node:child_process'
 import { after, before, test } from 'node:test'
 import { chromium } from 'playwright-core'
+import { planInputs } from './fixtures/plan-inputs.ts'
 
 const ROOMS = 'http://127.0.0.1:8790'
 const PAGE = 'http://127.0.0.1:4173/'
@@ -146,6 +147,36 @@ test('Battle settles by survival; a lost connection pauses both games; leaving e
   assert.deepEqual([...host.errors, ...guest.errors], [])
   await host.context.close(); await guest.context.close()
 }, { timeout: 150000 })
+
+// T-014: garbage rows really travel through the room. The host plays a planned two-line clear
+// (Classic rules, so the planner and the game agree), the guest sees the rows waiting and gets
+// them at its next lock: grey rows with one hole each.
+test('T-014: Battle garbage rows reach the other player and rise at their next lock', async () => {
+  const { host, guest } = await lobby()
+  await host.page.getByRole('radio', { name: 'Battle', exact: true }).click()
+  await host.page.getByRole('radio', { name: 'Classic', exact: true }).click()
+  await startMatch(host)
+  let seed = null
+  for (let i = 0; i < 40 && seed === null; i++) {
+    seed = await host.page.evaluate(() => JSON.parse(sessionStorage.getItem('bricks.net-match.v1') ?? 'null')?.seed ?? null)
+    if (seed === null) await host.page.waitForTimeout(100)
+  }
+  assert.ok(Number.isInteger(seed), 'the host keeps its match (and seed) in the tab')
+  const plan = planInputs(seed, 0, 2)
+  assert.ok(plan.lines >= 2, `a two-line clear can be planned: ${JSON.stringify({ seed, lines: plan.lines })}`)
+  const keyFor = { rotateClockwise: 'KeyX', moveLeft: 'ArrowLeft', moveRight: 'ArrowRight', hardDrop: 'Space' }
+  for (const action of plan.actions) await host.page.keyboard.press(keyFor[action])
+  const rows = [0, 0, 1, 2, 4][Math.min(plan.lines, 4)]
+  const attacks = guest.page.getByLabel('Battle attacks', { exact: true })
+  await attacks.filter({ hasText: `Pending: ${rows}` }).waitFor({ timeout: 15000 })
+  const grey = () => guest.page.getByLabel('Your game', { exact: true }).locator('.board-cell.filled').evaluateAll(nodes => nodes.filter(node => node.style.getPropertyValue('--cell-color').toLowerCase() === '#4a5170').length)
+  assert.equal(await grey(), 0, 'nothing rises before the guest locks a piece')
+  await guest.page.keyboard.press('Space')
+  await attacks.filter({ hasText: `Applied: ${rows}` }).waitFor({ timeout: 10000 })
+  assert.equal(await grey(), rows * 9, 'each garbage row is full except one hole')
+  assert.deepEqual([...host.errors, ...guest.errors], [])
+  await host.context.close(); await guest.context.close()
+}, { timeout: 120000 })
 
 test('F-038: a page reload during a match continues the same game and the match still settles', async () => {
   const { host, guest } = await lobby()

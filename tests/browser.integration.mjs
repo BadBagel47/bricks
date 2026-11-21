@@ -32,8 +32,8 @@ afterEach(async () => {
 })
 after(async () => { await browser?.close(); server?.kill('SIGTERM') })
 
-async function open({ viewport = { width: 1280, height: 800 }, personal = {}, singlePlayer = {} } = {}) {
-  const context = await browser.newContext({ viewport, hasTouch: true })
+async function open({ viewport = { width: 1280, height: 800 }, personal = {}, singlePlayer = {}, mobile = false, touch = true } = {}) {
+  const context = await browser.newContext({ viewport, hasTouch: touch, isMobile: mobile })
   contexts.push(context)
   // Gameplay regression tests use an explicitly open admission response when
   // the production build has an operating origin. Access behavior has its own
@@ -442,3 +442,30 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 320, height: 667 
     }
   })
 }
+
+// B-039: touch screens wider than 900 px without a mouse (iPad in landscape) get the touch controls
+// and Pause beside or below the board; a computer with a mouse keeps them hidden.
+for (const touchLayout of ['split', 'row']) {
+  test(`B-039: iPad in landscape, ${touchLayout}: touch controls and Pause fit beside or below the board`, async () => {
+    const viewport = { width: 1180, height: 820 }
+    const page = await open({ viewport, mobile: true, personal: { touchLayout, touchLayoutVersion: 2 } })
+    await start(page)
+    const controls = page.getByRole('region', { name: 'Touch controls' })
+    assert.equal(await controls.isVisible(), true)
+    assert.equal(await page.getByRole('button', { name: 'Pause', exact: true }).isVisible(), true)
+    const board = await page.getByRole('img', { name: 'Game board, 10 columns by 20 rows' }).boundingBox()
+    const dimensions = await page.evaluate(() => ({ scrollHeight: document.documentElement.scrollHeight, height: innerHeight }))
+    assert.ok(dimensions.scrollHeight <= dimensions.height + 1, JSON.stringify(dimensions))
+    for (const button of await controls.getByRole('button').all()) {
+      const box = await button.boundingBox()
+      assert.ok(box.width >= 44 && box.height >= 44, `a touch button is too small: ${JSON.stringify(box)}`)
+      assert.ok(box.y >= board.y + board.height || box.x + box.width <= board.x || box.x >= board.x + board.width, `a touch button overlaps the board: ${JSON.stringify(box)}`)
+      assert.ok(box.x >= 0 && box.x + box.width <= viewport.width && box.y + box.height <= viewport.height)
+    }
+  })
+}
+test('B-039: a computer with a mouse keeps the touch controls hidden', async () => {
+  const page = await open({ touch: false })
+  await start(page)
+  assert.equal(await page.getByRole('region', { name: 'Touch controls' }).isVisible(), false)
+})

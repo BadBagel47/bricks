@@ -134,3 +134,8 @@
 @media(max-width:900px) and (orientation:landscape){
   .multiplayer-game>.match-bar,.multiplayer-game>.score-row{width:100%}
 }
+
+/* B-039: on wide touch screens Row and Swipe sit below the boards, so the boards make room. */
+@media(min-width:901px) and (hover:none) and (pointer:coarse){
+  .multiplayer-game:has(.touch-controls:not(.touch-split)){--chrome:314px}
+}

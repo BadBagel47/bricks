@@ -6,6 +6,11 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Fixed (2026-11-21, B-039, B-036, T-014)
+- B-039: iPad in landscape and other wide touch screens without a mouse show the touch controls and the Pause button (Split in the bottom corners beside the board; Row and Swipe below it).
+- B-036: the Battle help text says that clearing 2 or more lines at once sends garbage rows.
+- T-014: the Cloudflare two-player tests check that Battle garbage rows reach the other player.
+
 ### Fixed (2026-11-20, B-037, B-038)
 - B-037: the whole Hard Drop button reacts again (B-035 had given its lowest part to the arrows, which made it hard to press); the larger gap below it stays and belongs to the arrows.
 - B-038: on iPad and other tablets in portrait the match boards grow to use the screen, and on tablets and wider screens the match top bar and score cards are as wide as the boards instead of the whole screen.
