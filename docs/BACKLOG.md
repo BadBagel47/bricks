@@ -4,9 +4,9 @@
 | --- | --- | --- | --- | --- | --- |
 | F-057 | Feature | Pieces appear in hidden rows above the board, as in modern games (fewer losses at the very top) | Low | Parked (2026-11-20) | Standard |
 | F-058 | Feature | Modern scoring: T-spins, combos and back-to-back, and their garbage in Battle. Rewards advanced play and changes 2 Players, so kept out of Modern for now | Low | Parked (2026-11-20) | Standard |
-| F-059 | Feature | Possibly remove the Row touch layout (one row of buttons) and keep only Split | Low | Proposed (2026-11-20, owner) | Standard |
+| F-059 | Feature | Remove the Row touch layout (one row of buttons) and keep only Split; players who had Row move to Split | Low | Approved (2026-11-21, owner: "Vi kan ta bort row. Den känns överflödig") | Standard |
 | F-060 | Feature | Hold button placement (Split). Owner (2026-11-20, with screenshots): try two placements on the phone, both with more space between the rotate buttons than today: (1) Hold at the bottom, to the right of the left rotate button and centred under the orange (right) rotate button; (2) sketch B: Hold in the free top corner of the rotate area, above the left rotate button and to the left of the orange one. Both mirrored for left-handed. Both are to be made switchable for the test; the loser is removed afterwards. Do not invent new placements | Low | Built for the test (2026-11-20): Settings → Hold button, Bottom (default) / Top; shown with Split, two rotate buttons and Hold on; with one rotate button or Row, Hold stays where it was. Waits for the owner's choice on the phone, then the other placement is removed | Standard |
-| F-061 | Feature | A setting to arrange the touch controls on the screen yourself, and to set the height of the playing field | Medium | Proposed (2026-11-20, owner) | Standard |
+| F-061 | Feature | A setting to arrange the touch controls on the screen yourself, and to set the height of the playing field; with a reset to the standard layout (owner, 2026-11-21) | Medium | Proposed (2026-11-20, owner) | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Vivid (formerly Modern) block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
@@ -128,14 +128,15 @@ The approved High items come from the owner's request of 2026-11-10: use the
 sketch's layout **and behavior**, not only its look. Design reference:
 "Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
 
-## Proposed runs (2026-11-21, after F-056)
+## Proposed runs (2026-11-21, after the owner removed Row)
 
 Prioritized for: visible faults first, then the touch controls.
 
-- **A** – strong model, high – Own control layout
-  - F-061 – arrange the touch controls yourself and set the playing field's height
-  - F-059 – the Row layout possibly removed
-  - Question: how far? Recommended: an edit mode where the button groups are dragged into place and resized, plus a board-height slider; Row removed once that exists
+- **A** – standard model, medium – Row removed
+  - F-059 – the Row layout and its choice in Settings go; everyone uses Split, and saved Row choices move to Split
+- **B** – strong model, high – Own control layout – builds on A
+  - F-061 – an edit mode where the button groups are dragged into place and resized, a slider for the board's height, and a reset to the standard layout
+  - Question: where is it opened? Recommended: a button "Edit layout" under the touch-control choices in Settings, which opens the game screen with sample pieces; Done and Reset at the top
 
 Waiting for the owner: F-060 (which Hold placement stays; both are in Settings → Hold button for the test).
 

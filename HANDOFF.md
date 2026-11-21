@@ -48,6 +48,8 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 - **Rules (2026-11-20, F-046, F-052 – F-055):** Classic / Modern / Custom in Settings → 1 Player, Modern by default; Modern = 7-bag, SRS wall kicks, lock delay, 3 next pieces, Hold, ghost piece; Custom shows the switches only when chosen and starts from the preset chosen before (Q7 a); one high-score list with a Classic/Modern/Custom label (Q5); Cloudflare matches choose Classic or Modern, Firebase stays Classic (Q4). Modern scoring (T-spins, combos) parked as F-058.
 - **Design and animations (2026-11-20, standing):** every new or changed element follows Bricks' design and animations; ask the owner when unsure (project rule in `AGENTS.md`).
 - **Settings removed (2026-11-20, F-048, F-049):** no Game effects or Interface animations setting; only the system's reduced-motion choice turns animations off.
+- **Row removed (2026-11-21, F-059, owner):** the Row touch layout goes ("Den känns överflödig"); only Split remains, and anyone who had Row moves to Split.
+- **Own layout needs a reset (2026-11-21, F-061, owner):** the own control layout must have a way back to the standard layout.
 - **Key repeat settings (2026-11-21, F-056, Q2 with recommendation):** in Settings next to the touch-control choices, defaults as today.
 - **Touch controls on wide touch screens (2026-11-21, B-039, Q1 with recommendation):** shown whenever the device has a touch screen and no mouse, whatever its width (iPad in landscape); hidden on computers with a mouse as before.
 - **Hard Drop as a normal button again (2026-11-20, B-037, Q5 with recommendation):** the whole Hard Drop button reacts; the larger gap from B-035 stays and the arrows below own all of it (replaces B-035's 30 % strip).
