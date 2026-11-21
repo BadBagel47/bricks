@@ -49,6 +49,8 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 - **Design and animations (2026-11-20, standing):** every new or changed element follows Bricks' design and animations; ask the owner when unsure (project rule in `AGENTS.md`).
 - **Settings removed (2026-11-20, F-048, F-049):** no Game effects or Interface animations setting; only the system's reduced-motion choice turns animations off.
 - **Modern scoring (2026-11-21, F-058, owner):** "lägg in, men inte på som standard": available, but off by default and not part of Modern.
+- **Game end with pieces above the board (2026-11-21, F-057, Q1 with recommendation):** the game ends when a piece locks with any part above the board, or a new piece has no room to appear above it; the board stays 20 rows. A switch in Custom too.
+- **Modern scoring only in 1 Player (2026-11-21, F-058, Q2 with recommendation):** a switch under Custom (off in Classic and Modern, off when Custom starts); matches and Battle garbage unchanged.
 - **Pieces above the board in Modern (2026-11-21, F-057, owner):** "Vi gör den som en del av modern": a Modern rule (off in Classic, a switch in Custom).
 - **After a new version (2026-11-21, B-040, Q1 with recommendation):** when a part of the game cannot be loaded because a newer version was published, the page reloads once by itself and reopens 2 Players; if it still fails, a short message with Try again and Main menu instead of a black screen.
 - **Row removed (2026-11-21, F-059, owner):** the Row touch layout goes ("Den känns överflödig"); only Split remains, and anyone who had Row moves to Split.
