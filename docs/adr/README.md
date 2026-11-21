@@ -13,3 +13,5 @@ for each new decision; never rewrite an accepted record — supersede it instead
 | [0005](0005-visual-refresh-from-design-sketch.md) | Visual refresh from the approved design sketch | Accepted |
 | [0006](0006-documentation-and-backlog-conventions.md) | Documentation and backlog conventions | Accepted |
 | [0007](0007-shared-agent-rules.md) | Adopt the shared agent rules | Accepted |
+| [0008](0008-two-players-on-network-kit.md) | Two Players on network-kit (Cloudflare) beside Firebase | Accepted |
+| [0009](0009-own-touch-layout.md) | Own touch layout as screen shares, upright 1 Player only | Accepted |
