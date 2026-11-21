@@ -5,7 +5,6 @@
 | F-057 | Feature | Pieces appear in hidden rows above the board, as in modern games (fewer losses at the very top) | Low | Parked (2026-11-20) | Standard |
 | F-058 | Feature | Modern scoring: T-spins, combos and back-to-back, and their garbage in Battle. Rewards advanced play and changes 2 Players, so kept out of Modern for now | Low | Parked (2026-11-20) | Standard |
 | F-060 | Feature | Hold button placement (Split). Owner (2026-11-20, with screenshots): try two placements on the phone, both with more space between the rotate buttons than today: (1) Hold at the bottom, to the right of the left rotate button and centred under the orange (right) rotate button; (2) sketch B: Hold in the free top corner of the rotate area, above the left rotate button and to the left of the orange one. Both mirrored for left-handed. Both are to be made switchable for the test; the loser is removed afterwards. Do not invent new placements | Low | Built for the test (2026-11-20): Settings → Hold button, Bottom (default) / Top; shown with Split, two rotate buttons and Hold on; with one rotate button or Row, Hold stays where it was. Waits for the owner's choice on the phone, then the other placement is removed | Standard |
-| F-061 | Feature | A setting to arrange the touch controls on the screen yourself, and to set the height of the playing field; with a reset to the standard layout (owner, 2026-11-21) | Medium | Proposed (2026-11-20, owner); Pågår (2026-11-21, session ccr-15c9b6e3-or4w1x, runs A and B) | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Vivid (formerly Modern) block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
 | F-007 | Feature | Move Bricks 2 Players from Firebase to the shared room server in BadBagel47/network-kit (umbrella for T-008, F-028, T-009) | Medium | Proposed 2026-11-18; owner: may come sooner than planned | Strong |
@@ -15,6 +14,7 @@
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| F-061 | Feature | A setting to arrange the touch controls on the screen yourself, and to set the height of the playing field; with a reset to the standard layout (owner, 2026-11-21) | Medium | Done (2026-11-21): Settings → Edit layout opens a copy of the 1 Player screen with sample pieces; drag the two button groups, resize them with the corner handle (keyboard: arrows and + / −), set the board height (60–100 %), Reset returns to the standard layout, Done keeps it. Used in 1 Player upright; landscape and matches keep the standard layout (ADR 0009). Needs a try on the phone | Standard |
 | F-059 | Feature | Remove the Row touch layout (one row of buttons) and keep only Split; players who had Row move to Split | Low | Done (2026-11-21): the Row layout and its Settings choice are gone; everyone uses Split, saved Row choices are ignored. Touch controls on phones, tablets and in matches are Split (or Swipe) | Standard |
 | F-056 | Feature | Adjustable key repeat for held buttons (DAS delay and repeat rate; today fixed 160 ms and 48 ms). A control setting, not a rule | Low | Done (2026-11-21): Settings → Repeat delay (Short / Normal / Long: 110 / 160 / 230 ms) and Repeat speed (Slow / Normal / Fast: one step every 80 / 48 / 28 ms) next to the touch-control choices; Normal is today's timing. Apply to touch buttons, keyboard and controller in 1 Player and both kinds of match; soft drop keeps its own pace (65 ms), only its wait follows the delay | Standard |
 | B-039 | Bug | iPad in landscape (and other touch screens wider than 900 px): no touch controls are shown, in 1 Player or in matches, so the game can only be played with a keyboard or controller there (found 2026-11-20 while measuring B-038: the touch controls are only shown up to 900 px width) | High | Done (2026-11-21): on touch screens without a mouse (hover none, coarse pointer) the touch controls and Pause show at every width; Split sits in the bottom corners beside the board, Row and Swipe below it with a smaller board; keyboard hints hidden there. Checked at 1024 × 768, 1180 × 820, 1366 × 1024 and 1024 × 1366 (1 Player) and in matches at 1024 × 768 and 1180 × 820; a computer with a mouse is unchanged. Needs a look on the iPad | Standard |
@@ -128,15 +128,9 @@ The approved High items come from the owner's request of 2026-11-10: use the
 sketch's layout **and behavior**, not only its look. Design reference:
 "Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
 
-## Proposed runs (2026-11-21, after the owner removed Row)
+## Proposed runs (2026-11-21, after F-059 and F-061)
 
-Prioritized for: visible faults first, then the touch controls.
-
-- **A** – strong model, high – Own control layout (in progress)
-  - F-061 – an edit mode where the button groups are dragged into place and resized, a slider for the board's height, and a reset to the standard layout
-  - Question: where is it opened? Recommended: a button "Edit layout" under the touch-control choices in Settings, which opens the game screen with sample pieces; Done and Reset at the top
-
-Waiting for the owner: F-060 (which Hold placement stays; both are in Settings → Hold button for the test).
+Nothing ready to propose. Waiting for the owner: F-060 (which Hold placement stays; both are in Settings → Hold button for the test).
 
 Not proposed: F-006 (music studio chat); T-009 (retire Firebase and the old admin; waits for the owner's two-device check and explicit yes); adaptation item 1.1 (web basics, see HANDOFF).
 

@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { DEFAULT_REPEAT } from '../input/repeat.ts'
 import type { RepeatTiming } from '../input/repeat.ts'
+import type { CustomLayout, GroupPlace } from './custom-layout.ts'
 import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from 'react'
 import { dropPosition, pieceCells } from '../engine/index.ts'
 import type { Cell, GameAction, GameState, PieceType } from '../engine/index.ts'
@@ -77,8 +78,8 @@ const ICONS = {
   hardDrop: <><path d="M6 5l6 6 6-6" /><path d="M6 11l6 6 6-6" /><path d="M5 21h14" /></>,
 }
 
-export function TouchControls({ method, buttonSize, leftHanded, dropMode, enabled, apply, rotateButtons = 'two', holdEnabled = false, holdAvailable = true, holdPlacement = 'bottom', repeat = DEFAULT_REPEAT }: {
-  method: 'dpad' | 'swipe'; buttonSize: number; leftHanded: boolean; holdEnabled?: boolean; holdAvailable?: boolean; dropMode: DropMode; enabled: boolean; apply: (action: GameAction) => void; rotateButtons?: 'one' | 'two'; holdPlacement?: HoldPlacement; repeat?: RepeatTiming
+export function TouchControls({ method, buttonSize, leftHanded, dropMode, enabled, apply, rotateButtons = 'two', holdEnabled = false, holdAvailable = true, holdPlacement = 'bottom', repeat = DEFAULT_REPEAT, custom = null }: {
+  method: 'dpad' | 'swipe'; buttonSize: number; leftHanded: boolean; holdEnabled?: boolean; holdAvailable?: boolean; dropMode: DropMode; enabled: boolean; apply: (action: GameAction) => void; rotateButtons?: 'one' | 'two'; holdPlacement?: HoldPlacement; repeat?: RepeatTiming; custom?: CustomLayout | null
 }) {
   const two = rotateButtons === 'two'
   const left = <TouchButton enabled={enabled} timing={repeat} label="Move left" icon={ICONS.left} action="moveLeft" apply={apply} repeat />
@@ -94,13 +95,18 @@ export function TouchControls({ method, buttonSize, leftHanded, dropMode, enable
   // F-060: with Split and two rotate buttons, Hold joins the rotate buttons; otherwise it stays in the pad.
   const holdInRotate = Boolean(hold) && two
   const padHold = holdInRotate ? false : hold
-  return <section className={`touch-controls${leftHanded ? ' left-handed' : ''}${method === 'dpad' ? ' touch-split' : ''}${single ? ' single-drop' : ''}${method === 'dpad' && holdInRotate ? ' hold-in-rotate' : ''}`} style={{ '--preferred-touch-size': `${buttonSize}px`, '--touch-count': count } as CSSProperties} aria-label="Touch controls">
+  return <section className={`touch-controls${leftHanded ? ' left-handed' : ''}${method === 'dpad' ? ' touch-split' : ''}${single ? ' single-drop' : ''}${method === 'dpad' && holdInRotate ? ' hold-in-rotate' : ''}${method === 'dpad' && custom ? ' touch-custom' : ''}`} style={{ '--preferred-touch-size': `${buttonSize}px`, '--touch-count': count } as CSSProperties} aria-label="Touch controls">
     {method === 'swipe' ? <p className="swipe-instructions">Tap the left half to rotate ↺ and the right half to rotate ↻ · Swipe left/right to move{softDropAllowed(dropMode) ? ' · Swipe down to soft drop' : ''}{hardDropAllowed(dropMode) ? ' · Swipe up to hard drop' : ''}</p>
       : <>
-        {single ? <div className={`touch-pad single${padHold ? ' with-hold' : ''}`}>{left}{down || drop}{right}{padHold}</div> : <div className="touch-pad">{drop}{left}{down}{right}{padHold}</div>}
-        <div className={`touch-rotate${two ? ' two' : ''}${holdInRotate ? ` with-hold hold-${holdPlacement}` : ''}`}>{ccw}{cw}{holdInRotate && hold}</div>
+        {single ? <div className={`touch-pad single${padHold ? ' with-hold' : ''}`} style={placeStyle(custom?.pad)}>{left}{down || drop}{right}{padHold}</div> : <div className="touch-pad" style={placeStyle(custom?.pad)}>{drop}{left}{down}{right}{padHold}</div>}
+        <div className={`touch-rotate${two ? ' two' : ''}${holdInRotate ? ` with-hold hold-${holdPlacement}` : ''}`} style={placeStyle(custom?.rotate)}>{ccw}{cw}{holdInRotate && hold}</div>
       </>}
   </section>
+}
+
+/** F-061: where a button group sits in the player's own layout (used by CSS only in portrait). */
+function placeStyle(place: GroupPlace | undefined): CSSProperties | undefined {
+  return place ? { '--x': place.x, '--y': place.y, '--s': place.scale } as CSSProperties : undefined
 }
 
 /** Small static copy of the touch buttons for the Settings preview (F-023). */

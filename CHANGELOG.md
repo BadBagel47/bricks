@@ -6,6 +6,9 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Added (2026-11-21, F-061)
+- F-061: own touch layout: Settings → Edit layout lets players drag and resize the two button groups and set the board's height on a copy of the 1 Player screen; Reset returns to the standard layout. Used in 1 Player when the device is upright.
+
 ### Removed (2026-11-21, F-059)
 - F-059: the Row touch layout (one row of buttons) and its choice in Settings; everyone uses Split.
 

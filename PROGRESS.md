@@ -9,6 +9,10 @@
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 
+## F-061 — 2026-11-21
+
+Owner: "Kör A och B rek" and "Den egna layouten behöver en funktion för återställning" (editor from Settings → Edit layout, Done and Reset at the top). `src/ui/custom-layout.ts` (model, parsing, keep-on-screen, resize, place from the drawn standard layout), `src/ui/LayoutEditor.tsx` (copy of the 1 Player screen with sample pieces, dashed frames with corner handles, keyboard nudging, board slider, Reset, Done; landscape asks to turn the device upright), `customLayout` in personal settings, `TouchControls` places the groups with `--x/--y/--s` (CSS only upright), 1 Player board via `--board-auto × --board-scale`. ADR 0009. Local: lint (no new warnings), unit 219, build, browser 24/24 (new: edit, use in the game with a working moved button, Reset back to the standard places), `npm run test:net` 4/4, operating 3/3. Firebase emulator suite: CI.
+
 ## F-059 — 2026-11-21
 
 Owner: "Vi kan ta bort row. Den känns överflödig". `touchLayout`/`touchLayoutVersion` removed from personal settings (old values ignored), `TouchControls`/`TouchPreview` always Split for buttons, the Layout choice and all `.touch-row` CSS removed; browser layout tests now cover both Hold placements only, and the iPad landscape tests cover Buttons and Swipe. Local: lint (no new warnings), unit 217, build, browser 23/23.

@@ -4,6 +4,8 @@ import type { BlockColors } from './ui/level-palettes.ts'
 import { hardDropAllowed, parseDropMode } from './input/drop-mode.ts'
 import type { DropMode } from './input/drop-mode.ts'
 import type { RepeatDelay, RepeatSpeed } from './input/repeat.ts'
+import { parseCustomLayout } from './ui/custom-layout.ts'
+import type { CustomLayout } from './ui/custom-layout.ts'
 export interface PersonalSettings {
   readonly version: 1
   /** Kept in step with dropMode (true unless dropMode is 'drop'); the engine and older code read it. */
@@ -26,6 +28,8 @@ export interface PersonalSettings {
   /** F-056: held buttons (touch, keyboard, controller): wait before repeating, and sideways repeat speed. */
   readonly repeatDelay: RepeatDelay
   readonly repeatSpeed: RepeatSpeed
+  /** F-061: the player's own touch-control layout (1 Player, portrait); null is the standard layout. */
+  readonly customLayout: CustomLayout | null
   readonly hideTouchControlsWhenController: boolean
   readonly blockColors: BlockColors
   /** Menu and screen transitions, switches, dialogs (F-021). */
@@ -58,7 +62,7 @@ export interface HighscoreResult {
 
 export const DEFAULT_PERSONAL_SETTINGS: PersonalSettings = {
   version: 1, hardDropEnabled: true, dropMode: 'both', musicEnabled: true, musicVolume: 70, effectsEnabled: true, effectsVolume: 70,
-  mobileControlMethod: 'dpad', touchButtonSize: 56, leftHandedControls: false, rotateButtons: 'two', holdPlacement: 'bottom', repeatDelay: 'normal', repeatSpeed: 'normal', hideTouchControlsWhenController: true,
+  mobileControlMethod: 'dpad', touchButtonSize: 56, leftHandedControls: false, rotateButtons: 'two', holdPlacement: 'bottom', repeatDelay: 'normal', repeatSpeed: 'normal', customLayout: null, hideTouchControlsWhenController: true,
   blockColors: 'level',
 }
 export const DEFAULT_SINGLE_PLAYER_SETTINGS: SinglePlayerSettings = { version: 1, startLevel: 0, rules: DEFAULT_RULES_CHOICE }
@@ -91,6 +95,7 @@ export function parsePersonalSettings(raw: string | null): PersonalSettings {
     holdPlacement: value?.holdPlacement === 'top' ? 'top' : 'bottom',
     repeatDelay: value?.repeatDelay === 'short' || value?.repeatDelay === 'long' ? value.repeatDelay : 'normal',
     repeatSpeed: value?.repeatSpeed === 'slow' || value?.repeatSpeed === 'fast' ? value.repeatSpeed : 'normal',
+    customLayout: parseCustomLayout(value?.customLayout),
     hideTouchControlsWhenController: typeof value?.hideTouchControlsWhenController === 'boolean' ? value.hideTouchControlsWhenController : true,
     blockColors: value?.blockColors === 'classic' || value?.blockColors === 'tones' ? value.blockColors : 'level',
   }

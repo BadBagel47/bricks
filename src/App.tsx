@@ -15,6 +15,7 @@ import { HeldInputs, repeatTiming } from './input/repeat.ts'
 import { actionsForSwipe } from './input/swipe.ts'
 import { actionAllowed, hardDropAllowed, softDropAllowed } from './input/drop-mode.ts'
 import { HoldBox, NextQueue, Playfield, PiecePreview, TouchControls, TouchPreview } from './ui/GameViews.tsx'
+import { LayoutEditor } from './ui/LayoutEditor.tsx'
 import { ColorPreview, Segmented, Stepper } from './ui/SettingsControls.tsx'
 import { addHighscore, DEFAULT_PERSONAL_SETTINGS, DEFAULT_SINGLE_PLAYER_SETTINGS, parseHighscores, parsePersonalSettings, parseSinglePlayerSettings, serializeHighscores } from './persistence.ts'
 import type { HighscoreRecord, PersonalSettings, SinglePlayerSettings } from './persistence.ts'
@@ -36,7 +37,7 @@ const PERSONAL_KEY = 'bricks.personal.v1'
 const SINGLE_PLAYER_KEY = 'bricks.single-player.v1'
 const HIGHSCORES_KEY = 'bricks.highscores.v1'
 const SCORE_TABS = [{ id: 'single', label: '1 Player' }, { id: 'score-duel', label: 'Score Duel' }, { id: 'battle', label: 'Battle' }] as const
-type View = 'welcome' | 'menu' | 'settings' | 'highScores' | 'game' | 'multiplayer'
+type View = 'welcome' | 'menu' | 'settings' | 'highScores' | 'game' | 'multiplayer' | 'layout'
 /** Presses that arrive right after game over were meant for the last piece (B-006). */
 const GAME_OVER_INPUT_GUARD_MS = 700
 
@@ -509,6 +510,7 @@ function App() {
           <Segmented label="Hold button" value={personal.holdPlacement} options={[{ value: 'bottom', label: 'Bottom' }, { value: 'top', label: 'Top' }]} onChange={(holdPlacement) => savePersonal({ ...personal, holdPlacement })} />
         </div>}
         <TouchPreview rotateButtons={personal.rotateButtons} dropMode={personal.dropMode} leftHanded={personal.leftHandedControls} holdEnabled={playRules(singlePlayer.rules).hold} holdPlacement={personal.holdPlacement} />
+        <button className="back-button layout-edit-button" type="button" onClick={() => setView('layout')}>Edit layout</button>
       </div>}
       <span className="setting-label">Drop</span>
       <Segmented label="Drop" value={personal.dropMode} options={[{ value: 'drop', label: 'Drop' }, { value: 'hard', label: 'Hard Drop' }, { value: 'both', label: 'Both' }]} onChange={(dropMode) => savePersonal({ ...personal, dropMode, hardDropEnabled: hardDropAllowed(dropMode) })} />
@@ -571,6 +573,9 @@ function App() {
     </section>
   </main>
 
+  // F-061: the player's own touch-control layout, edited on a copy of the 1 Player screen.
+  if (view === 'layout') return <LayoutEditor personal={personal} holdEnabled={playRules(singlePlayer.rules).hold} onDone={(customLayout) => { savePersonal({ ...personal, customLayout }); setView('settings') }} />
+
   if (view === 'highScores') return <main className="shell">
     <SubpageBar title="High Scores" onBack={() => setView('menu')} />
     <section className="settings-card score-list-page">
@@ -594,7 +599,7 @@ function App() {
   </main>
 
   if (view === 'game') return <>
-    <main className="shell game-shell" inert={game.status === 'paused' || game.status === 'gameOver'}>
+    <main className={`shell game-shell${personal.customLayout && personal.mobileControlMethod === 'dpad' ? ' layout-custom' : ''}`} style={personal.customLayout && personal.mobileControlMethod === 'dpad' ? { '--board-scale': personal.customLayout.board } as CSSProperties : undefined} inert={game.status === 'paused' || game.status === 'gameOver'}>
     <header className="topbar game-topbar"><Brand compact /><button className="mobile-pause-button" aria-label="Pause" onClick={() => apply('pause')} tabIndex={-1} type="button"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.2" /><rect x="14" y="5" width="4" height="14" rx="1.2" /></svg></button></header>
     <section className="game-layout" aria-label="Single-player game">
       <aside className="game-side game-stats">
@@ -605,7 +610,7 @@ function App() {
       <Playfield game={game} ghost={gameRules.ghost} colors={personal.blockColors} clear={clearFx} thump={thump} swipeMode={personal.mobileControlMethod === 'swipe'} onSwipe={(start, end, board) => actionsForSwipe(start, end, board).forEach(apply)} />
       <aside className="game-side next-panel"><div className="next-box"><span>Next</span><PiecePreview type={game.next} level={game.level} colors={personal.blockColors} /><NextQueue queue={game.queue} level={game.level} colors={personal.blockColors} /></div>{game.holdEnabled && <HoldBox type={game.held} level={game.level} colors={personal.blockColors} enabled={game.status === 'playing' && !game.holdUsed} onHold={() => apply('hold')} />}</aside>
     </section>
-    {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={72} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} holdPlacement={personal.holdPlacement} repeat={repeat} holdEnabled={game.holdEnabled} holdAvailable={!game.holdUsed} dropMode={personal.dropMode} enabled={game.status === 'playing'} apply={apply} />}
+    {(!personal.hideTouchControlsWhenController || !controllerStatus.startsWith('Gamepad connected')) && <TouchControls method={personal.mobileControlMethod} buttonSize={72} leftHanded={personal.leftHandedControls} rotateButtons={personal.rotateButtons} holdPlacement={personal.holdPlacement} repeat={repeat} custom={personal.customLayout} holdEnabled={game.holdEnabled} holdAvailable={!game.holdUsed} dropMode={personal.dropMode} enabled={game.status === 'playing'} apply={apply} />}
     <p className="controller-status" aria-live="polite">{controllerStatus}</p>
     <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">{gameAnnouncement}</p>
     <p className="control-hint" aria-label="Keyboard controls">{keyLabel(bindings.moveLeft)} {keyLabel(bindings.moveRight)} Move · {softDropAllowed(personal.dropMode) ? `${keyLabel(bindings.softDrop)} Soft drop · ` : ''}{keyLabel(bindings.rotateCounterclockwise)} {keyLabel(bindings.rotateClockwise)} Rotate · {hardDropAllowed(personal.dropMode) ? `${keyLabel(bindings.hardDrop)} Hard drop` : 'Hard Drop off'}{game.holdEnabled ? ` · ${keyLabel(bindings.hold)} Hold` : ''} · {keyLabel(bindings.pause)} / Esc Pause</p>
