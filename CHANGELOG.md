@@ -6,6 +6,9 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Removed (2026-11-21, F-059)
+- F-059: the Row touch layout (one row of buttons) and its choice in Settings; everyone uses Split.
+
 ### Added (2026-11-21, F-056)
 - F-056: Settings → Repeat delay (Short / Normal / Long) and Repeat speed (Slow / Normal / Fast) for held buttons on touch, keyboard and controller; Normal keeps the earlier timing.
 

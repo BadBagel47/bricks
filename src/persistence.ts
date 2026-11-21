@@ -19,10 +19,7 @@ export interface PersonalSettings {
   readonly leftHandedControls: boolean
   /** F-023: one rotate button (clockwise) or two (counterclockwise and clockwise). */
   readonly rotateButtons: 'one' | 'two'
-  /** F-023: all buttons in one row, or split between two thumbs. */
-  readonly touchLayout: 'row' | 'split'
-  /** F-041: 2 once the layout was saved after Split became the default; earlier saves move to Split once. */
-  readonly touchLayoutVersion: 2
+  /* F-059 (2026-11-21): the Row layout is gone; every player uses Split. Old touchLayout values are ignored. */
   /** F-060 (owner test, 2026-11-20): with Split and two rotate buttons, Hold sits below the orange
    *  rotate button ('bottom') or in the free top corner above the other one ('top'). One is removed after the test. */
   readonly holdPlacement: 'bottom' | 'top'
@@ -61,7 +58,7 @@ export interface HighscoreResult {
 
 export const DEFAULT_PERSONAL_SETTINGS: PersonalSettings = {
   version: 1, hardDropEnabled: true, dropMode: 'both', musicEnabled: true, musicVolume: 70, effectsEnabled: true, effectsVolume: 70,
-  mobileControlMethod: 'dpad', touchButtonSize: 56, leftHandedControls: false, rotateButtons: 'two', touchLayout: 'split', touchLayoutVersion: 2, holdPlacement: 'bottom', repeatDelay: 'normal', repeatSpeed: 'normal', hideTouchControlsWhenController: true,
+  mobileControlMethod: 'dpad', touchButtonSize: 56, leftHandedControls: false, rotateButtons: 'two', holdPlacement: 'bottom', repeatDelay: 'normal', repeatSpeed: 'normal', hideTouchControlsWhenController: true,
   blockColors: 'level',
 }
 export const DEFAULT_SINGLE_PLAYER_SETTINGS: SinglePlayerSettings = { version: 1, startLevel: 0, rules: DEFAULT_RULES_CHOICE }
@@ -91,8 +88,6 @@ export function parsePersonalSettings(raw: string | null): PersonalSettings {
     touchButtonSize: typeof value?.touchButtonSize === 'number' && Number.isInteger(value.touchButtonSize) && value.touchButtonSize >= 44 && value.touchButtonSize <= 72 ? value.touchButtonSize : 56,
     leftHandedControls: typeof value?.leftHandedControls === 'boolean' ? value.leftHandedControls : false,
     rotateButtons: value?.rotateButtons === 'one' ? 'one' : 'two',
-    touchLayout: value?.touchLayoutVersion === 2 && value?.touchLayout === 'row' ? 'row' : 'split',
-    touchLayoutVersion: 2,
     holdPlacement: value?.holdPlacement === 'top' ? 'top' : 'bottom',
     repeatDelay: value?.repeatDelay === 'short' || value?.repeatDelay === 'long' ? value.repeatDelay : 'normal',
     repeatSpeed: value?.repeatSpeed === 'slow' || value?.repeatSpeed === 'fast' ? value.repeatSpeed : 'normal',

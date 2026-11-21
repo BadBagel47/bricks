@@ -153,8 +153,6 @@ button.mode-card{cursor:pointer;transition:border-color .15s,transform .15s,back
 /* Touch controls: one row of five large buttons below the board. */
 .touch-controls{display:none;--touch-size:min(var(--preferred-touch-size),calc((100vw - 72px)/5))}
 .playfield.swipe-active{touch-action:none;user-select:none}
-.touch-row{display:flex;align-items:center;justify-content:center;gap:clamp(5px,2vw,12px)}
-.left-handed .touch-row{flex-direction:row-reverse}
 .touch-button{width:var(--touch-size);height:var(--touch-size);min-width:44px;min-height:44px;display:grid;place-items:center;padding:0;border:1px solid var(--line);border-radius:18px;background:var(--panel-2);color:var(--text);touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:pointer}
 .touch-button svg{width:46%;height:46%}
 .touch-button:active{transform:translateY(2px);background:var(--panel-3)}
@@ -419,9 +417,8 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
   .game-shell:has(.touch-split) .playfield{width:min(calc(100vw - 28px - 86px),300px,calc((100dvh - 270px - var(--preferred-touch-size, 56px)) / 2))}
 }
 .touch-preview{display:flex;justify-content:center;gap:16px;align-items:flex-end;margin:10px 0 4px;padding:14px;border:1px solid var(--line-soft);border-radius:14px;background:#0A0D18}
-.touch-preview .touch-row{display:flex;gap:6px}
 .touch-preview.split{justify-content:space-between}
-.touch-preview.left-handed .touch-row,.touch-preview.split.left-handed{flex-direction:row-reverse}
+.touch-preview.split.left-handed{flex-direction:row-reverse}
 .touch-preview .touch-pad{--touch-size:36px;gap:5px}
 .touch-preview .touch-rotate.two{--touch-size:36px}
 .preview-key{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;border:1px solid var(--line);background:var(--panel-2);color:var(--text)}
@@ -480,12 +477,6 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
 .invite-qr-code{width:min(260px,70vw);padding:10px;border-radius:14px;background:#fff;line-height:0}
 .invite-qr-code svg{display:block;width:100%;height:auto;aspect-ratio:1}
 
-/* F-040: in the Row layout, a gap between the move buttons (left, right) and the rest. */
-.touch-controls:not(.touch-split){--touch-group-gap:clamp(6px,(100vw - 300px) / 4,22px)}
-.touch-row>:nth-child(2){margin-inline-end:var(--touch-group-gap)}
-.left-handed .touch-row>:nth-child(2){margin-inline:var(--touch-group-gap) 0}
-.touch-preview{--touch-group-gap:14px}
-
 /* B-026: tablets in portrait stack the logo, headline and menu buttons as on phones. */
 @media(orientation:portrait) and (min-width:761px) and (max-width:1100px){
   .menu-content{grid-template-columns:1fr;gap:56px;width:min(100%,560px);padding:64px 0 40px}
@@ -535,14 +526,6 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
    neighbours, more towards the screen edges); round rotate buttons answer in their corners too. */
 .touch-button{position:relative}
 .touch-button::after{content:'';position:absolute;top:var(--hit-t,-10px);right:var(--hit-r,-6px);bottom:var(--hit-b,-16px);left:var(--hit-l,-6px)}
-.touch-row{--g:clamp(5px,2vw,12px)}
-.touch-row>*{--hit-l:calc(var(--g) / -2);--hit-r:calc(var(--g) / -2)}
-.touch-row>:first-child{--hit-l:-14px}.touch-row>:last-child{--hit-r:-14px}
-.touch-row>:nth-child(2){--hit-r:calc((var(--g) + var(--touch-group-gap, 0px)) / -2)}
-.touch-row>:nth-child(3){--hit-l:calc((var(--g) + var(--touch-group-gap, 0px)) / -2)}
-.left-handed .touch-row>:first-child{--hit-l:calc(var(--g) / -2);--hit-r:-14px}.left-handed .touch-row>:last-child{--hit-r:calc(var(--g) / -2);--hit-l:-14px}
-.left-handed .touch-row>:nth-child(2){--hit-r:calc(var(--g) / -2);--hit-l:calc((var(--g) + var(--touch-group-gap, 0px)) / -2)}
-.left-handed .touch-row>:nth-child(3){--hit-l:calc(var(--g) / -2);--hit-r:calc((var(--g) + var(--touch-group-gap, 0px)) / -2)}
 .touch-pad>*{--hit-t:-5px;--hit-b:-5px;--hit-l:-5px;--hit-r:-5px}
 .touch-pad>[style*="grid-area: 1"],.touch-pad>:nth-child(1){--hit-t:-10px}
 .touch-pad>:not(:nth-child(1)){--hit-b:-16px}
@@ -555,10 +538,9 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
 .touch-rotate.two .touch-primary{--hit-t:-10px;--hit-r:-14px;--hit-b:-6px;--hit-l:-6px}
 .left-handed .touch-rotate.two .touch-secondary{--hit-l:-6px;--hit-r:-14px}
 .left-handed .touch-rotate.two .touch-primary{--hit-r:-6px;--hit-l:-14px}
-.multiplayer-game .touch-row{--g:8px}
 /* The extra areas sit beneath the buttons: a button's own shape always wins over a neighbour's area. */
 .touch-controls{isolation:isolate}
-.touch-controls,.touch-controls .touch-row,.touch-pad,.touch-rotate{pointer-events:none}
+.touch-controls,.touch-pad,.touch-rotate{pointer-events:none}
 .touch-button{pointer-events:auto}
 .touch-button::after{z-index:-1}
 .touch-pad>:nth-child(1):not(.touch-hold){--hit-l:calc(var(--touch-size) * -1 - 4px);--hit-r:calc(var(--touch-size) * -1 - 4px)}
@@ -588,9 +570,6 @@ section[aria-label="Match start"] .button-primary{min-height:56px;font-size:17px
 @keyframes tile-in{from{opacity:0;transform:translateY(-14px) scale(1.25)}}
 .button,.mode-card,.secondary-card,.icon-back,.match-leave,.settings-button,.back-button{transition:transform 120ms,background 150ms,border-color 150ms,color 150ms,opacity 200ms}
 
-/* F-050 (owner, 2026-11-20): with Hold, the Row's seven buttons may be drawn down to 36 px on narrow
-   phones; their touch areas (B-032) stay larger than the drawn buttons. */
-.touch-row .touch-button{min-width:36px;min-height:36px}
 /* The touch areas reach the screen edge without making the page scroll sideways. */
 .game-shell{overflow:clip}
 /* The match screen scrolls on its own (overflow:auto), so there the touch areas stay inside its padding. */

@@ -403,9 +403,9 @@ test('leaving Game Over cancels the remaining effect notes before returning to t
 })
 
 // F-060: Split is checked with both Hold placements under test (below the orange rotate button, top corner).
-for (const viewport of [{ width: 1280, height: 800 }, { width: 320, height: 667 }, { width: 390, height: 844 }, { width: 844, height: 390 }, { width: 800, height: 600 }]) for (const [touchLayout, holdPlacement] of [['split', 'bottom'], ['split', 'top'], ['row', 'bottom']]) {
-  test(`layout ${viewport.width} × ${viewport.height}, ${touchLayout}${touchLayout === 'split' ? `, Hold ${holdPlacement}` : ''}: complete board and largest touch controls fit`, async () => {
-    const page = await open({ viewport, personal: { touchButtonSize: 72, touchLayout, touchLayoutVersion: 2, holdPlacement }, singlePlayer: { holdEnabled: true } })
+for (const viewport of [{ width: 1280, height: 800 }, { width: 320, height: 667 }, { width: 390, height: 844 }, { width: 844, height: 390 }, { width: 800, height: 600 }]) for (const holdPlacement of ['bottom', 'top']) {
+  test(`layout ${viewport.width} × ${viewport.height}, Hold ${holdPlacement}: complete board and largest touch controls fit`, async () => {
+    const page = await open({ viewport, personal: { touchButtonSize: 72, holdPlacement }, singlePlayer: { holdEnabled: true } })
     await start(page)
     const dimensions = await page.evaluate(() => ({ width: innerWidth, height: innerHeight, scrollHeight: document.documentElement.scrollHeight, scrollWidth: document.documentElement.scrollWidth }))
     assert.ok(dimensions.scrollHeight <= dimensions.height + 1, JSON.stringify(dimensions))
@@ -420,14 +420,13 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 320, height: 667 
         const box = await button.boundingBox()
         for (const other of boxes) assert.ok(box.x >= other.x + other.width || other.x >= box.x + box.width || box.y >= other.y + other.height || other.y >= box.y + box.height, `two touch buttons overlap: ${JSON.stringify([box, other])}`)
         boxes.push(box)
-        // Row with Hold has seven buttons and may draw them down to 36 px (owner, 2026-11-20).
-        const least = touchLayout === 'row' ? 36 : 44
+        const least = 44
         assert.ok(box.width >= least && box.height >= least, `a touch button is too small: ${JSON.stringify(box)}`)
         assert.ok(box.y >= board.y + board.height || box.x + box.width <= board.x || box.x >= board.x + board.width, `a touch button overlaps the board: ${JSON.stringify(box)}`)
         assert.ok(box.x >= 0 && box.x + box.width <= viewport.width && box.y + box.height <= viewport.height)
       }
     }
-    if (touchLayout === 'split' && viewport.width < viewport.height) {
+    if (viewport.width < viewport.height) {
       // F-060: Hold sits with the rotate buttons; F-063: the top bar follows the columns below it.
       const hold = await controls.getByRole('button', { name: 'Hold', exact: true }).boundingBox()
       const rotate = await controls.getByRole('button', { name: 'Rotate clockwise', exact: true }).boundingBox()
@@ -443,17 +442,17 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 320, height: 667 
     await checkGameTabCycle(page)
     if (process.env.BRICKS_SCREENSHOT_DIR) {
       mkdirSync(process.env.BRICKS_SCREENSHOT_DIR, { recursive: true })
-      await page.screenshot({ path: `${process.env.BRICKS_SCREENSHOT_DIR}/${viewport.width}x${viewport.height}-${touchLayout}-${holdPlacement}.png` })
+      await page.screenshot({ path: `${process.env.BRICKS_SCREENSHOT_DIR}/${viewport.width}x${viewport.height}-${holdPlacement}.png` })
     }
   })
 }
 
 // B-039: touch screens wider than 900 px without a mouse (iPad in landscape) get the touch controls
 // and Pause beside or below the board; a computer with a mouse keeps them hidden.
-for (const touchLayout of ['split', 'row']) {
-  test(`B-039: iPad in landscape, ${touchLayout}: touch controls and Pause fit beside or below the board`, async () => {
+for (const mobileControlMethod of ['dpad', 'swipe']) {
+  test(`B-039: iPad in landscape, ${mobileControlMethod}: touch controls and Pause fit beside or below the board`, async () => {
     const viewport = { width: 1180, height: 820 }
-    const page = await open({ viewport, mobile: true, personal: { touchLayout, touchLayoutVersion: 2 } })
+    const page = await open({ viewport, mobile: true, personal: { mobileControlMethod } })
     await start(page)
     const controls = page.getByRole('region', { name: 'Touch controls' })
     assert.equal(await controls.isVisible(), true)

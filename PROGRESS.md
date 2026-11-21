@@ -9,6 +9,10 @@
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 
+## F-059 — 2026-11-21
+
+Owner: "Vi kan ta bort row. Den känns överflödig". `touchLayout`/`touchLayoutVersion` removed from personal settings (old values ignored), `TouchControls`/`TouchPreview` always Split for buttons, the Layout choice and all `.touch-row` CSS removed; browser layout tests now cover both Hold placements only, and the iPad landscape tests cover Buttons and Swipe. Local: lint (no new warnings), unit 217, build, browser 23/23.
+
 ## F-056 — 2026-11-21
 
 Owner: "Kör A rek" (Q2: in Settings next to the touch-control choices, defaults as today). `src/input/repeat.ts` has `repeatTiming(delay, speed)` (delay 110 / 160 / 230 ms, sideways interval 80 / 48 / 28 ms, soft drop 65 ms) and `HeldInputs` takes the timing; personal settings `repeatDelay` and `repeatSpeed` ('normal' by default); `TouchButton` uses the same timing; 1 Player, Firebase and Cloudflare matches pass the player's choice. Local: lint (no new warnings), unit 217, build, browser 28/28, `npm run test:net` 4/4, operating 3/3. Firebase emulator suite: CI.

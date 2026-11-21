@@ -62,7 +62,6 @@
 .duel-status{width:100%;text-align:center}.duel-status h2{font-size:24px;margin:0 0 8px}.duel-status p{font-size:14px;margin:4px 0}.duel-status[role="status"]{color:var(--accent)}
 .multiplayer-game>.touch-controls{flex-shrink:0;margin:auto 0 0}
 .multiplayer-game>.control-hint{margin:0;max-width:600px}
-.multiplayer-game .touch-row{gap:8px}
 
 /* Wide screens: larger side column; keyboard hint visible. */
 @media(min-width:901px){
@@ -100,8 +99,6 @@
   .multiplayer-game>.match-note,.multiplayer-game>.duel-status,.multiplayer-game>[role=alert]{grid-column:2;grid-row:3}
   .multiplayer-game>.duel-status p{font-size:12px}
   .multiplayer-game>.touch-controls{grid-column:2;grid-row:4;align-self:end;margin:0}
-  .multiplayer-game .touch-row{flex-wrap:wrap;max-width:220px}
-  .multiplayer-game .touch-row>:nth-child(2){margin-inline:0}
   /* F-041: Split in the 220 px column: the pad above, the rotate buttons below it. */
   .multiplayer-game .touch-split{flex-wrap:wrap;justify-content:flex-end!important;gap:8px;--touch-size:min(var(--preferred-touch-size),52px)}
   .multiplayer-game .touch-split>.touch-pad{margin-inline:auto}

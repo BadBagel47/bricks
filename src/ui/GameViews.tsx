@@ -77,8 +77,8 @@ const ICONS = {
   hardDrop: <><path d="M6 5l6 6 6-6" /><path d="M6 11l6 6 6-6" /><path d="M5 21h14" /></>,
 }
 
-export function TouchControls({ method, buttonSize, leftHanded, dropMode, enabled, apply, rotateButtons = 'two', layout = 'split', holdEnabled = false, holdAvailable = true, holdPlacement = 'bottom', repeat = DEFAULT_REPEAT }: {
-  method: 'dpad' | 'swipe'; buttonSize: number; leftHanded: boolean; holdEnabled?: boolean; holdAvailable?: boolean; dropMode: DropMode; enabled: boolean; apply: (action: GameAction) => void; rotateButtons?: 'one' | 'two'; layout?: 'row' | 'split'; holdPlacement?: HoldPlacement; repeat?: RepeatTiming
+export function TouchControls({ method, buttonSize, leftHanded, dropMode, enabled, apply, rotateButtons = 'two', holdEnabled = false, holdAvailable = true, holdPlacement = 'bottom', repeat = DEFAULT_REPEAT }: {
+  method: 'dpad' | 'swipe'; buttonSize: number; leftHanded: boolean; holdEnabled?: boolean; holdAvailable?: boolean; dropMode: DropMode; enabled: boolean; apply: (action: GameAction) => void; rotateButtons?: 'one' | 'two'; holdPlacement?: HoldPlacement; repeat?: RepeatTiming
 }) {
   const two = rotateButtons === 'two'
   const left = <TouchButton enabled={enabled} timing={repeat} label="Move left" icon={ICONS.left} action="moveLeft" apply={apply} repeat />
@@ -94,28 +94,25 @@ export function TouchControls({ method, buttonSize, leftHanded, dropMode, enable
   // F-060: with Split and two rotate buttons, Hold joins the rotate buttons; otherwise it stays in the pad.
   const holdInRotate = Boolean(hold) && two
   const padHold = holdInRotate ? false : hold
-  return <section className={`touch-controls${leftHanded ? ' left-handed' : ''}${method === 'dpad' && layout === 'split' ? ' touch-split' : ''}${single ? ' single-drop' : ''}${method === 'dpad' && layout === 'split' && holdInRotate ? ' hold-in-rotate' : ''}`} style={{ '--preferred-touch-size': `${buttonSize}px`, '--touch-count': count } as CSSProperties} aria-label="Touch controls">
+  return <section className={`touch-controls${leftHanded ? ' left-handed' : ''}${method === 'dpad' ? ' touch-split' : ''}${single ? ' single-drop' : ''}${method === 'dpad' && holdInRotate ? ' hold-in-rotate' : ''}`} style={{ '--preferred-touch-size': `${buttonSize}px`, '--touch-count': count } as CSSProperties} aria-label="Touch controls">
     {method === 'swipe' ? <p className="swipe-instructions">Tap the left half to rotate ↺ and the right half to rotate ↻ · Swipe left/right to move{softDropAllowed(dropMode) ? ' · Swipe down to soft drop' : ''}{hardDropAllowed(dropMode) ? ' · Swipe up to hard drop' : ''}</p>
-      : layout === 'split' ? <>
+      : <>
         {single ? <div className={`touch-pad single${padHold ? ' with-hold' : ''}`}>{left}{down || drop}{right}{padHold}</div> : <div className="touch-pad">{drop}{left}{down}{right}{padHold}</div>}
         <div className={`touch-rotate${two ? ' two' : ''}${holdInRotate ? ` with-hold hold-${holdPlacement}` : ''}`}>{ccw}{cw}{holdInRotate && hold}</div>
-      </>
-      : <div className="touch-row">{left}{right}{down}{ccw}{cw}{drop}{hold}</div>}
+      </>}
   </section>
 }
 
 /** Small static copy of the touch buttons for the Settings preview (F-023). */
-export function TouchPreview({ rotateButtons, layout, dropMode, leftHanded, holdEnabled = false, holdPlacement = 'bottom' }: { rotateButtons: 'one' | 'two'; layout: 'row' | 'split'; dropMode: DropMode; leftHanded: boolean; holdEnabled?: boolean; holdPlacement?: HoldPlacement }) {
+export function TouchPreview({ rotateButtons, dropMode, leftHanded, holdEnabled = false, holdPlacement = 'bottom' }: { rotateButtons: 'one' | 'two'; dropMode: DropMode; leftHanded: boolean; holdEnabled?: boolean; holdPlacement?: HoldPlacement }) {
   const icon = (paths: ReactNode, kind = '') => <span className={`preview-key${kind}`}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">{paths}</svg></span>
   const two = rotateButtons === 'two'
   const ccw = two && icon(ICONS.counterclockwise, ' secondary'), cw = icon(ICONS.clockwise, ' primary')
   const down = softDropAllowed(dropMode) && icon(ICONS.down), drop = hardDropAllowed(dropMode) && icon(ICONS.hardDrop), single = dropMode !== 'both'
   const hold = holdEnabled && <span className="preview-key touch-hold">HOLD</span>
   const holdInRotate = Boolean(hold) && two, padHold = holdInRotate ? false : hold
-  return <div className={`touch-preview${layout === 'split' ? ' split' : ''}${single ? ' single-drop' : ''}${leftHanded ? ' left-handed' : ''}`} role="img" aria-label={`Preview: ${layout === 'split' ? 'split layout' : 'one row'} with ${two ? 'two rotate buttons' : 'one rotate button'}`}>
-    {layout === 'split'
-      ? <><div className={`touch-pad${single ? ' single' : ''}${single && padHold ? ' with-hold' : ''}`}>{single ? <>{icon(ICONS.left)}{down || drop}{icon(ICONS.right)}{padHold}</> : <>{drop}{icon(ICONS.left)}{down}{icon(ICONS.right)}{padHold}</>}</div><div className={`touch-rotate${two ? ' two' : ''}${holdInRotate ? ` with-hold hold-${holdPlacement}` : ''}`}>{ccw}{cw}{holdInRotate && hold}</div></>
-      : <div className="touch-row">{icon(ICONS.left)}{icon(ICONS.right)}{down}{ccw}{cw}{drop}{hold}</div>}
+  return <div className={`touch-preview split${single ? ' single-drop' : ''}${leftHanded ? ' left-handed' : ''}`} role="img" aria-label={`Preview: split layout with ${two ? 'two rotate buttons' : 'one rotate button'}`}>
+    <><div className={`touch-pad${single ? ' single' : ''}${single && padHold ? ' with-hold' : ''}`}>{single ? <>{icon(ICONS.left)}{down || drop}{icon(ICONS.right)}{padHold}</> : <>{drop}{icon(ICONS.left)}{down}{icon(ICONS.right)}{padHold}</>}</div><div className={`touch-rotate${two ? ' two' : ''}${holdInRotate ? ` with-hold hold-${holdPlacement}` : ''}`}>{ccw}{cw}{holdInRotate && hold}</div></>
   </div>
 }
 
