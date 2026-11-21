@@ -3,7 +3,7 @@
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
 | F-057 | Feature | Pieces appear in hidden rows above the board, as in modern games (fewer losses at the very top). Part of the Modern rules (owner, 2026-11-21): on in Modern, off in Classic, own switch in Custom; Cloudflare matches with Modern too | Low | Proposed (2026-11-21, owner: "Vi gör den som en del av modern") | Strong |
-| F-058 | Feature | Modern scoring: T-spins, combos and back-to-back, and their garbage in Battle. Rewards advanced play and changes 2 Players, so kept out of Modern for now | Low | Parked (2026-11-20) | Standard |
+| F-058 | Feature | Modern scoring: T-spins, combos and back-to-back, and their garbage in Battle. Rewards advanced play and changes 2 Players, so kept out of Modern for now. Owner 2026-11-21: add it, but not on by default (not part of Modern) | Low | Proposed (2026-11-21, owner: "lägg in, men inte på som standard") | Standard |
 | F-060 | Feature | Hold button placement (Split). Owner (2026-11-20, with screenshots): try two placements on the phone, both with more space between the rotate buttons than today: (1) Hold at the bottom, to the right of the left rotate button and centred under the orange (right) rotate button; (2) sketch B: Hold in the free top corner of the rotate area, above the left rotate button and to the left of the orange one. Both mirrored for left-handed. Both are to be made switchable for the test; the loser is removed afterwards. Do not invent new placements | Low | Built for the test (2026-11-20): Settings → Hold button, Bottom (default) / Top; shown with Split, two rotate buttons and Hold on; with one rotate button or Row, Hold stays where it was. Waits for the owner's choice on the phone, then the other placement is removed | Standard |
 | F-006 | Feature | More music tracks | Low | Idea | Standard |
 | F-027 | Feature | Vivid (formerly Modern) block colors: use a piece-color assignment that differs from the Tetris guideline (I cyan, O yellow, T purple, S green, Z red, J blue, L orange), to stay clear of trade dress. Tried 2026-11-15 (I orange, O green, T red, S blue, Z purple, J yellow, L cyan) and reverted at the owner's request | Low | Parkerad 2026-11-15 | Standard |
@@ -129,19 +129,22 @@ The approved High items come from the owner's request of 2026-11-10: use the
 sketch's layout **and behavior**, not only its look. Design reference:
 "Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
 
-## Proposed runs (2026-11-21, F-057 back from parking)
+## Proposed runs (2026-11-21, F-057 and F-058 back from parking)
 
-Prioritized for: the owner's latest request.
+Prioritized for: the owner's latest requests.
 
 - **A** – strong model, high – Pieces appear above the board (Modern)
   - F-057 – in Modern, new pieces appear in two hidden rows above the board and slide in, so a high stack no longer ends the game at once; Classic as today, Custom gets its own switch, Cloudflare matches with Modern use it too
   - Question: what ends the game? Recommended: when a piece locks with any part above the board, or a new piece has no room to appear above it (the board itself stays 20 rows)
+- **B** – strong model, high – Modern scoring, off by default
+  - F-058 – T-spins, combos and back-to-back give extra points, as a switch under Custom (off in Classic and Modern)
+  - Question: also in 2 Players? Recommended: 1 Player only for now, so matches keep their balance; Battle garbage unchanged
 
 Waiting for the owner: F-060 (which Hold placement stays; both are in Settings → Hold button for the test).
 
 Not proposed: F-006 (music studio chat); T-009 (retire Firebase and the old admin; waits for the owner's two-device check and explicit yes); adaptation item 1.1 (web basics, see HANDOFF).
 
-Parked: F-027 (alternative Vivid piece colors), F-058 (modern scoring).
+Parked: F-027 (alternative Vivid piece colors).
 
 ## Details
 
