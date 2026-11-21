@@ -50,6 +50,7 @@ Owner decisions that adjust the shared rules for this repo. Older product decisi
 - **Settings removed (2026-11-20, F-048, F-049):** no Game effects or Interface animations setting; only the system's reduced-motion choice turns animations off.
 - **Row removed (2026-11-21, F-059, owner):** the Row touch layout goes ("Den känns överflödig"); only Split remains, and anyone who had Row moves to Split.
 - **Own layout needs a reset (2026-11-21, F-061, owner):** the own control layout must have a way back to the standard layout.
+- **Own layout editor (2026-11-21, F-061, Q1 with recommendation):** opened with "Edit layout" under the touch-control choices in Settings; it shows the game screen with sample pieces, the button groups are dragged into place and resized, a slider sets the board's height, Done and Reset at the top.
 - **Key repeat settings (2026-11-21, F-056, Q2 with recommendation):** in Settings next to the touch-control choices, defaults as today.
 - **Touch controls on wide touch screens (2026-11-21, B-039, Q1 with recommendation):** shown whenever the device has a touch screen and no mouse, whatever its width (iPad in landscape); hidden on computers with a mouse as before.
 - **Hard Drop as a normal button again (2026-11-20, B-037, Q5 with recommendation):** the whole Hard Drop button reacts; the larger gap from B-035 stays and the arrows below own all of it (replaces B-035's 30 % strip).
