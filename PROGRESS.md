@@ -9,6 +9,10 @@
 - **Previous milestones:** Phases 1 and 2 were accepted by the owner when approving Phase 3. Line-clear scoring is approved; manual drops award no points. Interface copy must remain direct and functional.
 
 
+## B-040 — 2026-11-21
+
+Owner: "Kör A rek". `src/ui/reload-after-update.ts` wraps the two lazy 2 Players imports: a failed import reloads once (note in sessionStorage with the screen to reopen; no second reload within 60 s); `App` reopens 2 Players after such a reload; `LoadErrorBoundary` shows "Could not load 2 Players" with Try again and Main menu. Unit tests for the reload rules; browser test with the file missing once (reload, 2 Players opens) and permanently (message, Main menu works). Local: lint (no new warnings), unit 221, build, browser 25/25, `npm run test:net` 4/4, operating 3/3. Firebase emulator suite: CI.
+
 ## T-014 test fix — 2026-11-21
 
 CI for F-061 failed in the T-014 test, not in F-061: the room chooses the piece seed and the simple planner finds a two-line clear for about 7 in 8 seeds (174 of 200 measured), so seed 965151569 had none. The test now plays out a round without a plan and starts a rematch with a new seed (up to six rounds). The rematch path was checked by forcing it once; `npm run test:net` 4/4 twice.

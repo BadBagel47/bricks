@@ -76,11 +76,11 @@ Earlier: The v1.2/v1.3 adaptation plan (items 1.1 – 4.1) was run on 2026-11-12
 
 - Live: https://bricks.trythis.one (Pages from `main`); admin https://bricks-operating.l8p1.workers.dev/admin/ (Worker from `feature/operating-controls`).
 - Latest work, newest first (older entries in `PROGRESS.md`):
+  - 2026-11-21: B-040 no black screen on 2 Players after a new version (reload once, or a message).
   - 2026-11-21: F-061 own touch layout (Settings → Edit layout, Reset); F-059 Row touch layout removed.
   - 2026-11-21: F-056 Repeat delay and Repeat speed settings for held buttons.
   - 2026-11-21: B-039 touch controls on iPad in landscape, B-036 Battle help text, T-014 Cloudflare Battle garbage test.
   - 2026-11-20: B-037 Hard Drop a normal button again (gap from B-035 kept), B-038 match boards larger on tablets with the top as wide as the boards.
-  - 2026-11-20: B-035 Hard Drop no longer pressed by mistake when aiming at the arrows below it.
 - Waiting on the owner: F-061 own layout on the phone; F-056 repeat settings; B-035/B-037 with the thumb (Hard Drop neither by mistake nor hard to press); B-038 and B-039 on the iPad (portrait and landscape); F-060 which Hold placement stays (Settings → Hold button, Bottom / Top; then the other is removed); run A on a phone (match side column and top bar, 1 Player top bar, landscape with Row, no fullscreen button in the home-screen app); the QR box on the iPad (B-031); the countdown, Split default and stopped abandoned game on a phone (run A of 2026-11-19); a real Cloudflare 2 Players match on two devices and a look at Settings → Connection (F-028, F-036); phone checks of F-030 – F-035, B-019, B-018 and B-017; a two-device check of B-004; whether the privacy text is enough.
 - Next: nothing ready to propose (see `docs/BACKLOG.md`); F-060 waits for the owner's choice; T-009 only on the owner's explicit yes. F-006 music in the music studio chat.
 - Older checkpoints and history: `PROGRESS.md` (section *Handoff history*) and git history.

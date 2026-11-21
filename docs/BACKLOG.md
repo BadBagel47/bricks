@@ -2,7 +2,6 @@
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| B-040 | Bug | Sometimes the whole screen turns black when 2 Players is tapped (owner, 2026-11-21). Cause found: the 2 Players screens are loaded only when first opened, as separate code files whose names change with every published version; a page (or home-screen app) opened before a new version was published asks for the old file, which is gone, and the error removes the whole app. Reproduced by making that file missing. Happens after each publish until the page is reloaded | High | Proposed (2026-11-21, owner); Pågår (2026-11-21, session ccr-15c9b6e3-or4w1x, run A) | Standard |
 | F-057 | Feature | Pieces appear in hidden rows above the board, as in modern games (fewer losses at the very top) | Low | Parked (2026-11-20) | Standard |
 | F-058 | Feature | Modern scoring: T-spins, combos and back-to-back, and their garbage in Battle. Rewards advanced play and changes 2 Players, so kept out of Modern for now | Low | Parked (2026-11-20) | Standard |
 | F-060 | Feature | Hold button placement (Split). Owner (2026-11-20, with screenshots): try two placements on the phone, both with more space between the rotate buttons than today: (1) Hold at the bottom, to the right of the left rotate button and centred under the orange (right) rotate button; (2) sketch B: Hold in the free top corner of the rotate area, above the left rotate button and to the left of the orange one. Both mirrored for left-handed. Both are to be made switchable for the test; the loser is removed afterwards. Do not invent new placements | Low | Built for the test (2026-11-20): Settings → Hold button, Bottom (default) / Top; shown with Split, two rotate buttons and Hold on; with one rotate button or Row, Hold stays where it was. Waits for the owner's choice on the phone, then the other placement is removed | Standard |
@@ -15,6 +14,7 @@
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
+| B-040 | Bug | Sometimes the whole screen turns black when 2 Players is tapped (owner, 2026-11-21). Cause found: the 2 Players screens are loaded only when first opened, as separate code files whose names change with every published version; a page (or home-screen app) opened before a new version was published asks for the old file, which is gone, and the error removes the whole app. Reproduced by making that file missing. Happens after each publish until the page is reloaded | High | Done (2026-11-21): a missing 2 Players file reloads the page once by itself and 2 Players opens again in the new version; if it still cannot be loaded within a minute (e.g. offline), "Could not load 2 Players" with Try again and Main menu shows instead of a black screen. Tested by making the file missing once and permanently. The first time after this fix is published an already open old page can still go black once (it does not have the fix yet) | Standard |
 | F-061 | Feature | A setting to arrange the touch controls on the screen yourself, and to set the height of the playing field; with a reset to the standard layout (owner, 2026-11-21) | Medium | Done (2026-11-21): Settings → Edit layout opens a copy of the 1 Player screen with sample pieces; drag the two button groups, resize them with the corner handle (keyboard: arrows and + / −), set the board height (60–100 %), Reset returns to the standard layout, Done keeps it. Used in 1 Player upright; landscape and matches keep the standard layout (ADR 0009). Needs a try on the phone | Standard |
 | F-059 | Feature | Remove the Row touch layout (one row of buttons) and keep only Split; players who had Row move to Split | Low | Done (2026-11-21): the Row layout and its Settings choice are gone; everyone uses Split, saved Row choices are ignored. Touch controls on phones, tablets and in matches are Split (or Swipe) | Standard |
 | F-056 | Feature | Adjustable key repeat for held buttons (DAS delay and repeat rate; today fixed 160 ms and 48 ms). A control setting, not a rule | Low | Done (2026-11-21): Settings → Repeat delay (Short / Normal / Long: 110 / 160 / 230 ms) and Repeat speed (Slow / Normal / Fast: one step every 80 / 48 / 28 ms) next to the touch-control choices; Normal is today's timing. Apply to touch buttons, keyboard and controller in 1 Player and both kinds of match; soft drop keeps its own pace (65 ms), only its wait follows the delay | Standard |
@@ -129,15 +129,9 @@ The approved High items come from the owner's request of 2026-11-10: use the
 sketch's layout **and behavior**, not only its look. Design reference:
 "Bricks – visuell skiss" (Claude design canvas, artboards 1–5 and A1–A3).
 
-## Proposed runs (2026-11-21, after B-040 was found)
+## Proposed runs (2026-11-21, after B-040)
 
-Prioritized for: visible faults first.
-
-- **A** – standard model, medium – No black screen after a new version
-  - B-040 – when a part of the game cannot be loaded because a newer version was published, the page reloads once by itself and opens 2 Players again; if it still fails (for example offline), a short message with Try again and Main menu shows instead of a black screen
-  - Question: recommended as above. Alternative: no automatic reload, only the message with a Reload button
-
-Waiting for the owner: F-060 (which Hold placement stays; both are in Settings → Hold button for the test).
+Nothing ready to propose. Waiting for the owner: F-060 (which Hold placement stays; both are in Settings → Hold button for the test).
 
 Not proposed: F-006 (music studio chat); T-009 (retire Firebase and the old admin; waits for the owner's two-device check and explicit yes); adaptation item 1.1 (web basics, see HANDOFF).
 

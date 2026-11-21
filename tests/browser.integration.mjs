@@ -521,3 +521,23 @@ test('F-061: own touch layout is edited, used in the game and reset', async () =
   const reset = await groups()
   for (const key of Object.keys(standard)) for (const p of ['x', 'y', 'w', 'h']) assert.ok(Math.abs(reset[key][p] - standard[key][p]) <= 1, `${key} is back in its standard place`)
 })
+
+// B-040: after a new version is published, an older open page cannot load the 2 Players files.
+test('B-040: a missing 2 Players file reloads once and opens 2 Players; if it stays missing a message shows', async () => {
+  const page = await open({ viewport: { width: 390, height: 844 }, mobile: true })
+  let missing = 1
+  await page.context().route(/assets\/(NetMultiplayer|MultiplayerScreen)-.*\.js$/, route => missing-- > 0 ? route.fulfill({ status: 404, body: 'Not found' }) : route.continue())
+  await page.getByRole('button', { name: '2 Players', exact: true }).click()
+  await page.getByRole('heading', { name: '2 Players', exact: true }).waitFor({ timeout: 15000 })
+  assert.ok(await page.evaluate(() => document.getElementById('root').children.length > 0), 'not a black screen')
+  // Still missing after the reload: a message with Try again and Main menu.
+  const page2 = await open({ viewport: { width: 390, height: 844 }, mobile: true })
+  await page2.context().route(/assets\/(NetMultiplayer|MultiplayerScreen)-.*\.js$/, route => route.fulfill({ status: 404, body: 'Not found' }))
+  await page2.getByRole('button', { name: '2 Players', exact: true }).click()
+  const alert = page2.getByRole('alert')
+  await alert.getByRole('heading', { name: 'Could not load 2 Players', exact: true }).waitFor({ timeout: 15000 })
+  assert.equal(await alert.getByRole('button', { name: 'Try again', exact: true }).isVisible(), true)
+  await alert.getByRole('button', { name: 'Main menu', exact: true }).click()
+  await page2.getByRole('heading', { name: 'Make room for one more.' }).waitFor()
+  errors.splice(0) // the missing files and the 2 Players backends (not running here) report errors by design
+})

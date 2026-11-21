@@ -16,6 +16,8 @@ import { actionsForSwipe } from './input/swipe.ts'
 import { actionAllowed, hardDropAllowed, softDropAllowed } from './input/drop-mode.ts'
 import { HoldBox, NextQueue, Playfield, PiecePreview, TouchControls, TouchPreview } from './ui/GameViews.tsx'
 import { LayoutEditor } from './ui/LayoutEditor.tsx'
+import { LoadErrorBoundary } from './ui/LoadErrorBoundary.tsx'
+import { importOrReload, takeReopen } from './ui/reload-after-update.ts'
 import { ColorPreview, Segmented, Stepper } from './ui/SettingsControls.tsx'
 import { addHighscore, DEFAULT_PERSONAL_SETTINGS, DEFAULT_SINGLE_PLAYER_SETTINGS, parseHighscores, parsePersonalSettings, parseSinglePlayerSettings, serializeHighscores } from './persistence.ts'
 import type { HighscoreRecord, PersonalSettings, SinglePlayerSettings } from './persistence.ts'
@@ -41,8 +43,9 @@ type View = 'welcome' | 'menu' | 'settings' | 'highScores' | 'game' | 'multiplay
 /** Presses that arrive right after game over were meant for the last piece (B-006). */
 const GAME_OVER_INPUT_GUARD_MS = 700
 
-const MultiplayerScreen = lazy(() => import('./multiplayer/MultiplayerScreen.tsx'))
-const NetMultiplayer = lazy(() => import('./net/NetMultiplayer.tsx'))
+// B-040: after a new version is published these files are gone from an older open page; reload once.
+const MultiplayerScreen = lazy(importOrReload(() => import('./multiplayer/MultiplayerScreen.tsx'), 'multiplayer'))
+const NetMultiplayer = lazy(importOrReload(() => import('./net/NetMultiplayer.tsx'), 'multiplayer'))
 
 function readControls() {
   try { return parseBindings(localStorage.getItem(CONTROLS_KEY)) } catch { return parseBindings(null) }
@@ -79,7 +82,7 @@ function readUsername() {
 function App() {
   const [username, setUsername] = useState(readUsername)
   const [draft, setDraft] = useState(username)
-  const [view, setViewState] = useState<View>(() => username ? (new URL(location.href).searchParams.has('room') || cloudflareLink() ? 'multiplayer' : 'menu') : 'welcome')
+  const [view, setViewState] = useState<View>(() => username ? (new URL(location.href).searchParams.has('room') || cloudflareLink() || takeReopen(sessionStorage) === 'multiplayer' ? 'multiplayer' : 'menu') : 'welcome')
   const [notice, setNotice] = useState('')
   const [gameAnnouncement, setGameAnnouncement] = useState('')
   const [bindings, setBindings] = useState<KeyboardBindings>(readControls)
@@ -486,9 +489,9 @@ function App() {
     </section>
   </main>
 
-  if (view === 'multiplayer') return <Suspense fallback={<main className="shell"><p role="status">Loading…</p></main>}>{backend === 'cloudflare'
+  if (view === 'multiplayer') return <LoadErrorBoundary onBack={() => setView('menu')}><Suspense fallback={<main className="shell"><p role="status">Loading…</p></main>}>{backend === 'cloudflare'
     ? <NetMultiplayer preferences={{ personal, bindings, gamepadBindings }} username={username} onBack={() => setView('menu')} backendSwitch={chooseBackend} />
-    : <MultiplayerScreen preferences={{ personal, bindings, gamepadBindings }} username={username} onBack={() => setView('menu')} backendSwitch={chooseBackend} />}</Suspense>
+    : <MultiplayerScreen preferences={{ personal, bindings, gamepadBindings }} username={username} onBack={() => setView('menu')} backendSwitch={chooseBackend} />}</Suspense></LoadErrorBoundary>
 
   if (view === 'settings') return <main className="shell">
     <SubpageBar title="Settings" onBack={() => { setCapture(null); setGamepadCapture(null); setView('menu') }} />

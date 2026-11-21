@@ -6,6 +6,9 @@ not publish version numbers yet; entries are grouped by deployment.
 
 ## [Unreleased]
 
+### Fixed (2026-11-21, B-040)
+- B-040: tapping 2 Players on a page opened before a new version was published no longer turns the screen black: the page reloads once and opens 2 Players, or shows a short message with Try again and Main menu.
+
 ### Added (2026-11-21, F-061)
 - F-061: own touch layout: Settings → Edit layout lets players drag and resize the two button groups and set the board's height on a copy of the 1 Player screen; Reset returns to the standard layout. Used in 1 Player when the device is upright.
 
