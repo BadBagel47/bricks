@@ -2,7 +2,7 @@
 
 | ID | Type | Title | Priority | Status | Suggested model |
 | --- | --- | --- | --- | --- | --- |
-| F-056 | Feature | Adjustable key repeat for held buttons (DAS delay and repeat rate; today fixed 160 ms and 48 ms). A control setting, not a rule | Low | Proposed (2026-11-20) | Standard |
+| F-056 | Feature | Adjustable key repeat for held buttons (DAS delay and repeat rate; today fixed 160 ms and 48 ms). A control setting, not a rule | Low | Proposed (2026-11-20); Pågår (2026-11-21, session ccr-15c9b6e3-or4w1x, run A) | Standard |
 | F-057 | Feature | Pieces appear in hidden rows above the board, as in modern games (fewer losses at the very top) | Low | Parked (2026-11-20) | Standard |
 | F-058 | Feature | Modern scoring: T-spins, combos and back-to-back, and their garbage in Battle. Rewards advanced play and changes 2 Players, so kept out of Modern for now | Low | Parked (2026-11-20) | Standard |
 | F-059 | Feature | Possibly remove the Row touch layout (one row of buttons) and keep only Split | Low | Proposed (2026-11-20, owner) | Standard |
